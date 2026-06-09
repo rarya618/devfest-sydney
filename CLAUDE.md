@@ -5,6 +5,11 @@
 @BRANDING.md
 @PM.md
 
+## Git
+
+- **Never commit directly.** The user handles all git commits.
+- **Prompt to commit** at logical checkpoints — after a milestone is complete, after a significant feature is done, or before starting a risky change.
+
 ## Session Startup
 
 At the start of every session:
@@ -23,6 +28,10 @@ At the start of every session:
 - **Font usage** — `font-sans` (Google Sans) for all UI text, `font-mono` (Roboto Mono) for code-style accents, data labels, and short metadata lines.
 - **TypeScript strictly** — no `any` types. Define interfaces for all Firestore document shapes.
 - **Descriptive variable names** — names should clearly communicate intent. Avoid single-letter variables, abbreviations, and generic names like `data`, `item`, or `temp`.
+- **Error handling** — all errors must be caught and surfaced to the user as a custom-built alert component anchored to the bottom-left of the screen. Error messages must be written in plain, descriptive English — no raw error objects, status codes, or technical jargon shown to the user.
+- **Images** — always use `next/image`. All images are stored in Firebase Storage; retrieve URLs from Firestore documents and pass them to `next/image` as the `src`. Never store image files in the repo or `public/`.
+- **Loading states** — use skeleton loaders (animated placeholder rectangles) for all async content. Never use spinners or blank sections while data is loading.
+- **Accessibility** — all interactive elements must have descriptive `aria-label` attributes. Colour contrast must meet WCAG AA (4.5:1 for normal text, 3:1 for large text).
 
 ## Rules
 
