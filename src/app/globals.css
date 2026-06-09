@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Google Sans';
+  src: url('../fonts/Product Sans Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Google Sans';
+  src: url('../fonts/Product Sans Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Google Sans';
+  src: url('../fonts/Product Sans Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Google Sans';
+  src: url('../fonts/Product Sans Bold Italic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: 'Google Sans', sans-serif;
+  --font-mono: 'Roboto Mono', monospace;
+
+  --color-google-blue: #4285F4;
+  --color-google-red: #EA4335;
+  --color-google-yellow: #f9ab00;
+  --color-google-green: #34A853;
+}
+
+:root {
+  --bg: #070B14;
+  --bg-alt: #0A0F1C;
+  --google-blue: #4285F4;
+  --google-red: #EA4335;
+  --google-yellow: #f9ab00;
+  --google-green: #34A853;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Google Sans', sans-serif;
+  background-color: var(--bg);
+  color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #4285F4 0%, #34A853 40%, #f9ab00 70%, #EA4335 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-grid {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease both;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
