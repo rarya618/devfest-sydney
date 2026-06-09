@@ -48,12 +48,14 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 |---|-----------|-------------|
 | 1 | Project scaffold | Next.js + Tailwind setup, folder structure, deploy to Firebase App Hosting |
 | 2 | Static pages | All sections built with placeholder content |
-| 3 | CfS form | Form UI, validation, open/closed state |
-| 4 | CfS backend | Firestore submission storage + Resend confirmation email |
-| 5 | Admin panel | Login page (Firebase Auth / Google), submissions dashboard, promote-to-speaker action |
-| 6 | Speaker & schedule pages | Fetched from Firestore after CfS closes and speakers are accepted |
-| 7 | Polish & launch | Responsive QA, performance, accessibility |
-| 8 | SEO | Metadata, OG images, sitemap, robots.txt, structured data (JSON-LD) |
+| 3 | Firebase setup | Create Firebase project, enable Firestore, Auth (Google), Storage, and App Hosting; configure env vars |
+| 4 | CfS form | Form UI, validation, open/closed state |
+| 5 | CfS backend | Firestore submission storage + Resend confirmation email |
+| 6 | Admin panel | Login page (Firebase Auth / Google), submissions dashboard, promote-to-speaker action |
+| 7 | Speaker & schedule pages | Fetched from Firestore after CfS closes and speakers are accepted |
+| 8 | Polish & launch | Responsive QA, performance, accessibility |
+| 9 | Accessibility audit | Full WCAG AA compliance, keyboard navigation, screen reader support, focus management, skip links |
+| 10 | SEO | Metadata, OG images, sitemap, robots.txt, structured data (JSON-LD) |
 
 ## PM Rules
 
