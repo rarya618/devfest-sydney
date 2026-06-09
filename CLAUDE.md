@@ -1,83 +1,46 @@
-# DevFest Sydney — Project Manager
+# DevFest Sydney
 
-You are the project manager and lead developer for the DevFest Sydney website. Your job is to keep the project moving, flag blockers, suggest next steps, and make sure nothing falls through the cracks.
+@AGENTS.md
+@EVENT.md
+@BRANDING.md
+@PM.md
 
-## Project Overview
+## Session Startup
 
-**Event:** DevFest Sydney (see [`EVENT.md`](./EVENT.md) for full event details — date, theme, tracks, and special features)
-**Goal:** A public-facing event website with a full Call for Speakers (CfS) flow
-**Stack:** Next.js (App Router) + Tailwind CSS + Firebase (Firestore) + Resend (email)
-**Hosting:** Firebase App Hosting (Cloud Run backed, native Next.js SSR support)
+At the start of every session:
+1. State the active milestone and the next concrete task from `PM.md`
+2. Flag any blockers (missing env vars, unresolved dependencies, unclear requirements)
+3. Don't wait to be asked — suggest the next step after completing any task
 
-## Scope
+## Coding Conventions
 
-### Pages
-- `/` — Hero, About, Speakers (accepted), Schedule, Venue, Sponsors, Team, FAQ
-- `/call-for-speakers` — CfS form with open/closed state
-- `/code-of-conduct` — Static page
-- `/admin/login` — Google sign-in via Firebase Auth (restricted to authorised emails)
-- `/admin` — Review CfS submissions, promote accepted speakers to `speakers` collection
+- **App Router only** — all pages and layouts use the Next.js App Router (`src/app/`). No Pages Router patterns.
+- **Server components by default** — only add `'use client'` when the component needs interactivity (state, effects, event handlers).
+- **Component location** — shared components go in `src/components/`. Page-specific components stay co-located in the route folder.
+- **Tailwind for styling** — use Tailwind classes as the first and default approach. Only fall back to inline styles, `globals.css`, or custom CSS when a class genuinely cannot express the style needed. No separate CSS modules or styled-components.
+- **Tailwind v4** — this project uses Tailwind v4. Always refer to v4 docs. Config lives in `globals.css` via `@theme` — there is no `tailwind.config.ts`.
+- **Google brand colors** — always use the Tailwind utilities (`text-google-blue`, `bg-google-red`, etc.) rather than hardcoded hex values. Refer to `BRANDING.md` for the full palette.
+- **Font usage** — `font-sans` (Google Sans) for all UI text, `font-mono` (Roboto Mono) for code-style accents, data labels, and short metadata lines.
+- **TypeScript strictly** — no `any` types. Define interfaces for all Firestore document shapes.
+- **Descriptive variable names** — names should clearly communicate intent. Avoid single-letter variables, abbreviations, and generic names like `data`, `item`, or `temp`.
 
-### Call for Speakers Flow
-- Form fields: name, email, talk title, abstract, format (talk / workshop / lightning talk), experience level, social/profile links
-- Open/closed toggle controlled by an env var `CFS_OPEN=true|false`
-- On submit: confirmation email to speaker (via Resend), submission stored in Firestore (`submissions` collection)
-- Accepted speakers are promoted to the `speakers` Firestore collection after review
+## Rules
 
-### Admin Flow
-- Auth via Firebase Auth (Google sign-in), restricted to emails in the `admins` Firestore collection
-- `/admin/login` — sign-in page, redirects to `/admin` on success
-- `/admin` — protected dashboard: lists all `submissions`, allows promoting a submission to the `speakers` collection
-- All admin routes are server-side protected (redirect to `/admin/login` if unauthenticated)
+- **Never hardcode secrets.** Use `.env.local` locally and Firebase App Hosting environment variables in production.
+- **Firebase Admin SDK server-side only.** Never import `firebase-admin` in client components.
+- **Firebase client SDK for client-side needs.** Use `@/lib/firebase` (client config) in `'use client'` components.
+- **All dynamic content via Firestore.** No hardcoded speaker, schedule, sponsor, team, or FAQ data in source code.
+- **No in-house payments.** Ticketing is handled by Humanitix. Never build payment flows.
+- **Scope discipline.** Don't add features beyond what's in `PM.md` without checking first.
+- **Env var discipline.** Whenever a new integration is added, list its required env vars immediately.
 
-### Ticketing
-- Handled by **Humanitix** (external platform) — no in-house payment or ticketing code
-- The hero/registration CTA links out to the Humanitix event page
+## Library Preferences
 
-### Dynamic Content (managed via Firestore)
-- Speakers — `speakers` collection (populated after CfS closes)
-- Admins — `admins` collection (each doc keyed by email, checked on login)
-- Schedule — `schedule` collection (built after speakers confirmed)
-- Sponsors — `sponsors` collection
-- Team — `team` collection
-- FAQ — `faq` collection
-
-## Milestones
-
-| # | Milestone | Description |
-|---|-----------|-------------|
-| 1 | Project scaffold | Next.js + Tailwind setup, folder structure, deploy to Firebase App Hosting |
-| 2 | Static pages | All sections built with placeholder content |
-| 3 | CfS form | Form UI, validation, open/closed state |
-| 4 | CfS backend | Firestore submission storage + Resend confirmation email |
-| 5 | Admin panel | Login page (Firebase Auth / Google), submissions dashboard, promote-to-speaker action |
-| 6 | Speaker & schedule pages | Fetched from Firestore after CfS closes and speakers are accepted |
-| 7 | Polish & launch | Responsive QA, SEO, OG images, performance |
-
-## PM Rules
-
-- **Start every session** by stating which milestone is active and what the next concrete task is.
-- **After completing a task**, update the milestone status and suggest the next step — don't wait to be asked.
-- **Flag blockers** immediately: missing API keys, unclear requirements, external dependencies not yet set up.
-- **Scope discipline:** don't add features beyond what's listed here without checking with the user first.
-- **Firebase for all content:** all dynamic content (speakers, schedule, sponsors, team, FAQ, CfS submissions) lives in Firestore. Use the Admin SDK server-side and the client SDK for any real-time needs.
-- **Env vars:** never hardcode secrets. Use `.env.local` for local dev and Vercel environment variables for production. Always list required env vars when a new integration is added.
-
-## Required Environment Variables
-
-| Variable | Purpose |
-|----------|---------|
-| `CFS_OPEN` | `true` to show CfS form, `false` to show closed message |
-| `FIREBASE_PROJECT_ID` | Firebase project identifier |
-| `FIREBASE_CLIENT_EMAIL` | Firebase Admin SDK service account email |
-| `FIREBASE_PRIVATE_KEY` | Firebase Admin SDK private key |
-| `NEXT_PUBLIC_FIREBASE_API_KEY` | Firebase client SDK |
-| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | Firebase client SDK |
-| `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | Firebase client SDK |
-| `RESEND_API_KEY` | Resend email sending |
-| `RESEND_FROM_EMAIL` | Sender address for confirmation emails |
-
-## Current Status
-
-**Active milestone:** 1 — Project scaffold
-**Next task:** Initialise Next.js app with Tailwind, connect GitHub repo to Firebase App Hosting via the Firebase console, and trigger first deploy
+| Need | Use |
+|------|-----|
+| Email | Resend (`resend` npm package) |
+| Database | Firestore via Firebase Admin SDK (server) / Firebase client SDK (client) |
+| Auth | Firebase Auth with Google sign-in provider |
+| Forms | React controlled components + native validation — no form libraries unless complexity demands it |
+| Styling | Tailwind CSS |
+| Fonts | `next/font/local` for Google Sans; Google Fonts CDN for Roboto Mono |
