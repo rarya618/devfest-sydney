@@ -49,6 +49,24 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 | 1 | Project scaffold | Next.js + Tailwind setup, folder structure, deploy to Firebase App Hosting |
 | 2 | Static pages | All sections built with placeholder content |
 | 3 | Firebase setup | Create Firebase project, enable Firestore, Auth (Google), Storage, and App Hosting; configure env vars |
+
+### Milestone 3 — Responsibility Split
+
+**User must do (requires Google account / console access):**
+- Create the Firebase project in the Firebase console
+- Enable Firestore, Authentication (Google provider), Storage, and App Hosting
+- Connect the GitHub repo to Firebase App Hosting via the console
+- Copy service account credentials and client API keys into `.env.local`
+- Enable billing if required by App Hosting
+
+**Claude will do:**
+- Verify Firebase CLI is installed; install if missing (`npm install -g firebase-tools`)
+- Check Firebase MCP is connected; prompt user to connect if not
+- Run `firebase init` to configure the project locally
+- Set up Firestore security rules and indexes
+- Configure `apphosting.yaml` for Firebase App Hosting
+- Wire up Firebase Admin SDK and client SDK in the codebase
+- Verify env vars are present before proceeding with any Firebase work
 | 4 | CfS form | Form UI, validation, open/closed state |
 | 5 | CfS backend | Firestore submission storage + Resend confirmation email |
 | 6 | Admin panel | Login page (Firebase Auth / Google), submissions dashboard, promote-to-speaker action |

@@ -36,6 +36,8 @@ At the start of every session:
 ## Rules
 
 - **Never hardcode secrets.** Use `.env.local` locally and Firebase App Hosting environment variables in production.
+- **Firebase MCP** — before any Firebase-related task, check that the Firebase MCP server is connected. If not, prompt the user to install and connect it before proceeding. Use the Firebase MCP for all Firebase operations where possible — querying Firestore, managing Auth, and inspecting Storage — rather than writing one-off scripts.
+- **Firebase CLI** — before any Firebase-related task, check that the Firebase CLI is installed (`firebase --version`). If not, install it (`npm install -g firebase-tools`). Always use the Firebase CLI for deployments, emulator setup, and project configuration — never perform these manually through the console when a CLI command exists.
 - **Firebase Admin SDK server-side only.** Never import `firebase-admin` in client components.
 - **Firebase client SDK for client-side needs.** Use `@/lib/firebase` (client config) in `'use client'` components.
 - **All dynamic content via Firestore.** No hardcoded speaker, schedule, sponsor, team, or FAQ data in source code.
