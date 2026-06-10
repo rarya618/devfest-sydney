@@ -42,6 +42,7 @@ env:
   - variable: CFS_OPEN
     value: "true"
     availability:
+      - BUILD
       - RUNTIME
 
   # Firebase Admin SDK — stored as secrets

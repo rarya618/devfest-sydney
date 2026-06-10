@@ -2,6 +2,8 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CfsForm from './CfsForm';
 
+export const dynamic = 'force-dynamic';
+
 const isCfsOpen = process.env.CFS_OPEN === 'true';
 
 const topics = [
