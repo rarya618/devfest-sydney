@@ -71,7 +71,7 @@ export default function CodeOfConduct() {
             Back to home
           </Link>
 
-          <span className="text-xs font-bold text-google-green tracking-[0.2em] uppercase">Community Standards</span>
+          <span className="inline-flex items-center px-3 py-1 rounded-full bg-google-green/15 text-google-green text-xs font-bold tracking-[0.15em] uppercase">Community Standards</span>
           <h1 className="text-5xl md:text-6xl font-bold mt-3 mb-4 leading-tight">
             Code of Conduct
           </h1>
