@@ -51,12 +51,12 @@ export default function Navbar() {
         </div>
 
         {/* Desktop CTA */}
-        <a
-          href="#register"
-          className="hidden md:inline-flex items-center px-5 py-2 bg-google-blue text-white text-sm font-medium rounded-full hover:bg-[#3b78e7] transition-all hover:scale-105 active:scale-95"
+        <Link
+          href="/call-for-speakers"
+          className="hidden md:inline-flex items-center px-5 py-2 bg-google-red text-white text-sm font-medium rounded-full hover:bg-[#d63b2f] transition-all hover:scale-105 active:scale-95"
         >
-          Register
-        </a>
+          Apply to Speak
+        </Link>
 
         {/* Mobile hamburger */}
         <button
@@ -87,13 +87,13 @@ export default function Navbar() {
               {item}
             </a>
           ))}
-          <a
-            href="#register"
-            className="mt-2 px-5 py-2.5 bg-google-blue text-white text-sm font-medium rounded-full text-center hover:bg-[#3b78e7] transition-colors"
+          <Link
+            href="/call-for-speakers"
+            className="mt-2 px-5 py-2.5 bg-google-red text-white text-sm font-medium rounded-full text-center hover:bg-[#d63b2f] transition-colors"
             onClick={() => setMobileOpen(false)}
           >
-            Register
-          </a>
+            Apply to Speak
+          </Link>
         </div>
       )}
     </nav>

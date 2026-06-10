@@ -119,18 +119,18 @@ export default function Home() {
             className="flex flex-wrap gap-4 mt-10 animate-slide-up"
             style={{ animationDelay: '0.3s' }}
           >
-            <a
-              href="#register"
-              className="px-8 py-3.5 bg-google-blue text-white font-medium rounded-full hover:bg-[#3b78e7] transition-all hover:scale-[1.03] active:scale-95 shadow-lg shadow-google-blue/20"
-            >
-              Register to Attend
-            </a>
             <Link
               href="/call-for-speakers"
+              className="px-8 py-3.5 bg-google-red text-white font-medium rounded-full hover:bg-[#d63b2f] transition-all hover:scale-[1.03] active:scale-95 shadow-lg shadow-google-red/20"
+            >
+              Apply to Speak
+            </Link>
+            <a
+              href="#about"
               className="px-8 py-3.5 bg-white/6 text-white font-medium rounded-full border border-white/10 hover:bg-white/10 transition-all hover:scale-[1.03] active:scale-95"
             >
-              Submit a Talk →
-            </Link>
+              Learn more
+            </a>
           </div>
 
           {/* Stats */}
@@ -474,35 +474,71 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── REGISTER CTA ─── */}
-      <section id="register" className="py-28 px-6">
+      {/* ─── CALL FOR SPEAKERS ─── */}
+      <section id="call-for-speakers" className="py-28 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="relative rounded-3xl overflow-hidden border border-google-red/15 bg-google-red/5">
+            {/* Background glow */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-google-red/10 blur-[100px]" />
+              <div className="absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-google-yellow/8 blur-[80px]" />
+            </div>
+
+            <div className="relative z-10 px-8 md:px-16 py-16 md:py-20 flex flex-col md:flex-row items-start md:items-center justify-between gap-10">
+              <div className="max-w-xl">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-google-red/25 bg-google-red/10 mb-6">
+                  <span className="w-1.5 h-1.5 rounded-full bg-google-red animate-pulse" />
+                  <span className="text-xs font-medium text-google-red tracking-wide">Call for Speakers — Now Open</span>
+                </div>
+                <h2 className="text-4xl md:text-5xl font-bold leading-tight mb-5">
+                  Got something worth sharing?
+                </h2>
+                <p className="text-white/50 leading-relaxed mb-0 max-w-lg">
+                  We&apos;re looking for speakers across the Developer and Builder tracks for DevFest Sydney 2026.
+                  Whether you&apos;re a seasoned conference speaker or presenting for the first time — if you have
+                  a story to tell, we want to hear from you.
+                </p>
+
+                <div className="mt-8 flex flex-wrap gap-6 text-sm text-white/35">
+                  {[
+                    { label: 'Talk', duration: '30 min' },
+                    { label: 'Workshop', duration: '60 min' },
+                    { label: 'Lightning Talk', duration: '10 min' },
+                  ].map((f) => (
+                    <div key={f.label} className="flex items-center gap-2">
+                      <span className="w-1 h-1 rounded-full bg-google-red/50" />
+                      <span>{f.label}</span>
+                      <span className="font-mono text-white/20">{f.duration}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-4 shrink-0">
+                <Link
+                  href="/call-for-speakers"
+                  className="px-10 py-4 bg-google-red text-white font-semibold rounded-full hover:bg-[#d63b2f] transition-all hover:scale-[1.03] active:scale-95 shadow-xl shadow-google-red/25 text-center whitespace-nowrap"
+                >
+                  Submit your proposal
+                </Link>
+                <p className="text-xs text-white/25 text-center">10 October 2026 · Sydney CBD</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── TICKETS ─── */}
+      <section id="register" className="py-20 px-6 bg-[#0A0F1C]">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex gap-1 mb-8">
-            <span className="w-3 h-3 rounded-full bg-google-blue" />
-            <span className="w-3 h-3 rounded-full bg-google-red" />
-            <span className="w-3 h-3 rounded-full bg-google-yellow" />
-            <span className="w-3 h-3 rounded-full bg-google-green" />
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.04] mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-white/30" />
+            <span className="text-xs text-white/40 tracking-wide">Tickets not yet available</span>
           </div>
-          <h2 className="text-4xl md:text-6xl font-bold mb-5 leading-tight">
-            Ready to join us?
-          </h2>
-          <p className="text-white/40 text-lg mb-10 max-w-md mx-auto leading-relaxed">
-            Secure your spot at DevFest Sydney 2026. Tickets are available on Humanitix.
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Registration opening soon</h2>
+          <p className="text-white/35 text-sm max-w-sm mx-auto leading-relaxed">
+            Tickets for DevFest Sydney 2026 will be available on Humanitix. Check back closer to the event.
           </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <a
-              href="#"
-              className="px-10 py-4 bg-google-blue text-white font-medium rounded-full hover:bg-[#3b78e7] transition-all hover:scale-[1.03] active:scale-95 shadow-lg shadow-google-blue/20 text-lg"
-            >
-              Register on Humanitix
-            </a>
-            <Link
-              href="/call-for-speakers"
-              className="px-10 py-4 border border-white/10 text-white/70 font-medium rounded-full hover:border-white/20 hover:text-white transition-all text-lg"
-            >
-              Submit a Talk
-            </Link>
-          </div>
         </div>
       </section>
 

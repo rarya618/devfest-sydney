@@ -1,0 +1,263 @@
+rules_version='2';
+
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: submissions
+// Document ID: auto-generated
+// Fields:
+//   - name: string (required, 1–100 chars) — speaker's full name
+//   - email: string (required, valid email) — contact email (PII)
+//   - talkTitle: string (required, 1–150 chars)
+//   - abstract: string (required, 1–2000 chars)
+//   - format: string (required) — 'talk' | 'workshop' | 'lightning-talk'
+//   - experienceLevel: string (required) — 'beginner' | 'intermediate' | 'advanced'
+//   - socialLinks: string (optional, max 500 chars)
+//   - previousTalkLink: string (optional, max 500 chars)
+//   - submittedAt: timestamp (required, must be recent)
+//
+// Collection: speakers
+// Document ID: auto-generated
+// Fields:
+//   - name: string (required, 1–100 chars)
+//   - bio: string (required, 1–1000 chars)
+//   - photoUrl: string (required, valid https URL, max 500 chars)
+//   - talkTitle: string (required, 1–150 chars)
+//   - talkAbstract: string (required, 1–2000 chars)
+//   - track: string (required) — 'developer' | 'builder' | 'showcase'
+//   - socialLinks: string (optional, max 500 chars)
+//
+// Collection: admins
+// Document ID: user's email address
+// Fields:
+//   - name: string (optional, max 100 chars) — display name
+//
+// Collection: schedule
+// Document ID: auto-generated
+// Fields:
+//   - title: string (required, 1–150 chars)
+//   - speakerName: string (optional, max 100 chars)
+//   - startTime: timestamp (required)
+//   - durationMinutes: number (required, positive integer)
+//   - track: string (required) — 'developer' | 'builder' | 'showcase' | 'all'
+//   - location: string (optional, max 100 chars)
+//
+// Collection: sponsors
+// Document ID: auto-generated
+// Fields:
+//   - name: string (required, 1–100 chars)
+//   - tier: string (required) — 'platinum' | 'gold' | 'silver' | 'community'
+//   - logoUrl: string (required, valid https URL, max 500 chars)
+//   - websiteUrl: string (optional, valid https URL, max 500 chars)
+//
+// Collection: team
+// Document ID: auto-generated
+// Fields:
+//   - name: string (required, 1–100 chars)
+//   - role: string (required, 1–100 chars)
+//   - photoUrl: string (optional, valid https URL, max 500 chars)
+//   - linkedinUrl: string (optional, valid https URL, max 500 chars)
+//
+// Collection: faq
+// Document ID: auto-generated
+// Fields:
+//   - question: string (required, 1–300 chars)
+//   - answer: string (required, 1–2000 chars)
+//   - order: number (optional, non-negative integer)
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Checks the admins collection — any authenticated user can check
+    // their own email, which is how isAdmin() avoids a circular dependency.
+    function isAdmin() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.token.email));
+    }
+
+    function isValidEmail(email) {
+      return email is string &&
+        email.matches('^[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}$');
+    }
+
+    function isValidHttpsUrl(url) {
+      return url is string && url.matches('^https://.*') && url.size() <= 500;
+    }
+
+    function isValidOptionalHttpsUrl(field) {
+      return !(field in request.resource.data) ||
+        (request.resource.data[field] is string &&
+         request.resource.data[field].matches('^https://.*') &&
+         request.resource.data[field].size() <= 500);
+    }
+
+    function isValidOptionalString(field, minLen, maxLen) {
+      return !(field in request.resource.data) ||
+        (request.resource.data[field] is string &&
+         request.resource.data[field].size() >= minLen &&
+         request.resource.data[field].size() <= maxLen);
+    }
+
+    function isRecent(time) {
+      return time is timestamp &&
+        time > request.time - duration.value(5, 'm') &&
+        time <= request.time;
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidSubmission(data) {
+      let allowedFormats = ['talk', 'workshop', 'lightning-talk'];
+      let allowedTracks = ['developer', 'builder', 'showcase'];
+      let allowedLevels = ['beginner', 'intermediate', 'advanced'];
+      return data.keys().hasOnly(['name', 'email', 'talkTitle', 'abstract',
+                                   'format', 'track', 'experienceLevel', 'socialLinks',
+                                   'previousTalkLink', 'requiresTravelSupport',
+                                   'isGoogleDeveloperExpert', 'submittedAt']) &&
+        data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+        data.email is string && isValidEmail(data.email) &&
+        data.talkTitle is string && data.talkTitle.size() >= 1 && data.talkTitle.size() <= 150 &&
+        data.abstract is string && data.abstract.size() >= 1 && data.abstract.size() <= 2000 &&
+        data.format in allowedFormats &&
+        data.track in allowedTracks &&
+        data.experienceLevel in allowedLevels &&
+        isValidOptionalString('socialLinks', 1, 500) &&
+        isValidOptionalString('previousTalkLink', 1, 500) &&
+        data.requiresTravelSupport is bool &&
+        data.isGoogleDeveloperExpert is bool &&
+        data.submittedAt is timestamp;
+    }
+
+    function isValidSpeaker(data) {
+      let allowedTracks = ['developer', 'builder', 'showcase'];
+      return data.keys().hasOnly(['name', 'bio', 'photoUrl', 'talkTitle',
+                                   'talkAbstract', 'track', 'socialLinks']) &&
+        data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+        data.bio is string && data.bio.size() >= 1 && data.bio.size() <= 1000 &&
+        data.photoUrl is string && isValidHttpsUrl(data.photoUrl) &&
+        data.talkTitle is string && data.talkTitle.size() >= 1 && data.talkTitle.size() <= 150 &&
+        data.talkAbstract is string && data.talkAbstract.size() >= 1 && data.talkAbstract.size() <= 2000 &&
+        data.track in allowedTracks &&
+        isValidOptionalString('socialLinks', 1, 500);
+    }
+
+    function isValidScheduleItem(data) {
+      let allowedTracks = ['developer', 'builder', 'showcase', 'all'];
+      return data.keys().hasOnly(['title', 'speakerName', 'startTime',
+                                   'durationMinutes', 'track', 'location']) &&
+        data.title is string && data.title.size() >= 1 && data.title.size() <= 150 &&
+        isValidOptionalString('speakerName', 1, 100) &&
+        data.startTime is timestamp &&
+        data.durationMinutes is number && data.durationMinutes > 0 && data.durationMinutes <= 480 &&
+        data.track in allowedTracks &&
+        isValidOptionalString('location', 1, 100);
+    }
+
+    function isValidSponsor(data) {
+      let allowedTiers = ['platinum', 'gold', 'silver', 'community'];
+      return data.keys().hasOnly(['name', 'tier', 'logoUrl', 'websiteUrl']) &&
+        data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+        data.tier in allowedTiers &&
+        data.logoUrl is string && isValidHttpsUrl(data.logoUrl) &&
+        isValidOptionalHttpsUrl('websiteUrl');
+    }
+
+    function isValidTeamMember(data) {
+      return data.keys().hasOnly(['name', 'role', 'photoUrl', 'linkedinUrl']) &&
+        data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+        data.role is string && data.role.size() >= 1 && data.role.size() <= 100 &&
+        isValidOptionalHttpsUrl('photoUrl') &&
+        isValidOptionalHttpsUrl('linkedinUrl');
+    }
+
+    function isValidFaqItem(data) {
+      return data.keys().hasOnly(['question', 'answer', 'order']) &&
+        data.question is string && data.question.size() >= 1 && data.question.size() <= 300 &&
+        data.answer is string && data.answer.size() >= 1 && data.answer.size() <= 2000 &&
+        (!(	'order' in data) || (data.order is number && data.order >= 0));
+    }
+
+    // ===============================================================
+    // submissions — public write (CfS form), admin-only read
+    // ===============================================================
+    match /submissions/{submissionId} {
+      // Anyone may submit — no auth required for the CfS form
+      allow create: if isValidSubmission(request.resource.data) &&
+                       isRecent(request.resource.data.submittedAt);
+      // Only admins may read, update (add notes/status), or delete
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // speakers — public read, admin-only write
+    // ===============================================================
+    match /speakers/{speakerId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidSpeaker(request.resource.data);
+      allow update: if isAdmin() && isValidSpeaker(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // admins — each user may only read their own doc (for isAdmin checks);
+    // only existing admins may write
+    // ===============================================================
+    match /admins/{email} {
+      allow read: if isAuthenticated() && request.auth.token.email == email;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // schedule — public read, admin-only write
+    // ===============================================================
+    match /schedule/{itemId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidScheduleItem(request.resource.data);
+      allow update: if isAdmin() && isValidScheduleItem(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // sponsors — public read, admin-only write
+    // ===============================================================
+    match /sponsors/{sponsorId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidSponsor(request.resource.data);
+      allow update: if isAdmin() && isValidSponsor(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // team — public read, admin-only write
+    // ===============================================================
+    match /team/{memberId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidTeamMember(request.resource.data);
+      allow update: if isAdmin() && isValidTeamMember(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // faq — public read, admin-only write
+    // ===============================================================
+    match /faq/{itemId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidFaqItem(request.resource.data);
+      allow update: if isAdmin() && isValidFaqItem(request.resource.data);
+      allow delete: if isAdmin();
+    }
+  }
+}

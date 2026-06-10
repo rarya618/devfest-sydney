@@ -1,0 +1,69 @@
+runConfig:
+  cpu: 1
+  memoryMiB: 512
+  minInstances: 0
+  maxInstances: 10
+  concurrency: 80
+
+env:
+  # Firebase client SDK — safe to expose
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: AIzaSyCBzpQW2OjpnoMxNAnCKD4v77NUQ2dIR28
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: devfest-sydney-2026.firebaseapp.com
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: devfest-sydney-2026
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: devfest-sydney-2026.firebasestorage.app
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "814298543377"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: 1:814298543377:web:08fbcb92e0c9894eb388b0
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Call for Speakers toggle
+  - variable: CFS_OPEN
+    value: "true"
+    availability:
+      - RUNTIME
+
+  # Firebase Admin SDK — stored as secrets
+  - variable: FIREBASE_PROJECT_ID
+    value: devfest-sydney-2026
+    availability:
+      - RUNTIME
+  - variable: FIREBASE_CLIENT_EMAIL
+    secret: FIREBASE_CLIENT_EMAIL
+    availability:
+      - RUNTIME
+  - variable: FIREBASE_PRIVATE_KEY
+    secret: FIREBASE_PRIVATE_KEY
+    availability:
+      - RUNTIME
+
+  # Resend — stored as secrets
+  - variable: RESEND_API_KEY
+    secret: RESEND_API_KEY
+    availability:
+      - RUNTIME
+  - variable: RESEND_FROM_EMAIL
+    secret: RESEND_FROM_EMAIL
+    availability:
+      - RUNTIME
