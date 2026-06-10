@@ -36,10 +36,23 @@
   --font-sans: 'Google Sans', sans-serif;
   --font-mono: 'Roboto Mono', monospace;
 
+  /* Core Google colours */
   --color-google-blue: #4285F4;
   --color-google-red: #EA4335;
   --color-google-yellow: #f9ab00;
   --color-google-green: #34A853;
+
+  /* Halftone colours */
+  --color-halftone-blue: #57caff;
+  --color-halftone-green: #5cdb6d;
+  --color-halftone-yellow: #ffd427;
+  --color-halftone-red: #ff7daf;
+
+  /* Pastel colours */
+  --color-pastel-blue: #c3ecf6;
+  --color-pastel-green: #ccf6c5;
+  --color-pastel-yellow: #ffe7a5;
+  --color-pastel-red: #f8d8d8;
 }
 
 :root {
@@ -74,6 +87,17 @@ body {
     linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
   background-size: 60px 60px;
+}
+
+/* GDG dot pattern — coloured dots on a dark background */
+.gdg-dots {
+  background-image:
+    radial-gradient(circle, #4285F430 1px, transparent 1px),
+    radial-gradient(circle, #EA433530 1px, transparent 1px),
+    radial-gradient(circle, #f9ab0030 1px, transparent 1px),
+    radial-gradient(circle, #34A85330 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: 0 0, 20px 0, 0 20px, 20px 20px;
 }
 
 @keyframes fade-in {

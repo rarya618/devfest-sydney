@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
-const navLinks = ['About', 'Speakers', 'Schedule', 'Venue', 'Sponsors', 'Team', 'FAQ'];
+const navLinks = ['About', 'FAQ'];
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -25,14 +26,16 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="flex gap-1 items-center">
-            <span className="w-2.5 h-2.5 rounded-full bg-google-blue" />
-            <span className="w-2.5 h-2.5 rounded-full bg-google-red" />
-            <span className="w-2.5 h-2.5 rounded-full bg-google-yellow" />
-            <span className="w-2.5 h-2.5 rounded-full bg-google-green" />
-          </div>
-          <span className="font-bold text-white text-sm tracking-wide group-hover:text-white/80 transition-colors">
+        <Link href="/" className="flex items-center gap-0.5 group" aria-label="DevFest Sydney home">
+          <Image
+            src="/logo.png"
+            alt="GDG"
+            width={120}
+            height={32}
+            className="h-8 w-auto object-contain group-hover:opacity-80 transition-opacity"
+            priority
+          />
+          <span className="font-bold text-white text-xl tracking-wide group-hover:text-white/80 transition-colors">
             DevFest Sydney
           </span>
         </Link>
@@ -42,7 +45,7 @@ export default function Navbar() {
           {navLinks.map((item) => (
             <a
               key={item}
-              href={`#${item.toLowerCase()}`}
+              href={`/#${item.toLowerCase()}`}
               className="text-sm text-white/50 hover:text-white transition-colors"
             >
               {item}
@@ -53,9 +56,9 @@ export default function Navbar() {
         {/* Desktop CTA */}
         <Link
           href="/call-for-speakers"
-          className="hidden md:inline-flex items-center px-5 py-2 bg-google-red text-white text-sm font-medium rounded-full hover:bg-[#d63b2f] transition-all hover:scale-105 active:scale-95"
+          className="hidden md:inline-flex items-center px-5 py-2 bg-google-red text-white text-sm font-bold rounded-full hover:bg-[#d63b2f] transition-all hover:scale-105 active:scale-95"
         >
-          Apply to Speak
+          Submit your talk
         </Link>
 
         {/* Mobile hamburger */}
@@ -80,7 +83,7 @@ export default function Navbar() {
           {navLinks.map((item) => (
             <a
               key={item}
-              href={`#${item.toLowerCase()}`}
+              href={`/#${item.toLowerCase()}`}
               className="text-white/70 hover:text-white transition-colors py-1"
               onClick={() => setMobileOpen(false)}
             >
@@ -89,10 +92,10 @@ export default function Navbar() {
           ))}
           <Link
             href="/call-for-speakers"
-            className="mt-2 px-5 py-2.5 bg-google-red text-white text-sm font-medium rounded-full text-center hover:bg-[#d63b2f] transition-colors"
+            className="mt-2 px-5 py-2.5 bg-google-red text-white text-sm font-bold rounded-full text-center hover:bg-[#d63b2f] transition-colors"
             onClick={() => setMobileOpen(false)}
           >
-            Apply to Speak
+            Submit your talk
           </Link>
         </div>
       )}

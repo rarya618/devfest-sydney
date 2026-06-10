@@ -34,13 +34,13 @@ interface FormErrors {
 
 const FORMATS: { value: TalkFormat; label: string; duration: string; desc: string }[] = [
   { value: 'talk', label: 'Talk', duration: '30 min', desc: 'A focused technical or builder session.' },
-  { value: 'workshop', label: 'Workshop', duration: '60 min', desc: 'Hands-on — attendees build something together.' },
-  { value: 'lightning-talk', label: 'Lightning Talk', duration: '10 min', desc: 'Short and punchy — one focused idea or demo.' },
+  { value: 'workshop', label: 'Workshop', duration: '60 min', desc: 'Hands-on: attendees build something together.' },
+  { value: 'lightning-talk', label: 'Lightning Talk', duration: '10 min', desc: 'Short and punchy: one focused idea or demo.' },
 ];
 
 const TRACKS: { value: Track; label: string; color: string; desc: string }[] = [
-  { value: 'developer', label: 'Developer Track', color: 'google-blue', desc: 'Technical sessions for engineers — Gemini API, Flutter, Firebase, Android, Google Cloud.' },
-  { value: 'builder', label: 'Builder Track', color: 'google-green', desc: 'For PMs, designers, and founders — prototyping with AI, automation, no-code tooling.' },
+  { value: 'developer', label: 'Developer Track', color: 'google-blue', desc: 'Technical sessions for engineers: Gemini API, Flutter, Firebase, Android, Google Cloud.' },
+  { value: 'builder', label: 'Builder Track', color: 'google-green', desc: 'For PMs, designers, and founders: prototyping with AI, automation, no-code tooling.' },
   { value: 'showcase', label: 'Builder Showcase', color: 'google-yellow', desc: 'A 5-minute demo presented to the audience, with live voting.' },
 ];
 
@@ -251,7 +251,7 @@ export default function CfsForm() {
             <p id="cfs-abstract-error" role="alert" className="mt-1.5 text-xs text-google-red/80">{errors.abstract}</p>
           ) : (
             <p id="cfs-abstract-hint" className="mt-1.5 text-xs text-white/25">
-              Briefly describe your talk — the topic, key points, and what attendees will learn.
+              Briefly describe your talk: the topic, key points, and what attendees will learn.
             </p>
           )}
         </div>
@@ -493,6 +493,9 @@ export default function CfsForm() {
               </span>
             </label>
           ))}
+          <p className="text-xs text-white/25 leading-relaxed pt-1">
+            Travel support is limited. We may not be able to cover costs for non-GDE speakers.
+          </p>
         </div>
 
         {/* Submit */}
@@ -501,7 +504,7 @@ export default function CfsForm() {
             type="submit"
             disabled={submitState === 'submitting'}
             aria-label="Submit your speaker proposal"
-            className="w-full py-4 bg-google-red text-white font-semibold rounded-xl
+            className="w-full py-4 bg-google-red text-white font-bold rounded-xl
               hover:bg-[#d63b2f] active:scale-[0.99] transition-all shadow-lg shadow-google-red/20
               disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-google-red disabled:active:scale-100
               flex items-center justify-center gap-2"

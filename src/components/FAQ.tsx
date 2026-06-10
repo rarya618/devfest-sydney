@@ -10,7 +10,7 @@ const faqs = [
   },
   {
     q: 'How do I register to attend?',
-    a: 'Tickets are available via Humanitix. Click the Register button at the top of the page to secure your spot. We expect 150–300+ attendees.',
+    a: 'Tickets will be available via Humanitix closer to the event. We expect 150–300+ attendees.',
   },
   {
     q: 'How do I submit a talk or workshop?',
@@ -18,7 +18,7 @@ const faqs = [
   },
   {
     q: 'What tracks are at DevFest Sydney?',
-    a: 'We have two main tracks — the Developer Track for engineers, and the Builder Track for product managers, designers, and founders. There\'s also a Builder Showcase (5-min demos with audience voting) and the Agentathon.',
+    a: 'We have two main tracks: the Developer Track for engineers, and the Builder Track for product managers, designers, and founders. There\'s also a Builder Showcase (5-min demos with audience voting) and the Agentathon.',
   },
   {
     q: 'What is the Agentathon?',

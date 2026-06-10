@@ -25,8 +25,7 @@ export default function CallForSpeakers() {
       {/* Hero */}
       <section className="relative pt-36 pb-24 px-6 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] rounded-full bg-google-red/8 blur-[160px]" />
-          <div className="absolute inset-0 hero-grid opacity-[0.025]" />
+          <div className="absolute inset-0 gdg-dots opacity-30" />
         </div>
 
         <div className="relative z-10 max-w-4xl mx-auto text-center">
@@ -37,7 +36,7 @@ export default function CallForSpeakers() {
           >
             <span className={`w-1.5 h-1.5 rounded-full ${isCfsOpen ? 'bg-google-red animate-pulse' : 'bg-white/30'}`} />
             <span className={`text-sm font-medium ${isCfsOpen ? 'text-google-red' : 'text-white/40'}`}>
-              {isCfsOpen ? 'Call for Speakers — Now Open' : 'Call for Speakers — Closed'}
+              {isCfsOpen ? 'Call for Speakers: Now Open' : 'Call for Speakers: Closed'}
             </span>
           </div>
 
@@ -48,15 +47,15 @@ export default function CallForSpeakers() {
 
           <p className="text-white/45 text-lg max-w-2xl mx-auto leading-relaxed mb-10">
             We&apos;re looking for passionate speakers across the Developer and Builder tracks. Whether you&apos;re an engineer,
-            designer, PM, or founder — if you have something worth sharing, we want to hear from you.
+            designer, PM, or founder. If you have something worth sharing, we want to hear from you.
           </p>
 
           {isCfsOpen && (
             <a
               href="#apply"
-              className="inline-flex px-10 py-4 bg-google-red text-white font-medium rounded-full hover:bg-[#d63b2f] transition-all hover:scale-[1.03] active:scale-95 shadow-lg shadow-google-red/20 text-lg"
+              className="inline-flex px-10 py-4 bg-google-red text-white font-bold rounded-full hover:bg-[#d63b2f] transition-all hover:scale-[1.03] active:scale-95 shadow-lg shadow-google-red/20 text-lg"
             >
-              Submit your proposal
+              Submit your talk
             </a>
           )}
 
@@ -70,7 +69,7 @@ export default function CallForSpeakers() {
       <section className="py-20 px-6 bg-[#0A0F1C]">
         <div className="max-w-5xl mx-auto">
           <div className="mb-12 text-center">
-            <span className="text-xs font-bold text-google-blue tracking-[0.2em] uppercase">Topic Ideas</span>
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-google-blue/15 text-google-blue text-xs font-bold tracking-[0.15em] uppercase">Topic Ideas</span>
             <h2 className="text-3xl md:text-4xl font-bold mt-3">What are we looking for?</h2>
             <p className="text-white/35 mt-3 text-sm max-w-lg mx-auto">
               We welcome proposals on any topic relevant to our two tracks. Here are some ideas to get you started.
@@ -97,7 +96,7 @@ export default function CallForSpeakers() {
       <section id="apply" className="py-20 px-6">
         <div className="max-w-2xl mx-auto">
           <div className="mb-10 text-center">
-            <span className="text-xs font-bold text-google-red tracking-[0.2em] uppercase">Apply</span>
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-google-red/15 text-google-red text-xs font-bold tracking-[0.15em] uppercase">Apply</span>
             <h2 className="text-3xl md:text-4xl font-bold mt-3">Submit your proposal</h2>
           </div>
 
@@ -112,7 +111,7 @@ export default function CallForSpeakers() {
               </div>
               <h3 className="text-lg font-bold text-white/60 mb-3">Applications are now closed</h3>
               <p className="text-sm text-white/35 leading-relaxed max-w-sm mx-auto">
-                The Call for Speakers has closed for DevFest Sydney 2026. Thank you to everyone who submitted a proposal — we&apos;ll be in touch soon.
+                The Call for Speakers has closed for DevFest Sydney 2026. Thank you to everyone who submitted a proposal. We&apos;ll be in touch soon.
               </p>
               <a
                 href="mailto:sydney@gdg.community"

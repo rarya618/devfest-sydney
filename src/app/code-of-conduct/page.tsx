@@ -13,7 +13,7 @@ We do not tolerate harassment of event participants in any form. Sexual language
     title: 'Expected Behaviour',
     bullets: [
       'Be kind and considerate to fellow participants.',
-      'Communicate respectfully and constructively — both in person and online.',
+      'Communicate respectfully and constructively, both in person and online.',
       'Respect differing viewpoints and experiences.',
       'Gracefully accept constructive criticism.',
       'Focus on what is best for the community.',
