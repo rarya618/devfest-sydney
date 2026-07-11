@@ -6,7 +6,7 @@ import Link from 'next/link';
 const faqs = [
   {
     q: 'When and where is DevFest Sydney 2026?',
-    a: 'DevFest Sydney 2026 takes place on Saturday, 10 October 2026 in Sydney CBD. The exact venue will be announced shortly.',
+    a: 'DevFest Sydney 2026 will take place in Sydney CBD. The exact date and venue will be announced shortly.',
   },
   {
     q: 'How do I register to attend?',
@@ -18,11 +18,7 @@ const faqs = [
   },
   {
     q: 'What tracks are at DevFest Sydney?',
-    a: 'We have two main tracks: the Developer Track for engineers, and the Builder Track for product managers, designers, and founders. There\'s also a Builder Showcase (5-min demos with audience voting) and the Agentathon.',
-  },
-  {
-    q: 'What is the Agentathon?',
-    a: 'The Agentathon is a 2-hour structured team challenge in the afternoon where participants use Gemini to solve real problems. It features a live leaderboard and prizes for the top teams.',
+    a: 'We have two main tracks: the Developer Track for engineers, and the Builder Track for product managers, designers, and founders. There\'s also a Builder Showcase (5-min demos with audience voting).',
   },
   {
     q: 'What is Builder\'s Space?',
@@ -38,19 +34,16 @@ export default function FAQ() {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <div className="space-y-2">
+    <div className="divide-y divide-black-02/10 border-t border-b border-black-02/10">
       {faqs.map((faq, i) => (
-        <div
-          key={i}
-          className="border border-white/7 rounded-xl overflow-hidden transition-colors hover:border-white/12"
-        >
+        <div key={i}>
           <button
             onClick={() => setOpen(open === i ? null : i)}
-            className="w-full px-6 py-4 flex justify-between items-center text-left gap-6 hover:bg-white/[0.02] transition-colors"
+            className="w-full py-5 flex justify-between items-center text-left gap-6 hover:opacity-70 transition-opacity"
           >
-            <span className="font-medium text-white/90">{faq.q}</span>
+            <span className="font-medium text-black-02/90">{faq.q}</span>
             <span
-              className={`text-white/30 text-xl flex-shrink-0 transition-transform duration-200 ${
+              className={`text-black-02/35 text-xl flex-shrink-0 transition-transform duration-200 ${
                 open === i ? 'rotate-45' : ''
               }`}
             >
@@ -62,7 +55,7 @@ export default function FAQ() {
               open === i ? 'max-h-48' : 'max-h-0'
             }`}
           >
-            <p className="px-6 pb-5 text-white/50 leading-relaxed text-sm">
+            <p className="pb-5 text-black-02/60 leading-relaxed text-sm">
               {faq.a}
               {faq.q.includes('Code of Conduct') && (
                 <>
