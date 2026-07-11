@@ -6,7 +6,7 @@
 |-------|--------|
 | **Event** | DevFest Sydney 2026 |
 | **Organiser** | GDG Sydney, presented by Google |
-| **Date** | Saturday, 10 October 2026 |
+| **Date** | TBC — targeting 2026. "Saturday, 10 October 2026" was a placeholder used during early scaffolding and has been removed from the live site; do not reintroduce it until the date is locked in. |
 | **Location** | Sydney CBD |
 | **Format** | Full-day multi-track conference |
 | **Expected attendance** | 150–300+ participants |
@@ -38,5 +38,7 @@ Mid-afternoon session where attendees present 5-minute demos, with audience voti
 ### Builder's Space
 Dedicated room with mentors and Google Developer Experts (GDEs) providing hands-on support throughout the day.
 
-### Agentathon
+### Agentathon (Shelved)
+**Status:** Shelved for now — not currently planned for the 2026 event. Removed from the landing page; keep this section for reference in case it's revived for a future edition.
+
 A 2-hour structured team challenge using Gemini to solve problems, with a live leaderboard and prizes.
