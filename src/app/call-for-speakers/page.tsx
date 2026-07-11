@@ -38,7 +38,7 @@ export default function CallForSpeakers() {
           <div className="flex items-center justify-center gap-2 mb-8 animate-fade-in">
             <span className={`w-1.5 h-1.5 rounded-full ${isCfsOpen ? 'bg-google-red animate-pulse' : 'bg-black-02/30'}`} />
             <span className={`text-sm font-medium ${isCfsOpen ? 'text-google-red' : 'text-black-02/50'}`}>
-              {isCfsOpen ? 'Call for Speakers: Now Open' : 'Call for Speakers: Closed'}
+              {isCfsOpen ? 'Call for speakers: now open' : 'Call for speakers: closed'}
             </span>
           </div>
 
