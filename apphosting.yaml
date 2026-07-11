@@ -46,17 +46,22 @@ env:
       - RUNTIME
 
   # Firebase Admin SDK — stored as secrets
+  # BUILD availability is required: Next.js executes route modules (which
+  # import firebase-admin) during the "Collecting page data" build step.
   - variable: FIREBASE_PROJECT_ID
     value: devfest-sydney-2026
     availability:
+      - BUILD
       - RUNTIME
   - variable: FIREBASE_CLIENT_EMAIL
     secret: FIREBASE_CLIENT_EMAIL
     availability:
+      - BUILD
       - RUNTIME
   - variable: FIREBASE_PRIVATE_KEY
     secret: FIREBASE_PRIVATE_KEY
     availability:
+      - BUILD
       - RUNTIME
 
   # Resend — stored as secrets
