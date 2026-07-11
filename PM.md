@@ -71,7 +71,7 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 | 5 | CfS backend | Firestore submission storage + Resend confirmation email |
 | 6 | Admin panel | Login page (Firebase Auth / Google), submissions dashboard, promote-to-speaker action |
 | 7 | Speaker & schedule pages | Fetched from Firestore after CfS closes and speakers are accepted |
-| 8 | Polish & launch | Responsive QA, performance, accessibility |
+| 8 | Polish & launch | Responsive QA, performance, accessibility; Firebase App Check (reCAPTCHA Enterprise) to restrict Firestore access to approved apps only |
 | 9 | Accessibility audit | Full WCAG AA compliance, keyboard navigation, screen reader support, focus management, skip links |
 | 10 | SEO | Metadata, OG images, sitemap, robots.txt, structured data (JSON-LD) |
 
@@ -97,8 +97,10 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 | `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | Firebase client SDK |
 | `RESEND_API_KEY` | Resend email sending |
 | `RESEND_FROM_EMAIL` | Sender address for confirmation emails |
+| `NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY` | Firebase App Check (reCAPTCHA Enterprise site key) |
+| `NEXT_PUBLIC_APP_CHECK_DEBUG_TOKEN` | App Check debug token for local dev (`true` to auto-generate, or paste a registered UUID) |
 
 ## Current Status
 
-**Active milestone:** 2 — Static pages ✅ (complete)
-**Next task:** Milestone 3 — CfS form UI, validation, and open/closed state
+**Active milestone:** 6 — Admin panel (in progress)
+**Next task:** `/admin/login` Google sign-in page, then `/admin` submissions dashboard
