@@ -1,215 +1,307 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import FAQ from '@/components/FAQ';
 import GdgDivider from '@/components/GdgDivider';
+import { adminDb } from '@/lib/firebase-admin';
+import type { Sponsor, SponsorTier, TeamMember } from '@/lib/types';
+import type { Timestamp } from 'firebase-admin/firestore';
 
-const tracks = [
-  {
-    color: 'var(--google-blue)',
-    label: 'Developer Track',
-    desc: 'Technical sessions for professional engineers. Agentic app development, Gemini API, Flutter, Firebase, Android, and Google Cloud.',
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
-      </svg>
-    ),
-  },
-  {
-    color: 'var(--google-green)',
-    label: 'Builder Track',
-    desc: 'For product managers, designers, and founders. AI prototyping, automation, no-code and low-code tooling.',
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z" />
-      </svg>
-    ),
-  },
-  {
-    color: 'var(--google-yellow)',
-    label: 'Builder Showcase',
-    desc: 'Mid-afternoon 5-minute demos from attendees with live audience voting. Show the community what you\'ve built.',
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0" />
-      </svg>
-    ),
-  },
-];
+const tracks = ['Developer Track', 'Builder Track', 'Builder Showcase'];
 
-export default function Home() {
+const TIER_ORDER: SponsorTier[] = ['platinum', 'gold', 'silver', 'community'];
+const TIER_LABELS: Record<SponsorTier, string> = {
+  platinum: 'Platinum',
+  gold: 'Gold',
+  silver: 'Silver',
+  community: 'Community',
+};
+
+async function fetchSponsors(): Promise<Sponsor[]> {
+  try {
+    const snap = await adminDb.collection('sponsors').orderBy('order').get();
+    return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Sponsor));
+  } catch {
+    return [];
+  }
+}
+
+async function fetchTeam(): Promise<TeamMember[]> {
+  try {
+    const snap = await adminDb.collection('team').orderBy('order').get();
+    return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as TeamMember));
+  } catch {
+    return [];
+  }
+}
+
+const showLandingContent = false;
+const showVenue = false;
+const showSponsors = false;
+
+export default async function Home() {
+  const isCfsOpen = process.env.CFS_OPEN === 'true';
+  const [sponsors, team] = await Promise.all([fetchSponsors(), fetchTeam()]);
+
+  const sponsorsByTier = TIER_ORDER.reduce<Record<SponsorTier, Sponsor[]>>(
+    (acc, tier) => {
+      acc[tier] = sponsors.filter((s) => s.tier === tier);
+      return acc;
+    },
+    { platinum: [], gold: [], silver: [], community: [] }
+  );
+
   return (
-    <div className="bg-[#070B14] text-white min-h-screen">
-      <Navbar />
+    <div className="bg-off-white text-black-02 min-h-screen">
+      <Navbar light />
 
       {/* ─── HERO ─── */}
-      <section className="relative min-h-screen flex items-center overflow-hidden">
-        {/* Background */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 gdg-dots opacity-40" />
-          <div className="absolute -top-32 -right-32 w-[520px] h-[520px] rounded-full border-[40px] border-halftone-blue/10" />
-          <div className="absolute -top-16 -right-16 w-[340px] h-[340px] rounded-full border-[28px] border-halftone-red/10" />
-          <div className="absolute -bottom-24 -left-24 w-[300px] h-[300px] rounded-full border-[24px] border-halftone-green/10" />
-        </div>
+      <section className="relative pt-40 pb-28 px-6 overflow-hidden">
+        <div className="absolute inset-0 hero-atmosphere pointer-events-none" aria-hidden="true" />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 pt-28 pb-24 w-full">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-white/10 bg-white/[0.06] mb-10 animate-fade-in">
-            <span className="text-sm text-white/60 tracking-wide">DevFest Sydney · 10 October 2026 · Sydney CBD</span>
-          </div>
+        <div className="relative max-w-7xl mx-auto flex flex-col items-center text-center">
+          {isCfsOpen ? (
+            <div className="flex items-center justify-center gap-2 text-sm font-medium text-google-red mb-8 animate-fade-in">
+              <span className="w-1.5 h-1.5 rounded-full bg-google-red animate-pulse" />
+              <span>Call for Speakers open</span>
+            </div>
+          ) : (
+            <p className="text-sm text-black-02/45 mb-8 animate-fade-in">
+              DevFest Sydney · Sydney CBD
+            </p>
+          )}
 
-          {/* Headline */}
           <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            <h1 className="text-[clamp(2.8rem,8vw,7rem)] font-bold leading-[0.95] tracking-tight">
+            <h1 className="text-[clamp(2.8rem,8vw,7rem)] font-bold leading-[0.95] tracking-tight text-black-02">
               Build, Secure,
             </h1>
-            <h1 className="text-[clamp(2.8rem,8vw,7rem)] font-bold leading-[0.95] tracking-tight gradient-text">
+            <h1 className="text-[clamp(2.8rem,8vw,7rem)] font-bold leading-[0.95] tracking-tight text-google-blue">
               Scale.
             </h1>
-            <h2 className="mt-5 text-[clamp(1rem,2.2vw,1.5rem)] font-bold text-white/35 max-w-2xl leading-snug">
+            <h2 className="mt-6 text-[clamp(1rem,2.2vw,1.5rem)] text-black-02/50 max-w-xl mx-auto leading-snug">
               Developers and Builders in the Agentic Era
             </h2>
           </div>
 
-          {/* CTAs */}
-          <div className="flex flex-wrap gap-4 mt-10 animate-slide-up" style={{ animationDelay: '0.3s' }}>
-            <Link
-              href="/call-for-speakers"
-              className="px-8 py-3.5 bg-google-red text-white font-bold rounded-full hover:bg-[#d63b2f] transition-all hover:scale-[1.03] active:scale-95 shadow-lg shadow-google-red/20"
-            >
-              Submit your talk
-            </Link>
-            <a
-              href="#about"
-              className="px-8 py-3.5 bg-white/6 text-white font-bold rounded-full border border-white/10 hover:bg-white/10 transition-all hover:scale-[1.03] active:scale-95"
-            >
-              About the event
-            </a>
-          </div>
-
-          {/* CfS open indicator + event facts */}
-          <div
-            className="flex flex-wrap items-center gap-x-8 gap-y-3 mt-14 pt-10 border-t border-white/6 animate-slide-up text-sm font-mono"
-            style={{ animationDelay: '0.4s' }}
-          >
-            <div className="flex items-center gap-2 text-google-red">
-              <span className="w-1.5 h-1.5 rounded-full bg-google-red animate-pulse" />
-              <span>Call for Speakers open</span>
-            </div>
-            <span className="text-white/15">·</span>
-            <span className="text-white/35">Developer Track</span>
-            <span className="text-white/15">·</span>
-            <span className="text-white/35">Builder Track</span>
-            <span className="text-white/15">·</span>
-            <span className="text-white/35">Builder Showcase</span>
+          <div className="flex flex-wrap items-center justify-center gap-5 mt-10 animate-slide-up" style={{ animationDelay: '0.3s' }}>
+            {isCfsOpen ? (
+              <Link
+                href="/call-for-speakers"
+                className="px-7 py-2 bg-google-blue text-white text-base font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all"
+              >
+                Submit your talk
+              </Link>
+            ) : (
+              <a
+                href="https://gdgsydney.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-7 py-2 bg-google-blue text-white text-base font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all"
+              >
+                Follow GDG Sydney
+              </a>
+            )}
           </div>
         </div>
-
-        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#070B14] to-transparent pointer-events-none" />
       </section>
 
       {/* ─── ABOUT ─── */}
-      <section id="about" className="py-28 px-6 bg-[#0A0F1C]">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-14">
-            <span className="inline-flex items-center px-3 py-1 rounded-full bg-google-blue/15 text-google-blue text-xs font-bold tracking-[0.15em] uppercase">About the Event</span>
-            <h2 className="text-4xl md:text-5xl font-bold mt-3 max-w-2xl leading-tight">
-              Sydney&apos;s biggest Google Developer Festival
-            </h2>
+      <section id="about" className="pb-24 px-6">
+        <div className="max-w-2xl mx-auto text-center">
+          <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3 animate-fade-in">About the Event</p>
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-8 animate-slide-up" style={{ animationDelay: '0.05s' }}>
+            Sydney&apos;s biggest Google community conference
+          </h2>
+
+          <div className="space-y-4 text-black-02/60 leading-relaxed mb-12 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            <p>
+              DevFest Sydney is an annual community-run conference organised by GDG Sydney and presented
+              by Google, bringing together engineers, designers, product managers, and founders for a full
+              day of talks, workshops, and hands-on sessions.
+            </p>
+            <p>
+              The 2026 edition centres on the theme <span className="text-black-02/85 italic">&ldquo;Build, Secure, Scale: Developers and Builders in the Agentic Era&rdquo;</span>, exploring how the way we build and grow products is evolving in a world of agentic AI.
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-12 mb-16">
-            <div className="space-y-4 text-white/55 leading-relaxed">
-              <p>
-                DevFest Sydney is an annual community-run conference organised by GDG Sydney and presented
-                by Google. It brings together developers, designers, product managers, and founders for a full
-                day of talks, workshops, and hands-on challenges.
-              </p>
-              <p>
-                The 2026 edition centres on the theme <span className="text-white/80 italic">&ldquo;Build, Secure, Scale: Developers and Builders in the Agentic Era&rdquo;</span>, exploring how the role of the professional developer is evolving in a world of agentic AI.
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { label: 'Date', value: 'Saturday, 10 Oct 2026' },
-                { label: 'Location', value: 'Sydney CBD' },
-                { label: 'Format', value: 'Full-day multi-track' },
-                { label: 'Organiser', value: 'GDG Sydney' },
-              ].map((item) => (
-                <div key={item.label} className="bg-white/[0.03] border border-white/6 rounded-xl p-5">
-                  <div className="text-xs text-white/30 uppercase tracking-widest mb-1">{item.label}</div>
-                  <div className="font-medium text-white/80">{item.value}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Tracks */}
-          <div className="grid md:grid-cols-3 gap-5">
-            {tracks.map((track) => (
-              <div
-                key={track.label}
-                className="rounded-2xl p-6 hover:brightness-110 transition-all group overflow-hidden"
-                style={{
-                  background: `linear-gradient(135deg, ${track.color}10 0%, transparent 60%)`,
-                  border: `1px solid ${track.color}30`,
-                  borderLeft: `3px solid ${track.color}`,
-                }}
-              >
-                <div
-                  className="w-9 h-9 rounded-lg flex items-center justify-center mb-4"
-                  style={{ backgroundColor: `${track.color}20`, color: track.color }}
-                >
-                  {track.icon}
-                </div>
-                <h3 className="font-bold text-white mb-2">{track.label}</h3>
-                <p className="text-sm text-white/50 leading-relaxed">{track.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Special features */}
-          <div className="mt-8 grid md:grid-cols-2 gap-5">
-            {[
-              {
-                color: 'var(--google-red)',
-                label: "Builder's Space",
-                desc: "A dedicated room staffed by Google Developer Experts (GDEs) and mentors, offering hands-on support throughout the entire day.",
-              },
-              {
-                color: 'var(--google-blue)',
-                label: 'Agentathon',
-                desc: "A 2-hour structured team challenge using Gemini to solve real problems, complete with a live leaderboard and prizes.",
-              },
-            ].map((feature) => (
-              <div
-                key={feature.label}
-                className="rounded-2xl p-6 flex gap-5 hover:brightness-110 transition-all"
-                style={{
-                  background: `linear-gradient(135deg, ${feature.color}10 0%, transparent 60%)`,
-                  border: `1px solid ${feature.color}30`,
-                  borderLeft: `3px solid ${feature.color}`,
-                }}
-              >
-                <div>
-                  <h3 className="font-bold text-white mb-1">{feature.label}</h3>
-                  <p className="text-sm text-white/50 leading-relaxed">{feature.desc}</p>
-                </div>
-              </div>
+          <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm font-semibold text-black-02/80 animate-slide-up" style={{ animationDelay: '0.15s' }}>
+            {tracks.map((track, i) => (
+              <span key={track} className="inline-flex items-center gap-2">
+                <span
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ backgroundColor: [ 'var(--google-blue)', 'var(--google-green)', 'var(--google-yellow)' ][i] }}
+                />
+                {track}
+              </span>
             ))}
           </div>
         </div>
       </section>
+
+      {/* ─── everything below About is hidden until content is finalised ─── */}
+      {showLandingContent && (
+        <>
+
+      {/* ─── VENUE ─── (hidden until the venue is finalised) */}
+      {showVenue && (
+        <>
+          <div className="flex justify-center py-6" aria-hidden="true"><GdgDivider /></div>
+          <section id="venue" className="py-24 px-6">
+            <div className="max-w-7xl mx-auto">
+              <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3">Venue</p>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-14">Where it happens</h2>
+
+              <div className="grid md:grid-cols-2 gap-10 md:gap-16">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-5">
+                    {[
+                      { label: 'City', value: 'Sydney CBD' },
+                      { label: 'Doors open', value: '8:30 AM' },
+                      { label: 'Format', value: 'Multi-track, full day' },
+                    ].map((item) => (
+                      <div key={item.label}>
+                        <p className="text-xs text-black-02/40 uppercase tracking-widest mb-1">{item.label}</p>
+                        <p className="text-sm font-medium text-black-02/85">{item.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-sm text-black-02/50 leading-relaxed pt-5 border-t border-black-02/10">
+                    The full venue address will be announced closer to the event. Follow GDG Sydney for updates.
+                  </p>
+                </div>
+
+                <div className="md:pl-16 md:border-l md:border-black-02/10 flex flex-col gap-4">
+                  <div className="w-12 h-12 rounded-full bg-google-blue/10 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-google-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-black-02/80 mb-1">Venue to be announced</p>
+                    <p className="text-sm text-black-02/50 leading-relaxed max-w-xs">
+                      We&apos;re finalising the venue. Check back closer to the event for details.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </>
+      )}
+
+      {/* ─── SPONSORS ─── (hidden until there are sponsors to show) */}
+      {showSponsors && (
+        <>
+          <div className="flex justify-center py-6" aria-hidden="true"><GdgDivider /></div>
+          <section id="sponsors" className="py-24 px-6 bg-white border-y border-black-02/8">
+            <div className="max-w-7xl mx-auto">
+              <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3 text-center">Partners</p>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-14 text-center">Our sponsors</h2>
+
+              {sponsors.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-black-02/45 text-sm mb-3">Sponsors will be announced soon.</p>
+                  <a
+                    href="mailto:hello@gdgsydney.com"
+                    className="text-sm text-google-yellow/80 hover:text-google-yellow transition-colors underline underline-offset-2"
+                  >
+                    Interested in sponsoring? Get in touch.
+                  </a>
+                </div>
+              ) : (
+                <div className="space-y-12">
+                  {TIER_ORDER.filter((tier) => sponsorsByTier[tier].length > 0).map((tier) => (
+                    <div key={tier}>
+                      <p className="text-xs font-bold text-black-02/35 tracking-[0.15em] uppercase mb-6 text-center">
+                        {TIER_LABELS[tier]}
+                      </p>
+                      <div className="flex flex-wrap items-center justify-center gap-10">
+                        {sponsorsByTier[tier].map((sponsor) => (
+                          <a
+                            key={sponsor.id}
+                            href={sponsor.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={`${sponsor.name} — sponsor website`}
+                            className="opacity-80 hover:opacity-100 transition-opacity"
+                          >
+                            <Image
+                              src={sponsor.logoUrl}
+                              alt={sponsor.name}
+                              width={160}
+                              height={48}
+                              className="h-10 w-auto object-contain"
+                            />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        </>
+      )}
+
+      {/* ─── TEAM ─── (only rendered when team members exist) */}
+      {team.length > 0 && (
+        <>
+          <div className="flex justify-center py-6" aria-hidden="true"><GdgDivider /></div>
+          <section id="team" className="py-24 px-6">
+            <div className="max-w-7xl mx-auto">
+              <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3 text-center">Team</p>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-14 text-center">The organisers</h2>
+              <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-10 gap-x-6">
+                {team.map((member) => (
+                  <div key={member.id} className="text-center">
+                    <div className="w-20 h-20 rounded-full mx-auto mb-4 overflow-hidden bg-black-02/5">
+                      {member.photoUrl ? (
+                        <Image
+                          src={member.photoUrl}
+                          alt={member.name}
+                          width={80}
+                          height={80}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-black-02/30 text-xl font-bold">
+                          {member.name.charAt(0)}
+                        </div>
+                      )}
+                    </div>
+                    <p className="font-semibold text-black-02/85 text-sm">{member.name}</p>
+                    <p className="text-xs text-black-02/45 mt-0.5">{member.role}</p>
+                    {member.linkedinUrl && (
+                      <a
+                        href={member.linkedinUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`${member.name} on LinkedIn`}
+                        className="inline-block mt-3 text-black-02/30 hover:text-black-02/70 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                        </svg>
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        </>
+      )}
 
       <div className="flex justify-center py-6" aria-hidden="true"><GdgDivider /></div>
 
       {/* ─── FAQ ─── */}
-      <section id="faq" className="py-28 px-6 bg-[#0A0F1C]">
+      <section id="faq" className="py-24 px-6">
         <div className="max-w-3xl mx-auto">
-          <div className="mb-14 text-center">
-            <span className="inline-flex items-center px-3 py-1 rounded-full bg-google-green/15 text-google-green text-xs font-bold tracking-[0.15em] uppercase">FAQ</span>
-            <h2 className="text-4xl md:text-5xl font-bold mt-3">Common questions</h2>
-          </div>
+          <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3 text-center">FAQ</p>
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-14 text-center">Common questions</h2>
           <FAQ />
         </div>
       </section>
@@ -217,25 +309,44 @@ export default function Home() {
       <div className="flex justify-center py-6" aria-hidden="true"><GdgDivider /></div>
 
       {/* ─── FINAL CTA ─── */}
-      <section className="py-28 px-6">
+      <section className="py-24 px-6 bg-white border-t border-black-02/8">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold leading-tight mb-5">
-            Ready to speak?
-          </h2>
-          <p className="text-white/45 leading-relaxed mb-10 max-w-lg mx-auto">
-            The Call for Speakers is open now. We review every submission and get back to all applicants.
-          </p>
-          <Link
-            href="/call-for-speakers"
-            className="inline-flex px-10 py-4 bg-google-red text-white font-bold rounded-full hover:bg-[#d63b2f] transition-all hover:scale-[1.03] active:scale-95 shadow-xl shadow-google-red/25 text-lg"
-          >
-            Submit your talk
-          </Link>
-          <p className="text-xs text-white/25 font-mono mt-5">10 October 2026 · Sydney CBD</p>
+          {isCfsOpen ? (
+            <>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-5">Ready to speak?</h2>
+              <p className="text-black-02/55 leading-relaxed mb-10 max-w-lg mx-auto">
+                The Call for Speakers is open now. We review every submission and get back to all applicants.
+              </p>
+              <Link
+                href="/call-for-speakers"
+                className="inline-flex px-7 py-2 bg-google-blue text-white text-base font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all"
+              >
+                Submit your talk
+              </Link>
+            </>
+          ) : (
+            <>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-5">Join us in 2026</h2>
+              <p className="text-black-02/55 leading-relaxed mb-10 max-w-lg mx-auto">
+                DevFest Sydney 2026 is coming to Sydney CBD. Tickets and speaker announcements coming soon.
+              </p>
+              <a
+                href="https://gdgsydney.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex px-7 py-2 bg-google-blue text-white text-base font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all"
+              >
+                Follow GDG Sydney
+              </a>
+            </>
+          )}
+          <p className="text-xs text-black-02/35 mt-5">Sydney CBD · 2026</p>
         </div>
       </section>
+        </>
+      )}
 
-      <Footer />
+      <Footer light />
     </div>
   );
 }
