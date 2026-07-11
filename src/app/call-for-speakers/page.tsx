@@ -43,7 +43,8 @@ export default function CallForSpeakers() {
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight mb-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            Share your story at{' '}
+            Share your story at
+            <br />
             <span className="text-google-blue">DevFest Sydney</span>
           </h1>
 
