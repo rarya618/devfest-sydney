@@ -5,7 +5,7 @@ import Alert from '@/components/Alert';
 
 type TalkFormat = 'talk' | 'workshop' | 'lightning-talk';
 type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced';
-type Track = 'developer' | 'builder' | 'showcase';
+type Track = 'developer' | 'builder';
 type SubmitState = 'idle' | 'submitting' | 'success';
 
 interface FormFields {
@@ -41,7 +41,6 @@ const FORMATS: { value: TalkFormat; label: string; duration: string; desc: strin
 const TRACKS: { value: Track; label: string; color: string; desc: string }[] = [
   { value: 'developer', label: 'Developer Track', color: 'google-blue', desc: 'Technical sessions for engineers: Gemini API, Flutter, Firebase, Android, Google Cloud.' },
   { value: 'builder', label: 'Builder Track', color: 'google-green', desc: 'For PMs, designers, and founders: prototyping with AI, automation, no-code tooling.' },
-  { value: 'showcase', label: 'Builder Showcase', color: 'google-yellow', desc: 'A 5-minute demo presented to the audience, with live voting.' },
 ];
 
 const LEVELS: { value: ExperienceLevel; label: string; desc: string }[] = [
@@ -138,14 +137,14 @@ export default function CfsForm() {
 
   if (submitState === 'success') {
     return (
-      <div className="bg-white/[0.03] border border-white/6 rounded-2xl p-12 text-center">
+      <div className="bg-white border border-black-02/8 rounded-2xl p-12 text-center">
         <div className="w-14 h-14 rounded-full bg-google-green/15 border border-google-green/25 flex items-center justify-center mx-auto mb-5">
           <svg className="w-6 h-6 text-google-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
         </div>
-        <h3 className="text-xl font-bold text-white mb-3">Proposal submitted!</h3>
-        <p className="text-white/45 text-sm leading-relaxed max-w-sm mx-auto">
+        <h3 className="text-xl font-bold text-black-02 mb-3">Proposal submitted!</h3>
+        <p className="text-black-02/55 text-sm leading-relaxed max-w-sm mx-auto">
           Thanks for submitting to DevFest Sydney. We&apos;ll review your proposal and be in touch via email.
         </p>
       </div>
@@ -153,8 +152,8 @@ export default function CfsForm() {
   }
 
   const inputBase =
-    'w-full bg-white/[0.05] border rounded-xl px-4 py-3 text-white text-sm placeholder-white/25 outline-none transition-colors focus:bg-white/[0.07]';
-  const inputNormal = `${inputBase} border-white/10 focus:border-google-red/40`;
+    'w-full bg-white border rounded-xl px-4 py-3 text-black-02 text-sm placeholder-black-02/30 outline-none transition-colors focus:bg-white';
+  const inputNormal = `${inputBase} border-black-02/15 focus:border-google-red/40`;
   const inputError = `${inputBase} border-google-red/40 bg-google-red/5`;
 
   return (
@@ -164,7 +163,7 @@ export default function CfsForm() {
         {/* Name + Email */}
         <div className="grid sm:grid-cols-2 gap-5">
           <div>
-            <label htmlFor="cfs-name" className="block text-sm font-medium text-white/70 mb-2">
+            <label htmlFor="cfs-name" className="block text-sm font-bold text-black-02/70 mb-2">
               Full name <span className="text-google-red" aria-hidden="true">*</span>
             </label>
             <input
@@ -184,7 +183,7 @@ export default function CfsForm() {
           </div>
 
           <div>
-            <label htmlFor="cfs-email" className="block text-sm font-medium text-white/70 mb-2">
+            <label htmlFor="cfs-email" className="block text-sm font-bold text-black-02/70 mb-2">
               Email address <span className="text-google-red" aria-hidden="true">*</span>
             </label>
             <input
@@ -206,7 +205,7 @@ export default function CfsForm() {
 
         {/* Talk title */}
         <div>
-          <label htmlFor="cfs-title" className="block text-sm font-medium text-white/70 mb-2">
+          <label htmlFor="cfs-title" className="block text-sm font-bold text-black-02/70 mb-2">
             Talk title <span className="text-google-red" aria-hidden="true">*</span>
           </label>
           <input
@@ -227,12 +226,12 @@ export default function CfsForm() {
         {/* Abstract */}
         <div>
           <div className="flex items-baseline justify-between mb-2">
-            <label htmlFor="cfs-abstract" className="block text-sm font-medium text-white/70">
+            <label htmlFor="cfs-abstract" className="block text-sm font-bold text-black-02/70">
               Abstract <span className="text-google-red" aria-hidden="true">*</span>
             </label>
             <span
               aria-label={`${fields.abstract.length} of ${ABSTRACT_MAX} characters used`}
-              className={`text-xs font-mono tabular-nums ${fields.abstract.length > ABSTRACT_MAX ? 'text-google-red' : 'text-white/25'}`}
+              className={`text-xs font-mono tabular-nums ${fields.abstract.length > ABSTRACT_MAX ? 'text-google-red' : 'text-black-02/35'}`}
             >
               {fields.abstract.length}/{ABSTRACT_MAX}
             </span>
@@ -250,7 +249,7 @@ export default function CfsForm() {
           {errors.abstract ? (
             <p id="cfs-abstract-error" role="alert" className="mt-1.5 text-xs text-google-red/80">{errors.abstract}</p>
           ) : (
-            <p id="cfs-abstract-hint" className="mt-1.5 text-xs text-white/25">
+            <p id="cfs-abstract-hint" className="mt-1.5 text-xs text-black-02/35">
               Briefly describe your talk: the topic, key points, and what attendees will learn.
             </p>
           )}
@@ -258,7 +257,7 @@ export default function CfsForm() {
 
         {/* Format */}
         <div>
-          <p className="text-sm font-medium text-white/70 mb-3" id="cfs-format-label">
+          <p className="text-sm font-bold text-black-02/70 mb-3" id="cfs-format-label">
             Talk format <span className="text-google-red" aria-hidden="true">*</span>
           </p>
           <div
@@ -280,24 +279,24 @@ export default function CfsForm() {
                     setFields((prev) => ({ ...prev, format: f.value }));
                     setErrors((prev) => ({ ...prev, format: undefined }));
                   }}
-                  className={`text-left rounded-xl border px-4 py-4 transition-all cursor-pointer
+                  className={`flex flex-col items-start text-left rounded-xl border px-4 py-4 transition-all cursor-pointer
                     ${selected
                       ? 'border-google-red/50 bg-google-red/10'
                       : errors.format
                         ? 'border-google-red/30 bg-google-red/5 hover:border-google-red/30'
-                        : 'border-white/8 bg-white/[0.03] hover:border-white/15'
+                        : 'border-black-02/10 bg-off-white hover:border-black-02/20'
                     }`}
                 >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className={`text-sm font-semibold ${selected ? 'text-white' : 'text-white/70'}`}>
+                  <div className="w-full flex items-center justify-between mb-1.5">
+                    <span className={`text-sm font-semibold ${selected ? 'text-black-02' : 'text-black-02/70'}`}>
                       {f.label}
                     </span>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-mono
-                      ${selected ? 'bg-google-red/20 text-google-red' : 'bg-white/[0.06] text-white/35'}`}>
+                      ${selected ? 'bg-google-red/20 text-google-red' : 'bg-black-02/6 text-black-02/40'}`}>
                       {f.duration}
                     </span>
                   </div>
-                  <p className={`text-xs leading-relaxed ${selected ? 'text-white/55' : 'text-white/30'}`}>
+                  <p className={`w-full text-xs leading-relaxed ${selected ? 'text-black-02/60' : 'text-black-02/40'}`}>
                     {f.desc}
                   </p>
                 </button>
@@ -311,26 +310,20 @@ export default function CfsForm() {
 
         {/* Track */}
         <div>
-          <p className="text-sm font-medium text-white/70 mb-3" id="cfs-track-label">
+          <p className="text-sm font-bold text-black-02/70 mb-3" id="cfs-track-label">
             Track <span className="text-google-red" aria-hidden="true">*</span>
           </p>
           <div
             role="radiogroup"
             aria-labelledby="cfs-track-label"
             aria-describedby={errors.track ? 'cfs-track-error' : undefined}
-            className="grid sm:grid-cols-3 gap-3"
+            className="grid sm:grid-cols-2 gap-3"
           >
             {TRACKS.map((t) => {
               const selected = fields.track === t.value;
               const colorMap: Record<string, string> = {
-                'google-blue': selected ? 'border-google-blue/50 bg-google-blue/10' : 'border-white/8 bg-white/[0.03] hover:border-white/15',
-                'google-green': selected ? 'border-google-green/50 bg-google-green/10' : 'border-white/8 bg-white/[0.03] hover:border-white/15',
-                'google-yellow': selected ? 'border-google-yellow/50 bg-google-yellow/10' : 'border-white/8 bg-white/[0.03] hover:border-white/15',
-              };
-              const badgeMap: Record<string, string> = {
-                'google-blue': selected ? 'bg-google-blue/20 text-google-blue' : 'bg-white/[0.06] text-white/35',
-                'google-green': selected ? 'bg-google-green/20 text-google-green' : 'bg-white/[0.06] text-white/35',
-                'google-yellow': selected ? 'bg-google-yellow/20 text-google-yellow' : 'bg-white/[0.06] text-white/35',
+                'google-blue': selected ? 'border-google-blue/50 bg-google-blue/10' : 'border-black-02/10 bg-off-white hover:border-black-02/20',
+                'google-green': selected ? 'border-google-green/50 bg-google-green/10' : 'border-black-02/10 bg-off-white hover:border-black-02/20',
               };
               return (
                 <button
@@ -343,18 +336,16 @@ export default function CfsForm() {
                     setFields((prev) => ({ ...prev, track: t.value }));
                     setErrors((prev) => ({ ...prev, track: undefined }));
                   }}
-                  className={`text-left rounded-xl border px-4 py-4 transition-all cursor-pointer
+                  className={`flex flex-col items-start text-left rounded-xl border px-4 py-4 transition-all cursor-pointer
                     ${errors.track && !selected
                       ? 'border-google-red/30 bg-google-red/5 hover:border-google-red/30'
                       : colorMap[t.color]
                     }`}
                 >
-                  <div className="mb-1.5">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${badgeMap[t.color]}`}>
-                      {t.label}
-                    </span>
-                  </div>
-                  <p className={`text-xs leading-relaxed mt-2 ${selected ? 'text-white/55' : 'text-white/30'}`}>
+                  <span className={`w-full text-sm font-semibold mb-1.5 ${selected ? 'text-black-02' : 'text-black-02/70'}`}>
+                    {t.label}
+                  </span>
+                  <p className={`w-full text-xs leading-relaxed ${selected ? 'text-black-02/60' : 'text-black-02/40'}`}>
                     {t.desc}
                   </p>
                 </button>
@@ -368,7 +359,7 @@ export default function CfsForm() {
 
         {/* Experience level */}
         <div>
-          <p className="text-sm font-medium text-white/70 mb-3" id="cfs-level-label">
+          <p className="text-sm font-bold text-black-02/70 mb-3" id="cfs-level-label">
             Your experience level <span className="text-google-red" aria-hidden="true">*</span>
           </p>
           <div
@@ -390,18 +381,18 @@ export default function CfsForm() {
                     setFields((prev) => ({ ...prev, experienceLevel: level.value }));
                     setErrors((prev) => ({ ...prev, experienceLevel: undefined }));
                   }}
-                  className={`text-left rounded-xl border px-4 py-3.5 transition-all cursor-pointer
+                  className={`flex flex-col items-start text-left rounded-xl border px-4 py-4 transition-all cursor-pointer
                     ${selected
                       ? 'border-google-red/50 bg-google-red/10'
                       : errors.experienceLevel
                         ? 'border-google-red/30 bg-google-red/5 hover:border-google-red/30'
-                        : 'border-white/8 bg-white/[0.03] hover:border-white/15'
+                        : 'border-black-02/10 bg-off-white hover:border-black-02/20'
                     }`}
                 >
-                  <p className={`text-sm font-semibold mb-0.5 ${selected ? 'text-white' : 'text-white/70'}`}>
+                  <span className={`w-full text-sm font-semibold mb-1.5 ${selected ? 'text-black-02' : 'text-black-02/70'}`}>
                     {level.label}
-                  </p>
-                  <p className={`text-xs ${selected ? 'text-white/50' : 'text-white/28'}`}>
+                  </span>
+                  <p className={`w-full text-xs leading-relaxed ${selected ? 'text-black-02/60' : 'text-black-02/40'}`}>
                     {level.desc}
                   </p>
                 </button>
@@ -415,10 +406,10 @@ export default function CfsForm() {
 
         {/* Optional fields */}
         <div className="pt-1">
-          <p className="text-xs font-bold text-white/25 tracking-[0.15em] uppercase mb-5">Optional</p>
+          <p className="text-xs font-bold text-black-02/35 tracking-[0.15em] uppercase mb-5">Optional</p>
           <div className="space-y-5">
             <div>
-              <label htmlFor="cfs-social" className="block text-sm font-medium text-white/70 mb-2">
+              <label htmlFor="cfs-social" className="block text-sm font-bold text-black-02/70 mb-2">
                 Social or profile links
               </label>
               <input
@@ -429,13 +420,13 @@ export default function CfsForm() {
                 className={inputNormal}
                 {...field('socialLinks')}
               />
-              <p id="cfs-social-hint" className="mt-1.5 text-xs text-white/25">
+              <p id="cfs-social-hint" className="mt-1.5 text-xs text-black-02/35">
                 Helps us learn more about you. Any format is fine.
               </p>
             </div>
 
             <div>
-              <label htmlFor="cfs-prev-talk" className="block text-sm font-medium text-white/70 mb-2">
+              <label htmlFor="cfs-prev-talk" className="block text-sm font-bold text-black-02/70 mb-2">
                 Previous talk recording
               </label>
               <input
@@ -446,7 +437,7 @@ export default function CfsForm() {
                 className={inputNormal}
                 {...field('previousTalkLink')}
               />
-              <p id="cfs-prev-talk-hint" className="mt-1.5 text-xs text-white/25">
+              <p id="cfs-prev-talk-hint" className="mt-1.5 text-xs text-black-02/35">
                 A recording of a previous talk, if you have one.
               </p>
             </div>
@@ -470,7 +461,7 @@ export default function CfsForm() {
             <label
               key={id}
               htmlFor={id}
-              className="flex items-center gap-3 cursor-pointer group"
+              className="flex items-start gap-3 cursor-pointer group"
             >
               <div className="relative shrink-0">
                 <input
@@ -480,7 +471,7 @@ export default function CfsForm() {
                   onChange={(e) => setFields((prev) => ({ ...prev, [field]: e.target.checked }))}
                   className="sr-only peer"
                 />
-                <div className="w-5 h-5 rounded-md border border-white/15 bg-white/[0.04] peer-checked:bg-google-red peer-checked:border-google-red transition-all group-hover:border-white/30 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md border border-black-02/20 bg-white peer-checked:bg-google-red peer-checked:border-google-red transition-all group-hover:border-black-02/35 flex items-center justify-center">
                   {fields[field] && (
                     <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
@@ -488,12 +479,12 @@ export default function CfsForm() {
                   )}
                 </div>
               </div>
-              <span className="text-sm text-white/60 group-hover:text-white/80 transition-colors select-none">
+              <span className="text-sm text-black-02/70 group-hover:text-black-02/90 transition-colors select-none">
                 {label}
               </span>
             </label>
           ))}
-          <p className="text-xs text-white/25 leading-relaxed pt-1">
+          <p className="text-xs text-black-02/35 leading-relaxed pt-1">
             Travel support is limited. We may not be able to cover costs for non-GDE speakers.
           </p>
         </div>
@@ -504,10 +495,9 @@ export default function CfsForm() {
             type="submit"
             disabled={submitState === 'submitting'}
             aria-label="Submit your speaker proposal"
-            className="w-full py-4 bg-google-red text-white font-bold rounded-xl
-              hover:bg-[#d63b2f] active:scale-[0.99] transition-all shadow-lg shadow-google-red/20
-              disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-google-red disabled:active:scale-100
-              flex items-center justify-center gap-2"
+            className="inline-flex items-center justify-center gap-2 px-7 py-2 bg-google-blue text-white text-base font-semibold rounded-full
+              shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all
+              disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-google-blue disabled:hover:translate-y-0"
           >
             {submitState === 'submitting' ? (
               <>
@@ -521,9 +511,9 @@ export default function CfsForm() {
               'Submit proposal'
             )}
           </button>
-          <p className="text-center text-xs text-white/25 mt-3">
+          <p className="text-xs text-black-02/35 mt-3">
             By submitting you agree to our{' '}
-            <a href="/code-of-conduct" className="text-white/40 hover:text-white/60 underline underline-offset-2 transition-colors">
+            <a href="/code-of-conduct" className="text-black-02/50 hover:text-black-02/70 underline underline-offset-2 transition-colors">
               Code of Conduct
             </a>
             .
