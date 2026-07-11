@@ -64,7 +64,7 @@ export default async function Home() {
           {isCfsOpen ? (
             <div className="flex items-center justify-center gap-2 text-sm font-medium text-google-red mb-8 animate-fade-in">
               <span className="w-1.5 h-1.5 rounded-full bg-google-red animate-pulse" />
-              <span>Call for speakers open</span>
+              <span>Call for Speakers open</span>
             </div>
           ) : (
             <p className="text-sm text-black-02/45 mb-8 animate-fade-in">
