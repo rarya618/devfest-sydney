@@ -53,11 +53,14 @@
   --color-pastel-green: #ccf6c5;
   --color-pastel-yellow: #ffe7a5;
   --color-pastel-red: #f8d8d8;
+
+  /* Greyscale */
+  --color-off-white: #f0f0f0;
+  --color-black-02: #1e1e1e;
 }
 
 :root {
-  --bg: #070B14;
-  --bg-alt: #0A0F1C;
+  --bg: #f0f0f0;
   --google-blue: #4285F4;
   --google-red: #EA4335;
   --google-yellow: #f9ab00;
@@ -71,33 +74,24 @@ html {
 body {
   font-family: 'Google Sans', sans-serif;
   background-color: var(--bg);
-  color: #ffffff;
+  color: var(--color-black-02);
   -webkit-font-smoothing: antialiased;
 }
 
-.gradient-text {
-  background: linear-gradient(135deg, #4285F4 0%, #34A853 40%, #f9ab00 70%, #EA4335 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+::selection {
+  background-color: var(--google-blue);
+  color: #ffffff;
 }
 
-.hero-grid {
+/* Soft, brand-coloured atmosphere for the hero — four large, low-opacity
+   blooms in the core Google colours. Purely decorative; keeps the hero from
+   reading as flat while staying well clear of any legible content. */
+.hero-atmosphere {
   background-image:
-    linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
-  background-size: 60px 60px;
-}
-
-/* GDG dot pattern — coloured dots on a dark background */
-.gdg-dots {
-  background-image:
-    radial-gradient(circle, #4285F430 1px, transparent 1px),
-    radial-gradient(circle, #EA433530 1px, transparent 1px),
-    radial-gradient(circle, #f9ab0030 1px, transparent 1px),
-    radial-gradient(circle, #34A85330 1px, transparent 1px);
-  background-size: 40px 40px;
-  background-position: 0 0, 20px 0, 0 20px, 20px 20px;
+    radial-gradient(circle at 10% 10%, color-mix(in srgb, var(--google-blue) 7%, transparent) 0%, transparent 28%),
+    radial-gradient(circle at 92% 8%, color-mix(in srgb, var(--google-red) 5%, transparent) 0%, transparent 26%),
+    radial-gradient(circle at 94% 92%, color-mix(in srgb, var(--google-yellow) 6%, transparent) 0%, transparent 30%),
+    radial-gradient(circle at 6% 94%, color-mix(in srgb, var(--google-green) 5%, transparent) 0%, transparent 28%);
 }
 
 @keyframes fade-in {
@@ -120,5 +114,5 @@ body {
 
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--color-black-02) 18%, transparent); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--color-black-02) 30%, transparent); }
