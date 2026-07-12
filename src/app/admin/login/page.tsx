@@ -33,7 +33,7 @@ export default async function AdminLoginPage() {
               className="h-8 w-auto object-contain"
               priority
             />
-            <span className="font-bold text-black-02 text-xl tracking-wide">DevFest Sydney</span>
+            <span className="font-bold text-black-02 text-xl tracking-tight">DevFest Sydney</span>
           </Link>
           <p className="text-sm text-black-02/40">Admin</p>
         </div>
