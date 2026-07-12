@@ -13,7 +13,7 @@ import type { Submission, SubmissionStatus, Track, TalkFormat } from '@/lib/type
 const STATUS_STYLES: Record<SubmissionStatus, string> = {
   pending: 'bg-google-yellow/10 text-google-yellow border-google-yellow/20',
   accepted: 'bg-google-green/10 text-google-green border-google-green/20',
-  rejected: 'bg-white/5 text-white/35 border-white/10',
+  rejected: 'bg-black-02/5 text-black-02/35 border-black-02/10',
 };
 
 const STATUS_LABELS: Record<SubmissionStatus, string> = {
@@ -66,13 +66,13 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
 
   return (
     <div
-      className={`bg-white/[0.02] border rounded-xl p-5 transition-opacity ${isPending ? 'opacity-50 pointer-events-none' : 'border-white/6'}`}
+      className={`bg-white border rounded-xl p-5 transition-opacity ${isPending ? 'opacity-50 pointer-events-none' : 'border-black-02/8'}`}
       aria-label={`Submission from ${submission.name}: ${submission.talkTitle}`}
     >
       <div className="flex items-start justify-between gap-4 mb-3">
         <div className="min-w-0">
-          <h3 className="font-semibold text-white text-sm leading-snug truncate">{submission.talkTitle}</h3>
-          <p className="text-xs text-white/40 mt-0.5 truncate">{submission.name} &middot; {submission.email}</p>
+          <h3 className="font-semibold text-black-02 text-sm leading-snug truncate">{submission.talkTitle}</h3>
+          <p className="text-xs text-black-02/40 mt-0.5 truncate">{submission.name} &middot; {submission.email}</p>
         </div>
         <span className={`shrink-0 text-xs px-2.5 py-1 rounded-full border font-medium ${STATUS_STYLES[submission.status]}`}>
           {STATUS_LABELS[submission.status]}
@@ -83,28 +83,28 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
         <span className={`text-xs font-medium font-mono ${TRACK_COLORS[submission.track]}`}>
           {TRACK_LABELS[submission.track]}
         </span>
-        <span className="text-white/20 text-xs">/</span>
-        <span className="text-xs text-white/40 font-mono">{FORMAT_LABELS[submission.format]}</span>
-        <span className="text-white/20 text-xs">/</span>
-        <span className="text-xs text-white/40 font-mono capitalize">{submission.experienceLevel}</span>
+        <span className="text-black-02/20 text-xs">/</span>
+        <span className="text-xs text-black-02/40 font-mono">{FORMAT_LABELS[submission.format]}</span>
+        <span className="text-black-02/20 text-xs">/</span>
+        <span className="text-xs text-black-02/40 font-mono capitalize">{submission.experienceLevel}</span>
         {submission.isGoogleDeveloperExpert && (
           <>
-            <span className="text-white/20 text-xs">/</span>
+            <span className="text-black-02/20 text-xs">/</span>
             <span className="text-xs text-google-blue font-mono">GDE</span>
           </>
         )}
         {submission.requiresTravelSupport && (
           <>
-            <span className="text-white/20 text-xs">/</span>
+            <span className="text-black-02/20 text-xs">/</span>
             <span className="text-xs text-google-yellow font-mono">Travel support</span>
           </>
         )}
       </div>
 
-      <p className="text-xs text-white/30 leading-relaxed line-clamp-2 mb-4">{submission.abstract}</p>
+      <p className="text-xs text-black-02/45 leading-relaxed line-clamp-2 mb-4">{submission.abstract}</p>
 
       <div className="flex items-center justify-between gap-3">
-        <span className="text-xs text-white/20 font-mono">{formatDate(submission.submittedAt)}</span>
+        <span className="text-xs text-black-02/30 font-mono">{formatDate(submission.submittedAt)}</span>
 
         <div className="flex gap-2">
           {submission.status === 'pending' && (
@@ -113,7 +113,7 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
                 onClick={() => handleAction(rejectSubmission)}
                 disabled={isPending}
                 aria-label={`Reject proposal: ${submission.talkTitle}`}
-                className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/40 hover:border-white/20 hover:text-white/60 transition-colors"
+                className="text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
               >
                 Reject
               </button>
@@ -132,7 +132,7 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
               onClick={() => handleAction(restoreSubmission)}
               disabled={isPending}
               aria-label={`Restore proposal to pending: ${submission.talkTitle}`}
-              className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/40 hover:border-white/20 hover:text-white/60 transition-colors"
+              className="text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
             >
               Restore
             </button>
@@ -188,7 +188,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
 
   return (
     <>
-      <div className="min-h-screen bg-[#0f0f0f] px-4 py-10">
+      <div className="min-h-screen bg-off-white px-4 py-10">
         <div className="max-w-3xl mx-auto">
 
           {/* Header */}
@@ -202,15 +202,15 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                   height={27}
                   className="h-7 w-auto object-contain"
                 />
-                <span className="font-bold text-white text-lg tracking-wide">DevFest Sydney</span>
+                <span className="font-bold text-black-02 text-lg tracking-wide">DevFest Sydney</span>
               </Link>
-              <p className="text-sm text-white/35">Submissions</p>
+              <p className="text-sm text-black-02/40">Submissions</p>
             </div>
             <div className="flex items-center gap-2">
               <Link
                 href="/"
                 aria-label="Go to homepage"
-                className="text-xs px-4 py-2 rounded-lg border border-white/10 text-white/40 hover:border-white/20 hover:text-white/60 transition-colors"
+                className="text-xs px-4 py-2 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
               >
                 Home
               </Link>
@@ -218,7 +218,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 onClick={handleSignOut}
                 disabled={signingOut}
                 aria-label="Sign out of admin panel"
-                className="text-xs px-4 py-2 rounded-lg border border-white/10 text-white/40 hover:border-white/20 hover:text-white/60 transition-colors disabled:opacity-50"
+                className="text-xs px-4 py-2 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors disabled:opacity-50"
               >
                 {signingOut ? 'Signing out…' : 'Sign out'}
               </button>
@@ -230,17 +230,17 @@ export default function SubmissionsDashboard({ submissions }: Props) {
             {([
               { label: 'Pending', value: counts.pending, color: 'text-google-yellow' },
               { label: 'Accepted', value: counts.accepted, color: 'text-google-green' },
-              { label: 'Total', value: counts.all, color: 'text-white' },
+              { label: 'Total', value: counts.all, color: 'text-black-02' },
             ] as const).map(({ label, value, color }) => (
-              <div key={label} className="bg-white/[0.02] border border-white/6 rounded-xl px-4 py-3 text-center">
+              <div key={label} className="bg-white border border-black-02/8 rounded-xl px-4 py-3 text-center">
                 <p className={`text-2xl font-bold font-mono ${color}`}>{value}</p>
-                <p className="text-xs text-white/35 mt-0.5">{label}</p>
+                <p className="text-xs text-black-02/40 mt-0.5">{label}</p>
               </div>
             ))}
           </div>
 
           {/* Filter tabs */}
-          <div className="flex gap-1 mb-5 bg-white/[0.03] border border-white/6 rounded-xl p-1">
+          <div className="flex gap-1 mb-5 bg-white border border-black-02/8 rounded-xl p-1">
             {filterTabs.map((tab) => (
               <button
                 key={tab.value}
@@ -248,19 +248,19 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 aria-pressed={filter === tab.value}
                 className={`flex-1 text-xs py-1.5 rounded-lg transition-all font-medium ${
                   filter === tab.value
-                    ? 'bg-white/8 text-white'
-                    : 'text-white/35 hover:text-white/55'
+                    ? 'bg-black-02/8 text-black-02'
+                    : 'text-black-02/40 hover:text-black-02/65'
                 }`}
               >
                 {tab.label}
-                <span className="ml-1.5 text-white/25">{counts[tab.value]}</span>
+                <span className="ml-1.5 text-black-02/30">{counts[tab.value]}</span>
               </button>
             ))}
           </div>
 
           {/* Submissions list */}
           {filtered.length === 0 ? (
-            <div className="text-center py-16 text-white/25 text-sm">
+            <div className="text-center py-16 text-black-02/30 text-sm">
               No {filter === 'all' ? '' : filter} submissions yet.
             </div>
           ) : (

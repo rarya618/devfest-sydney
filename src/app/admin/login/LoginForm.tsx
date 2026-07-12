@@ -50,12 +50,12 @@ export default function LoginForm() {
         onClick={handleGoogleSignIn}
         disabled={loading}
         aria-label="Sign in with Google"
-        className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-white text-[#1e1e1e] font-semibold text-sm rounded-xl
-          hover:bg-white/90 active:scale-[0.99] transition-all shadow-lg shadow-black/20
+        className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-white border border-black-02/15 text-black-02 font-semibold text-sm rounded-xl
+          hover:bg-off-white active:scale-[0.99] transition-all
           disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100"
       >
         {loading ? (
-          <svg className="w-5 h-5 animate-spin text-[#1e1e1e]/40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <svg className="w-5 h-5 animate-spin text-black-02/40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
           </svg>
