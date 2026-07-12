@@ -19,8 +19,10 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// App Check — browser only. Try/catch guards against HMR double-init.
-if (typeof window !== "undefined") {
+// App Check — browser only, and only once the site key is configured (Milestone 8).
+// Try/catch guards against HMR double-init.
+const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY;
+if (typeof window !== "undefined" && recaptchaSiteKey) {
   const debugToken = process.env.NEXT_PUBLIC_APP_CHECK_DEBUG_TOKEN;
   if (process.env.NODE_ENV !== "production" && debugToken) {
     // Setting to a token string uses it directly; setting to "true" auto-generates
@@ -30,9 +32,7 @@ if (typeof window !== "undefined") {
   }
   try {
     initializeAppCheck(app, {
-      provider: new ReCaptchaEnterpriseProvider(
-        process.env.NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY!
-      ),
+      provider: new ReCaptchaEnterpriseProvider(recaptchaSiteKey),
       isTokenAutoRefreshEnabled: true,
     });
   } catch {
