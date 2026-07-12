@@ -201,8 +201,10 @@ export async function POST(request: NextRequest) {
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL!,
+      from: `GDG Sydney <${process.env.RESEND_FROM_EMAIL}>`,
       to: submission.email,
+      bcc: 'hello@gdgsydney.com',
+      replyTo: 'hello@gdgsydney.com',
       subject: `Proposal received: "${submission.talkTitle}", DevFest Sydney 2026`,
       html: buildConfirmationEmail(submission),
     });
