@@ -79,48 +79,65 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
 
   return (
     <div
-      className={`bg-white border border-l-4 rounded-xl p-5 transition-all hover:shadow-[0_2px_12px_rgba(30,30,30,0.06)] ${
+      className={`bg-white border border-l-4 rounded-2xl p-6 shadow-[0_1px_3px_rgba(30,30,30,0.04)] transition-all hover:shadow-[0_4px_16px_rgba(30,30,30,0.07)] hover:-translate-y-0.5 ${
         isPending ? 'opacity-50 pointer-events-none' : 'border-black-02/8'
       } ${TRACK_BORDER_COLORS[submission.track]}`}
       aria-label={`Submission from ${submission.name}: ${submission.talkTitle}`}
     >
       <div className="flex items-start justify-between gap-4 mb-3">
         <div className="min-w-0">
-          <h3 className="font-semibold text-black-02 text-sm leading-snug truncate">{submission.talkTitle}</h3>
-          <p className="text-xs text-black-02/40 mt-0.5 truncate">{submission.name} &middot; {submission.email}</p>
+          <h3 className="font-bold text-black-02 text-xl leading-snug tracking-tight truncate">{submission.talkTitle}</h3>
+          <p className="text-xs text-black-02/40 mt-1 truncate">{submission.name} &middot; {submission.email}</p>
         </div>
-        <span className={`shrink-0 text-xs px-2.5 py-1 rounded-full border font-medium ${STATUS_STYLES[submission.status]}`}>
-          {STATUS_LABELS[submission.status]}
-        </span>
+        <div className="shrink-0 flex items-center gap-1.5">
+          {submission.isGoogleDeveloperExpert && (
+            <span className="text-xs px-2.5 py-1 rounded-full border font-medium bg-google-blue/10 text-google-blue border-google-blue/20">
+              GDE
+            </span>
+          )}
+          {submission.requiresTravelSupport && (
+            <span className="text-xs px-2.5 py-1 rounded-full border font-medium bg-google-yellow/10 text-google-yellow border-google-yellow/20">
+              Travel support
+            </span>
+          )}
+          <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${STATUS_STYLES[submission.status]}`}>
+            {STATUS_LABELS[submission.status]}
+          </span>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
         <span className={`inline-block w-1.5 h-1.5 rounded-full ${TRACK_DOT_COLORS[submission.track]}`} />
-        <span className={`text-xs font-medium font-mono ${TRACK_COLORS[submission.track]}`}>
+        <span className={`text-xs font-medium ${TRACK_COLORS[submission.track]}`}>
           {TRACK_LABELS[submission.track]}
         </span>
         <span className="text-black-02/20 text-xs">/</span>
-        <span className="text-xs text-black-02/40 font-mono">{FORMAT_LABELS[submission.format]}</span>
+        <span className="text-xs text-black-02/40">{FORMAT_LABELS[submission.format]}</span>
         <span className="text-black-02/20 text-xs">/</span>
-        <span className="text-xs text-black-02/40 font-mono capitalize">{submission.experienceLevel}</span>
-        {submission.isGoogleDeveloperExpert && (
-          <>
-            <span className="text-black-02/20 text-xs">/</span>
-            <span className="text-xs text-google-blue font-mono">GDE</span>
-          </>
-        )}
-        {submission.requiresTravelSupport && (
-          <>
-            <span className="text-black-02/20 text-xs">/</span>
-            <span className="text-xs text-google-yellow font-mono">Travel support</span>
-          </>
-        )}
+        <span className="text-xs text-black-02/40 capitalize">{submission.experienceLevel}</span>
       </div>
 
-      <p className="text-xs text-black-02/45 leading-relaxed line-clamp-2 mb-4">{submission.abstract}</p>
+      <p className="text-sm text-black-02/50 leading-relaxed mb-4">{submission.abstract}</p>
 
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-xs text-black-02/30 font-mono">{formatDate(submission.submittedAt)}</span>
+      {(submission.socialLinks || submission.previousTalkLink) && (
+        <div className="flex flex-wrap gap-x-4 gap-y-1 mb-4 text-xs">
+          {submission.socialLinks && (
+            <span className="text-black-02/45">
+              <span className="text-black-02/30">Social: </span>
+              {submission.socialLinks}
+            </span>
+          )}
+          {submission.previousTalkLink && (
+            <span className="text-black-02/45">
+              <span className="text-black-02/30">Previous talk: </span>
+              {submission.previousTalkLink}
+            </span>
+          )}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between gap-3 pt-4 border-t border-black-02/6">
+        <span className="text-xs text-black-02/30">{formatDate(submission.submittedAt)}</span>
 
         <div className="flex gap-2">
           {submission.status === 'pending' && (
@@ -255,9 +272,9 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               { label: 'Accepted', value: counts.accepted, color: 'text-google-green', dot: 'bg-google-green' },
               { label: 'Total', value: counts.all, color: 'text-black-02', dot: null },
             ] as const).map(({ label, value, color, dot }) => (
-              <div key={label} className="bg-white border border-black-02/8 rounded-xl px-4 py-3 text-center">
-                <p className={`text-2xl font-bold font-mono ${color}`}>{value}</p>
-                <p className="flex items-center justify-center gap-1.5 text-xs text-black-02/40 mt-0.5">
+              <div key={label} className="bg-white border border-black-02/8 rounded-2xl px-4 py-5 text-center shadow-[0_1px_3px_rgba(30,30,30,0.04)]">
+                <p className={`text-3xl font-bold ${color}`}>{value}</p>
+                <p className="flex items-center justify-center gap-1.5 text-xs text-black-02/40 mt-1">
                   {dot && <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />}
                   {label}
                 </p>
