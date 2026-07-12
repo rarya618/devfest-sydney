@@ -37,6 +37,11 @@ const TRACK_LABELS: Record<Track, string> = {
   builder: 'Builder Track',
 };
 
+const TRACK_DOT_COLOR: Record<Track, string> = {
+  developer: '#4285F4',
+  builder: '#34A853',
+};
+
 const LEVEL_LABELS: Record<ExperienceLevel, string> = {
   beginner: 'Beginner',
   intermediate: 'Intermediate',
@@ -72,77 +77,88 @@ function validatePayload(body: unknown): SubmissionPayload {
 }
 
 function buildConfirmationEmail(submission: SubmissionPayload): string {
+  const font = "font-family:'Google Sans',Roboto,sans-serif;letter-spacing:-0.01em;";
+  const dotColors = ['#4285F4', '#EA4335', '#f9ab00', '#34A853'];
+  const gdgDots = dotColors
+    .map(
+      (c, i) =>
+        `<td style="padding:0 ${i === dotColors.length - 1 ? 0 : 5}px 0 ${i === 0 ? 0 : 5}px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c};font-size:0;line-height:0;">&nbsp;</span></td>`
+    )
+    .join('');
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Proposal received — DevFest Sydney 2026</title>
+  <title>Proposal received: DevFest Sydney 2026</title>
 </head>
-<body style="margin:0;padding:0;background:#0f0f0f;font-family:'Google Sans',Arial,sans-serif;color:#e0e0e0;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0f0f0f;padding:40px 16px;">
+<body style="margin:0;padding:0;background:#f0f0f0;${font}color:#1e1e1e;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f0f0;padding:48px 16px;">
     <tr>
       <td align="center">
-        <table width="560" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);">
-
-          <!-- Header -->
+        <table width="520" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;border:1px solid rgba(30,30,30,0.08);">
           <tr>
-            <td style="padding:32px 36px 24px;border-bottom:1px solid rgba(255,255,255,0.06);">
-              <div style="display:flex;align-items:center;gap:8px;">
-                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#4285F4;"></span>
-                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#EA4335;"></span>
-                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f9ab00;"></span>
-                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#34A853;"></span>
-              </div>
-              <h1 style="margin:20px 0 4px;font-size:22px;font-weight:700;color:#ffffff;line-height:1.2;">
-                Thanks for your proposal, ${submission.name.split(' ')[0]}!
-              </h1>
-              <p style="margin:0;font-size:14px;color:rgba(255,255,255,0.45);">DevFest Sydney 2026 — Call for Speakers</p>
-            </td>
-          </tr>
+            <td style="padding:48px 40px 40px;text-align:center;">
 
-          <!-- Body -->
-          <tr>
-            <td style="padding:28px 36px;">
-              <p style="margin:0 0 20px;font-size:15px;color:rgba(255,255,255,0.7);line-height:1.6;">
-                We've received your proposal and our team will review it shortly. We'll be in touch via this email address once a decision has been made.
-              </p>
-
-              <!-- Submission summary -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;overflow:hidden;margin-bottom:24px;">
+              <!-- Wordmark -->
+              <table cellpadding="0" cellspacing="0" style="margin:0 auto 32px;">
                 <tr>
-                  <td style="padding:20px 24px;">
-                    <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.3);">Your submission</p>
-                    <h2 style="margin:8px 0 16px;font-size:18px;font-weight:700;color:#ffffff;line-height:1.3;">${submission.talkTitle}</h2>
-                    <table cellpadding="0" cellspacing="0" style="width:100%;">
-                      <tr>
-                        <td style="padding:4px 0;font-size:13px;color:rgba(255,255,255,0.4);width:44%;">Format</td>
-                        <td style="padding:4px 0;font-size:13px;color:rgba(255,255,255,0.75);">${FORMAT_LABELS[submission.format]}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding:4px 0;font-size:13px;color:rgba(255,255,255,0.4);">Track</td>
-                        <td style="padding:4px 0;font-size:13px;color:rgba(255,255,255,0.75);">${TRACK_LABELS[submission.track]}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding:4px 0;font-size:13px;color:rgba(255,255,255,0.4);">Experience level</td>
-                        <td style="padding:4px 0;font-size:13px;color:rgba(255,255,255,0.75);">${LEVEL_LABELS[submission.experienceLevel]}</td>
-                      </tr>
-                    </table>
+                  <td style="vertical-align:middle;padding-right:5px;">
+                    <img src="https://devfest.gdgsydney.com/logo.png" alt="" width="53" height="30" style="display:block;" />
+                  </td>
+                  <td style="vertical-align:middle;">
+                    <span style="${font}font-size:18px;font-weight:700;color:#1e1e1e;">DevFest Sydney</span>
                   </td>
                 </tr>
               </table>
 
-              <p style="margin:0;font-size:14px;color:rgba(255,255,255,0.35);line-height:1.6;">
-                If you have any questions in the meantime, reply to this email. We look forward to seeing you at DevFest Sydney 2026.
+              <!-- Success icon (matches the on-site confirmation state) -->
+              <table cellpadding="0" cellspacing="0" style="margin:0 auto 20px;">
+                <tr>
+                  <td style="width:56px;height:56px;border-radius:50%;background:#e3f5e6;border:1px solid rgba(52,168,83,0.25);text-align:center;vertical-align:middle;">
+                    <span style="${font}font-size:22px;line-height:56px;color:#34A853;">&#10003;</span>
+                  </td>
+                </tr>
+              </table>
+
+              <h1 style="margin:0 0 12px;${font}font-size:26px;font-weight:700;color:#1e1e1e;line-height:1.35;letter-spacing:-0.02em;">
+                Thanks for your proposal, <span style="color:#4285F4;">${submission.name.split(' ')[0]}</span>!
+              </h1>
+              <p style="margin:0 0 32px;${font}font-size:14px;color:rgba(30,30,30,0.55);line-height:1.8;">
+                We're so glad you want to speak at DevFest Sydney. Our team reads every proposal, and if yours is picked, we'll email you here with the next steps. No need to follow up, we'll be in touch.
               </p>
+
+              <!-- Divider -->
+              <table cellpadding="0" cellspacing="0" style="margin:0 auto 32px;">
+                <tr>${gdgDots}</tr>
+              </table>
+
+              <!-- Submission recap -->
+              <p style="margin:0 0 6px;${font}font-size:12px;font-weight:700;color:#4285F4;">Your submission</p>
+              <h2 style="margin:0 0 14px;${font}font-size:19px;font-weight:700;color:#1e1e1e;line-height:1.55;">${submission.talkTitle}</h2>
+
+              <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
+                <tr>
+                  <td style="padding:0 14px 0 0;white-space:nowrap;">
+                    <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${TRACK_DOT_COLOR[submission.track]};margin-right:7px;"></span><span style="${font}font-size:13px;font-weight:600;color:rgba(30,30,30,0.8);">${TRACK_LABELS[submission.track]}</span>
+                  </td>
+                  <td style="padding:0 14px 0 0;white-space:nowrap;">
+                    <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:rgba(30,30,30,0.3);margin-right:7px;"></span><span style="${font}font-size:13px;font-weight:600;color:rgba(30,30,30,0.8);">${FORMAT_LABELS[submission.format]}</span>
+                  </td>
+                  <td style="white-space:nowrap;">
+                    <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:rgba(30,30,30,0.3);margin-right:7px;"></span><span style="${font}font-size:13px;font-weight:600;color:rgba(30,30,30,0.8);">${LEVEL_LABELS[submission.experienceLevel]}</span>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td style="padding:20px 36px;border-top:1px solid rgba(255,255,255,0.06);">
-              <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.2);">
-                GDG Sydney &mdash; DevFest Sydney 2026 &mdash; Sydney CBD
+            <td style="padding:20px 40px 32px;border-top:1px solid rgba(30,30,30,0.08);text-align:center;">
+              <p style="margin:0;${font}font-size:12px;color:rgba(30,30,30,0.35);line-height:1.8;">
+                Got a question? Just reply to this email, we're happy to help.<br />Organised by <a href="https://gdgsydney.com" style="color:rgba(30,30,30,0.45);text-decoration:underline;">GDG Sydney</a>
               </p>
             </td>
           </tr>
@@ -187,7 +203,7 @@ export async function POST(request: NextRequest) {
     await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL!,
       to: submission.email,
-      subject: `Proposal received: "${submission.talkTitle}" — DevFest Sydney 2026`,
+      subject: `Proposal received: "${submission.talkTitle}", DevFest Sydney 2026`,
       html: buildConfirmationEmail(submission),
     });
   } catch {
