@@ -174,7 +174,8 @@ export async function POST(request: NextRequest) {
       submittedAt: FieldValue.serverTimestamp(),
       status: 'pending',
     });
-  } catch {
+  } catch (err) {
+    console.error('Firestore write failed for submission:', submission.email, err);
     return NextResponse.json(
       { message: 'We couldn\'t save your proposal. Please try again in a moment.' },
       { status: 500 }
