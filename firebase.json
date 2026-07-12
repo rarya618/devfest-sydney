@@ -7,7 +7,8 @@
       ".git",
       "firebase-debug.log",
       "firebase-debug.*.log"
-    ]
+    ],
+    "alwaysDeployFromSource": true
   },
   "firestore": {
     "database": "(default)",
@@ -20,7 +21,11 @@
       "googleSignIn": {
         "oAuthBrandDisplayName": "DevFest Sydney",
         "supportEmail": "russalarya@gmail.com",
-        "authorizedRedirectUris": ["http://localhost:3000"]
+        "authorizedRedirectUris": [
+          "http://localhost",
+          "https://devfest.gdgsydney.com",
+          "https://devfest-sydney--devfest-sydney-2026.asia-southeast1.hosted.app"
+        ]
       }
     }
   }
