@@ -7,11 +7,48 @@ import { FieldValue } from 'firebase-admin/firestore';
 
 const SESSION_COOKIE_NAME = '__session';
 
-async function verifyAdminSession(): Promise<void> {
+async function verifyAdminSession(): Promise<{ email: string }> {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value;
   if (!sessionCookie) throw new Error('No session.');
-  await adminAuth.verifySessionCookie(sessionCookie, true);
+  const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
+  if (!decoded.email) throw new Error('No email on session.');
+  return { email: decoded.email };
+}
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export async function addAdmin(email: string, name: string): Promise<{ error?: string }> {
+  let currentAdminEmail: string;
+  try {
+    ({ email: currentAdminEmail } = await verifyAdminSession());
+  } catch {
+    return { error: 'Your session has expired. Please sign in again.' };
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+  if (!EMAIL_PATTERN.test(normalizedEmail)) {
+    return { error: 'Please enter a valid email address.' };
+  }
+
+  try {
+    const adminRef = adminDb.collection('admins').doc(normalizedEmail);
+    const existing = await adminRef.get();
+    if (existing.exists) {
+      return { error: 'This person already has admin access.' };
+    }
+
+    await adminRef.set({
+      name: name.trim(),
+      addedAt: FieldValue.serverTimestamp(),
+      addedBy: currentAdminEmail,
+    });
+
+    revalidatePath('/admin');
+    return {};
+  } catch {
+    return { error: 'Could not add this admin. Please try again.' };
+  }
 }
 
 export async function promoteSubmission(submissionId: string): Promise<{ error?: string }> {

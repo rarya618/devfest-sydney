@@ -8,6 +8,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { promoteSubmission, rejectSubmission, restoreSubmission } from './actions';
 import Alert from '@/components/Alert';
+import InviteAdminForm from './InviteAdminForm';
 import type { Submission, SubmissionStatus, Track, TalkFormat } from '@/lib/types';
 
 const STATUS_STYLES: Record<SubmissionStatus, string> = {
@@ -175,6 +176,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
   const [filter, setFilter] = useState<FilterStatus>('all');
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState(false);
+  const [inviting, setInviting] = useState(false);
 
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
 
