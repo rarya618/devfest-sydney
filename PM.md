@@ -102,5 +102,6 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 
 ## Current Status
 
-**Active milestone:** 6 — Admin panel (in progress)
-**Next task:** `/admin/login` Google sign-in page, then `/admin` submissions dashboard
+**Active milestone:** 6 — Admin panel (complete)
+**Verified:** Google sign-in (`/admin/login`), session cookie only issued to emails in the `admins` Firestore collection (`/api/admin/session`), `/admin` and all server actions re-verify the session cookie, and `promoteSubmission` correctly copies submission data into `speakers` and marks the submission `accepted`.
+**Next task:** Milestone 7 — Speaker & schedule pages, fetched from Firestore once CfS closes and speakers are accepted.
