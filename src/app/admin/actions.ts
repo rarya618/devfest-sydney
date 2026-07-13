@@ -13,6 +13,10 @@ async function verifyAdminSession(): Promise<{ email: string }> {
   if (!sessionCookie) throw new Error('No session.');
   const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
   if (!decoded.email) throw new Error('No email on session.');
+
+  const adminDoc = await adminDb.collection('admins').doc(decoded.email).get();
+  if (!adminDoc.exists) throw new Error('Not an admin.');
+
   return { email: decoded.email };
 }
 
@@ -85,6 +89,31 @@ export async function promoteSubmission(submissionId: string): Promise<{ error?:
     return {};
   } catch {
     return { error: 'Could not promote this submission. Please try again.' };
+  }
+}
+
+export async function undoPromotion(submissionId: string): Promise<{ error?: string }> {
+  try {
+    await verifyAdminSession();
+  } catch {
+    return { error: 'Your session has expired. Please sign in again.' };
+  }
+
+  try {
+    const speakersSnap = await adminDb
+      .collection('speakers')
+      .where('submissionId', '==', submissionId)
+      .get();
+
+    const batch = adminDb.batch();
+    speakersSnap.docs.forEach((doc) => batch.delete(doc.ref));
+    batch.update(adminDb.collection('submissions').doc(submissionId), { status: 'pending' });
+    await batch.commit();
+
+    revalidatePath('/admin');
+    return {};
+  } catch {
+    return { error: 'Could not undo this acceptance. Please try again.' };
   }
 }
 
