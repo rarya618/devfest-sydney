@@ -7,15 +7,31 @@ import type { Timestamp } from 'firebase-admin/firestore';
 
 export const metadata = { title: 'Admin — DevFest Sydney 2026' };
 
-async function getVerifiedSession(): Promise<void> {
+interface AdminSession {
+  email: string;
+  name: string;
+}
+
+async function getVerifiedSession(): Promise<AdminSession> {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get('__session')?.value;
   if (!sessionCookie) redirect('/admin/login');
+
+  let email: string | undefined;
   try {
-    await adminAuth.verifySessionCookie(sessionCookie, true);
+    const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
+    email = decoded.email;
   } catch {
     redirect('/admin/login');
   }
+  if (!email) redirect('/admin/login');
+
+  const adminDoc = await adminDb.collection('admins').doc(email).get();
+  if (!adminDoc.exists) redirect('/admin/login');
+
+  const name = (adminDoc.data()?.name as string | undefined) || email;
+
+  return { email, name };
 }
 
 async function fetchSubmissions(): Promise<Submission[]> {
@@ -47,8 +63,8 @@ async function fetchSubmissions(): Promise<Submission[]> {
 }
 
 export default async function AdminPage() {
-  await getVerifiedSession();
+  const admin = await getVerifiedSession();
   const submissions = await fetchSubmissions();
 
-  return <SubmissionsDashboard submissions={submissions} />;
+  return <SubmissionsDashboard submissions={submissions} adminEmail={admin.email} adminName={admin.name} />;
 }
