@@ -72,7 +72,7 @@ export default function CallForSpeakers() {
       </section>
 
       {/* Topics */}
-      <section className="py-20 px-6">
+      <section className="py-20 px-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="mb-12 text-center animate-slide-up">
             <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3">Topic Ideas</p>
@@ -83,16 +83,31 @@ export default function CallForSpeakers() {
           </div>
 
           <div className="flex flex-wrap gap-3 justify-center animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            {topics.map((topic) => (
+            {topics.map(({ label, track }) => (
               <span
-                key={topic}
-                className="px-4 py-2 bg-white border border-black-02/8 rounded-full text-sm text-black-02/70 hover:text-black-02/90 hover:border-black-02/15 transition-colors"
+                key={label}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-off-white border border-black-02/8 rounded-full text-sm text-black-02/70 hover:text-black-02/90 hover:border-black-02/15 transition-colors"
               >
-                {topic}
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${track === 'developer' ? 'bg-google-blue' : 'bg-google-green'}`}
+                  aria-hidden="true"
+                />
+                {label}
               </span>
             ))}
-            <span className="px-4 py-2 bg-white border border-black-02/8 rounded-full text-sm text-black-02/40">
+            <span className="px-4 py-2 bg-off-white border border-black-02/8 rounded-full text-sm text-black-02/40">
               and more...
+            </span>
+          </div>
+
+          <div className="flex items-center justify-center gap-6 mt-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <span className="inline-flex items-center gap-2 text-xs text-black-02/45">
+              <span className="w-1.5 h-1.5 rounded-full bg-google-blue" aria-hidden="true" />
+              Developer Track
+            </span>
+            <span className="inline-flex items-center gap-2 text-xs text-black-02/45">
+              <span className="w-1.5 h-1.5 rounded-full bg-google-green" aria-hidden="true" />
+              Builder Track
             </span>
           </div>
         </div>
