@@ -12,17 +12,19 @@ export const metadata: Metadata = {
 
 const isCfsOpen = process.env.CFS_OPEN === 'true';
 
-const topics = [
-  'Agentic app development',
-  'Gemini API & AI Studio',
-  'Flutter & Dart',
-  'Firebase',
-  'Android development',
-  'Google Cloud',
-  'AI prototyping',
-  'Automation & no-code',
-  'Product design with AI',
-  'Developer productivity',
+const topics: { label: string; track: 'developer' | 'builder' }[] = [
+  { label: 'Agentic app development', track: 'developer' },
+  { label: 'AI prototyping', track: 'builder' },
+  { label: 'Gemini API & AI Studio', track: 'developer' },
+  { label: 'No-code & low-code tooling', track: 'builder' },
+  { label: 'Flutter & Dart', track: 'developer' },
+  { label: 'Product design with AI', track: 'builder' },
+  { label: 'Firebase', track: 'developer' },
+  { label: 'Automation for builders', track: 'builder' },
+  { label: 'Android development', track: 'developer' },
+  { label: 'Founder & PM playbooks', track: 'builder' },
+  { label: 'Google Cloud', track: 'developer' },
+  { label: 'Developer productivity', track: 'developer' },
 ];
 
 export default function CallForSpeakers() {
