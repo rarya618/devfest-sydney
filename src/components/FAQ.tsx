@@ -18,7 +18,7 @@ const faqs = [
   },
   {
     q: 'What tracks are at DevFest Sydney?',
-    a: 'We have two main tracks: the Developer Track for engineers, and the Builder Track for product managers, designers, and founders. There\'s also a Builder Showcase (5-min demos with audience voting).',
+    a: 'We have two main tracks: the Developer Track for engineers, and the Builder Track for product managers, designers, and founders.',
   },
   {
     q: 'What is Builder\'s Space?',
