@@ -3,12 +3,26 @@ import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import FAQ from '@/components/FAQ';
-import GdgDivider from '@/components/GdgDivider';
 import { adminDb } from '@/lib/firebase-admin';
 import type { Sponsor, SponsorTier, TeamMember } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
 
 const tracks = ['Developer Track', 'Builder Track'];
+
+const TRACK_DETAILS: { name: string; color: string; audience: string; topics: string[] }[] = [
+  {
+    name: 'Developer Track',
+    color: 'google-blue',
+    audience: 'A deep-tech dive into Gemini API, Flutter, Firebase, Android, and Cloud. Perfect for engineers looking to master Google’s latest ecosystem tools.',
+    topics: ['Agentic app development', 'Gemini API', 'Flutter', 'Firebase', 'Android', 'Google Cloud'],
+  },
+  {
+    name: 'Builder Track',
+    color: 'google-green',
+    audience: 'Designed for founders, PMs, and designers using AI and low-code tools to ship products faster. No formal engineering background required.',
+    topics: ['Prototyping with AI', 'Automation', 'No-code tooling', 'Low-code tooling'],
+  },
+];
 
 const TIER_ORDER: SponsorTier[] = ['platinum', 'gold', 'silver', 'community'];
 const TIER_LABELS: Record<SponsorTier, string> = {
@@ -139,14 +153,57 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ─── everything below About is hidden until content is finalised ─── */}
+      {/* ─── TRACKS ─── */}
+      <section id="tracks" className="pt-4 pb-24 px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-14 text-center animate-fade-in">
+            <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3">Tracks</p>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight">However you build, there&apos;s a track for you</h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {TRACK_DETAILS.map((track) => (
+              <div key={track.name} className="bg-white border border-black-02/8 rounded-2xl p-8">
+                <span className="inline-flex items-center gap-2 text-lg font-bold text-black-02 mb-3">
+                  <span
+                    className={`w-2 h-2 rounded-full ${track.color === 'google-blue' ? 'bg-google-blue' : 'bg-google-green'}`}
+                    aria-hidden="true"
+                  />
+                  {track.name}
+                </span>
+                <p className="text-black-02/55 leading-relaxed mb-6">{track.audience}</p>
+                <div className="flex flex-wrap gap-2">
+                  {track.topics.map((topic) => (
+                    <span
+                      key={topic}
+                      className="px-3 py-1 bg-off-white border border-black-02/8 rounded-full text-xs text-black-02/60"
+                    >
+                      {topic}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── FAQ ─── */}
+      <section id="faq" className="py-24 px-6">
+        <div className="max-w-3xl mx-auto">
+          <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3 text-center">FAQ</p>
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-14 text-center">Common questions</h2>
+          <FAQ />
+        </div>
+      </section>
+
+      {/* ─── everything below FAQ is hidden until content is finalised ─── */}
       {showLandingContent && (
         <>
 
       {/* ─── VENUE ─── (hidden until the venue is finalised) */}
       {showVenue && (
         <>
-          <div className="flex justify-center py-6" aria-hidden="true"><GdgDivider /></div>
           <section id="venue" className="py-24 px-6">
             <div className="max-w-7xl mx-auto">
               <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3">Venue</p>
@@ -194,7 +251,6 @@ export default async function Home() {
       {/* ─── SPONSORS ─── (hidden until there are sponsors to show) */}
       {showSponsors && (
         <>
-          <div className="flex justify-center py-6" aria-hidden="true"><GdgDivider /></div>
           <section id="sponsors" className="py-24 px-6 bg-white border-y border-black-02/8">
             <div className="max-w-7xl mx-auto">
               <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3 text-center">Partners</p>
@@ -249,7 +305,6 @@ export default async function Home() {
       {/* ─── TEAM ─── (only rendered when team members exist) */}
       {team.length > 0 && (
         <>
-          <div className="flex justify-center py-6" aria-hidden="true"><GdgDivider /></div>
           <section id="team" className="py-24 px-6">
             <div className="max-w-7xl mx-auto">
               <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3 text-center">Team</p>
@@ -294,19 +349,6 @@ export default async function Home() {
           </section>
         </>
       )}
-
-      <div className="flex justify-center py-6" aria-hidden="true"><GdgDivider /></div>
-
-      {/* ─── FAQ ─── */}
-      <section id="faq" className="py-24 px-6">
-        <div className="max-w-3xl mx-auto">
-          <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3 text-center">FAQ</p>
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-14 text-center">Common questions</h2>
-          <FAQ />
-        </div>
-      </section>
-
-      <div className="flex justify-center py-6" aria-hidden="true"><GdgDivider /></div>
 
       {/* ─── FINAL CTA ─── */}
       <section className="py-24 px-6 bg-white border-t border-black-02/8">
