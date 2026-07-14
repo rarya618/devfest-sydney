@@ -27,7 +27,7 @@ export default function Navbar({ light = false }: { light?: boolean }) {
           : 'bg-transparent'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-12 h-[68px] flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 h-[68px] flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="inline-flex items-center gap-0.5 group" aria-label="DevFest Sydney home">
           <Image
