@@ -130,7 +130,7 @@ export default async function Home() {
               <span key={track} className="inline-flex items-center gap-2">
                 <span
                   className="w-1.5 h-1.5 rounded-full"
-                  style={{ backgroundColor: [ 'var(--google-blue)', 'var(--google-green)', 'var(--google-yellow)' ][i] }}
+                  style={{ backgroundColor: [ 'var(--google-blue)', 'var(--google-green)' ][i] }}
                 />
                 {track}
               </span>
