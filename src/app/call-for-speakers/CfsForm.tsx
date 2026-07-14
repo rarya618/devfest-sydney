@@ -342,7 +342,11 @@ export default function CfsForm() {
                       : colorMap[t.color]
                     }`}
                 >
-                  <span className={`w-full text-sm font-semibold mb-1.5 ${selected ? 'text-black-02' : 'text-black-02/70'}`}>
+                  <span className={`w-full flex items-center gap-2 text-sm font-semibold mb-1.5 ${selected ? 'text-black-02' : 'text-black-02/70'}`}>
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${t.color === 'google-blue' ? 'bg-google-blue' : 'bg-google-green'}`}
+                      aria-hidden="true"
+                    />
                     {t.label}
                   </span>
                   <p className={`w-full text-xs leading-relaxed ${selected ? 'text-black-02/60' : 'text-black-02/40'}`}>
