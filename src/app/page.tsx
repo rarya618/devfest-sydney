@@ -8,7 +8,7 @@ import { adminDb } from '@/lib/firebase-admin';
 import type { Sponsor, SponsorTier, TeamMember } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
 
-const tracks = ['Developer Track', 'Builder Track', 'Builder Showcase'];
+const tracks = ['Developer Track', 'Builder Track'];
 
 const TIER_ORDER: SponsorTier[] = ['platinum', 'gold', 'silver', 'community'];
 const TIER_LABELS: Record<SponsorTier, string> = {
