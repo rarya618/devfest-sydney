@@ -21,10 +21,6 @@ const faqs = [
     a: 'We have two main tracks: the Developer Track for engineers, and the Builder Track for product managers, designers, and founders.',
   },
   {
-    q: 'What is Builder\'s Space?',
-    a: 'Builder\'s Space is a dedicated room available throughout the day with Google Developer Experts (GDEs) and mentors providing hands-on support for whatever you\'re building.',
-  },
-  {
     q: 'Is there a Code of Conduct?',
     a: 'Yes. DevFest Sydney is committed to providing a harassment-free experience for everyone, regardless of background or experience level.',
   },
