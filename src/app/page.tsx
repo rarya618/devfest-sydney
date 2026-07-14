@@ -73,13 +73,13 @@ export default async function Home() {
           )}
 
           <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            <h1 className="text-[clamp(2.8rem,8vw,7rem)] font-bold leading-[0.95] tracking-tight text-black-02">
+            <h1 className="text-[clamp(3.25rem,13vw,7rem)] font-bold leading-[0.95] tracking-tight text-black-02">
               Build, Secure,
             </h1>
-            <h1 className="text-[clamp(2.8rem,8vw,7rem)] font-bold leading-[0.95] tracking-tight text-google-blue">
+            <h1 className="text-[clamp(3.25rem,13vw,7rem)] font-bold leading-[0.95] tracking-tight text-google-blue">
               Scale.
             </h1>
-            <h2 className="mt-6 text-[clamp(1rem,2.2vw,1.5rem)] text-black-02/50 max-w-xl mx-auto leading-snug">
+            <h2 className="mt-6 text-[clamp(1.125rem,4vw,1.5rem)] text-black-02/50 max-w-xl mx-auto leading-snug">
               Developers and Builders in the Agentic Era
             </h2>
           </div>
