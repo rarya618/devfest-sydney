@@ -9,6 +9,10 @@ const faqs = [
     a: 'DevFest Sydney 2026 will take place in Sydney CBD. The exact date and venue will be announced shortly.',
   },
   {
+    q: 'Who can attend?',
+    a: 'Everyone. DevFest Sydney welcomes engineers, designers, product managers, and founders of all experience levels, from students to senior leaders.',
+  },
+  {
     q: 'How do I register to attend?',
     a: 'Registration details will be announced closer to the event.',
   },
@@ -19,6 +23,14 @@ const faqs = [
   {
     q: 'What tracks are at DevFest Sydney?',
     a: 'We have two main tracks: the Developer Track for engineers, and the Builder Track for product managers, designers, and founders.',
+  },
+  {
+    q: 'How can my company sponsor DevFest Sydney?',
+    a: 'We\'d love to hear from you. Reach out to hello@gdgsydney.com and we\'ll share our sponsorship options.',
+  },
+  {
+    q: 'Can I volunteer at DevFest Sydney?',
+    a: 'Yes, we\'re always looking for volunteers to help run the day. Email hello@gdgsydney.com to get involved.',
   },
   {
     q: 'Is there a Code of Conduct?',
