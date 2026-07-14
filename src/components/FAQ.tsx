@@ -10,7 +10,7 @@ const faqs = [
   },
   {
     q: 'How do I register to attend?',
-    a: 'Tickets will be available via Humanitix closer to the event. We expect 150–300+ attendees.',
+    a: 'Registration details will be announced closer to the event.',
   },
   {
     q: 'How do I submit a talk or workshop?',
