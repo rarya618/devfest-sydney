@@ -14,7 +14,7 @@ const faqs = [
   },
   {
     q: 'How do I submit a talk or workshop?',
-    a: 'Our Call for Speakers is open! Head to the Call for Speakers page to submit your proposal. We welcome talks, workshops, and lightning talks across both the Developer and Builder tracks.',
+    a: 'Our Call for Speakers is open! We welcome talks, workshops, and lightning talks across both the Developer and Builder tracks.',
   },
   {
     q: 'What tracks are at DevFest Sydney?',
@@ -58,6 +58,14 @@ export default function FAQ() {
                   {' '}
                   <Link href="/code-of-conduct" className="text-google-blue hover:underline">
                     Read the full Code of Conduct.
+                  </Link>
+                </>
+              )}
+              {faq.q.includes('submit a talk') && (
+                <>
+                  {' '}
+                  <Link href="/call-for-speakers" className="text-google-blue hover:underline">
+                    Visit the Call for Speakers page.
                   </Link>
                 </>
               )}
