@@ -25,6 +25,10 @@ const faqs = [
     a: 'We have two main tracks: the Developer Track for engineers, and the Builder Track for product managers, designers, and founders.',
   },
   {
+    q: 'What is GDG Sydney?',
+    a: 'Google Developer Group Sydney is a community of over 2,000 developers and builders. DevFest Sydney is our flagship annual event, organised by volunteers and presented by Google.',
+  },
+  {
     q: 'How can my company sponsor DevFest Sydney?',
     a: 'We\'d love to hear from you. Reach out to hello@gdgsydney.com and we\'ll share our sponsorship options.',
   },
@@ -75,10 +79,25 @@ export default function FAQ() {
               )}
               {faq.q.includes('submit a talk') && (
                 <>
-                  {' '}
+                  {' Visit the '}
                   <Link href="/call-for-speakers" className="text-google-blue hover:underline">
-                    Visit the Call for Speakers page.
+                    Call for Speakers page
                   </Link>
+                  {'.'}
+                </>
+              )}
+              {faq.q.includes('What is GDG Sydney') && (
+                <>
+                  {' Visit '}
+                  <a
+                    href="https://gdgsydney.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-google-blue hover:underline"
+                  >
+                    gdgsydney.com
+                  </a>
+                  {'.'}
                 </>
               )}
             </p>
