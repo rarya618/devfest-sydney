@@ -20,7 +20,7 @@ export default function Navbar({ light = false }: { light?: boolean }) {
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isLight
           ? scrolled
-            ? 'bg-white/90 backdrop-blur-lg'
+            ? 'bg-off-white shadow-sm'
             : 'bg-transparent'
           : scrolled
           ? 'bg-[#070B14]/90 backdrop-blur-lg shadow-lg shadow-black/40'
