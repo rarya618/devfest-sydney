@@ -1,6 +1,8 @@
 # GDG Brand Guide — DevFest Sydney
 
-Source: [External] Google Developer Groups - Brand Guide for Organizers
+Sources:
+- [External] Google Developer Groups - Brand Guide for Organizers
+- [External] DevFest 2026 Brand Assets (Google Slides) — asset library of official DevFest logos, key art, digital/social/print templates. Reference this deck when a design task needs an official DevFest asset (logo files, signage, social templates) rather than a hand-built equivalent. Confirms the same core/halftone/pastel/greyscale palette as below. Brand questions: contact your regional lead or gdg-support@google.com.
 
 ## Brand Messaging
 
@@ -67,6 +69,8 @@ Used for short lines, speaker names, data labels, and anywhere a "code-style" fe
 - The **stacked logo** is an alternative when space is limited.
 - Both formats must maintain a strong visual affiliation with Google.
 - Do not alter, recolour, or distort the logo.
+- Include ample clear space all the way around the logo artwork (per the DevFest brand assets deck).
+- DevFest-specific lockups (in addition to the general GDG logo above): primary DevFest wordmark, wordmark with year, and an editable-location lockup (e.g. "DevFest New York") for city-specific branding. Use these when an asset specifically needs to read as a DevFest lockup rather than the plain GDG logo.
 
 ## Implementation Notes
 
