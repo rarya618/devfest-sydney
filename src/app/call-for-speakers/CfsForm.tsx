@@ -17,9 +17,20 @@ interface FormFields {
   track: Track | '';
   experienceLevel: ExperienceLevel | '';
   socialLinks: string;
+  speakerTagline: string;
+  speakerBio: string;
   previousTalkLink: string;
+  howDidYouHear: string;
+  coSpeakerEmails: string;
+  accessibilityNeeds: string;
   requiresTravelSupport: boolean;
+  travelSupportLocation: string;
   isGoogleDeveloperExpert: boolean;
+  isFirstTimeSpeaker: boolean;
+  wantsMentoring: boolean;
+  hasSpokenAtGdgSydneyBefore: boolean;
+  isOpenToAudienceQuestions: boolean;
+  optOutOfRecording: boolean;
 }
 
 interface FormErrors {
@@ -30,6 +41,7 @@ interface FormErrors {
   format?: string;
   track?: string;
   experienceLevel?: string;
+  travelSupportLocation?: string;
 }
 
 const FORMATS: { value: TalkFormat; label: string; duration: string; desc: string }[] = [
@@ -61,9 +73,20 @@ export default function CfsForm() {
     track: '',
     experienceLevel: '',
     socialLinks: '',
+    speakerTagline: '',
+    speakerBio: '',
     previousTalkLink: '',
+    howDidYouHear: '',
+    coSpeakerEmails: '',
+    accessibilityNeeds: '',
     requiresTravelSupport: false,
+    travelSupportLocation: '',
     isGoogleDeveloperExpert: false,
+    isFirstTimeSpeaker: false,
+    wantsMentoring: false,
+    hasSpokenAtGdgSydneyBefore: false,
+    isOpenToAudienceQuestions: false,
+    optOutOfRecording: false,
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitState, setSubmitState] = useState<SubmitState>('idle');
@@ -86,6 +109,9 @@ export default function CfsForm() {
     if (!fields.format) errs.format = 'Please select a talk format.';
     if (!fields.track) errs.track = 'Please select a track.';
     if (!fields.experienceLevel) errs.experienceLevel = 'Please select your experience level.';
+    if (fields.requiresTravelSupport && !fields.travelSupportLocation.trim()) {
+      errs.travelSupportLocation = 'Please let us know which city you\'d be travelling from.';
+    }
     return errs;
   }
 
@@ -122,6 +148,7 @@ export default function CfsForm() {
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
 
   type StringField = { [K in keyof FormFields]: FormFields[K] extends string ? K : never }[keyof FormFields];
+  type BooleanField = { [K in keyof FormFields]: FormFields[K] extends boolean ? K : never }[keyof FormFields];
 
   function field(name: StringField) {
     return {
@@ -133,6 +160,42 @@ export default function CfsForm() {
         }
       },
     };
+  }
+
+  function renderCheckbox({ id, field: name, label }: { id: string; field: BooleanField; label: string }) {
+    return (
+      <label key={id} htmlFor={id} className="flex items-start gap-3 cursor-pointer group">
+        <div className="relative shrink-0">
+          <input
+            id={id}
+            type="checkbox"
+            checked={fields[name]}
+            onChange={(e) => {
+              const checked = e.target.checked;
+              setFields((prev) => ({
+                ...prev,
+                [name]: checked,
+                ...(name === 'requiresTravelSupport' && !checked ? { travelSupportLocation: '' } : {}),
+              }));
+              if (name === 'requiresTravelSupport' && !checked) {
+                setErrors((prev) => ({ ...prev, travelSupportLocation: undefined }));
+              }
+            }}
+            className="sr-only peer"
+          />
+          <div className="w-5 h-5 rounded-md border border-black-02/20 bg-white peer-checked:bg-google-red peer-checked:border-google-red transition-all group-hover:border-black-02/35 flex items-center justify-center">
+            {fields[name] && (
+              <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
+              </svg>
+            )}
+          </div>
+        </div>
+        <span className="text-sm text-black-02/70 group-hover:text-black-02/90 transition-colors select-none">
+          {label}
+        </span>
+      </label>
+    );
   }
 
   if (submitState === 'success') {
@@ -158,10 +221,16 @@ export default function CfsForm() {
 
   return (
     <>
-      <form onSubmit={handleSubmit} noValidate className="space-y-7">
+      <form onSubmit={handleSubmit} noValidate className="space-y-10">
 
-        {/* Name + Email */}
-        <div className="grid sm:grid-cols-2 gap-5">
+        {/* Section: Your details */}
+        <div>
+          <div className="flex items-center gap-3 mb-5">
+            <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase whitespace-nowrap">Your details</p>
+            <div className="h-px flex-1 bg-black-02/8" aria-hidden="true" />
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-5">
           <div>
             <label htmlFor="cfs-name" className="block text-sm font-bold text-black-02/70 mb-2">
               Full name <span className="text-google-red" aria-hidden="true">*</span>
@@ -201,8 +270,17 @@ export default function CfsForm() {
               <p id="cfs-email-error" role="alert" className="mt-1.5 text-xs text-google-red/80">{errors.email}</p>
             )}
           </div>
+          </div>
         </div>
 
+        {/* Section: Your talk */}
+        <div>
+          <div className="flex items-center gap-3 mb-5">
+            <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase whitespace-nowrap">Your talk</p>
+            <div className="h-px flex-1 bg-black-02/8" aria-hidden="true" />
+          </div>
+
+          <div className="space-y-7">
         {/* Talk title */}
         <div>
           <label htmlFor="cfs-title" className="block text-sm font-bold text-black-02/70 mb-2">
@@ -407,10 +485,15 @@ export default function CfsForm() {
             <p id="cfs-level-error" role="alert" className="mt-2 text-xs text-google-red/80">{errors.experienceLevel}</p>
           )}
         </div>
+          </div>
+        </div>
 
-        {/* Optional fields */}
-        <div className="pt-1">
-          <p className="text-xs font-bold text-black-02/35 tracking-[0.15em] uppercase mb-5">Optional</p>
+        {/* Section: About you */}
+        <div>
+          <div className="flex items-center gap-3 mb-5">
+            <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase whitespace-nowrap">About you <span className="text-black-02/25 normal-case font-medium tracking-normal">(optional)</span></p>
+            <div className="h-px flex-1 bg-black-02/8" aria-hidden="true" />
+          </div>
           <div className="space-y-5">
             <div>
               <label htmlFor="cfs-social" className="block text-sm font-bold text-black-02/70 mb-2">
@@ -430,6 +513,40 @@ export default function CfsForm() {
             </div>
 
             <div>
+              <label htmlFor="cfs-tagline" className="block text-sm font-bold text-black-02/70 mb-2">
+                Tagline
+              </label>
+              <input
+                id="cfs-tagline"
+                type="text"
+                placeholder="Your role, company, or a one-line intro"
+                aria-describedby="cfs-tagline-hint"
+                className={inputNormal}
+                {...field('speakerTagline')}
+              />
+              <p id="cfs-tagline-hint" className="mt-1.5 text-xs text-black-02/35">
+                Shown on your speaker profile if you&apos;re accepted.
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="cfs-bio" className="block text-sm font-bold text-black-02/70 mb-2">
+                Speaker bio
+              </label>
+              <textarea
+                id="cfs-bio"
+                rows={4}
+                placeholder="Tell us a bit about yourself..."
+                aria-describedby="cfs-bio-hint"
+                className={`${inputNormal} resize-none leading-relaxed`}
+                {...field('speakerBio')}
+              />
+              <p id="cfs-bio-hint" className="mt-1.5 text-xs text-black-02/35">
+                We&apos;ll use this for your speaker profile if you&apos;re accepted.
+              </p>
+            </div>
+
+            <div>
               <label htmlFor="cfs-prev-talk" className="block text-sm font-bold text-black-02/70 mb-2">
                 Previous talk recording
               </label>
@@ -445,52 +562,137 @@ export default function CfsForm() {
                 A recording of a previous talk, if you have one.
               </p>
             </div>
+
+            <div>
+              <label htmlFor="cfs-how-heard" className="block text-sm font-bold text-black-02/70 mb-2">
+                How did you hear about DevFest Sydney?
+              </label>
+              <input
+                id="cfs-how-heard"
+                type="text"
+                placeholder="e.g. Twitter, a friend, a GDG Sydney meetup..."
+                className={inputNormal}
+                {...field('howDidYouHear')}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-3 pt-5">
+            {[
+              {
+                id: 'cfs-first-time',
+                field: 'isFirstTimeSpeaker' as const,
+                label: 'This would be my first time speaking at a conference',
+              },
+              {
+                id: 'cfs-mentoring',
+                field: 'wantsMentoring' as const,
+                label: 'I would like some speaker mentoring to help me prepare',
+              },
+              {
+                id: 'cfs-spoken-before',
+                field: 'hasSpokenAtGdgSydneyBefore' as const,
+                label: 'I have spoken at a GDG Sydney event before',
+              },
+              {
+                id: 'cfs-gde',
+                field: 'isGoogleDeveloperExpert' as const,
+                label: 'I am a Google Developer Expert (GDE)',
+              },
+            ].map(renderCheckbox)}
           </div>
         </div>
 
-        {/* Checkboxes */}
-        <div className="space-y-3 pt-1">
+        {/* Section: Logistics */}
+        <div>
+          <div className="flex items-center gap-3 mb-5">
+            <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase whitespace-nowrap">Logistics <span className="text-black-02/25 normal-case font-medium tracking-normal">(optional)</span></p>
+            <div className="h-px flex-1 bg-black-02/8" aria-hidden="true" />
+          </div>
+
+          <div className="space-y-5">
+            <div>
+              <label htmlFor="cfs-co-speakers" className="block text-sm font-bold text-black-02/70 mb-2">
+                Co-speaker email(s)
+              </label>
+              <input
+                id="cfs-co-speakers"
+                type="text"
+                placeholder="jane@example.com, alex@example.com"
+                aria-describedby="cfs-co-speakers-hint"
+                className={inputNormal}
+                {...field('coSpeakerEmails')}
+              />
+              <p id="cfs-co-speakers-hint" className="mt-1.5 text-xs text-black-02/35">
+                If you&apos;re presenting with someone else, list their email(s).
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="cfs-accessibility" className="block text-sm font-bold text-black-02/70 mb-2">
+                Accessibility support
+              </label>
+              <textarea
+                id="cfs-accessibility"
+                rows={3}
+                placeholder="Let us know if you need anything to present comfortably, e.g. a sign language interpreter, step-free stage access, seating on stage..."
+                aria-describedby="cfs-accessibility-hint"
+                className={`${inputNormal} resize-none leading-relaxed`}
+                {...field('accessibilityNeeds')}
+              />
+              <p id="cfs-accessibility-hint" className="mt-1.5 text-xs text-black-02/35">
+                Anything we should arrange so you can present comfortably.
+              </p>
+            </div>
+          </div>
+
+          {/* Checkboxes */}
+          <div className="space-y-3 pt-5">
           {[
             {
-              id: 'cfs-gde',
-              field: 'isGoogleDeveloperExpert' as const,
-              label: 'I am a Google Developer Expert (GDE)',
+              id: 'cfs-questions',
+              field: 'isOpenToAudienceQuestions' as const,
+              label: 'I am happy to take audience questions after my session',
+            },
+            {
+              id: 'cfs-recording-opt-out',
+              field: 'optOutOfRecording' as const,
+              label: 'I would prefer my session not be recorded',
             },
             {
               id: 'cfs-travel',
               field: 'requiresTravelSupport' as const,
               label: 'I would require travel support to attend',
             },
-          ].map(({ id, field, label }) => (
-            <label
-              key={id}
-              htmlFor={id}
-              className="flex items-start gap-3 cursor-pointer group"
-            >
-              <div className="relative shrink-0">
-                <input
-                  id={id}
-                  type="checkbox"
-                  checked={fields[field]}
-                  onChange={(e) => setFields((prev) => ({ ...prev, [field]: e.target.checked }))}
-                  className="sr-only peer"
-                />
-                <div className="w-5 h-5 rounded-md border border-black-02/20 bg-white peer-checked:bg-google-red peer-checked:border-google-red transition-all group-hover:border-black-02/35 flex items-center justify-center">
-                  {fields[field] && (
-                    <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
-                    </svg>
-                  )}
-                </div>
-              </div>
-              <span className="text-sm text-black-02/70 group-hover:text-black-02/90 transition-colors select-none">
-                {label}
-              </span>
-            </label>
-          ))}
+          ].map(renderCheckbox)}
+
           <p className="text-xs text-black-02/35 leading-relaxed pt-1">
             Travel support is limited. We may not be able to cover costs for non-GDE speakers.
           </p>
+
+          {fields.requiresTravelSupport && (
+            <div className="pt-2">
+              <label htmlFor="cfs-travel-location" className="block text-sm font-bold text-black-02/70 mb-2">
+                Which city would you be travelling from? <span className="text-google-red" aria-hidden="true">*</span>
+              </label>
+              <input
+                id="cfs-travel-location"
+                type="text"
+                placeholder="e.g. Melbourne, Australia"
+                aria-required="true"
+                aria-describedby={errors.travelSupportLocation ? 'cfs-travel-location-error' : undefined}
+                aria-invalid={!!errors.travelSupportLocation}
+                className={errors.travelSupportLocation ? inputError : inputNormal}
+                {...field('travelSupportLocation')}
+              />
+              {errors.travelSupportLocation && (
+                <p id="cfs-travel-location-error" role="alert" className="mt-1.5 text-xs text-google-red/80">
+                  {errors.travelSupportLocation}
+                </p>
+              )}
+            </div>
+          )}
+          </div>
         </div>
 
         {/* Submit */}

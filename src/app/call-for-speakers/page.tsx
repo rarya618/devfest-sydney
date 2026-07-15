@@ -113,6 +113,44 @@ export default function CallForSpeakers() {
         </div>
       </section>
 
+      {/* Speaker perks */}
+      <section className="py-20 px-6">
+        <div className="max-w-3xl mx-auto">
+          <div className="mb-12 text-center animate-slide-up">
+            <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3">Speaking at DevFest</p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">What to expect as a speaker</h2>
+            <p className="text-black-02/45 mt-3 text-sm max-w-lg mx-auto">
+              You don&apos;t need to be a seasoned speaker to submit. First-time speakers are welcome, and we&apos;ll help you prepare.
+            </p>
+          </div>
+
+          <ul className="grid sm:grid-cols-2 gap-4 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            {[
+              'Free attendance for accepted speakers.',
+              'Sessions may be recorded and shared after the event. Let us know if you\'d prefer not to be recorded.',
+              'A green room to store your things and prepare before your session.',
+              'Support connecting with other speakers and mentors ahead of the day.',
+            ].map((perk) => (
+              <li
+                key={perk}
+                className="flex items-start gap-3 bg-white border border-black-02/8 rounded-xl px-5 py-4 text-sm text-black-02/70 leading-relaxed"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-google-red mt-1.5 shrink-0" aria-hidden="true" />
+                {perk}
+              </li>
+            ))}
+          </ul>
+
+          <p className="text-center text-black-02/45 text-sm mt-8">
+            Need something to present comfortably, an interpreter, step-free access, or anything else? Tell us in the form below, or email{' '}
+            <a href="mailto:hello@gdgsydney.com" className="text-black-02/60 hover:text-black-02/80 underline underline-offset-2 transition-colors">
+              hello@gdgsydney.com
+            </a>
+            .
+          </p>
+        </div>
+      </section>
+
       {/* Form or Closed State */}
       <section id="apply" className="py-20 px-6">
         <div className="max-w-xl mx-auto">

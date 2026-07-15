@@ -16,9 +16,20 @@ interface SubmissionPayload {
   track: Track;
   experienceLevel: ExperienceLevel;
   socialLinks: string;
+  speakerTagline: string;
+  speakerBio: string;
   previousTalkLink: string;
+  howDidYouHear: string;
+  coSpeakerEmails: string;
+  accessibilityNeeds: string;
   requiresTravelSupport: boolean;
+  travelSupportLocation: string;
   isGoogleDeveloperExpert: boolean;
+  isFirstTimeSpeaker: boolean;
+  wantsMentoring: boolean;
+  hasSpokenAtGdgSydneyBefore: boolean;
+  isOpenToAudienceQuestions: boolean;
+  optOutOfRecording: boolean;
 }
 
 const VALID_FORMATS: TalkFormat[] = ['talk', 'workshop', 'lightning-talk'];
@@ -60,6 +71,9 @@ function validatePayload(body: unknown): SubmissionPayload {
   if (!VALID_FORMATS.includes(b.format as TalkFormat)) throw new Error('Please select a valid talk format.');
   if (!VALID_TRACKS.includes(b.track as Track)) throw new Error('Please select a valid track.');
   if (!VALID_LEVELS.includes(b.experienceLevel as ExperienceLevel)) throw new Error('Please select a valid experience level.');
+  if (b.requiresTravelSupport === true && (typeof b.travelSupportLocation !== 'string' || !b.travelSupportLocation.trim())) {
+    throw new Error('Please let us know which city you\'d be travelling from.');
+  }
 
   return {
     name: b.name.trim(),
@@ -71,8 +85,19 @@ function validatePayload(body: unknown): SubmissionPayload {
     experienceLevel: b.experienceLevel as ExperienceLevel,
     socialLinks: typeof b.socialLinks === 'string' ? b.socialLinks.trim() : '',
     previousTalkLink: typeof b.previousTalkLink === 'string' ? b.previousTalkLink.trim() : '',
+    speakerTagline: typeof b.speakerTagline === 'string' ? b.speakerTagline.trim() : '',
+    speakerBio: typeof b.speakerBio === 'string' ? b.speakerBio.trim() : '',
+    howDidYouHear: typeof b.howDidYouHear === 'string' ? b.howDidYouHear.trim() : '',
+    coSpeakerEmails: typeof b.coSpeakerEmails === 'string' ? b.coSpeakerEmails.trim() : '',
+    accessibilityNeeds: typeof b.accessibilityNeeds === 'string' ? b.accessibilityNeeds.trim() : '',
     requiresTravelSupport: b.requiresTravelSupport === true,
+    travelSupportLocation: typeof b.travelSupportLocation === 'string' ? b.travelSupportLocation.trim() : '',
     isGoogleDeveloperExpert: b.isGoogleDeveloperExpert === true,
+    isFirstTimeSpeaker: b.isFirstTimeSpeaker === true,
+    wantsMentoring: b.wantsMentoring === true,
+    hasSpokenAtGdgSydneyBefore: b.hasSpokenAtGdgSydneyBefore === true,
+    isOpenToAudienceQuestions: b.isOpenToAudienceQuestions === true,
+    optOutOfRecording: b.optOutOfRecording === true,
   };
 }
 

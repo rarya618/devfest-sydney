@@ -80,7 +80,8 @@ export async function promoteSubmission(submissionId: string): Promise<{ error?:
       socialLinks: data.socialLinks ?? '',
       submissionId,
       promotedAt: FieldValue.serverTimestamp(),
-      bio: '',
+      bio: data.speakerBio ?? '',
+      tagline: data.speakerTagline ?? '',
       photoUrl: '',
     });
 

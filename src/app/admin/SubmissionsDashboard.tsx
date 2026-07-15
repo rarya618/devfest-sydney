@@ -159,8 +159,21 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
             <span className="text-sm font-medium text-black-02/70">{submission.name}</span>
             <span className="text-xs text-black-02/40"> &middot; {submission.email}</span>
           </p>
+          {submission.speakerTagline && (
+            <p className="text-xs text-black-02/40 truncate mt-0.5">{submission.speakerTagline}</p>
+          )}
         </div>
         <div className="shrink-0 flex items-center gap-1.5">
+          {submission.isFirstTimeSpeaker && (
+            <span className="inline-flex items-center gap-1 text-xs pl-2 pr-2.5 py-1 rounded-full border font-medium bg-google-green/10 text-google-green border-google-green/20">
+              First-time speaker
+            </span>
+          )}
+          {submission.wantsMentoring && (
+            <span className="inline-flex items-center gap-1 text-xs pl-2 pr-2.5 py-1 rounded-full border font-medium bg-google-green/10 text-google-green border-google-green/20">
+              Wants mentoring
+            </span>
+          )}
           {submission.isGoogleDeveloperExpert && (
             <span className="inline-flex items-center gap-1 text-xs pl-2 pr-2.5 py-1 rounded-full border font-medium bg-google-blue/10 text-google-blue border-google-blue/20">
               <svg className="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -174,7 +187,12 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
               <svg className="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 15.5V9.75a1.5 1.5 0 011.5-1.5h13.5a1.5 1.5 0 011.5 1.5v5.75M3.75 15.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5M3.75 15.5v.75A1.5 1.5 0 005.25 17.75h13.5a1.5 1.5 0 001.5-1.5v-.75M9 8.25V6.5A1.5 1.5 0 0110.5 5h3A1.5 1.5 0 0115 6.5v1.75" />
               </svg>
-              Travel support
+              Travel support{submission.travelSupportLocation ? ` · ${submission.travelSupportLocation}` : ''}
+            </span>
+          )}
+          {submission.optOutOfRecording && (
+            <span className="inline-flex items-center gap-1 text-xs pl-2 pr-2.5 py-1 rounded-full border font-medium bg-google-red/10 text-google-red border-google-red/20">
+              Don&apos;t record
             </span>
           )}
         </div>
@@ -192,6 +210,54 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
       </div>
 
       <p className="text-sm text-black-02/50 leading-relaxed mb-4">{submission.abstract}</p>
+
+      {(submission.speakerBio ||
+        submission.accessibilityNeeds ||
+        submission.howDidYouHear ||
+        submission.coSpeakerEmails ||
+        submission.hasSpokenAtGdgSydneyBefore ||
+        submission.isOpenToAudienceQuestions) && (
+        <div className="space-y-2 mb-4">
+          {submission.speakerBio && (
+            <p className="text-xs text-black-02/50 bg-off-white border border-black-02/8 rounded-lg px-3 py-2 leading-relaxed">
+              <span className="font-bold text-black-02/60">Bio: </span>
+              {submission.speakerBio}
+            </p>
+          )}
+
+          {submission.accessibilityNeeds && (
+            <p className="text-xs text-black-02/50 bg-off-white border border-black-02/8 rounded-lg px-3 py-2 leading-relaxed">
+              <span className="font-bold text-black-02/60">Accessibility: </span>
+              {submission.accessibilityNeeds}
+            </p>
+          )}
+
+          {submission.howDidYouHear && (
+            <p className="text-xs text-black-02/40">
+              <span className="font-medium text-black-02/50">Found us via: </span>
+              {submission.howDidYouHear}
+            </p>
+          )}
+
+          {submission.coSpeakerEmails && (
+            <p className="text-xs text-black-02/40">
+              <span className="font-medium text-black-02/50">Co-speaker(s): </span>
+              {submission.coSpeakerEmails}
+            </p>
+          )}
+
+          {(submission.hasSpokenAtGdgSydneyBefore || submission.isOpenToAudienceQuestions) && (
+            <p className="text-xs text-black-02/40">
+              {[
+                submission.hasSpokenAtGdgSydneyBefore && 'Has spoken at GDG Sydney before',
+                submission.isOpenToAudienceQuestions && 'Open to audience questions',
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            </p>
+          )}
+        </div>
+      )}
 
       {(submission.socialLinks || submission.previousTalkLink) && (
         <div className="flex flex-wrap gap-2 mb-4">

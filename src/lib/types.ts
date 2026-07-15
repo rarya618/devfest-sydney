@@ -32,9 +32,20 @@ export interface Submission {
   track: Track;
   experienceLevel: ExperienceLevel;
   socialLinks: string;
+  speakerTagline: string;
+  speakerBio: string;
   previousTalkLink: string;
+  howDidYouHear: string;
+  coSpeakerEmails: string;
+  accessibilityNeeds: string;
   requiresTravelSupport: boolean;
+  travelSupportLocation: string;
   isGoogleDeveloperExpert: boolean;
+  isFirstTimeSpeaker: boolean;
+  wantsMentoring: boolean;
+  hasSpokenAtGdgSydneyBefore: boolean;
+  isOpenToAudienceQuestions: boolean;
+  optOutOfRecording: boolean;
   submittedAt: string; // ISO date string (serialized from Firestore Timestamp)
   status: SubmissionStatus;
 }
