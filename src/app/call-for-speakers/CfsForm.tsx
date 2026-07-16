@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Alert from '@/components/Alert';
 
 type TalkFormat = 'talk' | 'workshop' | 'lightning-talk';
@@ -63,6 +63,13 @@ const LEVELS: { value: ExperienceLevel; label: string; desc: string }[] = [
 
 const ABSTRACT_MAX = 2000;
 
+const SECTIONS: { id: string; label: string; required: boolean }[] = [
+  { id: 'cfs-section-details', label: 'Your details', required: true },
+  { id: 'cfs-section-talk', label: 'Your session', required: true },
+  { id: 'cfs-section-about', label: 'About you', required: false },
+  { id: 'cfs-section-logistics', label: 'Logistics', required: false },
+];
+
 export default function CfsForm() {
   const [fields, setFields] = useState<FormFields>({
     name: '',
@@ -91,6 +98,38 @@ export default function CfsForm() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitState, setSubmitState] = useState<SubmitState>('idle');
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState<string>(SECTIONS[0].id);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible[0]) setActiveSection(visible[0].target.id);
+      },
+      { rootMargin: '-15% 0px -70% 0px', threshold: 0 }
+    );
+    SECTIONS.forEach(({ id }) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email);
+  const sectionComplete: Record<string, boolean> = {
+    'cfs-section-details': fields.name.trim() !== '' && isEmailValid,
+    'cfs-section-talk':
+      fields.talkTitle.trim() !== '' &&
+      fields.abstract.trim() !== '' &&
+      fields.abstract.length <= ABSTRACT_MAX &&
+      fields.format !== '' &&
+      fields.track !== '' &&
+      fields.experienceLevel !== '',
+    'cfs-section-about': false,
+    'cfs-section-logistics': false,
+  };
 
   function validate(): FormErrors {
     const errs: FormErrors = {};
@@ -100,13 +139,13 @@ export default function CfsForm() {
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email)) {
       errs.email = 'Please enter a valid email address.';
     }
-    if (!fields.talkTitle.trim()) errs.talkTitle = 'Please enter a title for your talk.';
+    if (!fields.talkTitle.trim()) errs.talkTitle = 'Please enter a title for your session.';
     if (!fields.abstract.trim()) {
-      errs.abstract = 'Please write an abstract for your proposal.';
+      errs.abstract = 'Please write an abstract for your session.';
     } else if (fields.abstract.length > ABSTRACT_MAX) {
       errs.abstract = `Abstract must be ${ABSTRACT_MAX} characters or fewer.`;
     }
-    if (!fields.format) errs.format = 'Please select a talk format.';
+    if (!fields.format) errs.format = 'Please select a session format.';
     if (!fields.track) errs.track = 'Please select a track.';
     if (!fields.experienceLevel) errs.experienceLevel = 'Please select your experience level.';
     if (fields.requiresTravelSupport && !fields.travelSupportLocation.trim()) {
@@ -140,7 +179,7 @@ export default function CfsForm() {
       setAlertMessage(
         err instanceof Error
           ? err.message
-          : 'Something went wrong submitting your proposal. Please try again.'
+          : 'Something went wrong submitting your session. Please try again.'
       );
     }
   }
@@ -206,9 +245,9 @@ export default function CfsForm() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
         </div>
-        <h3 className="text-xl font-bold text-black-02 mb-3">Proposal submitted!</h3>
+        <h3 className="text-xl font-bold text-black-02 mb-3">Session submitted!</h3>
         <p className="text-black-02/55 text-sm leading-relaxed max-w-sm mx-auto">
-          Thanks for submitting to DevFest Sydney. We&apos;ll review your proposal and be in touch via email.
+          Thanks for submitting to DevFest Sydney. We&apos;ll review your session and be in touch via email.
         </p>
       </div>
     );
@@ -221,10 +260,89 @@ export default function CfsForm() {
 
   return (
     <>
-      <form onSubmit={handleSubmit} noValidate className="space-y-10">
+      <nav
+        aria-label="Form progress"
+        className="md:hidden sticky top-[68px] z-40 -mt-2 mb-6 bg-off-white/95 backdrop-blur-sm border-b border-black-02/8 px-1 py-2 -mx-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+      >
+        <ul className="flex items-center gap-1.5 w-max">
+          {SECTIONS.map((section) => {
+            const isActive = activeSection === section.id;
+            const isComplete = sectionComplete[section.id];
+            return (
+              <li key={section.id}>
+                <a
+                  href={`#${section.id}`}
+                  aria-current={isActive ? 'true' : undefined}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm whitespace-nowrap transition-colors
+                    ${isActive ? 'bg-google-red/8 text-black-02 font-semibold' : 'text-black-02/50 hover:text-black-02/80 hover:bg-black-02/5'}`}
+                >
+                  <span
+                    className={`flex items-center justify-center w-5 h-5 rounded-full border shrink-0 transition-colors
+                      ${isComplete
+                        ? 'bg-google-green border-google-green'
+                        : isActive
+                          ? 'border-google-red'
+                          : 'border-black-02/20'
+                      }`}
+                  >
+                    {isComplete && (
+                      <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
+                      </svg>
+                    )}
+                  </span>
+                  {section.label}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      <div className="md:flex md:items-start md:gap-10">
+      <nav aria-label="Form progress" className="hidden md:block sticky top-28 w-52 shrink-0 self-start">
+        <ul className="space-y-1">
+          {SECTIONS.map((section) => {
+            const isActive = activeSection === section.id;
+            const isComplete = sectionComplete[section.id];
+            return (
+              <li key={section.id}>
+                <a
+                  href={`#${section.id}`}
+                  aria-current={isActive ? 'true' : undefined}
+                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-colors
+                    ${isActive ? 'bg-google-red/8 text-black-02 font-semibold' : 'text-black-02/50 hover:text-black-02/80 hover:bg-black-02/5'}`}
+                >
+                  <span
+                    className={`flex items-center justify-center w-5 h-5 rounded-full border shrink-0 transition-colors
+                      ${isComplete
+                        ? 'bg-google-green border-google-green'
+                        : isActive
+                          ? 'border-google-red'
+                          : 'border-black-02/20'
+                      }`}
+                  >
+                    {isComplete && (
+                      <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
+                      </svg>
+                    )}
+                  </span>
+                  <span className="flex-1">{section.label}</span>
+                  {!section.required && (
+                    <span className="text-[10px] uppercase tracking-wide text-black-02/30">Optional</span>
+                  )}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      <form onSubmit={handleSubmit} noValidate className="space-y-10 flex-1 min-w-0">
 
         {/* Section: Your details */}
-        <div>
+        <div id="cfs-section-details" className="scroll-mt-28">
           <div className="flex items-center gap-3 mb-5">
             <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase whitespace-nowrap">Your details</p>
             <div className="h-px flex-1 bg-black-02/8" aria-hidden="true" />
@@ -274,9 +392,9 @@ export default function CfsForm() {
         </div>
 
         {/* Section: Your talk */}
-        <div>
+        <div id="cfs-section-talk" className="scroll-mt-28">
           <div className="flex items-center gap-3 mb-5">
-            <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase whitespace-nowrap">Your talk</p>
+            <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase whitespace-nowrap">Your session</p>
             <div className="h-px flex-1 bg-black-02/8" aria-hidden="true" />
           </div>
 
@@ -284,7 +402,7 @@ export default function CfsForm() {
         {/* Talk title */}
         <div>
           <label htmlFor="cfs-title" className="block text-sm font-bold text-black-02/70 mb-2">
-            Talk title <span className="text-google-red" aria-hidden="true">*</span>
+            Session title <span className="text-google-red" aria-hidden="true">*</span>
           </label>
           <input
             id="cfs-title"
@@ -317,7 +435,7 @@ export default function CfsForm() {
           <textarea
             id="cfs-abstract"
             rows={6}
-            placeholder="What is your talk about? What will attendees take away?"
+            placeholder="What is your session about? What will attendees take away?"
             aria-required="true"
             aria-describedby={errors.abstract ? 'cfs-abstract-error' : 'cfs-abstract-hint'}
             aria-invalid={!!errors.abstract}
@@ -328,7 +446,7 @@ export default function CfsForm() {
             <p id="cfs-abstract-error" role="alert" className="mt-1.5 text-xs text-google-red/80">{errors.abstract}</p>
           ) : (
             <p id="cfs-abstract-hint" className="mt-1.5 text-xs text-black-02/35">
-              Briefly describe your talk: the topic, key points, and what attendees will learn.
+              Briefly describe your session: the topic, key points, and what attendees will learn.
             </p>
           )}
         </div>
@@ -336,7 +454,7 @@ export default function CfsForm() {
         {/* Format */}
         <div>
           <p className="text-sm font-bold text-black-02/70 mb-3" id="cfs-format-label">
-            Talk format <span className="text-google-red" aria-hidden="true">*</span>
+            Session format <span className="text-google-red" aria-hidden="true">*</span>
           </p>
           <div
             role="radiogroup"
@@ -489,7 +607,7 @@ export default function CfsForm() {
         </div>
 
         {/* Section: About you */}
-        <div>
+        <div id="cfs-section-about" className="scroll-mt-28">
           <div className="flex items-center gap-3 mb-5">
             <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase whitespace-nowrap">About you <span className="text-black-02/25 normal-case font-medium tracking-normal">(optional)</span></p>
             <div className="h-px flex-1 bg-black-02/8" aria-hidden="true" />
@@ -604,7 +722,7 @@ export default function CfsForm() {
         </div>
 
         {/* Section: Logistics */}
-        <div>
+        <div id="cfs-section-logistics" className="scroll-mt-28">
           <div className="flex items-center gap-3 mb-5">
             <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase whitespace-nowrap">Logistics <span className="text-black-02/25 normal-case font-medium tracking-normal">(optional)</span></p>
             <div className="h-px flex-1 bg-black-02/8" aria-hidden="true" />
@@ -700,8 +818,8 @@ export default function CfsForm() {
           <button
             type="submit"
             disabled={submitState === 'submitting'}
-            aria-label="Submit your speaker proposal"
-            className="inline-flex items-center justify-center gap-2 px-7 py-2 bg-google-blue text-white text-base font-semibold rounded-full
+            aria-label="Submit your session"
+            className="inline-flex items-center justify-center gap-2 px-7 pt-2 pb-1.5 bg-google-blue text-white text-base font-semibold rounded-full
               shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all
               disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-google-blue disabled:hover:translate-y-0"
           >
@@ -714,7 +832,7 @@ export default function CfsForm() {
                 Submitting…
               </>
             ) : (
-              'Submit proposal'
+              'Submit session'
             )}
           </button>
           <p className="text-xs text-black-02/35 mt-3">
@@ -726,6 +844,7 @@ export default function CfsForm() {
           </p>
         </div>
       </form>
+      </div>
 
       {alertMessage && <Alert message={alertMessage} onDismiss={dismissAlert} />}
     </>

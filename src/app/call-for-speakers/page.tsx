@@ -50,23 +50,31 @@ export default function CallForSpeakers() {
             <span className="text-google-blue">DevFest Sydney</span>
           </h1>
 
-          <p className="text-black-02/55 text-lg max-w-2xl mx-auto leading-relaxed mb-10 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <p className="text-black-02/55 text-lg max-w-2xl mx-auto leading-relaxed mb-6 animate-slide-up" style={{ animationDelay: '0.2s' }}>
             We&apos;re looking for passionate speakers across the Developer and Builder tracks. Whether you&apos;re an engineer,
             designer, PM, or founder. If you have something worth sharing, we want to hear from you.
           </p>
 
+          <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5 mb-10 text-sm text-black-02/45 animate-slide-up" style={{ animationDelay: '0.25s' }}>
+            <span>Free attendance for accepted speakers</span>
+            <span className="text-black-02/20" aria-hidden="true">·</span>
+            <span>Speaker support and mentoring</span>
+            <span className="text-black-02/20" aria-hidden="true">·</span>
+            <span>Green room on the day</span>
+          </div>
+
           {isCfsOpen && (
             <a
               href="#apply"
-              className="inline-flex px-7 py-2 bg-google-blue text-white text-base font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all animate-slide-up"
+              className="inline-flex px-7 pt-2 pb-1.5 bg-google-blue text-white text-base font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all animate-slide-up"
               style={{ animationDelay: '0.3s' }}
             >
-              Submit your talk
+              Submit your session
             </a>
           )}
 
           <p className="text-black-02/35 text-sm mt-5 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-            Sydney CBD · DevFest Sydney
+            You don&apos;t need to be a seasoned speaker: first-time speakers are welcome.
           </p>
         </div>
       </section>
@@ -78,7 +86,7 @@ export default function CallForSpeakers() {
             <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3">Topic Ideas</p>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">What are we looking for?</h2>
             <p className="text-black-02/45 mt-3 text-sm max-w-lg mx-auto">
-              We welcome proposals on any topic relevant to our two tracks. Here are some ideas to get you started.
+              We welcome sessions on any topic relevant to our two tracks. Here are some ideas to get you started.
             </p>
           </div>
 
@@ -113,50 +121,19 @@ export default function CallForSpeakers() {
         </div>
       </section>
 
-      {/* Speaker perks */}
-      <section className="py-20 px-6">
-        <div className="max-w-3xl mx-auto">
-          <div className="mb-12 text-center animate-slide-up">
-            <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3">Speaking at DevFest</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">What to expect as a speaker</h2>
-            <p className="text-black-02/45 mt-3 text-sm max-w-lg mx-auto">
-              You don&apos;t need to be a seasoned speaker to submit. First-time speakers are welcome, and we&apos;ll help you prepare.
-            </p>
-          </div>
-
-          <ul className="grid sm:grid-cols-2 gap-4 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            {[
-              'Free attendance for accepted speakers.',
-              'Sessions may be recorded and shared after the event. Let us know if you\'d prefer not to be recorded.',
-              'A green room to store your things and prepare before your session.',
-              'Support connecting with other speakers and mentors ahead of the day.',
-            ].map((perk) => (
-              <li
-                key={perk}
-                className="flex items-start gap-3 bg-white border border-black-02/8 rounded-xl px-5 py-4 text-sm text-black-02/70 leading-relaxed"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-google-red mt-1.5 shrink-0" aria-hidden="true" />
-                {perk}
-              </li>
-            ))}
-          </ul>
-
-          <p className="text-center text-black-02/45 text-sm mt-8">
-            Need something to present comfortably, an interpreter, step-free access, or anything else? Tell us in the form below, or email{' '}
-            <a href="mailto:hello@gdgsydney.com" className="text-black-02/60 hover:text-black-02/80 underline underline-offset-2 transition-colors">
-              hello@gdgsydney.com
-            </a>
-            .
-          </p>
-        </div>
-      </section>
-
       {/* Form or Closed State */}
       <section id="apply" className="py-20 px-6">
-        <div className="max-w-xl mx-auto">
+        <div className={isCfsOpen ? 'max-w-4xl mx-auto' : 'max-w-xl mx-auto'}>
           <div className="mb-10 text-center animate-slide-up">
             <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3">Apply</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Submit your proposal</h2>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Submit your session</h2>
+            <p className="text-black-02/45 mt-3 text-sm max-w-md mx-auto">
+              Need something to present comfortably, an interpreter, step-free access, or anything else? Tell us in the form below, or email{' '}
+              <a href="mailto:hello@gdgsydney.com" className="text-black-02/60 hover:text-black-02/80 underline underline-offset-2 transition-colors">
+                hello@gdgsydney.com
+              </a>
+              .
+            </p>
           </div>
 
           {isCfsOpen ? (
@@ -170,7 +147,7 @@ export default function CallForSpeakers() {
               </div>
               <h3 className="text-lg font-bold text-black-02/70 mb-3">Applications are now closed</h3>
               <p className="text-sm text-black-02/45 leading-relaxed max-w-sm mx-auto">
-                The Call for Speakers has closed for DevFest Sydney 2026. Thank you to everyone who submitted a proposal. We&apos;ll be in touch soon.
+                The Call for Speakers has closed for DevFest Sydney 2026. Thank you to everyone who submitted a session. We&apos;ll be in touch soon.
               </p>
               <a
                 href="mailto:hello@gdgsydney.com"
