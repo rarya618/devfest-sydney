@@ -50,9 +50,9 @@ export default function Navbar({ light = false }: { light?: boolean }) {
         {/* CTA */}
         <Link
           href="/call-for-speakers"
-          className="inline-flex items-center px-5 py-[5px] bg-google-blue text-white text-sm font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all"
+          className="inline-flex items-center px-5 pt-[5px] pb-1 bg-google-blue text-white text-sm font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all"
         >
-          Submit your talk
+          Call for Speakers
         </Link>
       </div>
     </nav>
