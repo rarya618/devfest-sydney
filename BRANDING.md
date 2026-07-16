@@ -33,7 +33,7 @@ Used for short lines, speaker names, data labels, and anywhere a "code-style" fe
 |------|-----|-------|
 | Blue 500 | `#4285F4` | Primary CTA, links, Developer Track accent |
 | Green 500 | `#34A853` | Success states, Builder Track accent |
-| Yellow 600 | `#f9ab00` | Warnings, Builder Showcase accent |
+| Yellow 600 | `#f9ab00` | Warnings, Builder Showcase accent, Workshops Track accent |
 | Red 500 | `#EA4335` | Errors, Speaker/CfS accent |
 
 ### Halftone Colors

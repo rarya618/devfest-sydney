@@ -30,7 +30,10 @@ For non-traditional builders — product managers, designers, and founders.
 
 Topics: Prototyping with AI, automation, no-code and low-code tooling
 
-### 3. Builder Showcase
+### 3. Workshops Track
+Hands-on sessions where attendees build alongside the speaker. Open to any topic or audience, from either the Developer or Builder track.
+
+### 4. Builder Showcase
 Mid-afternoon session where attendees present 5-minute demos, with audience voting.
 
 ## Special Features
