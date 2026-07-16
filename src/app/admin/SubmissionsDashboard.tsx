@@ -26,31 +26,35 @@ const STATUS_LABELS: Record<SubmissionStatus, string> = {
 const TRACK_LABELS: Record<Track, string> = {
   developer: 'Developer',
   builder: 'Builder',
+  workshop: 'Workshops',
   showcase: 'Showcase',
 };
 
 const TRACK_COLORS: Record<Track, string> = {
   developer: 'text-google-blue',
   builder: 'text-google-green',
+  workshop: 'text-google-yellow',
   showcase: 'text-google-yellow',
 };
 
 const TRACK_BORDER_COLORS: Record<Track, string> = {
   developer: 'border-l-google-blue',
   builder: 'border-l-google-green',
+  workshop: 'border-l-google-yellow',
   showcase: 'border-l-google-yellow',
 };
 
 const TRACK_DOT_COLORS: Record<Track, string> = {
   developer: 'bg-google-blue',
   builder: 'bg-google-green',
+  workshop: 'bg-google-yellow',
   showcase: 'bg-google-yellow',
 };
 
 const FORMAT_LABELS: Record<TalkFormat, string> = {
   talk: 'Talk',
-  workshop: 'Workshop',
   'lightning-talk': 'Lightning',
+  workshop: 'Workshop',
 };
 
 function getInitials(name: string): string {

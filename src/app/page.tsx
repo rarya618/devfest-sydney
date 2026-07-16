@@ -7,7 +7,7 @@ import { adminDb } from '@/lib/firebase-admin';
 import type { Sponsor, SponsorTier, TeamMember } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
 
-const tracks = ['Developer Track', 'Builder Track'];
+const tracks = ['Developer Track', 'Builder Track', 'Workshops Track'];
 
 const TRACK_DETAILS: { name: string; color: string; audience: string; topics: string[] }[] = [
   {
@@ -21,6 +21,12 @@ const TRACK_DETAILS: { name: string; color: string; audience: string; topics: st
     color: 'google-green',
     audience: 'Designed for founders, PMs, and designers using AI and low-code tools to ship products faster. No formal engineering background required.',
     topics: ['Prototyping with AI', 'Automation', 'No-code tooling', 'Low-code tooling'],
+  },
+  {
+    name: 'Workshops Track',
+    color: 'google-yellow',
+    audience: 'Hands-on sessions where attendees build alongside the speaker. Open to any topic or audience, from either the Developer or Builder track.',
+    topics: ['Guided building', 'Live coding', 'Small-group format'],
   },
 ];
 
@@ -144,7 +150,7 @@ export default async function Home() {
               <span key={track} className="inline-flex items-center gap-2">
                 <span
                   className="w-1.5 h-1.5 rounded-full"
-                  style={{ backgroundColor: [ 'var(--google-blue)', 'var(--google-green)' ][i] }}
+                  style={{ backgroundColor: [ 'var(--google-blue)', 'var(--google-green)', 'var(--google-yellow)' ][i] }}
                 />
                 {track}
               </span>
@@ -161,12 +167,14 @@ export default async function Home() {
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight">However you build, there&apos;s a track for you</h2>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             {TRACK_DETAILS.map((track) => (
               <div key={track.name} className="bg-white border border-black-02/8 rounded-2xl p-8">
                 <span className="inline-flex items-center gap-2 text-lg font-bold text-black-02 mb-3">
                   <span
-                    className={`w-2 h-2 rounded-full ${track.color === 'google-blue' ? 'bg-google-blue' : 'bg-google-green'}`}
+                    className={`w-2 h-2 rounded-full ${
+                      track.color === 'google-blue' ? 'bg-google-blue' : track.color === 'google-green' ? 'bg-google-green' : 'bg-google-yellow'
+                    }`}
                     aria-hidden="true"
                   />
                   {track.name}

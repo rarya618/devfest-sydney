@@ -3,9 +3,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import Alert from '@/components/Alert';
 
-type TalkFormat = 'talk' | 'workshop' | 'lightning-talk';
+type TalkFormat = 'talk' | 'lightning-talk' | 'workshop';
 type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced';
-type Track = 'developer' | 'builder';
+type Track = 'developer' | 'builder' | 'workshop';
 type SubmitState = 'idle' | 'submitting' | 'success';
 
 interface FormFields {
@@ -46,13 +46,13 @@ interface FormErrors {
 
 const FORMATS: { value: TalkFormat; label: string; duration: string; desc: string }[] = [
   { value: 'talk', label: 'Talk', duration: '30 min', desc: 'A focused technical or builder session.' },
-  { value: 'workshop', label: 'Workshop', duration: '60 min', desc: 'Hands-on: attendees build something together.' },
   { value: 'lightning-talk', label: 'Lightning Talk', duration: '10 min', desc: 'Short and punchy: one focused idea or demo.' },
 ];
 
 const TRACKS: { value: Track; label: string; color: string; desc: string }[] = [
   { value: 'developer', label: 'Developer Track', color: 'google-blue', desc: 'Technical sessions for engineers: Gemini API, Flutter, Firebase, Android, Google Cloud.' },
   { value: 'builder', label: 'Builder Track', color: 'google-green', desc: 'For PMs, designers, and founders: prototyping with AI, automation, no-code tooling.' },
+  { value: 'workshop', label: 'Workshops Track', color: 'google-yellow', desc: 'A dedicated hands-on stream running in parallel with the Developer and Builder talks.' },
 ];
 
 const LEVELS: { value: ExperienceLevel; label: string; desc: string }[] = [
@@ -451,59 +451,6 @@ export default function CfsForm() {
           )}
         </div>
 
-        {/* Format */}
-        <div>
-          <p className="text-sm font-bold text-black-02/70 mb-3" id="cfs-format-label">
-            Session format <span className="text-google-red" aria-hidden="true">*</span>
-          </p>
-          <div
-            role="radiogroup"
-            aria-labelledby="cfs-format-label"
-            aria-describedby={errors.format ? 'cfs-format-error' : undefined}
-            className="grid sm:grid-cols-3 gap-3"
-          >
-            {FORMATS.map((f) => {
-              const selected = fields.format === f.value;
-              return (
-                <button
-                  key={f.value}
-                  type="button"
-                  role="radio"
-                  aria-checked={selected}
-                  aria-label={`${f.label}, ${f.duration}`}
-                  onClick={() => {
-                    setFields((prev) => ({ ...prev, format: f.value }));
-                    setErrors((prev) => ({ ...prev, format: undefined }));
-                  }}
-                  className={`flex flex-col items-start text-left rounded-xl border px-4 py-4 transition-all cursor-pointer
-                    ${selected
-                      ? 'border-google-red/50 bg-google-red/10'
-                      : errors.format
-                        ? 'border-google-red/30 bg-google-red/5 hover:border-google-red/30'
-                        : 'border-black-02/10 bg-off-white hover:border-black-02/20'
-                    }`}
-                >
-                  <div className="w-full flex items-center justify-between mb-1.5">
-                    <span className={`text-sm font-semibold ${selected ? 'text-black-02' : 'text-black-02/70'}`}>
-                      {f.label}
-                    </span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-mono
-                      ${selected ? 'bg-google-red/20 text-google-red' : 'bg-black-02/6 text-black-02/40'}`}>
-                      {f.duration}
-                    </span>
-                  </div>
-                  <p className={`w-full text-xs leading-relaxed ${selected ? 'text-black-02/60' : 'text-black-02/40'}`}>
-                    {f.desc}
-                  </p>
-                </button>
-              );
-            })}
-          </div>
-          {errors.format && (
-            <p id="cfs-format-error" role="alert" className="mt-2 text-xs text-google-red/80">{errors.format}</p>
-          )}
-        </div>
-
         {/* Track */}
         <div>
           <p className="text-sm font-bold text-black-02/70 mb-3" id="cfs-track-label">
@@ -513,13 +460,14 @@ export default function CfsForm() {
             role="radiogroup"
             aria-labelledby="cfs-track-label"
             aria-describedby={errors.track ? 'cfs-track-error' : undefined}
-            className="grid sm:grid-cols-2 gap-3"
+            className="grid sm:grid-cols-3 gap-3"
           >
             {TRACKS.map((t) => {
               const selected = fields.track === t.value;
               const colorMap: Record<string, string> = {
                 'google-blue': selected ? 'border-google-blue/50 bg-google-blue/10' : 'border-black-02/10 bg-off-white hover:border-black-02/20',
                 'google-green': selected ? 'border-google-green/50 bg-google-green/10' : 'border-black-02/10 bg-off-white hover:border-black-02/20',
+                'google-yellow': selected ? 'border-google-yellow/50 bg-google-yellow/10' : 'border-black-02/10 bg-off-white hover:border-black-02/20',
               };
               return (
                 <button
@@ -529,8 +477,12 @@ export default function CfsForm() {
                   aria-checked={selected}
                   aria-label={t.label}
                   onClick={() => {
-                    setFields((prev) => ({ ...prev, track: t.value }));
-                    setErrors((prev) => ({ ...prev, track: undefined }));
+                    setFields((prev) => ({
+                      ...prev,
+                      track: t.value,
+                      format: t.value === 'workshop' ? 'workshop' : prev.format === 'workshop' ? '' : prev.format,
+                    }));
+                    setErrors((prev) => ({ ...prev, track: undefined, format: undefined }));
                   }}
                   className={`flex flex-col items-start text-left rounded-xl border px-4 py-4 transition-all cursor-pointer
                     ${errors.track && !selected
@@ -540,7 +492,9 @@ export default function CfsForm() {
                 >
                   <span className={`w-full flex items-center gap-2 text-sm font-semibold mb-1.5 ${selected ? 'text-black-02' : 'text-black-02/70'}`}>
                     <span
-                      className={`w-1.5 h-1.5 rounded-full ${t.color === 'google-blue' ? 'bg-google-blue' : 'bg-google-green'}`}
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        t.color === 'google-blue' ? 'bg-google-blue' : t.color === 'google-green' ? 'bg-google-green' : 'bg-google-yellow'
+                      }`}
                       aria-hidden="true"
                     />
                     {t.label}
@@ -557,7 +511,63 @@ export default function CfsForm() {
           )}
         </div>
 
+        {/* Format */}
+        {(fields.track === 'developer' || fields.track === 'builder') && (
+          <div>
+            <p className="text-sm font-bold text-black-02/70 mb-3" id="cfs-format-label">
+              Session format <span className="text-google-red" aria-hidden="true">*</span>
+            </p>
+            <div
+              role="radiogroup"
+              aria-labelledby="cfs-format-label"
+              aria-describedby={errors.format ? 'cfs-format-error' : undefined}
+              className="grid sm:grid-cols-2 gap-3"
+            >
+              {FORMATS.map((f) => {
+                const selected = fields.format === f.value;
+                return (
+                  <button
+                    key={f.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    aria-label={`${f.label}, ${f.duration}`}
+                    onClick={() => {
+                      setFields((prev) => ({ ...prev, format: f.value }));
+                      setErrors((prev) => ({ ...prev, format: undefined }));
+                    }}
+                    className={`flex flex-col items-start text-left rounded-xl border px-4 py-4 transition-all cursor-pointer
+                      ${selected
+                        ? 'border-google-red/50 bg-google-red/10'
+                        : errors.format
+                          ? 'border-google-red/30 bg-google-red/5 hover:border-google-red/30'
+                          : 'border-black-02/10 bg-off-white hover:border-black-02/20'
+                      }`}
+                  >
+                    <div className="w-full flex items-center justify-between mb-1.5">
+                      <span className={`text-sm font-semibold ${selected ? 'text-black-02' : 'text-black-02/70'}`}>
+                        {f.label}
+                      </span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-mono
+                        ${selected ? 'bg-google-red/20 text-google-red' : 'bg-black-02/6 text-black-02/40'}`}>
+                        {f.duration}
+                      </span>
+                    </div>
+                    <p className={`w-full text-xs leading-relaxed ${selected ? 'text-black-02/60' : 'text-black-02/40'}`}>
+                      {f.desc}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+            {errors.format && (
+              <p id="cfs-format-error" role="alert" className="mt-2 text-xs text-google-red/80">{errors.format}</p>
+            )}
+          </div>
+        )}
+
         {/* Experience level */}
+
         <div>
           <p className="text-sm font-bold text-black-02/70 mb-3" id="cfs-level-label">
             Your experience level <span className="text-google-red" aria-hidden="true">*</span>

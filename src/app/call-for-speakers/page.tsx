@@ -7,12 +7,12 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Call for Speakers',
-  description: 'Submit a talk, workshop, or lightning talk for DevFest Sydney 2026. We are looking for passionate speakers across the Developer and Builder tracks.',
+  description: 'Submit a talk, workshop, or lightning talk for DevFest Sydney 2026. We are looking for passionate speakers across the Developer, Builder, and Workshops tracks.',
 };
 
 const isCfsOpen = process.env.CFS_OPEN === 'true';
 
-const topics: { label: string; track: 'developer' | 'builder' }[] = [
+const topics: { label: string; track: 'developer' | 'builder' | 'workshop' }[] = [
   { label: 'Agentic app development', track: 'developer' },
   { label: 'AI prototyping', track: 'builder' },
   { label: 'Gemini API & AI Studio', track: 'developer' },
@@ -25,6 +25,8 @@ const topics: { label: string; track: 'developer' | 'builder' }[] = [
   { label: 'Founder & PM playbooks', track: 'builder' },
   { label: 'Google Cloud', track: 'developer' },
   { label: 'Developer productivity', track: 'developer' },
+  { label: 'Hands-on building', track: 'workshop' },
+  { label: 'Live coding sessions', track: 'workshop' },
 ];
 
 export default function CallForSpeakers() {
@@ -59,8 +61,6 @@ export default function CallForSpeakers() {
             <span>Free attendance for accepted speakers</span>
             <span className="text-black-02/20" aria-hidden="true">·</span>
             <span>Speaker support and mentoring</span>
-            <span className="text-black-02/20" aria-hidden="true">·</span>
-            <span>Green room on the day</span>
           </div>
 
           {isCfsOpen && (
@@ -86,7 +86,7 @@ export default function CallForSpeakers() {
             <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3">Topic Ideas</p>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">What are we looking for?</h2>
             <p className="text-black-02/45 mt-3 text-sm max-w-lg mx-auto">
-              We welcome sessions on any topic relevant to our two tracks. Here are some ideas to get you started.
+              We welcome sessions on any topic relevant to our tracks. Here are some ideas to get you started.
             </p>
           </div>
 
@@ -97,7 +97,9 @@ export default function CallForSpeakers() {
                 className="inline-flex items-center gap-2 px-4 py-2 bg-off-white border border-black-02/8 rounded-full text-sm text-black-02/70 hover:text-black-02/90 hover:border-black-02/15 transition-colors"
               >
                 <span
-                  className={`w-1.5 h-1.5 rounded-full ${track === 'developer' ? 'bg-google-blue' : 'bg-google-green'}`}
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    track === 'developer' ? 'bg-google-blue' : track === 'builder' ? 'bg-google-green' : 'bg-google-yellow'
+                  }`}
                   aria-hidden="true"
                 />
                 {label}
@@ -116,6 +118,10 @@ export default function CallForSpeakers() {
             <span className="inline-flex items-center gap-2 text-xs text-black-02/45">
               <span className="w-1.5 h-1.5 rounded-full bg-google-green" aria-hidden="true" />
               Builder Track
+            </span>
+            <span className="inline-flex items-center gap-2 text-xs text-black-02/45">
+              <span className="w-1.5 h-1.5 rounded-full bg-google-yellow" aria-hidden="true" />
+              Workshops Track
             </span>
           </div>
         </div>

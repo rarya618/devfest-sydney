@@ -18,11 +18,11 @@ const faqs = [
   },
   {
     q: 'How do I submit a talk or workshop?',
-    a: 'Our Call for Speakers is open! We welcome talks, workshops, and lightning talks across both the Developer and Builder tracks.',
+    a: 'Our Call for Speakers is open! We welcome talks, workshops, and lightning talks across the Developer, Builder, and Workshops tracks.',
   },
   {
     q: 'What tracks are at DevFest Sydney?',
-    a: 'We have two main tracks: the Developer Track for engineers, and the Builder Track for product managers, designers, and founders.',
+    a: 'We have three tracks: the Developer Track for engineers, the Builder Track for product managers, designers, and founders, and the Workshops Track for hands-on, build-along sessions.',
   },
   {
     q: 'What is GDG Sydney?',

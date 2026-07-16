@@ -3,9 +3,9 @@ import { adminDb } from '@/lib/firebase-admin';
 import { Resend } from 'resend';
 import { FieldValue } from 'firebase-admin/firestore';
 
-type TalkFormat = 'talk' | 'workshop' | 'lightning-talk';
+type TalkFormat = 'talk' | 'lightning-talk' | 'workshop';
 type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced';
-type Track = 'developer' | 'builder';
+type Track = 'developer' | 'builder' | 'workshop';
 
 interface SubmissionPayload {
   name: string;
@@ -32,25 +32,27 @@ interface SubmissionPayload {
   optOutOfRecording: boolean;
 }
 
-const VALID_FORMATS: TalkFormat[] = ['talk', 'workshop', 'lightning-talk'];
-const VALID_TRACKS: Track[] = ['developer', 'builder'];
+const VALID_FORMATS: TalkFormat[] = ['talk', 'lightning-talk', 'workshop'];
+const VALID_TRACKS: Track[] = ['developer', 'builder', 'workshop'];
 const VALID_LEVELS: ExperienceLevel[] = ['beginner', 'intermediate', 'advanced'];
 const ABSTRACT_MAX = 2000;
 
 const FORMAT_LABELS: Record<TalkFormat, string> = {
   talk: 'Talk (30 min)',
-  workshop: 'Workshop (60 min)',
   'lightning-talk': 'Lightning Talk (10 min)',
+  workshop: 'Workshop',
 };
 
 const TRACK_LABELS: Record<Track, string> = {
   developer: 'Developer Track',
   builder: 'Builder Track',
+  workshop: 'Workshops Track',
 };
 
 const TRACK_DOT_COLOR: Record<Track, string> = {
   developer: '#4285F4',
   builder: '#34A853',
+  workshop: '#f9ab00',
 };
 
 const LEVEL_LABELS: Record<ExperienceLevel, string> = {
