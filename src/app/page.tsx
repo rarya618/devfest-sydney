@@ -102,16 +102,16 @@ export default async function Home() {
             {isCfsOpen ? (
               <Link
                 href="/call-for-speakers"
-                className="px-7 py-2 bg-google-blue text-white text-base font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all"
+                className="px-7 pt-2 pb-1.5 bg-google-blue text-white text-base font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all"
               >
-                Submit your talk
+                Submit your session
               </Link>
             ) : (
               <a
                 href="https://gdgsydney.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-7 py-2 bg-google-blue text-white text-base font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all"
+                className="px-7 pt-2 pb-1.5 bg-google-blue text-white text-base font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all"
               >
                 Follow GDG Sydney
               </a>
@@ -361,9 +361,9 @@ export default async function Home() {
               </p>
               <Link
                 href="/call-for-speakers"
-                className="inline-flex px-7 py-2 bg-google-blue text-white text-base font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all"
+                className="inline-flex px-7 pt-2 pb-1.5 bg-google-blue text-white text-base font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all"
               >
-                Submit your talk
+                Submit your session
               </Link>
             </>
           ) : (
@@ -376,7 +376,7 @@ export default async function Home() {
                 href="https://gdgsydney.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex px-7 py-2 bg-google-blue text-white text-base font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all"
+                className="inline-flex px-7 pt-2 pb-1.5 bg-google-blue text-white text-base font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all"
               >
                 Follow GDG Sydney
               </a>
