@@ -16,7 +16,9 @@ interface FormFields {
   format: TalkFormat | '';
   track: Track | '';
   experienceLevel: ExperienceLevel | '';
-  socialLinks: string;
+  linkedinUrl: string;
+  githubUrl: string;
+  websiteUrl: string;
   speakerTagline: string;
   speakerBio: string;
   previousTalkLink: string;
@@ -79,7 +81,9 @@ export default function CfsForm() {
     format: '',
     track: '',
     experienceLevel: '',
-    socialLinks: '',
+    linkedinUrl: '',
+    githubUrl: '',
+    websiteUrl: '',
     speakerTagline: '',
     speakerBio: '',
     previousTalkLink: '',
@@ -624,19 +628,45 @@ export default function CfsForm() {
           </div>
           <div className="space-y-5">
             <div>
-              <label htmlFor="cfs-social" className="block text-sm font-bold text-black-02/70 mb-2">
-                Social or profile links
+              <label htmlFor="cfs-linkedin" className="block text-sm font-bold text-black-02/70 mb-2">
+                LinkedIn
               </label>
               <input
-                id="cfs-social"
-                type="text"
-                placeholder="LinkedIn, X/Twitter, personal site, GitHub..."
-                aria-describedby="cfs-social-hint"
+                id="cfs-linkedin"
+                type="url"
+                placeholder="linkedin.com/in/..."
                 className={inputNormal}
-                {...field('socialLinks')}
+                {...field('linkedinUrl')}
               />
-              <p id="cfs-social-hint" className="mt-1.5 text-xs text-black-02/35">
-                Helps us learn more about you. Any format is fine.
+            </div>
+
+            <div>
+              <label htmlFor="cfs-github" className="block text-sm font-bold text-black-02/70 mb-2">
+                GitHub
+              </label>
+              <input
+                id="cfs-github"
+                type="url"
+                placeholder="github.com/..."
+                className={inputNormal}
+                {...field('githubUrl')}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="cfs-website" className="block text-sm font-bold text-black-02/70 mb-2">
+                Website
+              </label>
+              <input
+                id="cfs-website"
+                type="url"
+                placeholder="yoursite.com"
+                aria-describedby="cfs-website-hint"
+                className={inputNormal}
+                {...field('websiteUrl')}
+              />
+              <p id="cfs-website-hint" className="mt-1.5 text-xs text-black-02/35">
+                Helps us learn more about you. All optional.
               </p>
             </div>
 

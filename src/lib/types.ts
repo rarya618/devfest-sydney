@@ -31,7 +31,9 @@ export interface Submission {
   format: TalkFormat;
   track: Track;
   experienceLevel: ExperienceLevel;
-  socialLinks: string;
+  linkedinUrl: string;
+  githubUrl: string;
+  websiteUrl: string;
   speakerTagline: string;
   speakerBio: string;
   previousTalkLink: string;

@@ -15,7 +15,9 @@ interface SubmissionPayload {
   format: TalkFormat;
   track: Track;
   experienceLevel: ExperienceLevel;
-  socialLinks: string;
+  linkedinUrl: string;
+  githubUrl: string;
+  websiteUrl: string;
   speakerTagline: string;
   speakerBio: string;
   previousTalkLink: string;
@@ -85,7 +87,9 @@ function validatePayload(body: unknown): SubmissionPayload {
     format: b.format as TalkFormat,
     track: b.track as Track,
     experienceLevel: b.experienceLevel as ExperienceLevel,
-    socialLinks: typeof b.socialLinks === 'string' ? b.socialLinks.trim() : '',
+    linkedinUrl: typeof b.linkedinUrl === 'string' ? b.linkedinUrl.trim() : '',
+    githubUrl: typeof b.githubUrl === 'string' ? b.githubUrl.trim() : '',
+    websiteUrl: typeof b.websiteUrl === 'string' ? b.websiteUrl.trim() : '',
     previousTalkLink: typeof b.previousTalkLink === 'string' ? b.previousTalkLink.trim() : '',
     speakerTagline: typeof b.speakerTagline === 'string' ? b.speakerTagline.trim() : '',
     speakerBio: typeof b.speakerBio === 'string' ? b.speakerBio.trim() : '',

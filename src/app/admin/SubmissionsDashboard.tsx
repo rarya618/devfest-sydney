@@ -263,12 +263,36 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
         </div>
       )}
 
-      {(submission.socialLinks || submission.previousTalkLink) && (
+      {(submission.linkedinUrl || submission.githubUrl || submission.websiteUrl || submission.previousTalkLink) && (
         <div className="flex flex-wrap gap-2 mb-4">
-          {submission.socialLinks && (
+          {submission.linkedinUrl && (
             <LinkChip
-              label="Social"
-              value={submission.socialLinks}
+              label="LinkedIn"
+              value={submission.linkedinUrl}
+              accent="blue"
+              icon={
+                <svg className="w-3 h-3" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  <path d="M3.5 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM2.25 6.75h2.5v7.5h-2.5v-7.5zM6.75 6.75h2.4v1.03h.03c.33-.63 1.15-1.3 2.37-1.3 2.54 0 3.01 1.67 3.01 3.84v4.93h-2.5v-4.37c0-1.04-.02-2.38-1.45-2.38-1.45 0-1.67 1.14-1.67 2.3v4.45h-2.5v-7.5z" />
+                </svg>
+              }
+            />
+          )}
+          {submission.githubUrl && (
+            <LinkChip
+              label="GitHub"
+              value={submission.githubUrl}
+              accent="blue"
+              icon={
+                <svg className="w-3 h-3" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" clipRule="evenodd" d="M8 0a8 8 0 00-2.53 15.59c.4.07.55-.17.55-.38v-1.48c-2.23.48-2.7-1.07-2.7-1.07-.36-.93-.89-1.18-.89-1.18-.72-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.71 1.23 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.65-.89-3.65-3.96 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.22 2.2.82a7.5 7.5 0 014 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.08-1.88 3.76-3.66 3.96.29.25.55.74.55 1.5v2.22c0 .21.15.46.55.38A8 8 0 008 0z" />
+                </svg>
+              }
+            />
+          )}
+          {submission.websiteUrl && (
+            <LinkChip
+              label="Website"
+              value={submission.websiteUrl}
               accent="blue"
               icon={
                 <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
