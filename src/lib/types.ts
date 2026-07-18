@@ -13,6 +13,13 @@ export interface Sponsor {
   order: number;
 }
 
+export interface AdminUser {
+  email: string;
+  name: string;
+  addedBy: string;
+  addedAt: string;
+}
+
 export interface TeamMember {
   id: string;
   name: string;
