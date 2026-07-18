@@ -1,8 +1,8 @@
-import Link from 'next/link';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import FAQ from '@/components/FAQ';
+import CfsLink from '@/components/CfsLink';
 import { adminDb } from '@/lib/firebase-admin';
 import type { Sponsor, SponsorTier, TeamMember } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
@@ -106,12 +106,11 @@ export default async function Home() {
 
           <div className="flex flex-wrap items-center justify-center gap-5 mt-10 animate-slide-up" style={{ animationDelay: '0.3s' }}>
             {isCfsOpen ? (
-              <Link
-                href="/call-for-speakers"
+              <CfsLink
                 className="px-7 pt-2 pb-1.5 bg-google-blue text-white text-base font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all"
               >
                 Submit your session
-              </Link>
+              </CfsLink>
             ) : (
               <a
                 href="https://gdgsydney.com"
@@ -367,12 +366,11 @@ export default async function Home() {
               <p className="text-black-02/55 leading-relaxed mb-10 max-w-lg mx-auto">
                 The Call for Speakers is open now. We review every submission and get back to all applicants.
               </p>
-              <Link
-                href="/call-for-speakers"
+              <CfsLink
                 className="inline-flex px-7 pt-2 pb-1.5 bg-google-blue text-white text-base font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all"
               >
                 Submit your session
-              </Link>
+              </CfsLink>
             </>
           ) : (
             <>

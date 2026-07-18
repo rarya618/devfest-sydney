@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import CfsLink from './CfsLink';
 
 export default function Navbar({ light = false }: { light?: boolean }) {
   const [scrolled, setScrolled] = useState(false);
@@ -48,12 +49,11 @@ export default function Navbar({ light = false }: { light?: boolean }) {
         </Link>
 
         {/* CTA */}
-        <Link
-          href="/call-for-speakers"
+        <CfsLink
           className="inline-flex items-center px-5 pt-[5px] pb-1 bg-google-blue text-white text-sm font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all"
         >
           Call for Speakers
-        </Link>
+        </CfsLink>
       </div>
     </nav>
   );

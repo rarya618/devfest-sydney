@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import CfsLink from './CfsLink';
 
 const faqs = [
   {
@@ -80,9 +81,9 @@ export default function FAQ() {
               {faq.q.includes('submit a talk') && (
                 <>
                   {' Visit the '}
-                  <Link href="/call-for-speakers" className="text-google-blue hover:underline">
+                  <CfsLink className="text-google-blue hover:underline">
                     Call for Speakers page
-                  </Link>
+                  </CfsLink>
                   {'.'}
                 </>
               )}

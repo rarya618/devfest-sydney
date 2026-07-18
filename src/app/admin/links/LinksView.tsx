@@ -10,32 +10,39 @@ const FIELDS: { key: 'source' | 'medium' | 'campaign' | 'ref'; label: string; pl
   { key: 'ref', label: 'Ref', placeholder: 'e.g. newsletter' },
 ];
 
+const DESTINATIONS: { path: string; label: string }[] = [
+  { path: '/', label: 'Homepage' },
+  { path: '/call-for-speakers', label: 'Call for Speakers' },
+];
+
 export default function LinksView() {
   const [origin, setOrigin] = useState('');
   const [values, setValues] = useState({ source: '', medium: '', campaign: '', ref: '' });
-  const [copied, setCopied] = useState(false);
+  const [copiedPath, setCopiedPath] = useState<string | null>(null);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
 
   useEffect(() => {
     setOrigin(window.location.origin);
   }, []);
 
-  const url = useMemo(() => {
+  const query = useMemo(() => {
     const params = new URLSearchParams();
     if (values.source.trim()) params.set('utm_source', values.source.trim());
     if (values.medium.trim()) params.set('utm_medium', values.medium.trim());
     if (values.campaign.trim()) params.set('utm_campaign', values.campaign.trim());
     if (values.ref.trim()) params.set('ref', values.ref.trim());
+    return params.toString();
+  }, [values]);
 
-    const query = params.toString();
-    return `${origin}/call-for-speakers${query ? `?${query}` : ''}`;
-  }, [origin, values]);
+  function urlFor(path: string): string {
+    return `${origin}${path}${query ? `?${query}` : ''}`;
+  }
 
-  async function handleCopy() {
+  async function handleCopy(path: string) {
     try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      await navigator.clipboard.writeText(urlFor(path));
+      setCopiedPath(path);
+      setTimeout(() => setCopiedPath((current) => (current === path ? null : current)), 2000);
     } catch {
       setAlertMessage('Could not copy the link. Please select and copy it manually.');
     }
@@ -49,8 +56,9 @@ export default function LinksView() {
         <div className="bg-white border border-black-02/8 rounded-2xl px-5 py-5">
           <h2 className="text-sm font-bold text-black-02/70 mb-1">Generate a tracking link</h2>
           <p className="text-xs text-black-02/45 mb-4">
-            Add a source, medium, campaign, or ref to the Call for Speakers link so submissions show up under
-            &quot;Traffic sources&quot; on the Analytics page.
+            Add a source, medium, campaign, or ref to the homepage or Call for Speakers link so submissions show up
+            under &quot;Traffic sources&quot; on the Analytics page. Tracking params carry over automatically if
+            someone lands on the homepage and clicks through to Call for Speakers.
           </p>
 
           <div className="grid sm:grid-cols-4 gap-3 mb-4">
@@ -71,17 +79,24 @@ export default function LinksView() {
             ))}
           </div>
 
-          <div className="flex items-center gap-2">
-            <code className="flex-1 min-w-0 truncate text-xs text-black-02/70 bg-off-white border border-black-02/10 rounded-lg px-3 py-2">
-              {url}
-            </code>
-            <button
-              onClick={handleCopy}
-              aria-label="Copy tracking link"
-              className="shrink-0 text-xs font-semibold px-3 py-2 rounded-lg bg-google-blue text-white hover:bg-[#3574db] transition-colors"
-            >
-              {copied ? 'Copied!' : 'Copy'}
-            </button>
+          <div className="space-y-3">
+            {DESTINATIONS.map(({ path, label }) => (
+              <div key={path}>
+                <p className="text-xs font-medium text-black-02/45 mb-1.5">{label}</p>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 min-w-0 truncate text-xs text-black-02/70 bg-off-white border border-black-02/10 rounded-lg px-3 py-2">
+                    {urlFor(path)}
+                  </code>
+                  <button
+                    onClick={() => handleCopy(path)}
+                    aria-label={`Copy ${label} tracking link`}
+                    className="shrink-0 text-xs font-semibold px-3 py-2 rounded-lg bg-google-blue text-white hover:bg-[#3574db] transition-colors"
+                  >
+                    {copiedPath === path ? 'Copied!' : 'Copy'}
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

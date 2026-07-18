@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import Alert from '@/components/Alert';
+import { readTrackingParamsFromUrl } from '@/lib/tracking';
 
 type TalkFormat = 'talk' | 'lightning-talk' | 'workshop';
 type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced';
@@ -64,19 +65,6 @@ const LEVELS: { value: ExperienceLevel; label: string; desc: string }[] = [
 ];
 
 const ABSTRACT_MAX = 2000;
-
-const TRACKING_PARAMS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'ref'] as const;
-
-function readTrackingParamsFromUrl(): Record<string, string> {
-  if (typeof window === 'undefined') return {};
-  const params = new URLSearchParams(window.location.search);
-  const tracking: Record<string, string> = {};
-  for (const key of TRACKING_PARAMS) {
-    const value = params.get(key);
-    if (value) tracking[key] = value.slice(0, 200);
-  }
-  return tracking;
-}
 
 const SECTIONS: { id: string; label: string; required: boolean }[] = [
   { id: 'cfs-section-details', label: 'Your details', required: true },
