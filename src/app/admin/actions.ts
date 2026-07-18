@@ -55,6 +55,33 @@ export async function addAdmin(email: string, name: string): Promise<{ error?: s
   }
 }
 
+export async function removeAdmin(email: string): Promise<{ error?: string }> {
+  let currentAdminEmail: string;
+  try {
+    ({ email: currentAdminEmail } = await verifyAdminSession());
+  } catch {
+    return { error: 'Your session has expired. Please sign in again.' };
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+  if (normalizedEmail === currentAdminEmail) {
+    return { error: 'You can\'t remove your own admin access.' };
+  }
+
+  try {
+    const adminsSnap = await adminDb.collection('admins').get();
+    if (adminsSnap.size <= 1) {
+      return { error: 'At least one admin must remain.' };
+    }
+
+    await adminDb.collection('admins').doc(normalizedEmail).delete();
+    revalidatePath('/admin/admins');
+    return {};
+  } catch {
+    return { error: 'Could not remove this admin. Please try again.' };
+  }
+}
+
 export async function promoteSubmission(submissionId: string): Promise<{ error?: string }> {
   try {
     await verifyAdminSession();
