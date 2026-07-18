@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useTransition, type ReactNode } from 'react';
-import { promoteSubmission, rejectSubmission, restoreSubmission, undoPromotion } from './actions';
+import { promoteSubmission, rejectSubmission, restoreSubmission, undoPromotion, deleteSubmission } from './actions';
 import Alert from '@/components/Alert';
 import { formatDate } from '@/lib/format';
 import {
@@ -83,11 +83,22 @@ interface SubmissionRowProps {
 
 function SubmissionRow({ submission, onError }: SubmissionRowProps) {
   const [isPending, startTransition] = useTransition();
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   function handleAction(action: (id: string) => Promise<{ error?: string }>) {
     startTransition(async () => {
       const result = await action(submission.id);
       if (result.error) onError(result.error);
+    });
+  }
+
+  function handleDelete() {
+    startTransition(async () => {
+      const result = await deleteSubmission(submission.id);
+      if (result.error) {
+        setConfirmingDelete(false);
+        onError(result.error);
+      }
     });
   }
 
@@ -337,6 +348,36 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
               </svg>
               Undo
             </button>
+          )}
+          {submission.status !== 'accepted' && (
+            confirmingDelete ? (
+              <>
+                <button
+                  onClick={() => setConfirmingDelete(false)}
+                  disabled={isPending}
+                  className="text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={isPending}
+                  aria-label={`Confirm permanent deletion of proposal: ${submission.talkTitle}`}
+                  className="text-xs px-3 py-1.5 rounded-lg bg-google-red/10 border border-google-red/25 text-google-red hover:bg-google-red/15 transition-colors font-medium"
+                >
+                  {isPending ? 'Deleting…' : 'Confirm delete'}
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setConfirmingDelete(true)}
+                disabled={isPending}
+                aria-label={`Delete proposal: ${submission.talkTitle}`}
+                className="text-xs px-3 py-1.5 rounded-lg text-black-02/35 hover:text-google-red/85 transition-colors"
+              >
+                Delete
+              </button>
+            )
           )}
         </div>
       </div>
