@@ -218,6 +218,10 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
       {(submission.speakerBio ||
         submission.accessibilityNeeds ||
         submission.howDidYouHear ||
+        submission.tracking.utmSource ||
+        submission.tracking.utmMedium ||
+        submission.tracking.utmCampaign ||
+        submission.tracking.ref ||
         submission.coSpeakerEmails ||
         submission.hasSpokenAtGdgSydneyBefore ||
         submission.isOpenToAudienceQuestions) && (
@@ -240,6 +244,20 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
             <p className="text-xs text-black-02/40">
               <span className="font-medium text-black-02/50">Found us via: </span>
               {submission.howDidYouHear}
+            </p>
+          )}
+
+          {(submission.tracking.utmSource || submission.tracking.utmMedium || submission.tracking.utmCampaign || submission.tracking.ref) && (
+            <p className="text-xs text-black-02/40">
+              <span className="font-medium text-black-02/50">Link tracking: </span>
+              {[
+                submission.tracking.ref && `ref=${submission.tracking.ref}`,
+                submission.tracking.utmSource && `source=${submission.tracking.utmSource}`,
+                submission.tracking.utmMedium && `medium=${submission.tracking.utmMedium}`,
+                submission.tracking.utmCampaign && `campaign=${submission.tracking.utmCampaign}`,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
             </p>
           )}
 
@@ -484,13 +502,9 @@ export default function SubmissionsDashboard({ submissions, adminEmail, adminNam
                       : 'text-black-02/40 font-medium hover:text-black-02/65 hover:bg-black-02/[0.04]'
                   }`}
                 >
-                  <span className="leading-none">{tab.label}</span>
-                  <span
-                    className={`ml-2.5 leading-none text-xs px-1.5 py-0.5 rounded-full ${
-                      filter === tab.value ? 'bg-white/20 text-white' : 'bg-black-02/[0.06] text-black-02/40'
-                    }`}
-                  >
-                    {counts[tab.value]}
+                  <span className="leading-none">
+                    {tab.label}
+                    <span className="ml-2.5">{counts[tab.value]}</span>
                   </span>
                 </button>
               ))}

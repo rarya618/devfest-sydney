@@ -69,6 +69,14 @@ async function fetchSubmissions(): Promise<Submission[]> {
       hasSpokenAtGdgSydneyBefore: data.hasSpokenAtGdgSydneyBefore ?? false,
       isOpenToAudienceQuestions: data.isOpenToAudienceQuestions ?? false,
       optOutOfRecording: data.optOutOfRecording ?? false,
+      tracking: {
+        utmSource: data.tracking?.utm_source ?? '',
+        utmMedium: data.tracking?.utm_medium ?? '',
+        utmCampaign: data.tracking?.utm_campaign ?? '',
+        utmContent: data.tracking?.utm_content ?? '',
+        utmTerm: data.tracking?.utm_term ?? '',
+        ref: data.tracking?.ref ?? '',
+      },
       submittedAt: timestamp ? timestamp.toDate().toISOString() : new Date().toISOString(),
       status: data.status ?? 'pending',
     } satisfies Submission;

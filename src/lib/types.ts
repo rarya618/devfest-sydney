@@ -22,6 +22,15 @@ export interface TeamMember {
   order: number;
 }
 
+export interface SubmissionTracking {
+  utmSource: string;
+  utmMedium: string;
+  utmCampaign: string;
+  utmContent: string;
+  utmTerm: string;
+  ref: string;
+}
+
 export interface Submission {
   id: string;
   name: string;
@@ -39,6 +48,7 @@ export interface Submission {
   previousTalkLink: string;
   howDidYouHear: string;
   coSpeakerEmails: string;
+  tracking: SubmissionTracking;
   accessibilityNeeds: string;
   requiresTravelSupport: boolean;
   travelSupportLocation: string;

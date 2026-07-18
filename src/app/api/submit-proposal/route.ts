@@ -32,6 +32,23 @@ interface SubmissionPayload {
   hasSpokenAtGdgSydneyBefore: boolean;
   isOpenToAudienceQuestions: boolean;
   optOutOfRecording: boolean;
+  tracking: Record<string, string>;
+}
+
+const TRACKING_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'ref'] as const;
+const TRACKING_VALUE_MAX = 200;
+
+function sanitizeTracking(input: unknown): Record<string, string> {
+  const tracking: Record<string, string> = {};
+  if (!input || typeof input !== 'object') return tracking;
+  const raw = input as Record<string, unknown>;
+  for (const key of TRACKING_KEYS) {
+    const value = raw[key];
+    if (typeof value === 'string' && value.trim()) {
+      tracking[key] = value.trim().slice(0, TRACKING_VALUE_MAX);
+    }
+  }
+  return tracking;
 }
 
 const VALID_FORMATS: TalkFormat[] = ['talk', 'lightning-talk', 'workshop'];
@@ -104,6 +121,7 @@ function validatePayload(body: unknown): SubmissionPayload {
     hasSpokenAtGdgSydneyBefore: b.hasSpokenAtGdgSydneyBefore === true,
     isOpenToAudienceQuestions: b.isOpenToAudienceQuestions === true,
     optOutOfRecording: b.optOutOfRecording === true,
+    tracking: sanitizeTracking(b.tracking),
   };
 }
 
