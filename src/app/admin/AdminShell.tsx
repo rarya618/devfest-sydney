@@ -114,7 +114,7 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
                 </span>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-black-02 truncate" title={adminName}>{adminName}</p>
-                  <p className="text-xs font-mono text-black-02/45 truncate" title={adminEmail}>{adminEmail}</p>
+                  <p className="text-xs text-black-02/45 truncate" title={adminEmail}>{adminEmail}</p>
                 </div>
               </div>
 
