@@ -83,7 +83,7 @@ export default function AnalyticsView({ submissions }: Props) {
 
   return (
     <div className="max-w-3xl mx-auto px-4">
-      <h1 className="text-4xl font-bold text-black-02 tracking-tight text-center mt-8 mb-8">Analytics</h1>
+      <h1 className="text-4xl font-bold text-black-02 tracking-tight mt-8 mb-8">Analytics</h1>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <StatTile label="Total" count={total} />
