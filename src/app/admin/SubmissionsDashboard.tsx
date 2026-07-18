@@ -1,68 +1,19 @@
 'use client';
 
-import { useState, useCallback, useTransition, useRef, useEffect, type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
-import { signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { useState, useCallback, useTransition, type ReactNode } from 'react';
 import { promoteSubmission, rejectSubmission, restoreSubmission, undoPromotion } from './actions';
 import Alert from '@/components/Alert';
-import InviteAdminForm from './InviteAdminForm';
-import type { Submission, SubmissionStatus, Track, TalkFormat } from '@/lib/types';
-
-const STATUS_DOT_STYLES: Record<SubmissionStatus, { text: string; dot: string }> = {
-  pending: { text: 'text-google-yellow', dot: 'bg-google-yellow' },
-  accepted: { text: 'text-google-green', dot: 'bg-google-green' },
-  rejected: { text: 'text-black-02/40', dot: 'bg-black-02/30' },
-};
-
-const STATUS_LABELS: Record<SubmissionStatus, string> = {
-  pending: 'Pending',
-  accepted: 'Accepted',
-  rejected: 'Rejected',
-};
-
-const TRACK_LABELS: Record<Track, string> = {
-  developer: 'Developer',
-  builder: 'Builder',
-  workshop: 'Workshops',
-  showcase: 'Showcase',
-};
-
-const TRACK_COLORS: Record<Track, string> = {
-  developer: 'text-google-blue',
-  builder: 'text-google-green',
-  workshop: 'text-google-yellow',
-  showcase: 'text-google-yellow',
-};
-
-const TRACK_BORDER_COLORS: Record<Track, string> = {
-  developer: 'border-l-google-blue',
-  builder: 'border-l-google-green',
-  workshop: 'border-l-google-yellow',
-  showcase: 'border-l-google-yellow',
-};
-
-const TRACK_DOT_COLORS: Record<Track, string> = {
-  developer: 'bg-google-blue',
-  builder: 'bg-google-green',
-  workshop: 'bg-google-yellow',
-  showcase: 'bg-google-yellow',
-};
-
-const FORMAT_LABELS: Record<TalkFormat, string> = {
-  talk: 'Talk',
-  'lightning-talk': 'Lightning',
-  workshop: 'Workshop',
-};
-
-function getInitials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return '?';
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
+import { formatDate } from '@/lib/format';
+import {
+  STATUS_DOT_STYLES,
+  STATUS_LABELS,
+  TRACK_LABELS,
+  TRACK_COLORS,
+  TRACK_BORDER_COLORS,
+  TRACK_DOT_COLORS,
+  FORMAT_LABELS,
+} from '@/lib/submissionLabels';
+import type { Submission, SubmissionStatus } from '@/lib/types';
 
 function toHref(value: string): string | null {
   const trimmed = value.trim();
@@ -123,15 +74,6 @@ function LinkChip({ label, value, icon, accent }: LinkChipProps) {
   ) : (
     <span className={baseClasses}>{content}</span>
   );
-}
-
-function formatDate(isoString: string): string {
-  return new Date(isoString).toLocaleDateString('en-AU', {
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
 }
 
 interface SubmissionRowProps {
@@ -404,55 +346,15 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
 
 interface Props {
   submissions: Submission[];
-  adminEmail: string;
-  adminName: string;
 }
 
 type FilterStatus = 'all' | SubmissionStatus;
 
-export default function SubmissionsDashboard({ submissions, adminEmail, adminName }: Props) {
-  const router = useRouter();
+export default function SubmissionsDashboard({ submissions }: Props) {
   const [filter, setFilter] = useState<FilterStatus>('all');
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [signingOut, setSigningOut] = useState(false);
-  const [inviting, setInviting] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
-
-  useEffect(() => {
-    if (!menuOpen) return;
-
-    function handlePointerDown(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setMenuOpen(false);
-      }
-    }
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setMenuOpen(false);
-    }
-
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [menuOpen]);
-
-  async function handleSignOut() {
-    setSigningOut(true);
-    try {
-      await signOut(auth);
-      await fetch('/api/admin/session', { method: 'DELETE' });
-      router.push('/admin/login');
-      router.refresh();
-    } catch {
-      setSigningOut(false);
-      setAlertMessage('Sign-out failed. Please try again.');
-    }
-  }
 
   const counts: Record<FilterStatus, number> = {
     all: submissions.length,
@@ -472,154 +374,49 @@ export default function SubmissionsDashboard({ submissions, adminEmail, adminNam
 
   return (
     <>
-      <div className="min-h-screen bg-off-white pb-10">
+      <div className="max-w-3xl mx-auto px-4">
 
-        {/* Header */}
-        <div className="sticky top-0 z-20 border-b border-black-02/8 bg-off-white">
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 py-3">
-            <div className="flex items-center gap-3 shrink-0 justify-self-start">
-              <Link href="/" className="inline-flex items-center gap-0.5 hover:opacity-80 transition-opacity" aria-label="Back to DevFest Sydney home">
-                <Image
-                  src="/logo.png"
-                  alt="GDG"
-                  width={100}
-                  height={27}
-                  className="h-6 w-auto object-contain"
-                />
-                <span className="font-bold text-black-02 text-lg tracking-tight">DevFest Sydney</span>
-              </Link>
-            </div>
+        <div className="flex items-center justify-between mt-8 mb-8">
+          <h1 className="text-4xl font-bold text-black-02 tracking-tight">Submissions</h1>
 
-            <div className="flex items-center gap-1 justify-self-center">
-              {filterTabs.map((tab) => (
-                <button
-                  key={tab.value}
-                  onClick={() => setFilter(tab.value)}
-                  aria-pressed={filter === tab.value}
-                  className={`inline-flex items-center text-sm px-3 py-1.5 rounded-full transition-colors ${
-                    filter === tab.value
-                      ? 'bg-google-blue text-white font-bold'
-                      : 'text-black-02/40 font-medium hover:text-black-02/65 hover:bg-black-02/[0.04]'
-                  }`}
-                >
-                  <span className="leading-none">
-                    {tab.label}
-                    <span className="ml-2.5">{counts[tab.value]}</span>
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-4 shrink-0 justify-self-end">
-              <div className="relative" ref={menuRef}>
-                <button
-                  onClick={() => setMenuOpen((open) => !open)}
-                  aria-label="Admin menu"
-                  aria-haspopup="menu"
-                  aria-expanded={menuOpen}
-                  className={`flex items-center gap-2 pl-1.5 pr-2.5 py-1.5 rounded-full border transition-colors ${
-                    menuOpen ? 'border-black-02/25 bg-black-02/[0.03]' : 'border-black-02/15 hover:border-black-02/30'
-                  }`}
-                >
-                  <span className="flex items-center justify-center w-7 h-7 rounded-full bg-google-blue text-white text-xs font-bold shrink-0">
-                    {getInitials(adminName)}
-                  </span>
-                  <svg className={`w-3 h-3 text-black-02/40 transition-transform ${menuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
-                  </svg>
-                </button>
-
-                {menuOpen && (
-                  <div
-                    role="menu"
-                    className="absolute right-0 top-full mt-2 w-64 bg-white border border-black-02/10 rounded-2xl shadow-[0_12px_32px_rgba(30,30,30,0.14)] overflow-hidden"
-                  >
-                    <div className="flex items-center gap-3 px-4 py-3.5 bg-black-02/[0.02]">
-                      <span className="flex items-center justify-center w-9 h-9 rounded-full bg-google-blue text-white text-sm font-bold shrink-0">
-                        {getInitials(adminName)}
-                      </span>
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-black-02 truncate" title={adminName}>{adminName}</p>
-                        <p className="text-xs font-mono text-black-02/45 truncate" title={adminEmail}>{adminEmail}</p>
-                      </div>
-                    </div>
-
-                    <div className="py-1.5">
-                      <button
-                        role="menuitem"
-                        onClick={() => {
-                          setMenuOpen(false);
-                          setInviting(true);
-                        }}
-                        aria-label="Invite a new admin"
-                        className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-black-02/75 hover:bg-black-02/[0.04] transition-colors"
-                      >
-                        <svg className="w-4 h-4 text-black-02/40 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                          <circle cx="6" cy="5.5" r="2.75" />
-                          <path strokeLinecap="round" d="M1.5 14c0-2.76 2.24-4.5 4.5-4.5s4.5 1.74 4.5 4.5" />
-                          <path strokeLinecap="round" d="M12.5 5.5v4M10.5 7.5h4" />
-                        </svg>
-                        Invite admin
-                      </button>
-                    </div>
-
-                    <div className="border-t border-black-02/8 py-1.5">
-                      <button
-                        role="menuitem"
-                        onClick={() => {
-                          setMenuOpen(false);
-                          handleSignOut();
-                        }}
-                        disabled={signingOut}
-                        aria-label="Sign out of admin panel"
-                        className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-google-red/85 hover:bg-google-red/[0.06] transition-colors disabled:opacity-50"
-                      >
-                        <svg className="w-4 h-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 14H3.5A1.5 1.5 0 012 12.5v-9A1.5 1.5 0 013.5 2H6" />
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 11.5L14 8l-3.5-3.5M14 8H6" />
-                        </svg>
-                        {signingOut ? 'Signing out…' : 'Sign out'}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+          <div className="flex items-center gap-1">
+            {filterTabs.map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => setFilter(tab.value)}
+                aria-pressed={filter === tab.value}
+                className={`inline-flex items-center text-sm px-3 py-1.5 rounded-full transition-colors ${
+                  filter === tab.value
+                    ? 'bg-google-blue text-white font-bold'
+                    : 'text-black-02/40 font-medium hover:text-black-02/65 hover:bg-black-02/[0.04]'
+                }`}
+              >
+                <span className="leading-none">
+                  {tab.label}
+                  <span className="ml-2.5">{counts[tab.value]}</span>
+                </span>
+              </button>
+            ))}
           </div>
         </div>
 
-        <div className="max-w-3xl mx-auto px-4">
-
-          <h1 className="text-4xl font-bold text-black-02 tracking-tight text-center mt-8 mb-8">Submissions</h1>
-
-          {/* Submissions list */}
-          {filtered.length === 0 ? (
-            <div className="text-center py-16 text-black-02/30 text-sm">
-              No {filter === 'all' ? '' : filter} submissions yet.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {filtered.map((submission) => (
-                <SubmissionRow
-                  key={submission.id}
-                  submission={submission}
-                  onError={setAlertMessage}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        {/* Submissions list */}
+        {filtered.length === 0 ? (
+          <div className="text-center py-16 text-black-02/30 text-sm">
+            No {filter === 'all' ? '' : filter} submissions yet.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filtered.map((submission) => (
+              <SubmissionRow
+                key={submission.id}
+                submission={submission}
+                onError={setAlertMessage}
+              />
+            ))}
+          </div>
+        )}
       </div>
-
-      {inviting && (
-        <InviteAdminForm
-          onDone={() => setInviting(false)}
-          onError={(message) => {
-            setInviting(false);
-            setAlertMessage(message);
-          }}
-        />
-      )}
 
       {alertMessage && <Alert message={alertMessage} onDismiss={dismissAlert} />}
     </>
