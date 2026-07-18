@@ -49,7 +49,7 @@ export default function AdminsView({ admins, currentAdminEmail }: Props) {
                     {admin.name}
                     {isSelf && <span className="ml-2 text-xs font-medium text-black-02/40">(you)</span>}
                   </p>
-                  <p className="text-xs font-mono text-black-02/45 truncate">{admin.email}</p>
+                  <p className="text-xs text-black-02/45 truncate">{admin.email}</p>
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-xs text-black-02/40">Added {formatDate(admin.addedAt)}</p>
