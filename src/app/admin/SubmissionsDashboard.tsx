@@ -376,7 +376,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
     <>
       <div className="max-w-3xl mx-auto px-4">
 
-        <div className="flex items-center justify-between mt-8 mb-8">
+        <div className="flex items-center justify-between mt-8 mb-6">
           <h1 className="text-4xl font-bold text-black-02 tracking-tight">Submissions</h1>
 
           <div className="flex items-center gap-1">

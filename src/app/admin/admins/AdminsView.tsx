@@ -29,8 +29,8 @@ export default function AdminsView({ admins, currentAdminEmail }: Props) {
 
   return (
     <>
-      <div className="max-w-2xl mx-auto px-4">
-        <h1 className="text-4xl font-bold text-black-02 tracking-tight mt-8 mb-10">Admins</h1>
+      <div className="max-w-3xl mx-auto px-4">
+        <h1 className="text-4xl font-bold text-black-02 tracking-tight mt-8 mb-6">Admins</h1>
 
         <div className="space-y-3">
           {admins.map((admin) => {
