@@ -41,7 +41,7 @@ export default function AdminsView({ admins, currentAdminEmail }: Props) {
                 key={admin.email}
                 className="flex items-center gap-4 bg-white border border-black-02/8 rounded-2xl px-5 py-4"
               >
-                <span className="flex items-center justify-center w-10 h-10 rounded-full bg-google-blue text-white text-sm font-bold shrink-0">
+                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-google-blue text-white text-xs font-bold shrink-0">
                   {getInitials(admin.name)}
                 </span>
                 <div className="min-w-0 flex-1">
