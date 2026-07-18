@@ -13,6 +13,7 @@ import InviteAdminForm from './InviteAdminForm';
 const NAV_ITEMS: { href: string; label: string }[] = [
   { href: '/admin', label: 'Submissions' },
   { href: '/admin/analytics', label: 'Analytics' },
+  { href: '/admin/links', label: 'Links' },
   { href: '/admin/admins', label: 'Admins' },
 ];
 
