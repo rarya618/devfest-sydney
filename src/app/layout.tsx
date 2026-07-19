@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import TrackingCapture from "@/components/TrackingCapture";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://devfest.gdgsydney.com';
 
@@ -47,6 +48,7 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <GoogleAnalytics />
         <TrackingCapture />
         {children}
       </body>

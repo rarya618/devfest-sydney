@@ -37,6 +37,11 @@ env:
     availability:
       - BUILD
       - RUNTIME
+  - variable: NEXT_PUBLIC_GA_MEASUREMENT_ID
+    value: G-F2ZZ8H82BW
+    availability:
+      - BUILD
+      - RUNTIME
 
   # Call for Speakers toggle
   - variable: CFS_OPEN
