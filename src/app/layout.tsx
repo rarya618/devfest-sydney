@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import TrackingCapture from "@/components/TrackingCapture";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://devfest.gdgsydney.com';
 
@@ -45,7 +46,10 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <TrackingCapture />
+        {children}
+      </body>
     </html>
   );
 }

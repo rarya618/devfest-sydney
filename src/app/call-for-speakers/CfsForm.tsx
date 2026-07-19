@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import Alert from '@/components/Alert';
-import { readTrackingParamsFromUrl } from '@/lib/tracking';
+import { getTrackingParams } from '@/lib/tracking';
 
 type TalkFormat = 'talk' | 'lightning-talk' | 'workshop';
 type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced';
@@ -100,7 +100,7 @@ export default function CfsForm() {
     isOpenToAudienceQuestions: false,
     optOutOfRecording: false,
   });
-  const [tracking] = useState<Record<string, string>>(() => readTrackingParamsFromUrl());
+  const [tracking] = useState<Record<string, string>>(() => getTrackingParams());
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitState, setSubmitState] = useState<SubmitState>('idle');
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
