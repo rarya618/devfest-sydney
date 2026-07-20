@@ -30,6 +30,7 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
   const [signingOut, setSigningOut] = useState(false);
   const [inviting, setInviting] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,6 +53,10 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
+
   async function handleSignOut() {
     setSigningOut(true);
     try {
@@ -66,19 +71,60 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-off-white flex items-start">
-      {/* Sidebar */}
-      <div className="w-56 shrink-0 h-screen sticky top-0 flex flex-col border-r border-black-02/8 px-3 py-5">
-        <Link href="/" className="inline-flex items-center gap-0.5 px-2 mb-6 hover:opacity-80 transition-opacity" aria-label="Back to DevFest Sydney home">
-          <Image
-            src="/logo.png"
-            alt="GDG"
-            width={100}
-            height={27}
-            className="h-6 w-auto object-contain"
-          />
-          <span className="font-bold text-black-02 text-lg tracking-tight">DevFest Sydney</span>
+    <div className="min-h-screen bg-off-white md:flex md:items-start">
+      {/* Mobile top bar */}
+      <div className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-off-white border-b border-black-02/8">
+        <Link href="/" className="inline-flex items-center gap-0.5 hover:opacity-80 transition-opacity" aria-label="Back to DevFest Sydney home">
+          <Image src="/logo.png" alt="GDG" width={100} height={27} className="h-6 w-auto object-contain" />
+          <span className="font-bold text-black-02 text-base tracking-tight">DevFest Sydney</span>
         </Link>
+        <button
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Open admin menu"
+          className="p-2 -mr-2 text-black-02/60 hover:text-black-02 transition-colors"
+        >
+          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+            <path strokeLinecap="round" d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Overlay for mobile drawer */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black-02/40 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Sidebar */}
+      <div
+        className={`fixed md:sticky top-0 left-0 z-50 w-64 md:w-56 shrink-0 h-screen flex flex-col border-r border-black-02/8 px-3 py-5 bg-off-white transition-transform duration-200 md:transition-none ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:translate-x-0`}
+      >
+        <div className="flex items-center justify-between gap-2 px-2 mb-6">
+          <Link href="/" className="inline-flex items-center gap-0.5 hover:opacity-80 transition-opacity" aria-label="Back to DevFest Sydney home">
+            <Image
+              src="/logo.png"
+              alt="GDG"
+              width={100}
+              height={27}
+              className="h-6 w-auto object-contain"
+            />
+            <span className="font-bold text-black-02 text-lg tracking-tight">DevFest Sydney</span>
+          </Link>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close admin menu"
+            className="md:hidden shrink-0 p-1 text-black-02/50 hover:text-black-02 transition-colors"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+              <path strokeLinecap="round" d="M3 3l10 10M13 3L3 13" />
+            </svg>
+          </button>
+        </div>
 
         <nav aria-label="Admin sections" className="flex-1">
           <ul className="space-y-1">
@@ -88,6 +134,7 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
                 <li key={item.href}>
                   <Link
                     href={item.href}
+                    onClick={() => setSidebarOpen(false)}
                     aria-current={active ? 'page' : undefined}
                     className={`block text-sm px-3 py-2 rounded-lg transition-colors ${
                       active
@@ -181,7 +228,7 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
         </div>
       </div>
 
-      <main className="flex-1 min-w-0 pb-10">{children}</main>
+      <main className="flex-1 min-w-0 w-full pb-10">{children}</main>
 
       {inviting && (
         <InviteAdminForm

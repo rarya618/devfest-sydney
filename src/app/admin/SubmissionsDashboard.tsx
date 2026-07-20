@@ -104,14 +104,14 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
 
   return (
     <div
-      className={`bg-white border border-l-4 rounded-2xl p-6 shadow-[0_1px_3px_rgba(30,30,30,0.04)] transition-all hover:shadow-[0_4px_16px_rgba(30,30,30,0.07)] hover:-translate-y-0.5 ${
+      className={`bg-white border border-l-4 rounded-2xl p-4 sm:p-6 shadow-[0_1px_3px_rgba(30,30,30,0.04)] transition-all hover:shadow-[0_4px_16px_rgba(30,30,30,0.07)] hover:-translate-y-0.5 ${
         isPending ? 'opacity-50 pointer-events-none' : 'border-black-02/8'
       } ${TRACK_BORDER_COLORS[submission.track]}`}
       aria-label={`Submission from ${submission.name}: ${submission.talkTitle}`}
     >
-      <div className="flex items-start justify-between gap-4 mb-3">
-        <div className="min-w-0">
-          <h3 className="font-bold text-black-02 text-xl leading-snug tracking-tight truncate">{submission.talkTitle}</h3>
+      <div className="flex flex-wrap items-start justify-between gap-4 mb-3">
+        <div className="min-w-0 w-full sm:w-auto">
+          <h3 className="font-bold text-black-02 text-xl leading-snug tracking-tight">{submission.talkTitle}</h3>
           <p className="mt-1 truncate">
             <span className="text-sm font-medium text-black-02/70">{submission.name}</span>
             <span className="text-xs text-black-02/40"> &middot; {submission.email}</span>
@@ -120,7 +120,7 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
             <p className="text-xs text-black-02/40 truncate mt-0.5">{submission.speakerTagline}</p>
           )}
         </div>
-        <div className="shrink-0 flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
           {submission.isFirstTimeSpeaker && (
             <span className="inline-flex items-center gap-1 text-xs pl-2 pr-2.5 py-1 rounded-full border font-medium bg-google-green/10 text-google-green border-google-green/20">
               First-time speaker
@@ -289,7 +289,7 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
         </div>
       )}
 
-      <div className="flex items-center justify-between gap-3 pt-4 border-t border-black-02/6">
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-black-02/6">
         <div className="flex items-center gap-3">
           <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${STATUS_DOT_STYLES[submission.status].text}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT_STYLES[submission.status].dot}`} />
@@ -299,7 +299,7 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
           <span className="text-xs text-black-02/30">{formatDate(submission.submittedAt)}</span>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {submission.status === 'pending' && (
             <>
               <button
@@ -417,16 +417,16 @@ export default function SubmissionsDashboard({ submissions }: Props) {
     <>
       <div className="max-w-3xl mx-auto px-4">
 
-        <div className="flex items-center justify-between mt-8 mb-6">
-          <h1 className="text-4xl font-bold text-black-02 tracking-tight">Submissions</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-6 sm:mt-8 mb-6 gap-3">
+          <h1 className="text-3xl sm:text-4xl font-bold text-black-02 tracking-tight">Submissions</h1>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 -mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto">
             {filterTabs.map((tab) => (
               <button
                 key={tab.value}
                 onClick={() => setFilter(tab.value)}
                 aria-pressed={filter === tab.value}
-                className={`inline-flex items-center text-sm px-3 py-1.5 rounded-full transition-colors ${
+                className={`inline-flex items-center shrink-0 text-sm px-3 py-1.5 rounded-full transition-colors ${
                   filter === tab.value
                     ? 'bg-google-blue text-white font-bold'
                     : 'text-black-02/40 font-medium hover:text-black-02/65 hover:bg-black-02/[0.04]'
