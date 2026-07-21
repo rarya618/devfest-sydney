@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
+import type { ExperienceLevel, TalkFormat, Track } from '@/lib/types';
 
 const SESSION_COOKIE_NAME = '__session';
 
@@ -119,6 +120,105 @@ export async function promoteSubmission(submissionId: string): Promise<{ error?:
     return {};
   } catch {
     return { error: 'Could not promote this submission. Please try again.' };
+  }
+}
+
+export interface SubmissionEditableFields {
+  name: string;
+  email: string;
+  talkTitle: string;
+  abstract: string;
+  format: TalkFormat;
+  track: Track;
+  experienceLevel: ExperienceLevel;
+  linkedinUrl: string;
+  githubUrl: string;
+  websiteUrl: string;
+  speakerTagline: string;
+  speakerBio: string;
+  previousTalkLink: string;
+  accessibilityNeeds: string;
+  travelSupportLocation: string;
+  coSpeakerEmails: string;
+  requiresTravelSupport: boolean;
+  isGoogleDeveloperExpert: boolean;
+  isFirstTimeSpeaker: boolean;
+  wantsMentoring: boolean;
+  hasSpokenAtGdgSydneyBefore: boolean;
+  isOpenToAudienceQuestions: boolean;
+  optOutOfRecording: boolean;
+}
+
+const TALK_FORMATS: TalkFormat[] = ['talk', 'lightning-talk', 'workshop'];
+const TRACKS: Track[] = ['developer', 'builder', 'workshop', 'showcase'];
+const EXPERIENCE_LEVELS: ExperienceLevel[] = ['beginner', 'intermediate', 'advanced'];
+
+export async function updateSubmission(
+  submissionId: string,
+  fields: SubmissionEditableFields
+): Promise<{ error?: string }> {
+  try {
+    await verifyAdminSession();
+  } catch {
+    return { error: 'Your session has expired. Please sign in again.' };
+  }
+
+  const name = fields.name.trim();
+  const email = fields.email.trim().toLowerCase();
+  const talkTitle = fields.talkTitle.trim();
+  const abstract = fields.abstract.trim();
+
+  if (!name || !email || !talkTitle || !abstract) {
+    return { error: 'Name, email, talk title, and abstract can\'t be empty.' };
+  }
+  if (!EMAIL_PATTERN.test(email)) {
+    return { error: 'Please enter a valid email address.' };
+  }
+  if (!TALK_FORMATS.includes(fields.format)) {
+    return { error: 'Please select a valid talk format.' };
+  }
+  if (!TRACKS.includes(fields.track)) {
+    return { error: 'Please select a valid track.' };
+  }
+  if (!EXPERIENCE_LEVELS.includes(fields.experienceLevel)) {
+    return { error: 'Please select a valid experience level.' };
+  }
+
+  try {
+    const submissionRef = adminDb.collection('submissions').doc(submissionId);
+    const snap = await submissionRef.get();
+    if (!snap.exists) return { error: 'Submission not found.' };
+
+    await submissionRef.update({
+      name,
+      email,
+      talkTitle,
+      abstract,
+      format: fields.format,
+      track: fields.track,
+      experienceLevel: fields.experienceLevel,
+      linkedinUrl: fields.linkedinUrl.trim(),
+      githubUrl: fields.githubUrl.trim(),
+      websiteUrl: fields.websiteUrl.trim(),
+      speakerTagline: fields.speakerTagline.trim(),
+      speakerBio: fields.speakerBio.trim(),
+      previousTalkLink: fields.previousTalkLink.trim(),
+      accessibilityNeeds: fields.accessibilityNeeds.trim(),
+      travelSupportLocation: fields.travelSupportLocation.trim(),
+      coSpeakerEmails: fields.coSpeakerEmails.trim(),
+      requiresTravelSupport: fields.requiresTravelSupport,
+      isGoogleDeveloperExpert: fields.isGoogleDeveloperExpert,
+      isFirstTimeSpeaker: fields.isFirstTimeSpeaker,
+      wantsMentoring: fields.wantsMentoring,
+      hasSpokenAtGdgSydneyBefore: fields.hasSpokenAtGdgSydneyBefore,
+      isOpenToAudienceQuestions: fields.isOpenToAudienceQuestions,
+      optOutOfRecording: fields.optOutOfRecording,
+    });
+
+    revalidatePath('/admin');
+    return {};
+  } catch {
+    return { error: 'Could not save these changes. Please try again.' };
   }
 }
 

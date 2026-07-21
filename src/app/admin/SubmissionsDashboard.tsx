@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useTransition, type ReactNode } from 'react';
 import { promoteSubmission, rejectSubmission, restoreSubmission, undoPromotion, deleteSubmission } from './actions';
+import EditSubmissionModal from './EditSubmissionModal';
 import Alert from '@/components/Alert';
 import { formatDate } from '@/lib/format';
 import {
