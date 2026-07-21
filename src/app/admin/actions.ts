@@ -3,12 +3,12 @@
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import type { ExperienceLevel, TalkFormat, Track } from '@/lib/types';
 
 const SESSION_COOKIE_NAME = '__session';
 
-async function verifyAdminSession(): Promise<{ email: string }> {
+async function verifyAdminSession(): Promise<{ email: string; name: string }> {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value;
   if (!sessionCookie) throw new Error('No session.');
@@ -18,7 +18,7 @@ async function verifyAdminSession(): Promise<{ email: string }> {
   const adminDoc = await adminDb.collection('admins').doc(decoded.email).get();
   if (!adminDoc.exists) throw new Error('Not an admin.');
 
-  return { email: decoded.email };
+  return { email: decoded.email, name: adminDoc.data()?.name || decoded.email };
 }
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -120,6 +120,64 @@ export async function promoteSubmission(submissionId: string): Promise<{ error?:
     return {};
   } catch {
     return { error: 'Could not promote this submission. Please try again.' };
+  }
+}
+
+export async function addReviewerNote(submissionId: string, text: string): Promise<{ error?: string }> {
+  let authorName: string;
+  try {
+    ({ name: authorName } = await verifyAdminSession());
+  } catch {
+    return { error: 'Your session has expired. Please sign in again.' };
+  }
+
+  const trimmed = text.trim();
+  if (!trimmed) return { error: 'Note can\'t be empty.' };
+  if (trimmed.length > 2000) return { error: 'Note is too long (max 2000 characters).' };
+
+  try {
+    const submissionRef = adminDb.collection('submissions').doc(submissionId);
+    const snap = await submissionRef.get();
+    if (!snap.exists) return { error: 'Submission not found.' };
+
+    await submissionRef.update({
+      reviewerNotes: FieldValue.arrayUnion({
+        text: trimmed,
+        authorName,
+        createdAt: Timestamp.now(),
+      }),
+    });
+
+    revalidatePath('/admin');
+    return {};
+  } catch {
+    return { error: 'Could not save this note. Please try again.' };
+  }
+}
+
+export async function deleteReviewerNote(submissionId: string, noteIndex: number): Promise<{ error?: string }> {
+  try {
+    await verifyAdminSession();
+  } catch {
+    return { error: 'Your session has expired. Please sign in again.' };
+  }
+
+  try {
+    const submissionRef = adminDb.collection('submissions').doc(submissionId);
+    const snap = await submissionRef.get();
+    if (!snap.exists) return { error: 'Submission not found.' };
+
+    const notes = (snap.data()?.reviewerNotes ?? []) as unknown[];
+    if (noteIndex < 0 || noteIndex >= notes.length) return { error: 'Note not found.' };
+
+    await submissionRef.update({
+      reviewerNotes: notes.filter((_, index) => index !== noteIndex),
+    });
+
+    revalidatePath('/admin');
+    return {};
+  } catch {
+    return { error: 'Could not delete this note. Please try again.' };
   }
 }
 

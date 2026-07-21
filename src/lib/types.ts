@@ -38,6 +38,12 @@ export interface SubmissionTracking {
   ref: string;
 }
 
+export interface ReviewerNote {
+  text: string;
+  authorName: string;
+  createdAt: string; // ISO date string (serialized from Firestore Timestamp)
+}
+
 export interface Submission {
   id: string;
   name: string;
@@ -67,4 +73,5 @@ export interface Submission {
   optOutOfRecording: boolean;
   submittedAt: string; // ISO date string (serialized from Firestore Timestamp)
   status: SubmissionStatus;
+  reviewerNotes: ReviewerNote[];
 }

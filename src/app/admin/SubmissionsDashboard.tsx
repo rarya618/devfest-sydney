@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useCallback, useTransition, type ReactNode } from 'react';
-import { promoteSubmission, rejectSubmission, restoreSubmission, undoPromotion, deleteSubmission } from './actions';
+import { useState, useCallback, useTransition, type FormEvent, type ReactNode } from 'react';
+import { promoteSubmission, rejectSubmission, restoreSubmission, undoPromotion, deleteSubmission, addReviewerNote, deleteReviewerNote } from './actions';
 import EditSubmissionModal from './EditSubmissionModal';
 import Alert from '@/components/Alert';
 import { formatDate } from '@/lib/format';
@@ -15,7 +15,7 @@ import {
   FORMAT_LABELS,
   EXPERIENCE_LABELS,
 } from '@/lib/submissionLabels';
-import type { Submission, SubmissionStatus, Track } from '@/lib/types';
+import type { ReviewerNote, Submission, SubmissionStatus, Track } from '@/lib/types';
 
 function toHref(value: string): string | null {
   const trimmed = value.trim();
@@ -78,6 +78,99 @@ function LinkChip({ label, value, icon, accent }: LinkChipProps) {
   );
 }
 
+interface ReviewerNotesPanelProps {
+  submissionId: string;
+  notes: ReviewerNote[];
+  onError: (message: string) => void;
+}
+
+function ReviewerNotesPanel({ submissionId, notes, onError }: ReviewerNotesPanelProps) {
+  const [draft, setDraft] = useState('');
+  const [isPending, startTransition] = useTransition();
+  const [deletingIndex, setDeletingIndex] = useState<number | null>(null);
+  const [isDeleting, startDeleteTransition] = useTransition();
+
+  function handleAdd(event: FormEvent) {
+    event.preventDefault();
+    const text = draft.trim();
+    if (!text) return;
+
+    startTransition(async () => {
+      const result = await addReviewerNote(submissionId, text);
+      if (result.error) {
+        onError(result.error);
+      } else {
+        setDraft('');
+      }
+    });
+  }
+
+  function handleDelete(index: number) {
+    setDeletingIndex(index);
+    startDeleteTransition(async () => {
+      const result = await deleteReviewerNote(submissionId, index);
+      if (result.error) onError(result.error);
+      setDeletingIndex(null);
+    });
+  }
+
+  return (
+    <div className="mt-3 pt-3 border-t border-black-02/6 space-y-3">
+      {notes.length > 0 && (
+        <ul className="space-y-2">
+          {notes.map((note, index) => (
+            <li key={index} className="text-xs bg-off-white border border-black-02/8 rounded-lg px-3 py-2">
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-black-02/70 leading-relaxed whitespace-pre-wrap flex-1">{note.text}</p>
+                <button
+                  onClick={() => handleDelete(index)}
+                  disabled={isDeleting}
+                  aria-label={`Delete reviewer note from ${note.authorName}`}
+                  className="shrink-0 text-black-02/30 hover:text-google-red/85 transition-colors disabled:opacity-40"
+                >
+                  {isDeleting && deletingIndex === index ? (
+                    <span className="text-[10px]">Deleting…</span>
+                  ) : (
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3.5 4.5h9M6.5 4.5v-1a1 1 0 011-1h1a1 1 0 011 1v1m-5.5 0l.5 8a1 1 0 001 .95h5a1 1 0 001-.95l.5-8" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+              <p className="mt-1 text-[10px] text-black-02/35">
+                {note.authorName} &middot; {formatDate(note.createdAt)}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
+      <form onSubmit={handleAdd} className="flex items-start gap-2">
+        <label htmlFor={`note-${submissionId}`} className="sr-only">
+          Add a reviewer note
+        </label>
+        <textarea
+          id={`note-${submissionId}`}
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          placeholder="Add a reviewer note (admin-only)…"
+          rows={2}
+          maxLength={2000}
+          disabled={isPending}
+          className="flex-1 rounded-lg border border-black-02/15 bg-white px-3 py-2 text-xs text-black-02 placeholder:text-black-02/35 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30 resize-none disabled:opacity-50"
+        />
+        <button
+          type="submit"
+          disabled={isPending || !draft.trim()}
+          aria-label="Save reviewer note"
+          className="shrink-0 text-xs px-3 py-2 rounded-lg bg-google-blue/10 border border-google-blue/25 text-google-blue hover:bg-google-blue/15 transition-colors font-medium disabled:opacity-40"
+        >
+          {isPending ? 'Saving…' : 'Add'}
+        </button>
+      </form>
+    </div>
+  );
+}
+
 interface SubmissionRowProps {
   submission: Submission;
   onError: (message: string) => void;
@@ -90,6 +183,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
   const [isPending, startTransition] = useTransition();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
 
   function handleAction(action: (id: string) => Promise<{ error?: string }>) {
     startTransition(async () => {
@@ -317,6 +411,18 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
 
         <div className="flex flex-wrap gap-2">
           <button
+            onClick={() => setNotesOpen((open) => !open)}
+            disabled={isPending || bulkActionsPending}
+            aria-expanded={notesOpen}
+            aria-label={`${notesOpen ? 'Hide' : 'Show'} reviewer notes for: ${submission.talkTitle}`}
+            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
+          >
+            <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 3.5h11M2.5 7h11M2.5 10.5h7" />
+            </svg>
+            Notes{submission.reviewerNotes.length > 0 ? ` (${submission.reviewerNotes.length})` : ''}
+          </button>
+          <button
             onClick={() => setIsEditing(true)}
             disabled={isPending || bulkActionsPending}
             aria-label={`Edit submission: ${submission.talkTitle}`}
@@ -408,6 +514,14 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
           )}
         </div>
       </div>
+
+      {notesOpen && (
+        <ReviewerNotesPanel
+          submissionId={submission.id}
+          notes={submission.reviewerNotes}
+          onError={onError}
+        />
+      )}
 
       {isEditing && (
         <EditSubmissionModal

@@ -1,5 +1,5 @@
 import { adminDb } from '@/lib/firebase-admin';
-import type { Submission } from '@/lib/types';
+import type { ReviewerNote, Submission } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
 
 export async function fetchSubmissions(): Promise<Submission[]> {
@@ -47,6 +47,15 @@ export async function fetchSubmissions(): Promise<Submission[]> {
       },
       submittedAt: timestamp ? timestamp.toDate().toISOString() : new Date().toISOString(),
       status: data.status ?? 'pending',
+      reviewerNotes: ((data.reviewerNotes ?? []) as Array<{
+        text?: string;
+        authorName?: string;
+        createdAt?: Timestamp;
+      }>).map((note) => ({
+        text: note.text ?? '',
+        authorName: note.authorName ?? '',
+        createdAt: note.createdAt ? note.createdAt.toDate().toISOString() : new Date().toISOString(),
+      })) satisfies ReviewerNote[],
     } satisfies Submission;
   });
 }
