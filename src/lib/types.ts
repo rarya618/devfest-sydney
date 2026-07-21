@@ -1,7 +1,7 @@
 export type TalkFormat = 'talk' | 'lightning-talk' | 'workshop';
 export type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced';
 export type Track = 'developer' | 'builder' | 'workshop' | 'showcase';
-export type SubmissionStatus = 'pending' | 'accepted' | 'rejected';
+export type SubmissionStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
 export type SponsorTier = 'platinum' | 'gold' | 'silver' | 'community';
 
 export interface Sponsor {

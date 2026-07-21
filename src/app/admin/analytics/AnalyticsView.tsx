@@ -61,7 +61,7 @@ function getChannel(submission: Submission): string {
 export default function AnalyticsView({ submissions }: Props) {
   const total = submissions.length;
 
-  const statusCounts: Record<SubmissionStatus, number> = { pending: 0, accepted: 0, rejected: 0 };
+  const statusCounts: Record<SubmissionStatus, number> = { pending: 0, accepted: 0, rejected: 0, archived: 0 };
   const trackCounts: Partial<Record<Track, number>> = {};
   const formatCounts: Partial<Record<TalkFormat, number>> = {};
   const experienceCounts: Partial<Record<ExperienceLevel, number>> = {};

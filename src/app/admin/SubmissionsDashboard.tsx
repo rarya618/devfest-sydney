@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useTransition, type FormEvent, type ReactNode } from 'react';
-import { promoteSubmission, rejectSubmission, restoreSubmission, undoPromotion, deleteSubmission, addReviewerNote, deleteReviewerNote } from './actions';
+import { promoteSubmission, rejectSubmission, restoreSubmission, undoPromotion, archiveSubmission, addReviewerNote, deleteReviewerNote } from './actions';
 import EditSubmissionModal from './EditSubmissionModal';
 import Alert from '@/components/Alert';
 import { formatDate } from '@/lib/format';
@@ -181,7 +181,6 @@ interface SubmissionRowProps {
 
 function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActionsPending }: SubmissionRowProps) {
   const [isPending, startTransition] = useTransition();
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
 
@@ -189,16 +188,6 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
     startTransition(async () => {
       const result = await action(submission.id);
       if (result.error) onError(result.error);
-    });
-  }
-
-  function handleDelete() {
-    startTransition(async () => {
-      const result = await deleteSubmission(submission.id);
-      if (result.error) {
-        setConfirmingDelete(false);
-        onError(result.error);
-      }
     });
   }
 
@@ -439,7 +428,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
                 onClick={() => handleAction(rejectSubmission)}
                 disabled={isPending || bulkActionsPending}
                 aria-label={`Reject proposal: ${submission.talkTitle}`}
-                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-google-red/10 border border-google-red/25 text-google-red hover:bg-google-red/15 transition-colors font-medium"
               >
                 <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" d="M2.5 2.5l7 7m0-7l-7 7" />
@@ -459,7 +448,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
               </button>
             </>
           )}
-          {submission.status === 'rejected' && (
+          {(submission.status === 'rejected' || submission.status === 'archived') && (
             <button
               onClick={() => handleAction(restoreSubmission)}
               disabled={isPending || bulkActionsPending}
@@ -482,35 +471,15 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
               Undo
             </button>
           )}
-          {submission.status !== 'accepted' && (
-            confirmingDelete ? (
-              <>
-                <button
-                  onClick={() => setConfirmingDelete(false)}
-                  disabled={isPending || bulkActionsPending}
-                  className="text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDelete}
-                  disabled={isPending || bulkActionsPending}
-                  aria-label={`Confirm permanent deletion of proposal: ${submission.talkTitle}`}
-                  className="text-xs px-3 py-1.5 rounded-lg bg-google-red/10 border border-google-red/25 text-google-red hover:bg-google-red/15 transition-colors font-medium"
-                >
-                  {isPending ? 'Deleting…' : 'Confirm delete'}
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={() => setConfirmingDelete(true)}
-                disabled={isPending || bulkActionsPending}
-                aria-label={`Delete proposal: ${submission.talkTitle}`}
-                className="text-xs px-3 py-1.5 rounded-lg text-black-02/35 hover:text-google-red/85 transition-colors"
-              >
-                Delete
-              </button>
-            )
+          {submission.status !== 'accepted' && submission.status !== 'archived' && (
+            <button
+              onClick={() => handleAction(archiveSubmission)}
+              disabled={isPending || bulkActionsPending}
+              aria-label={`Archive proposal: ${submission.talkTitle}`}
+              className="text-xs px-3 py-1.5 rounded-lg text-black-02/35 hover:text-black-02/60 transition-colors"
+            >
+              Archive
+            </button>
           )}
         </div>
       </div>
@@ -582,16 +551,21 @@ export default function SubmissionsDashboard({ submissions }: Props) {
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
 
   const counts: Record<FilterStatus, number> = {
-    all: submissions.length,
+    all: submissions.filter((s) => s.status !== 'archived').length,
     pending: submissions.filter((s) => s.status === 'pending').length,
     accepted: submissions.filter((s) => s.status === 'accepted').length,
     rejected: submissions.filter((s) => s.status === 'rejected').length,
+    archived: submissions.filter((s) => s.status === 'archived').length,
   };
 
   const normalizedSearch = search.trim().toLowerCase();
 
   const filtered = submissions.filter((s) => {
-    if (filter !== 'all' && s.status !== filter) return false;
+    if (filter === 'all') {
+      if (s.status === 'archived') return false;
+    } else if (s.status !== filter) {
+      return false;
+    }
     if (trackFilter !== 'all' && s.track !== trackFilter) return false;
     if (
       normalizedSearch &&
@@ -619,6 +593,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
     { value: 'pending', label: 'Pending' },
     { value: 'accepted', label: 'Accepted' },
     { value: 'rejected', label: 'Rejected' },
+    { value: 'archived', label: 'Archived' },
   ];
 
   const visibleSelectedIds = sorted.filter((s) => selectedIds.has(s.id)).map((s) => s.id);
@@ -678,8 +653,12 @@ export default function SubmissionsDashboard({ submissions }: Props) {
     runBulkAction((s) => s.status === 'pending', rejectSubmission, 'Only pending submissions can be rejected.');
   }
 
-  function handleBulkDelete() {
-    runBulkAction((s) => s.status !== 'accepted', deleteSubmission, 'Accepted submissions can\'t be deleted. Undo the acceptance first.');
+  function handleBulkArchive() {
+    runBulkAction(
+      (s) => s.status !== 'accepted' && s.status !== 'archived',
+      archiveSubmission,
+      'Accepted submissions can\'t be archived. Undo the acceptance first.'
+    );
   }
 
   function handleExport() {
@@ -802,7 +781,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 onClick={handleBulkReject}
                 disabled={isBulkPending}
                 aria-label={`Reject ${selectedCount} selected submissions`}
-                className="text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
+                className="text-xs px-3 py-1.5 rounded-lg bg-google-red/10 border border-google-red/25 text-google-red hover:bg-google-red/15 transition-colors font-medium"
               >
                 Reject
               </button>
@@ -815,12 +794,12 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 Accept
               </button>
               <button
-                onClick={handleBulkDelete}
+                onClick={handleBulkArchive}
                 disabled={isBulkPending}
-                aria-label={`Delete ${selectedCount} selected submissions`}
-                className="text-xs px-3 py-1.5 rounded-lg bg-google-red/10 border border-google-red/25 text-google-red hover:bg-google-red/15 transition-colors font-medium"
+                aria-label={`Archive ${selectedCount} selected submissions`}
+                className="text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
               >
-                Delete
+                Archive
               </button>
               <button
                 onClick={clearSelection}

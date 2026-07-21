@@ -337,7 +337,7 @@ export async function restoreSubmission(submissionId: string): Promise<{ error?:
   }
 }
 
-export async function deleteSubmission(submissionId: string): Promise<{ error?: string }> {
+export async function archiveSubmission(submissionId: string): Promise<{ error?: string }> {
   try {
     await verifyAdminSession();
   } catch {
@@ -349,13 +349,13 @@ export async function deleteSubmission(submissionId: string): Promise<{ error?: 
     const snap = await submissionRef.get();
     if (!snap.exists) return { error: 'Submission not found.' };
     if (snap.data()?.status === 'accepted') {
-      return { error: 'Accepted submissions can\'t be deleted. Undo the acceptance first.' };
+      return { error: 'Accepted submissions can\'t be archived. Undo the acceptance first.' };
     }
 
-    await submissionRef.delete();
+    await submissionRef.update({ status: 'archived' });
     revalidatePath('/admin');
     return {};
   } catch {
-    return { error: 'Could not delete this submission. Please try again.' };
+    return { error: 'Could not archive this submission. Please try again.' };
   }
 }
