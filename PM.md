@@ -23,6 +23,7 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 - Open/closed toggle controlled by an env var `CFS_OPEN=true|false`
 - On submit: confirmation email to speaker (via Resend), submission stored in Firestore (`submissions` collection)
 - Accepted speakers are promoted to the `speakers` Firestore collection after review
+- **Multiple submissions per person are allowed by design** (e.g. someone submitting a talk and a workshop). Do not add dedupe/rate-limiting on email for `submit-proposal` without checking with the user first.
 
 ### Admin Flow
 - Auth via Firebase Auth (Google sign-in), restricted to emails in the `admins` Firestore collection
