@@ -13,8 +13,9 @@ import {
   TRACK_BORDER_COLORS,
   TRACK_DOT_COLORS,
   FORMAT_LABELS,
+  EXPERIENCE_LABELS,
 } from '@/lib/submissionLabels';
-import type { Submission, SubmissionStatus } from '@/lib/types';
+import type { Submission, SubmissionStatus, Track } from '@/lib/types';
 
 function toHref(value: string): string | null {
   const trimmed = value.trim();
@@ -80,11 +81,15 @@ function LinkChip({ label, value, icon, accent }: LinkChipProps) {
 interface SubmissionRowProps {
   submission: Submission;
   onError: (message: string) => void;
+  selected: boolean;
+  onToggleSelect: () => void;
+  bulkActionsPending: boolean;
 }
 
-function SubmissionRow({ submission, onError }: SubmissionRowProps) {
+function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActionsPending }: SubmissionRowProps) {
   const [isPending, startTransition] = useTransition();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   function handleAction(action: (id: string) => Promise<{ error?: string }>) {
     startTransition(async () => {
@@ -106,20 +111,30 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
   return (
     <div
       className={`bg-white border border-l-4 rounded-2xl p-4 sm:p-6 shadow-[0_1px_3px_rgba(30,30,30,0.04)] transition-all hover:shadow-[0_4px_16px_rgba(30,30,30,0.07)] hover:-translate-y-0.5 ${
-        isPending ? 'opacity-50 pointer-events-none' : 'border-black-02/8'
+        isPending ? 'opacity-50 pointer-events-none' : selected ? 'border-black-02/8 ring-2 ring-google-blue/30' : 'border-black-02/8'
       } ${TRACK_BORDER_COLORS[submission.track]}`}
       aria-label={`Submission from ${submission.name}: ${submission.talkTitle}`}
     >
       <div className="flex flex-wrap items-start justify-between gap-4 mb-3">
-        <div className="min-w-0 w-full sm:w-auto">
-          <h3 className="font-bold text-black-02 text-xl leading-snug tracking-tight">{submission.talkTitle}</h3>
-          <p className="mt-1 truncate">
-            <span className="text-sm font-medium text-black-02/70">{submission.name}</span>
-            <span className="text-xs text-black-02/40"> &middot; {submission.email}</span>
-          </p>
-          {submission.speakerTagline && (
-            <p className="text-xs text-black-02/40 truncate mt-0.5">{submission.speakerTagline}</p>
-          )}
+        <div className="flex items-start gap-3 min-w-0 w-full sm:w-auto">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={onToggleSelect}
+            disabled={bulkActionsPending}
+            aria-label={`Select submission: ${submission.talkTitle}`}
+            className="mt-1.5 shrink-0 w-4 h-4 rounded border-black-02/25 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue/40"
+          />
+          <div className="min-w-0">
+            <h3 className="font-bold text-black-02 text-xl leading-snug tracking-tight">{submission.talkTitle}</h3>
+            <p className="mt-1 truncate">
+              <span className="text-sm font-medium text-black-02/70">{submission.name}</span>
+              <span className="text-xs text-black-02/40"> &middot; {submission.email}</span>
+            </p>
+            {submission.speakerTagline && (
+              <p className="text-xs text-black-02/40 truncate mt-0.5">{submission.speakerTagline}</p>
+            )}
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
           {submission.isFirstTimeSpeaker && (
@@ -301,11 +316,22 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
         </div>
 
         <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setIsEditing(true)}
+            disabled={isPending || bulkActionsPending}
+            aria-label={`Edit submission: ${submission.talkTitle}`}
+            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
+          >
+            <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M11.5 2.5a1.5 1.5 0 012.12 2.12l-8 8-3 .88.88-3 8-8z" />
+            </svg>
+            Edit
+          </button>
           {submission.status === 'pending' && (
             <>
               <button
                 onClick={() => handleAction(rejectSubmission)}
-                disabled={isPending}
+                disabled={isPending || bulkActionsPending}
                 aria-label={`Reject proposal: ${submission.talkTitle}`}
                 className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
               >
@@ -316,7 +342,7 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
               </button>
               <button
                 onClick={() => handleAction(promoteSubmission)}
-                disabled={isPending}
+                disabled={isPending || bulkActionsPending}
                 aria-label={`Accept and promote proposal: ${submission.talkTitle}`}
                 className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-google-green/10 border border-google-green/25 text-google-green hover:bg-google-green/15 transition-colors font-medium"
               >
@@ -330,7 +356,7 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
           {submission.status === 'rejected' && (
             <button
               onClick={() => handleAction(restoreSubmission)}
-              disabled={isPending}
+              disabled={isPending || bulkActionsPending}
               aria-label={`Restore proposal to pending: ${submission.talkTitle}`}
               className="text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
             >
@@ -340,7 +366,7 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
           {submission.status === 'accepted' && (
             <button
               onClick={() => handleAction(undoPromotion)}
-              disabled={isPending}
+              disabled={isPending || bulkActionsPending}
               aria-label={`Undo acceptance of proposal: ${submission.talkTitle}`}
               className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
             >
@@ -355,14 +381,14 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
               <>
                 <button
                   onClick={() => setConfirmingDelete(false)}
-                  disabled={isPending}
+                  disabled={isPending || bulkActionsPending}
                   className="text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDelete}
-                  disabled={isPending}
+                  disabled={isPending || bulkActionsPending}
                   aria-label={`Confirm permanent deletion of proposal: ${submission.talkTitle}`}
                   className="text-xs px-3 py-1.5 rounded-lg bg-google-red/10 border border-google-red/25 text-google-red hover:bg-google-red/15 transition-colors font-medium"
                 >
@@ -372,7 +398,7 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
             ) : (
               <button
                 onClick={() => setConfirmingDelete(true)}
-                disabled={isPending}
+                disabled={isPending || bulkActionsPending}
                 aria-label={`Delete proposal: ${submission.talkTitle}`}
                 className="text-xs px-3 py-1.5 rounded-lg text-black-02/35 hover:text-google-red/85 transition-colors"
               >
@@ -382,6 +408,14 @@ function SubmissionRow({ submission, onError }: SubmissionRowProps) {
           )}
         </div>
       </div>
+
+      {isEditing && (
+        <EditSubmissionModal
+          submission={submission}
+          onClose={() => setIsEditing(false)}
+          onError={onError}
+        />
+      )}
     </div>
   );
 }
@@ -391,10 +425,45 @@ interface Props {
 }
 
 type FilterStatus = 'all' | SubmissionStatus;
+type TrackFilter = 'all' | Track;
+type SortOption = 'newest' | 'oldest' | 'track';
+
+const TRACK_SORT_ORDER: Record<Track, number> = {
+  developer: 0,
+  builder: 1,
+  workshop: 2,
+  showcase: 3,
+};
+
+const SORT_LABELS: Record<SortOption, string> = {
+  newest: 'Newest first',
+  oldest: 'Oldest first',
+  track: 'By track',
+};
+
+function escapeCsvCell(value: string): string {
+  return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+}
+
+function downloadCsv(filename: string, rows: string[][]) {
+  const csv = rows.map((row) => row.map(escapeCsvCell).join(',')).join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
 
 export default function SubmissionsDashboard({ submissions }: Props) {
   const [filter, setFilter] = useState<FilterStatus>('all');
+  const [trackFilter, setTrackFilter] = useState<TrackFilter>('all');
+  const [sort, setSort] = useState<SortOption>('newest');
+  const [search, setSearch] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [isBulkPending, startBulkTransition] = useTransition();
 
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
 
@@ -405,7 +474,31 @@ export default function SubmissionsDashboard({ submissions }: Props) {
     rejected: submissions.filter((s) => s.status === 'rejected').length,
   };
 
-  const filtered = filter === 'all' ? submissions : submissions.filter((s) => s.status === filter);
+  const normalizedSearch = search.trim().toLowerCase();
+
+  const filtered = submissions.filter((s) => {
+    if (filter !== 'all' && s.status !== filter) return false;
+    if (trackFilter !== 'all' && s.track !== trackFilter) return false;
+    if (
+      normalizedSearch &&
+      !s.name.toLowerCase().includes(normalizedSearch) &&
+      !s.email.toLowerCase().includes(normalizedSearch) &&
+      !s.talkTitle.toLowerCase().includes(normalizedSearch)
+    ) {
+      return false;
+    }
+    return true;
+  });
+
+  const sorted = [...filtered].sort((a, b) => {
+    if (sort === 'track') {
+      const trackDiff = TRACK_SORT_ORDER[a.track] - TRACK_SORT_ORDER[b.track];
+      if (trackDiff !== 0) return trackDiff;
+      return new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime();
+    }
+    const diff = new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime();
+    return sort === 'oldest' ? diff : -diff;
+  });
 
   const filterTabs: { value: FilterStatus; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -414,11 +507,91 @@ export default function SubmissionsDashboard({ submissions }: Props) {
     { value: 'rejected', label: 'Rejected' },
   ];
 
+  const visibleSelectedIds = sorted.filter((s) => selectedIds.has(s.id)).map((s) => s.id);
+  const allVisibleSelected = sorted.length > 0 && visibleSelectedIds.length === sorted.length;
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAllVisible() {
+    setSelectedIds((prev) => {
+      if (allVisibleSelected) {
+        const next = new Set(prev);
+        sorted.forEach((s) => next.delete(s.id));
+        return next;
+      }
+      const next = new Set(prev);
+      sorted.forEach((s) => next.add(s.id));
+      return next;
+    });
+  }
+
+  function clearSelection() {
+    setSelectedIds(new Set());
+  }
+
+  function runBulkAction(
+    eligible: (s: Submission) => boolean,
+    action: (id: string) => Promise<{ error?: string }>,
+    ineligibleMessage: string
+  ) {
+    const targets = sorted.filter((s) => selectedIds.has(s.id) && eligible(s));
+    if (targets.length === 0) {
+      setAlertMessage(ineligibleMessage);
+      return;
+    }
+    startBulkTransition(async () => {
+      const results = await Promise.all(targets.map((s) => action(s.id)));
+      const failures = results.filter((r) => r.error).length;
+      if (failures > 0) {
+        setAlertMessage(`${failures} of ${targets.length} submissions could not be updated. Please try again.`);
+      }
+      clearSelection();
+    });
+  }
+
+  function handleBulkAccept() {
+    runBulkAction((s) => s.status === 'pending', promoteSubmission, 'Only pending submissions can be accepted.');
+  }
+
+  function handleBulkReject() {
+    runBulkAction((s) => s.status === 'pending', rejectSubmission, 'Only pending submissions can be rejected.');
+  }
+
+  function handleBulkDelete() {
+    runBulkAction((s) => s.status !== 'accepted', deleteSubmission, 'Accepted submissions can\'t be deleted. Undo the acceptance first.');
+  }
+
+  function handleExport() {
+    const rows = [
+      ['Name', 'Email', 'Talk title', 'Track', 'Format', 'Experience', 'Status', 'Submitted at'],
+      ...sorted.map((s) => [
+        s.name,
+        s.email,
+        s.talkTitle,
+        TRACK_LABELS[s.track],
+        FORMAT_LABELS[s.format],
+        EXPERIENCE_LABELS[s.experienceLevel],
+        STATUS_LABELS[s.status],
+        formatDate(s.submittedAt),
+      ]),
+    ];
+    downloadCsv(`submissions-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+  }
+
+  const selectedCount = visibleSelectedIds.length;
+
   return (
     <>
       <div className="max-w-3xl mx-auto px-4">
 
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-6 sm:mt-8 mb-6 gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-6 sm:mt-8 mb-4 gap-3">
           <h1 className="text-3xl sm:text-4xl font-bold text-black-02 tracking-tight">Submissions</h1>
 
           <div className="flex items-center gap-1 -mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto">
@@ -442,18 +615,125 @@ export default function SubmissionsDashboard({ submissions }: Props) {
           </div>
         </div>
 
+        {/* Toolbar: search, track filter, sort, export */}
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          <div className="relative flex-1 min-w-[180px]">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-black-02/30" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+              <circle cx="7" cy="7" r="5" />
+              <path strokeLinecap="round" d="M11 11l3.5 3.5" />
+            </svg>
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search name, email, or talk title…"
+              aria-label="Search submissions"
+              className="w-full rounded-lg border border-black-02/15 bg-white pl-8 pr-3 py-1.5 text-xs text-black-02 placeholder:text-black-02/35 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30"
+            />
+          </div>
+
+          <select
+            value={trackFilter}
+            onChange={(e) => setTrackFilter(e.target.value as TrackFilter)}
+            aria-label="Filter by track"
+            className="rounded-lg border border-black-02/15 bg-white px-2.5 py-1.5 text-xs font-medium text-black-02/70 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30"
+          >
+            <option value="all">All tracks</option>
+            {(Object.entries(TRACK_LABELS) as [Track, string][]).map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
+
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortOption)}
+            aria-label="Sort submissions"
+            className="rounded-lg border border-black-02/15 bg-white px-2.5 py-1.5 text-xs font-medium text-black-02/70 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30"
+          >
+            {(Object.entries(SORT_LABELS) as [SortOption, string][]).map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
+
+          <button
+            onClick={handleExport}
+            aria-label="Export visible submissions as CSV"
+            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/60 hover:border-black-02/30 hover:text-black-02/85 transition-colors font-medium"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 1.5v8m0 0L5 6.5m3 3l3-3M2.5 11v2A1.5 1.5 0 004 14.5h8a1.5 1.5 0 001.5-1.5v-2" />
+            </svg>
+            Export
+          </button>
+        </div>
+
+        {/* Bulk selection bar */}
+        <div className="flex items-center justify-between gap-3 mb-4 px-1">
+          <label className="flex items-center gap-2 text-xs text-black-02/40">
+            <input
+              type="checkbox"
+              checked={allVisibleSelected}
+              onChange={toggleSelectAllVisible}
+              disabled={sorted.length === 0 || isBulkPending}
+              aria-label="Select all visible submissions"
+              className="w-4 h-4 rounded border-black-02/25 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue/40"
+            />
+            Select all
+          </label>
+
+          {selectedCount > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs text-black-02/40">{selectedCount} selected</span>
+              <button
+                onClick={handleBulkReject}
+                disabled={isBulkPending}
+                aria-label={`Reject ${selectedCount} selected submissions`}
+                className="text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
+              >
+                Reject
+              </button>
+              <button
+                onClick={handleBulkAccept}
+                disabled={isBulkPending}
+                aria-label={`Accept ${selectedCount} selected submissions`}
+                className="text-xs px-3 py-1.5 rounded-lg bg-google-green/10 border border-google-green/25 text-google-green hover:bg-google-green/15 transition-colors font-medium"
+              >
+                Accept
+              </button>
+              <button
+                onClick={handleBulkDelete}
+                disabled={isBulkPending}
+                aria-label={`Delete ${selectedCount} selected submissions`}
+                className="text-xs px-3 py-1.5 rounded-lg bg-google-red/10 border border-google-red/25 text-google-red hover:bg-google-red/15 transition-colors font-medium"
+              >
+                Delete
+              </button>
+              <button
+                onClick={clearSelection}
+                disabled={isBulkPending}
+                className="text-xs px-3 py-1.5 rounded-lg text-black-02/35 hover:text-black-02/60 transition-colors"
+              >
+                Clear
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Submissions list */}
-        {filtered.length === 0 ? (
+        {sorted.length === 0 ? (
           <div className="text-center py-16 text-black-02/30 text-sm">
-            No {filter === 'all' ? '' : filter} submissions yet.
+            No submissions match these filters.
           </div>
         ) : (
           <div className="space-y-3">
-            {filtered.map((submission) => (
+            {sorted.map((submission) => (
               <SubmissionRow
                 key={submission.id}
                 submission={submission}
                 onError={setAlertMessage}
+                selected={selectedIds.has(submission.id)}
+                onToggleSelect={() => toggleSelect(submission.id)}
+                bulkActionsPending={isBulkPending}
               />
             ))}
           </div>
