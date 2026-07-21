@@ -19,14 +19,24 @@ rules_version='2';
 //
 // Collection: speakers
 // Document ID: auto-generated
+// Written by promoteSubmission() (src/app/admin/actions.ts) when an admin
+// promotes a CfS submission — fields mirror that write exactly.
 // Fields:
 //   - name: string (required, 1–100 chars)
-//   - bio: string (required, 1–1000 chars)
-//   - photoUrl: string (required, valid https URL, max 500 chars)
+//   - email: string (required, valid email)
 //   - talkTitle: string (required, 1–150 chars)
-//   - talkAbstract: string (required, 1–2000 chars)
-//   - track: string (required) — 'developer' | 'builder' | 'showcase'
-//   - socialLinks: string (optional, max 500 chars)
+//   - abstract: string (required, 1–2000 chars)
+//   - format: string (required) — 'talk' | 'lightning-talk' | 'workshop'
+//   - track: string (required) — 'developer' | 'builder' | 'workshop' | 'showcase'
+//   - experienceLevel: string (required) — 'beginner' | 'intermediate' | 'advanced'
+//   - linkedinUrl: string (optional, max 500 chars, may be empty)
+//   - githubUrl: string (optional, max 500 chars, may be empty)
+//   - websiteUrl: string (optional, max 500 chars, may be empty)
+//   - submissionId: string (required) — id of the source submissions doc
+//   - promotedAt: timestamp (required)
+//   - bio: string (optional, max 1000 chars, may be empty)
+//   - tagline: string (optional, max 200 chars, may be empty)
+//   - photoUrl: string (optional, valid https URL or empty — starts blank until an admin adds one)
 //
 // Collection: admins
 // Document ID: user's email address
@@ -109,6 +119,23 @@ service cloud.firestore {
          request.resource.data[field].size() <= maxLen);
     }
 
+    // Like isValidOptionalString, but also accepts an empty string —
+    // for fields that are written blank and filled in later (e.g. photoUrl).
+    function isValidBlankableString(field, maxLen) {
+      return !(field in request.resource.data) ||
+        (request.resource.data[field] is string &&
+         request.resource.data[field].size() <= maxLen);
+    }
+
+    // Accepts a valid https URL, or an empty/absent string.
+    function isValidBlankableHttpsUrl(field, maxLen) {
+      return !(field in request.resource.data) ||
+        (request.resource.data[field] is string &&
+         (request.resource.data[field] == '' ||
+          (request.resource.data[field].matches('^https://.*') &&
+           request.resource.data[field].size() <= maxLen)));
+    }
+
     function isRecent(time) {
       return time is timestamp &&
         time > request.time - duration.value(5, 'm') &&
@@ -142,16 +169,28 @@ service cloud.firestore {
     }
 
     function isValidSpeaker(data) {
-      let allowedTracks = ['developer', 'builder', 'showcase'];
-      return data.keys().hasOnly(['name', 'bio', 'photoUrl', 'talkTitle',
-                                   'talkAbstract', 'track', 'socialLinks']) &&
+      let allowedFormats = ['talk', 'lightning-talk', 'workshop'];
+      let allowedTracks = ['developer', 'builder', 'workshop', 'showcase'];
+      let allowedLevels = ['beginner', 'intermediate', 'advanced'];
+      return data.keys().hasOnly(['name', 'email', 'talkTitle', 'abstract', 'format',
+                                   'track', 'experienceLevel', 'linkedinUrl', 'githubUrl',
+                                   'websiteUrl', 'submissionId', 'promotedAt', 'bio',
+                                   'tagline', 'photoUrl']) &&
         data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
-        data.bio is string && data.bio.size() >= 1 && data.bio.size() <= 1000 &&
-        data.photoUrl is string && isValidHttpsUrl(data.photoUrl) &&
+        data.email is string && isValidEmail(data.email) &&
         data.talkTitle is string && data.talkTitle.size() >= 1 && data.talkTitle.size() <= 150 &&
-        data.talkAbstract is string && data.talkAbstract.size() >= 1 && data.talkAbstract.size() <= 2000 &&
+        data.abstract is string && data.abstract.size() >= 1 && data.abstract.size() <= 2000 &&
+        data.format in allowedFormats &&
         data.track in allowedTracks &&
-        isValidOptionalString('socialLinks', 1, 500);
+        data.experienceLevel in allowedLevels &&
+        isValidBlankableString('linkedinUrl', 500) &&
+        isValidBlankableString('githubUrl', 500) &&
+        isValidBlankableString('websiteUrl', 500) &&
+        data.submissionId is string && data.submissionId.size() >= 1 &&
+        data.promotedAt is timestamp &&
+        isValidBlankableString('bio', 1000) &&
+        isValidBlankableString('tagline', 200) &&
+        isValidBlankableHttpsUrl('photoUrl', 500);
     }
 
     function isValidScheduleItem(data) {
