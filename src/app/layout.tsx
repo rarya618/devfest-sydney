@@ -26,10 +26,6 @@ export const metadata: Metadata = {
     title: 'DevFest Sydney 2026',
     description: 'Build, Secure, Scale. Sydney CBD · GDG Sydney.',
   },
-  icons: {
-    icon: '/logo.png',
-    apple: '/logo.png',
-  },
 };
 
 export default function RootLayout({
