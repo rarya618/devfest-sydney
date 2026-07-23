@@ -4,7 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import CfsLink from './CfsLink';
 
-const faqs = [
+function buildFaqs(isCfsOpen: boolean) {
+  return [
   {
     q: 'When and where is DevFest Sydney 2026?',
     a: 'DevFest Sydney 2026 will take place in Sydney CBD. The exact date and venue will be announced shortly.',
@@ -19,7 +20,9 @@ const faqs = [
   },
   {
     q: 'How do I submit a talk or workshop?',
-    a: 'Our Call for Speakers is open! We welcome talks, workshops, and lightning talks across the Developer, Builder, and Workshops tracks.',
+    a: isCfsOpen
+      ? 'Our Call for Speakers is open! We welcome talks, workshops, and lightning talks across the Developer, Builder, and Workshops tracks.'
+      : 'Our Call for Speakers is currently closed. We welcome talks, workshops, and lightning talks across the Developer, Builder, and Workshops tracks when it reopens.',
   },
   {
     q: 'What tracks are at DevFest Sydney?',
@@ -41,67 +44,78 @@ const faqs = [
     q: 'Is there a Code of Conduct?',
     a: 'Yes. DevFest Sydney is committed to providing a harassment-free experience for everyone, regardless of background or experience level.',
   },
-];
+  ];
+}
 
-export default function FAQ() {
+export default function FAQ({ isCfsOpen }: { isCfsOpen: boolean }) {
   const [open, setOpen] = useState<number | null>(null);
+  const faqs = buildFaqs(isCfsOpen);
 
   return (
-    <div className="divide-y divide-black-02/10 border-t border-b border-black-02/10">
+    <div className="grid sm:grid-cols-2 gap-4">
       {faqs.map((faq, i) => (
-        <div key={i}>
+        <div
+          key={i}
+          className="bg-white border border-black-02/8 rounded-2xl px-6 self-start"
+        >
           <button
             onClick={() => setOpen(open === i ? null : i)}
-            className="w-full py-5 flex justify-between items-center text-left gap-6 hover:opacity-70 transition-opacity"
+            aria-expanded={open === i}
+            className={`w-full pt-5 flex justify-between items-center text-left gap-6 hover:opacity-70 transition-[padding-bottom,opacity] duration-300 ${
+              open === i ? 'pb-2' : 'pb-5'
+            }`}
           >
-            <span className="font-medium text-black-02/90">{faq.q}</span>
+            <span className="font-bold text-black-02/90 text-base">{faq.q}</span>
             <span
               className={`text-black-02/35 text-xl flex-shrink-0 transition-transform duration-200 ${
                 open === i ? 'rotate-45' : ''
               }`}
+              aria-hidden="true"
             >
               +
             </span>
           </button>
           <div
-            className={`overflow-hidden transition-all duration-300 ${
-              open === i ? 'max-h-48' : 'max-h-0'
+            className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
+              open === i ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
             }`}
           >
-            <p className="pb-5 text-black-02/60 leading-relaxed text-sm">
-              {faq.a}
-              {faq.q.includes('Code of Conduct') && (
-                <>
-                  {' '}
-                  <Link href="/code-of-conduct" className="text-google-blue hover:underline">
-                    Read the full Code of Conduct.
-                  </Link>
-                </>
-              )}
-              {faq.q.includes('submit a talk') && (
-                <>
-                  {' Visit the '}
-                  <CfsLink className="text-google-blue hover:underline">
-                    Call for Speakers page
-                  </CfsLink>
-                  {'.'}
-                </>
-              )}
-              {faq.q.includes('What is GDG Sydney') && (
-                <>
-                  {' Visit '}
-                  <a
-                    href="https://gdgsydney.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-google-blue hover:underline"
-                  >
-                    gdgsydney.com
-                  </a>
-                  {'.'}
-                </>
-              )}
-            </p>
+            <div className="overflow-hidden">
+              <p className="pb-5 text-black-02/60 leading-relaxed text-sm">
+                {faq.a}
+                {faq.q.includes('Code of Conduct') && (
+                  <>
+                    {' '}
+                    <Link href="/code-of-conduct" className="text-google-blue hover:underline">
+                      Read the full Code of Conduct.
+                    </Link>
+                  </>
+                )}
+                {faq.q.includes('submit a talk') && (
+                  <>
+                    {' Visit the '}
+                    <CfsLink className="text-google-blue hover:underline">
+                      Call for Speakers page
+                    </CfsLink>
+                    {'.'}
+                  </>
+                )}
+                {faq.q.includes('What is GDG Sydney') && (
+                  <>
+                    {' Visit '}
+                    <a
+                      href="https://gdgsydney.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-google-blue hover:underline"
+                    >
+                      gdgsydney.com
+                    </a>
+                    {'.'}
+                  </>
+                )}
+              </p>
+            </div>
           </div>
         </div>
       ))}

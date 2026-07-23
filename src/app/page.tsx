@@ -200,7 +200,7 @@ export default async function Home() {
         <div className="max-w-3xl mx-auto">
           <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3 text-center">FAQ</p>
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-14 text-center">Common questions</h2>
-          <FAQ />
+          <FAQ isCfsOpen={isCfsOpen} />
         </div>
       </section>
 
