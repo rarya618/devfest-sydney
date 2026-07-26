@@ -34,11 +34,11 @@ function buildFaqs(isCfsOpen: boolean) {
   },
   {
     q: 'How can my company sponsor DevFest Sydney?',
-    a: 'We\'d love to hear from you. Reach out to hello@gdgsydney.com and we\'ll share our sponsorship options.',
+    a: 'We\'d love to hear from you. Reach out to ',
   },
   {
     q: 'Can I volunteer at DevFest Sydney?',
-    a: 'Yes, we\'re always looking for volunteers to help run the day. Email hello@gdgsydney.com to get involved.',
+    a: 'Yes, we\'re always looking for volunteers to help run the day. Email ',
   },
   {
     q: 'Is there a Code of Conduct?',
@@ -47,7 +47,13 @@ function buildFaqs(isCfsOpen: boolean) {
   ];
 }
 
-export default function FAQ({ isCfsOpen }: { isCfsOpen: boolean }) {
+export default function FAQ({
+  isCfsOpen,
+  sponsorshipProspectusUrl,
+}: {
+  isCfsOpen: boolean;
+  sponsorshipProspectusUrl?: string | null;
+}) {
   const [open, setOpen] = useState<number | null>(null);
   const faqs = buildFaqs(isCfsOpen);
 
@@ -98,6 +104,36 @@ export default function FAQ({ isCfsOpen }: { isCfsOpen: boolean }) {
                       Call for Speakers page
                     </CfsLink>
                     {'.'}
+                  </>
+                )}
+                {faq.q.includes('sponsor DevFest Sydney') && (
+                  <>
+                    <a href="mailto:hello@gdgsydney.com" className="text-google-blue hover:underline">
+                      hello@gdgsydney.com
+                    </a>
+                    {' and we\'ll share our sponsorship options.'}
+                    {sponsorshipProspectusUrl && (
+                      <>
+                        {' '}
+                        <a
+                          href={sponsorshipProspectusUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Download the DevFest Sydney sponsorship prospectus (PDF)"
+                          className="text-google-blue hover:underline"
+                        >
+                          Download the sponsorship prospectus.
+                        </a>
+                      </>
+                    )}
+                  </>
+                )}
+                {faq.q.includes('volunteer at DevFest Sydney') && (
+                  <>
+                    <a href="mailto:hello@gdgsydney.com" className="text-google-blue hover:underline">
+                      hello@gdgsydney.com
+                    </a>
+                    {' to get involved.'}
                   </>
                 )}
                 {faq.q.includes('What is GDG Sydney') && (
