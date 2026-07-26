@@ -154,12 +154,12 @@ export default async function Home() {
 
             <div className="space-y-4 text-black-02/60 leading-relaxed mb-10">
               <p>
-                DevFest Sydney is an annual community-run conference organised by GDG Sydney and presented
-                by Google, bringing together engineers, designers, product managers, and founders for a full
-                day of talks, workshops, and hands-on sessions.
+                DevFest Sydney is GDG Sydney&apos;s flagship annual conference, presented by Google. Each
+                year it brings together engineers, designers, product managers, and founders for a full day
+                of talks, workshops, and hands-on building.
               </p>
               <p>
-                The 2026 edition centres on the theme <span className="text-black-02/85 italic">&ldquo;Build, Secure, Scale: Developers and Builders in the Agentic Era&rdquo;</span>, exploring how the way we build and grow products is evolving in a world of agentic AI.
+                2026&apos;s theme, <span className="text-black-02/85 italic">&ldquo;Build, Secure, Scale: Developers and Builders in the Agentic Era,&rdquo;</span> looks at a real shift underway: the professional developer&apos;s role is moving from writing code to reviewing it. We&apos;re bringing together the people building, securing, and scaling products for that new reality.
               </p>
             </div>
 
@@ -191,64 +191,23 @@ export default async function Home() {
             )}
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 gap-4 animate-slide-up" style={{ animationDelay: '0.15s' }}>
+          <div
+            className="grid grid-cols-2 divide-x divide-y divide-black-02/10 border-t border-l border-black-02/10 animate-slide-up"
+            style={{ animationDelay: '0.15s' }}
+          >
             {[
-              {
-                label: 'Tracks',
-                value: '3',
-                iconBg: 'bg-google-blue/10',
-                iconColor: 'text-google-blue',
-                icon: (
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
-                ),
-              },
-              {
-                label: 'Community',
-                value: '2,000+',
-                iconBg: 'bg-google-green/10',
-                iconColor: 'text-google-green',
-                icon: (
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-                ),
-              },
-              {
-                label: 'Format',
-                value: 'Full-day, multi-track',
-                iconBg: 'bg-google-yellow/10',
-                iconColor: 'text-google-yellow',
-                icon: (
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                ),
-              },
-              {
-                label: 'Location',
-                value: 'Sydney CBD',
-                iconBg: 'bg-google-red/10',
-                iconColor: 'text-google-red',
-                icon: (
-                  <>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                  </>
-                ),
-              },
+              { label: 'Tracks', value: '3', dot: 'var(--google-blue)' },
+              { label: 'Community', value: '2,000+', dot: 'var(--google-green)' },
+              { label: 'Format', value: 'Full-day', dot: 'var(--google-yellow)' },
+              { label: 'Location', value: 'Sydney CBD', dot: 'var(--google-red)' },
             ].map((stat) => (
-              <div key={stat.label} className="bg-white border border-black-02/8 rounded-2xl p-5">
-                <div
-                  className={`w-9 h-9 rounded-full flex items-center justify-center mb-4 ${stat.iconBg}`}
-                >
-                  <svg
-                    className={`w-4.5 h-4.5 ${stat.iconColor}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={1.5}
-                    aria-hidden="true"
-                  >
-                    {stat.icon}
-                  </svg>
-                </div>
-                <p className="text-xl font-bold text-black-02/90 leading-tight mb-1">{stat.value}</p>
+              <div key={stat.label} className="p-6">
+                <span
+                  className="inline-block w-1.5 h-1.5 rounded-full mb-4"
+                  style={{ backgroundColor: stat.dot }}
+                  aria-hidden="true"
+                />
+                <p className="text-2xl font-bold text-black-02/90 leading-tight mb-1">{stat.value}</p>
                 <p className="text-xs text-black-02/45">{stat.label}</p>
               </div>
             ))}
