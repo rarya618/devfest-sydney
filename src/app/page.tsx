@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -6,6 +7,10 @@ import CfsLink from '@/components/CfsLink';
 import { adminDb } from '@/lib/firebase-admin';
 import type { Sponsor, SponsorTier, TeamMember } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
+
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+};
 
 const tracks = ['Developer Track', 'Builder Track', 'Workshops Track'];
 

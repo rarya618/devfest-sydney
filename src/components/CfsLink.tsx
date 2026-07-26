@@ -1,24 +1,17 @@
-'use client';
-
-import { useState, useEffect, type ReactNode, type AnchorHTMLAttributes } from 'react';
+import type { ReactNode, AnchorHTMLAttributes } from 'react';
 import Link from 'next/link';
-import { getTrackingParams } from '@/lib/tracking';
 
 interface CfsLinkProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> {
   children: ReactNode;
 }
 
+// Tracking attribution doesn't need to ride the visible URL: TrackingCapture
+// persists UTM params to localStorage on landing, and CfsForm reads them from
+// there at submit time. Keeping this link plain avoids showing the visitor's
+// own tracking source (e.g. "linkedin") in a link they can hover, copy, or share.
 export default function CfsLink({ children, ...rest }: CfsLinkProps) {
-  const [href, setHref] = useState('/call-for-speakers');
-
-  useEffect(() => {
-    const tracking = getTrackingParams();
-    const query = new URLSearchParams(tracking).toString();
-    if (query) setHref(`/call-for-speakers?${query}`);
-  }, []);
-
   return (
-    <Link href={href} {...rest}>
+    <Link href="/call-for-speakers" {...rest}>
       {children}
     </Link>
   );

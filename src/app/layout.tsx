@@ -28,6 +28,15 @@ export const metadata: Metadata = {
   },
 };
 
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'GDG Sydney',
+  url: siteUrl,
+  logo: `${siteUrl}/logo.png`,
+  sameAs: ['https://gdgsydney.com'],
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -41,6 +50,10 @@ export default function RootLayout({
         <link
           href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,400;0,700;1,400&display=swap"
           rel="stylesheet"
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
       </head>
       <body>

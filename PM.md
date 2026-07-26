@@ -71,10 +71,12 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 | 4 | CfS form | Form UI, validation, open/closed state |
 | 5 | CfS backend | Firestore submission storage + Resend confirmation email |
 | 6 | Admin panel | Login page (Firebase Auth / Google), submissions dashboard, promote-to-speaker action |
-| 7 | Speaker & schedule pages | Fetched from Firestore after CfS closes and speakers are accepted |
-| 8 | Polish & launch | Responsive QA, performance, accessibility; Firebase App Check (reCAPTCHA Enterprise) to restrict Firestore access to approved apps only |
-| 9 | Accessibility audit | Full WCAG AA compliance, keyboard navigation, screen reader support, focus management, skip links |
-| 10 | SEO | Metadata, OG images, sitemap, robots.txt, structured data (JSON-LD) |
+| 7 | SEO | Metadata, OG images, sitemap, robots.txt, structured data (JSON-LD) |
+| 8 | Speaker & schedule pages | Fetched from Firestore after CfS closes and speakers are accepted |
+| 9 | Polish & launch | Responsive QA, performance, accessibility; Firebase App Check (reCAPTCHA Enterprise) to restrict Firestore access to approved apps only |
+| 10 | Accessibility audit | Full WCAG AA compliance, keyboard navigation, screen reader support, focus management, skip links |
+
+> Reprioritized 2026-07-25: SEO moved up ahead of speaker/schedule pages, polish, and accessibility, so the CfS gets better search/social discovery while it's still open. Speaker/schedule pages are on hold until closer to the CfS closing date. Within Milestone 7, prioritize `/call-for-speakers` (metadata, OG image, JSON-LD, sitemap inclusion) before extending SEO work to the rest of the site.
 
 ## PM Rules
 
@@ -103,6 +105,7 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 
 ## Current Status
 
-**Active milestone:** 6 — Admin panel (complete)
-**Verified:** Google sign-in (`/admin/login`), session cookie only issued to emails in the `admins` Firestore collection (`/api/admin/session`), `/admin` and all server actions re-verify the session cookie, and `promoteSubmission` correctly copies submission data into `speakers` and marks the submission `accepted`.
-**Next task:** Milestone 7 — Speaker & schedule pages, fetched from Firestore once CfS closes and speakers are accepted.
+**Active milestone:** 7 — SEO (complete for all current public pages)
+**Verified:** `/`, `/call-for-speakers`, and `/code-of-conduct` each have correct `<title>`, canonical URL, and page-specific OpenGraph/Twitter metadata. `/call-for-speakers` has its own dynamic OG image (`opengraph-image.tsx`, on-brand GDG dots + wordmark, generated via `next/og`, no stored asset); `/` and `/code-of-conduct` share the site-wide default (`src/app/opengraph-image.tsx` — note: file-convention OG images do NOT cascade to child routes, so `/code-of-conduct` references it explicitly via `openGraph.images`/`twitter.images`). `sitemap.xml` and `robots.txt` (disallows `/admin`, `/api`) added. Minimal `Organization` JSON-LD added to the root layout. Confirmed via curl (200s, correct tags, valid sitemap/robots output) and visually inspected both OG images.
+**Deliberately deferred:** `Event` JSON-LD schema — needs a confirmed `startDate`, and the event date is still TBC per `EVENT.md`. Add once the date is locked in.
+**Next task:** Milestone 8 — Speaker & schedule pages (deferred until closer to the CfS closing date), or Milestone 9 — Polish & launch in the meantime.

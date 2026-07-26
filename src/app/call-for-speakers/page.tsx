@@ -5,9 +5,24 @@ import CfsForm from './CfsForm';
 
 export const dynamic = 'force-dynamic';
 
+const title = 'Call for Speakers';
+const description = 'Submit a talk, workshop, or lightning talk for DevFest Sydney 2026. We are looking for passionate speakers across the Developer, Builder, and Workshops tracks.';
+
 export const metadata: Metadata = {
-  title: 'Call for Speakers',
-  description: 'Submit a talk, workshop, or lightning talk for DevFest Sydney 2026. We are looking for passionate speakers across the Developer, Builder, and Workshops tracks.',
+  title,
+  description,
+  alternates: { canonical: '/call-for-speakers' },
+  openGraph: {
+    title: `${title} — DevFest Sydney 2026`,
+    description,
+    url: '/call-for-speakers',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${title} — DevFest Sydney 2026`,
+    description,
+  },
 };
 
 const isCfsOpen = process.env.CFS_OPEN === 'true';

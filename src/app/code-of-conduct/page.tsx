@@ -2,9 +2,26 @@ import type { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
+const title = 'Code of Conduct';
+const description = 'DevFest Sydney is dedicated to providing a harassment-free and inclusive experience for everyone. Read our community standards.';
+
 export const metadata: Metadata = {
-  title: 'Code of Conduct',
-  description: 'DevFest Sydney is dedicated to providing a harassment-free and inclusive experience for everyone. Read our community standards.',
+  title,
+  description,
+  alternates: { canonical: '/code-of-conduct' },
+  openGraph: {
+    title: `${title} — DevFest Sydney 2026`,
+    description,
+    url: '/code-of-conduct',
+    type: 'website',
+    images: ['/opengraph-image'],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${title} — DevFest Sydney 2026`,
+    description,
+    images: ['/opengraph-image'],
+  },
 };
 
 const sections = [
