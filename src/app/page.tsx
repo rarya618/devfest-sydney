@@ -61,13 +61,26 @@ async function fetchTeam(): Promise<TeamMember[]> {
   }
 }
 
+async function fetchSponsorshipProspectusUrl(): Promise<string | null> {
+  try {
+    const doc = await adminDb.collection('settings').doc('site').get();
+    return (doc.data()?.sponsorshipProspectusUrl as string | undefined) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 const showLandingContent = false;
 const showVenue = false;
 const showSponsors = false;
 
 export default async function Home() {
   const isCfsOpen = process.env.CFS_OPEN === 'true';
-  const [sponsors, team] = await Promise.all([fetchSponsors(), fetchTeam()]);
+  const [sponsors, team, sponsorshipProspectusUrl] = await Promise.all([
+    fetchSponsors(),
+    fetchTeam(),
+    fetchSponsorshipProspectusUrl(),
+  ]);
 
   const sponsorsByTier = TIER_ORDER.reduce<Record<SponsorTier, Sponsor[]>>(
     (acc, tier) => {
@@ -161,6 +174,21 @@ export default async function Home() {
                 </span>
               ))}
             </div>
+
+            {sponsorshipProspectusUrl && (
+              <a
+                href={sponsorshipProspectusUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Download the DevFest Sydney sponsorship prospectus (PDF)"
+                className="inline-flex items-center gap-2 mt-8 text-sm font-semibold text-google-blue hover:text-[#3574db] transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+                Download the sponsorship prospectus
+              </a>
+            )}
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 gap-4 animate-slide-up" style={{ animationDelay: '0.15s' }}>
