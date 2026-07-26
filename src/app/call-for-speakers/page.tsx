@@ -47,20 +47,13 @@ const topics: { label: string; track: 'developer' | 'builder' | 'workshop' }[] =
 export default function CallForSpeakers() {
   return (
     <div className="bg-off-white text-black-02 min-h-screen">
-      <Navbar light />
+      <Navbar light isCfsOpen={isCfsOpen} />
 
       {/* Hero */}
-      <section className="relative pt-36 pb-24 px-6 overflow-hidden">
+      <section className={`relative pb-24 px-6 overflow-hidden ${isCfsOpen ? 'pt-40' : 'pt-36'}`}>
         <div className="absolute inset-0 hero-atmosphere pointer-events-none" aria-hidden="true" />
 
         <div className="relative max-w-4xl mx-auto text-center">
-          <div className="flex items-center justify-center gap-2 mb-8 animate-fade-in">
-            <span className={`w-1.5 h-1.5 rounded-full ${isCfsOpen ? 'bg-google-red animate-pulse' : 'bg-black-02/30'}`} />
-            <span className={`text-sm font-medium ${isCfsOpen ? 'text-google-red' : 'text-black-02/50'}`}>
-              {isCfsOpen ? 'Call for Speakers: now open' : 'Call for Speakers: closed'}
-            </span>
-          </div>
-
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight mb-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
             Share your story at
             <br />
@@ -81,10 +74,13 @@ export default function CallForSpeakers() {
           {isCfsOpen && (
             <a
               href="#apply"
-              className="inline-flex px-7 pt-2 pb-1.5 bg-google-blue text-white text-base font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all animate-slide-up"
+              className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-google-blue text-white text-sm font-bold rounded-[3px] border border-google-blue transition-colors hover:bg-transparent hover:text-google-blue animate-slide-up"
               style={{ animationDelay: '0.3s' }}
             >
               Submit your session
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 6l6 6-6 6" />
+              </svg>
             </a>
           )}
 

@@ -92,24 +92,13 @@ export default async function Home() {
 
   return (
     <div className="bg-off-white text-black-02 min-h-screen">
-      <Navbar light />
+      <Navbar light isCfsOpen={isCfsOpen} />
 
       {/* ─── HERO ─── */}
-      <section className="relative pt-40 pb-28 px-6 overflow-hidden">
+      <section className={`relative pb-28 px-6 overflow-hidden ${isCfsOpen ? 'pt-44' : 'pt-40'}`}>
         <div className="absolute inset-0 hero-atmosphere pointer-events-none" aria-hidden="true" />
 
         <div className="relative max-w-7xl mx-auto flex flex-col items-center text-center">
-          {isCfsOpen ? (
-            <div className="flex items-center justify-center gap-2 text-sm font-medium text-google-red mb-8 animate-fade-in">
-              <span className="w-1.5 h-1.5 rounded-full bg-google-red animate-pulse" />
-              <span>Call for Speakers open</span>
-            </div>
-          ) : (
-            <p className="text-sm text-black-02/45 mb-8 animate-fade-in">
-              DevFest Sydney · Sydney CBD
-            </p>
-          )}
-
           <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
             <h1 className="text-[clamp(3.25rem,13vw,7rem)] font-bold leading-[0.95] tracking-tight text-black-02">
               Build, Secure,
@@ -122,21 +111,33 @@ export default async function Home() {
             </h2>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-5 mt-10 animate-slide-up" style={{ animationDelay: '0.3s' }}>
+          <div className="flex flex-wrap items-center justify-center gap-5 mt-14 animate-slide-up" style={{ animationDelay: '0.3s' }}>
+            <a
+              href="#about"
+              className="inline-flex items-center px-5 py-2.5 bg-transparent text-black-02/80 text-sm font-bold rounded-[3px] border border-black-02/15 transition-colors hover:border-black-02/30"
+            >
+              About
+            </a>
             {isCfsOpen ? (
               <CfsLink
-                className="px-7 pt-2 pb-1.5 bg-google-blue text-white text-base font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all"
+                className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-google-blue text-white text-sm font-bold rounded-[3px] border border-google-blue transition-colors hover:bg-transparent hover:text-google-blue"
               >
                 Submit your session
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 6l6 6-6 6" />
+                </svg>
               </CfsLink>
             ) : (
               <a
                 href="https://gdgsydney.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-7 pt-2 pb-1.5 bg-google-blue text-white text-base font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all"
+                className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-google-blue text-white text-sm font-bold rounded-[3px] border border-google-blue transition-colors hover:bg-transparent hover:text-google-blue"
               >
                 Follow GDG Sydney
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 6l6 6-6 6" />
+                </svg>
               </a>
             )}
           </div>
@@ -424,9 +425,12 @@ export default async function Home() {
                 The Call for Speakers is open now. We review every submission and get back to all applicants.
               </p>
               <CfsLink
-                className="inline-flex px-7 pt-2 pb-1.5 bg-google-blue text-white text-base font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all"
+                className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-google-blue text-white text-sm font-bold rounded-[3px] border border-google-blue transition-colors hover:bg-transparent hover:text-google-blue"
               >
                 Submit your session
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 6l6 6-6 6" />
+                </svg>
               </CfsLink>
             </>
           ) : (
@@ -439,9 +443,12 @@ export default async function Home() {
                 href="https://gdgsydney.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex px-7 pt-2 pb-1.5 bg-google-blue text-white text-base font-semibold rounded-full shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all"
+                className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-google-blue text-white text-sm font-bold rounded-[3px] border border-google-blue transition-colors hover:bg-transparent hover:text-google-blue"
               >
                 Follow GDG Sydney
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 6l6 6-6 6" />
+                </svg>
               </a>
             </>
           )}

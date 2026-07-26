@@ -861,9 +861,9 @@ export default function CfsForm() {
             type="submit"
             disabled={submitState === 'submitting'}
             aria-label="Submit your session"
-            className="inline-flex items-center justify-center gap-2 px-7 pt-2 pb-1.5 bg-google-blue text-white text-base font-semibold rounded-full
-              shadow-[0_1px_6px_rgba(66,133,244,0.28)] hover:bg-[#3574db] hover:-translate-y-0.5 transition-all
-              disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-google-blue disabled:hover:translate-y-0"
+            className="inline-flex items-center justify-center gap-2.5 px-5 py-2.5 bg-google-blue text-white text-sm font-bold rounded-[3px]
+              border border-google-blue transition-colors hover:bg-transparent hover:text-google-blue
+              disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-google-blue disabled:hover:text-white"
           >
             {submitState === 'submitting' ? (
               <>
@@ -874,7 +874,12 @@ export default function CfsForm() {
                 Submitting…
               </>
             ) : (
-              'Submit session'
+              <>
+                Submit session
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 6l6 6-6 6" />
+                </svg>
+              </>
             )}
           </button>
           <p className="text-xs text-black-02/35 mt-3">
