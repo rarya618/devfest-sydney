@@ -83,6 +83,20 @@ body {
   color: #ffffff;
 }
 
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
 /* Soft, brand-coloured atmosphere for the hero — four large, low-opacity
    blooms in the core Google colours. Purely decorative; keeps the hero from
    reading as flat while staying well clear of any legible content. */

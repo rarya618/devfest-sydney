@@ -230,9 +230,13 @@ export default function CfsForm() {
           />
           <div className="w-5 h-5 rounded-md border border-black-02/20 bg-white peer-checked:bg-google-red peer-checked:border-google-red transition-all group-hover:border-black-02/35 flex items-center justify-center">
             {fields[name] && (
-              <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
-              </svg>
+              <span
+                className="material-symbols-outlined text-white text-[18px] flex items-center justify-center"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+                aria-hidden="true"
+              >
+                check_small
+              </span>
             )}
           </div>
         </div>
@@ -247,9 +251,13 @@ export default function CfsForm() {
     return (
       <div className="bg-white border border-black-02/8 rounded-2xl p-12 text-center">
         <div className="w-14 h-14 rounded-full bg-google-green/15 border border-google-green/25 flex items-center justify-center mx-auto mb-5">
-          <svg className="w-6 h-6 text-google-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-          </svg>
+          <span
+            className="material-symbols-outlined text-google-green text-[44px] flex items-center justify-center"
+            style={{ fontVariationSettings: "'FILL' 1" }}
+            aria-hidden="true"
+          >
+            check_circle
+          </span>
         </div>
         <h3 className="text-xl font-bold text-black-02 mb-3">Session submitted!</h3>
         <p className="text-black-02/55 text-sm leading-relaxed max-w-sm mx-auto">
@@ -260,7 +268,7 @@ export default function CfsForm() {
   }
 
   const inputBase =
-    'w-full bg-white border rounded-xl px-4 py-3 text-black-02 text-sm placeholder-black-02/30 outline-none transition-colors focus:bg-white';
+    'w-full bg-white border rounded-md px-4 py-3 text-black-02 text-sm placeholder-black-02/30 outline-none transition-colors focus:bg-white';
   const inputNormal = `${inputBase} border-black-02/15 focus:border-google-red/40`;
   const inputError = `${inputBase} border-google-red/40 bg-google-red/5`;
 
@@ -292,9 +300,13 @@ export default function CfsForm() {
                       }`}
                   >
                     {isComplete && (
-                      <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
-                      </svg>
+                      <span
+                        className="material-symbols-outlined text-white text-[16px] flex items-center justify-center"
+                        style={{ fontVariationSettings: "'FILL' 1" }}
+                        aria-hidden="true"
+                      >
+                        check_small
+                      </span>
                     )}
                   </span>
                   {section.label}
@@ -329,9 +341,13 @@ export default function CfsForm() {
                       }`}
                   >
                     {isComplete && (
-                      <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
-                      </svg>
+                      <span
+                        className="material-symbols-outlined text-white text-[16px] flex items-center justify-center"
+                        style={{ fontVariationSettings: "'FILL' 1" }}
+                        aria-hidden="true"
+                      >
+                        check_small
+                      </span>
                     )}
                   </span>
                   <span className="flex-1">{section.label}</span>
@@ -349,9 +365,8 @@ export default function CfsForm() {
 
         {/* Section: Your details */}
         <div id="cfs-section-details" className="scroll-mt-28">
-          <div className="flex items-center gap-3 mb-5">
-            <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase whitespace-nowrap">Your details</p>
-            <div className="h-px flex-1 bg-black-02/8" aria-hidden="true" />
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-black-02">Your details</h3>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-5">
@@ -399,9 +414,8 @@ export default function CfsForm() {
 
         {/* Section: Your talk */}
         <div id="cfs-section-talk" className="scroll-mt-28">
-          <div className="flex items-center gap-3 mb-5">
-            <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase whitespace-nowrap">Your session</p>
-            <div className="h-px flex-1 bg-black-02/8" aria-hidden="true" />
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-black-02">Your session</h3>
           </div>
 
           <div className="space-y-7">
@@ -624,9 +638,9 @@ export default function CfsForm() {
 
         {/* Section: About you */}
         <div id="cfs-section-about" className="scroll-mt-28">
-          <div className="flex items-center gap-3 mb-5">
-            <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase whitespace-nowrap">About you <span className="text-black-02/25 normal-case font-medium tracking-normal">(optional)</span></p>
-            <div className="h-px flex-1 bg-black-02/8" aria-hidden="true" />
+          <div className="flex items-baseline gap-3 mb-6">
+            <h3 className="text-lg font-bold text-black-02">About you</h3>
+            <span className="text-xs font-medium text-black-02/35">Optional</span>
           </div>
           <div className="space-y-5">
             <div>
@@ -765,9 +779,9 @@ export default function CfsForm() {
 
         {/* Section: Logistics */}
         <div id="cfs-section-logistics" className="scroll-mt-28">
-          <div className="flex items-center gap-3 mb-5">
-            <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase whitespace-nowrap">Logistics <span className="text-black-02/25 normal-case font-medium tracking-normal">(optional)</span></p>
-            <div className="h-px flex-1 bg-black-02/8" aria-hidden="true" />
+          <div className="flex items-baseline gap-3 mb-6">
+            <h3 className="text-lg font-bold text-black-02">Logistics</h3>
+            <span className="text-xs font-medium text-black-02/35">Optional</span>
           </div>
 
           <div className="space-y-5">
@@ -867,10 +881,9 @@ export default function CfsForm() {
           >
             {submitState === 'submitting' ? (
               <>
-                <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                </svg>
+                <span className="material-symbols-outlined text-[16px] flex items-center justify-center animate-spin" aria-hidden="true">
+                  progress_activity
+                </span>
                 Submitting…
               </>
             ) : (
