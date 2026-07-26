@@ -71,18 +71,27 @@ export default function CallForSpeakers() {
             <span>Speaker support and mentoring</span>
           </div>
 
-          {isCfsOpen && (
+          <div className="flex flex-wrap items-center justify-center gap-5">
             <a
-              href="#apply"
-              className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-google-blue text-white text-sm font-bold rounded-[3px] border border-google-blue transition-colors hover:bg-transparent hover:text-google-blue animate-slide-up"
-              style={{ animationDelay: '0.3s' }}
+              href="#topics"
+              className="inline-flex items-center px-5 py-2.5 bg-transparent text-black-02/80 text-sm font-bold rounded-[3px] border border-black-02/15 transition-colors hover:border-black-02/30 animate-slide-up"
+              style={{ animationDelay: '0.25s' }}
             >
-              Submit your session
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 6l6 6-6 6" />
-              </svg>
+              Learn more
             </a>
-          )}
+            {isCfsOpen && (
+              <a
+                href="#apply"
+                className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-google-blue text-white text-sm font-bold rounded-[3px] border border-google-blue transition-colors hover:bg-transparent hover:text-google-blue animate-slide-up"
+                style={{ animationDelay: '0.3s' }}
+              >
+                Submit your session
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 6l6 6-6 6" />
+                </svg>
+              </a>
+            )}
+          </div>
 
           <p className="text-black-02/35 text-sm mt-5 animate-fade-in" style={{ animationDelay: '0.4s' }}>
             You don&apos;t need to be a seasoned speaker: first-time speakers are welcome.
@@ -91,7 +100,7 @@ export default function CallForSpeakers() {
       </section>
 
       {/* Topics */}
-      <section className="py-20 px-6 bg-white">
+      <section id="topics" className="py-20 px-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="mb-12 text-center animate-slide-up">
             <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3">Topic Ideas</p>
