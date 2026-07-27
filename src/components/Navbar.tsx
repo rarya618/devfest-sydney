@@ -25,6 +25,7 @@ export default function Navbar({ light = false, isCfsOpen = false }: { light?: b
           }`}
         >
           <CfsLink
+            source="banner"
             className="block bg-google-red text-white text-center py-2 text-xs font-semibold tracking-wide hover:underline underline-offset-2"
           >
             Call for Speakers is open — submit your session
@@ -64,6 +65,7 @@ export default function Navbar({ light = false, isCfsOpen = false }: { light?: b
 
           {/* CTA */}
           <CfsLink
+            source="navbar"
             className="inline-flex items-center px-4 py-2 bg-google-blue text-white text-xs font-bold rounded-[3px] border border-google-blue transition-colors hover:bg-transparent hover:text-google-blue"
           >
             Call for Speakers

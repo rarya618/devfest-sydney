@@ -8,6 +8,7 @@ import {
   EXPERIENCE_LABELS,
 } from '@/lib/submissionLabels';
 import type { Submission, SubmissionStatus, Track, TalkFormat, ExperienceLevel } from '@/lib/types';
+import { INTERNAL_UTM_SOURCE } from '@/lib/tracking';
 
 interface Props {
   submissions: Submission[];
@@ -53,8 +54,13 @@ function BreakdownCard({ title, children }: { title: string; children: ReactNode
 }
 
 function getChannel(submission: Submission): string {
-  if (submission.tracking.utmSource) return submission.tracking.utmSource;
+  // Internal CTAs (banner, navbar, etc.) all share the same utm_source — bucket those
+  // by their more specific ref instead, so "banner" and "navbar" show up separately.
+  if (submission.tracking.utmSource && submission.tracking.utmSource !== INTERNAL_UTM_SOURCE) {
+    return submission.tracking.utmSource;
+  }
   if (submission.tracking.ref) return submission.tracking.ref;
+  if (submission.tracking.utmSource) return submission.tracking.utmSource;
   return 'Direct / unknown';
 }
 

@@ -1,5 +1,11 @@
 export const TRACKING_PARAMS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'ref'] as const;
 
+// Fixed utm_source/utm_medium CfsLink sends for on-page CTAs (banner, navbar, etc.).
+// Shared with AnalyticsView so it knows to bucket these by their more specific `ref`
+// (e.g. "banner") instead of by this generic source.
+export const INTERNAL_UTM_SOURCE = 'devfest-site';
+export const INTERNAL_UTM_MEDIUM = 'internal';
+
 const STORAGE_KEY = 'dfs_tracking';
 const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 

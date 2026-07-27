@@ -120,6 +120,7 @@ export default async function Home() {
             </a>
             {isCfsOpen ? (
               <CfsLink
+                source="hero"
                 className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-google-blue text-white text-sm font-bold rounded-[3px] border border-google-blue transition-colors hover:bg-transparent hover:text-google-blue"
               >
                 Submit your session
@@ -425,6 +426,7 @@ export default async function Home() {
                 The Call for Speakers is open now. We review every submission and get back to all applicants.
               </p>
               <CfsLink
+                source="final-cta"
                 className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-google-blue text-white text-sm font-bold rounded-[3px] border border-google-blue transition-colors hover:bg-transparent hover:text-google-blue"
               >
                 Submit your session

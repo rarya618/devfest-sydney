@@ -100,7 +100,7 @@ export default function FAQ({
                 {faq.q.includes('submit a talk') && (
                   <>
                     {' Visit the '}
-                    <CfsLink className="text-google-blue hover:underline">
+                    <CfsLink source="faq" className="text-google-blue hover:underline">
                       Call for Speakers page
                     </CfsLink>
                     {'.'}

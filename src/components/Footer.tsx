@@ -9,7 +9,7 @@ export default function Footer({ light = false }: { light?: boolean }) {
       <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
         {/* Links */}
         <div className={`flex flex-wrap justify-center gap-6 text-sm mb-10 ${light ? 'text-black-02/55' : 'text-white/40'}`}>
-          <CfsLink className={light ? 'hover:text-black-02 transition-colors' : 'hover:text-white transition-colors'}>
+          <CfsLink source="footer" className={light ? 'hover:text-black-02 transition-colors' : 'hover:text-white transition-colors'}>
             Call for Speakers
           </CfsLink>
           <Link href="/code-of-conduct" className={light ? 'hover:text-black-02 transition-colors' : 'hover:text-white transition-colors'}>
