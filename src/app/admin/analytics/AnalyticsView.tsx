@@ -72,12 +72,20 @@ export default function AnalyticsView({ submissions }: Props) {
   const formatCounts: Partial<Record<TalkFormat, number>> = {};
   const experienceCounts: Partial<Record<ExperienceLevel, number>> = {};
   const channelCounts: Record<string, number> = {};
+  let firstTimeSpeakerCount = 0;
+  let gdeCount = 0;
+  let wantsMentoringCount = 0;
+  let requiresTravelSupportCount = 0;
 
   for (const submission of submissions) {
     statusCounts[submission.status] += 1;
     trackCounts[submission.track] = (trackCounts[submission.track] ?? 0) + 1;
     formatCounts[submission.format] = (formatCounts[submission.format] ?? 0) + 1;
     experienceCounts[submission.experienceLevel] = (experienceCounts[submission.experienceLevel] ?? 0) + 1;
+    if (submission.isFirstTimeSpeaker) firstTimeSpeakerCount += 1;
+    if (submission.isGoogleDeveloperExpert) gdeCount += 1;
+    if (submission.wantsMentoring) wantsMentoringCount += 1;
+    if (submission.requiresTravelSupport) requiresTravelSupportCount += 1;
     const channel = getChannel(submission);
     channelCounts[channel] = (channelCounts[channel] ?? 0) + 1;
   }
@@ -135,6 +143,13 @@ export default function AnalyticsView({ submissions }: Props) {
                   total={total}
                 />
               ))}
+          </BreakdownCard>
+
+          <BreakdownCard title="Speaker profile">
+            <BarRow label="First-time speakers" count={firstTimeSpeakerCount} total={total} />
+            <BarRow label="Google Developer Experts (GDE)" count={gdeCount} total={total} />
+            <BarRow label="Wants mentoring" count={wantsMentoringCount} total={total} />
+            <BarRow label="Requires travel support" count={requiresTravelSupportCount} total={total} />
           </BreakdownCard>
 
           <BreakdownCard title="Traffic sources">
