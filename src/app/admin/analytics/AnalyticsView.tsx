@@ -9,6 +9,7 @@ import {
 } from '@/lib/submissionLabels';
 import type { Submission, SubmissionStatus, Track, TalkFormat, ExperienceLevel } from '@/lib/types';
 import { INTERNAL_UTM_SOURCE } from '@/lib/tracking';
+import SubmissionsOverTimeChart from './SubmissionsOverTimeChart';
 
 interface Props {
   submissions: Submission[];
@@ -35,7 +36,7 @@ function BarRow({ label, count, total, dotClass }: { label: string; count: numbe
           {dotClass && <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotClass}`} aria-hidden="true" />}
           {label}
         </span>
-        <span className="text-black-02/40 font-mono text-xs shrink-0">{count} &middot; {pct}%</span>
+        <span className="text-black-02/40 text-xs shrink-0">{count} &middot; {pct}%</span>
       </div>
       <div className="h-2 rounded-full bg-black-02/[0.06] overflow-hidden">
         <div className="h-full rounded-full bg-google-blue" style={{ width: `${pct}%` }} />
@@ -109,55 +110,59 @@ export default function AnalyticsView({ submissions }: Props) {
       {total === 0 ? (
         <div className="text-center py-16 text-black-02/30 text-sm">No submissions yet.</div>
       ) : (
-        <div className="grid sm:grid-cols-2 gap-3">
-          <BreakdownCard title="By track">
-            {trackOrder
-              .filter((track) => trackCounts[track])
-              .map((track) => (
-                <BarRow
-                  key={track}
-                  label={TRACK_LABELS[track]}
-                  count={trackCounts[track] ?? 0}
-                  total={total}
-                  dotClass={TRACK_DOT_COLORS[track]}
-                />
+        <>
+          <SubmissionsOverTimeChart submissions={submissions} />
+
+          <div className="grid sm:grid-cols-2 gap-3">
+            <BreakdownCard title="By track">
+              {trackOrder
+                .filter((track) => trackCounts[track])
+                .map((track) => (
+                  <BarRow
+                    key={track}
+                    label={TRACK_LABELS[track]}
+                    count={trackCounts[track] ?? 0}
+                    total={total}
+                    dotClass={TRACK_DOT_COLORS[track]}
+                  />
+                ))}
+            </BreakdownCard>
+
+            <BreakdownCard title="By format">
+              {formatOrder
+                .filter((format) => formatCounts[format])
+                .map((format) => (
+                  <BarRow key={format} label={FORMAT_LABELS[format]} count={formatCounts[format] ?? 0} total={total} />
+                ))}
+            </BreakdownCard>
+
+            <BreakdownCard title="By experience level">
+              {experienceOrder
+                .filter((level) => experienceCounts[level])
+                .map((level) => (
+                  <BarRow
+                    key={level}
+                    label={EXPERIENCE_LABELS[level]}
+                    count={experienceCounts[level] ?? 0}
+                    total={total}
+                  />
+                ))}
+            </BreakdownCard>
+
+            <BreakdownCard title="Speaker profile">
+              <BarRow label="First-time speakers" count={firstTimeSpeakerCount} total={total} />
+              <BarRow label="Google Developer Experts (GDE)" count={gdeCount} total={total} />
+              <BarRow label="Wants mentoring" count={wantsMentoringCount} total={total} />
+              <BarRow label="Requires travel support" count={requiresTravelSupportCount} total={total} />
+            </BreakdownCard>
+
+            <BreakdownCard title="Traffic sources">
+              {channels.map(([channel, count]) => (
+                <BarRow key={channel} label={channel} count={count} total={total} />
               ))}
-          </BreakdownCard>
-
-          <BreakdownCard title="By format">
-            {formatOrder
-              .filter((format) => formatCounts[format])
-              .map((format) => (
-                <BarRow key={format} label={FORMAT_LABELS[format]} count={formatCounts[format] ?? 0} total={total} />
-              ))}
-          </BreakdownCard>
-
-          <BreakdownCard title="By experience level">
-            {experienceOrder
-              .filter((level) => experienceCounts[level])
-              .map((level) => (
-                <BarRow
-                  key={level}
-                  label={EXPERIENCE_LABELS[level]}
-                  count={experienceCounts[level] ?? 0}
-                  total={total}
-                />
-              ))}
-          </BreakdownCard>
-
-          <BreakdownCard title="Speaker profile">
-            <BarRow label="First-time speakers" count={firstTimeSpeakerCount} total={total} />
-            <BarRow label="Google Developer Experts (GDE)" count={gdeCount} total={total} />
-            <BarRow label="Wants mentoring" count={wantsMentoringCount} total={total} />
-            <BarRow label="Requires travel support" count={requiresTravelSupportCount} total={total} />
-          </BreakdownCard>
-
-          <BreakdownCard title="Traffic sources">
-            {channels.map(([channel, count]) => (
-              <BarRow key={channel} label={channel} count={count} total={total} />
-            ))}
-          </BreakdownCard>
-        </div>
+            </BreakdownCard>
+          </div>
+        </>
       )}
     </div>
   );
