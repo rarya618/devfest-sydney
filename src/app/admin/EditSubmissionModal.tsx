@@ -37,6 +37,12 @@ function toEditableFields(submission: Submission): SubmissionEditableFields {
     hasSpokenAtGdgSydneyBefore: submission.hasSpokenAtGdgSydneyBefore,
     isOpenToAudienceQuestions: submission.isOpenToAudienceQuestions,
     optOutOfRecording: submission.optOutOfRecording,
+    trackingUtmSource: submission.tracking.utmSource,
+    trackingUtmMedium: submission.tracking.utmMedium,
+    trackingUtmCampaign: submission.tracking.utmCampaign,
+    trackingUtmContent: submission.tracking.utmContent,
+    trackingUtmTerm: submission.tracking.utmTerm,
+    trackingRef: submission.tracking.ref,
   };
 }
 
@@ -328,6 +334,66 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
                   />
                 </div>
               )}
+            </div>
+
+            <div className="space-y-2 pt-2 border-t border-black-02/8">
+              <p className={labelClasses}>Link tracking</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelClasses} htmlFor="edit-tracking-ref">Ref</label>
+                  <input
+                    id="edit-tracking-ref"
+                    className={inputClasses}
+                    value={fields.trackingRef}
+                    onChange={(e) => update('trackingRef', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className={labelClasses} htmlFor="edit-tracking-source">UTM source</label>
+                  <input
+                    id="edit-tracking-source"
+                    className={inputClasses}
+                    value={fields.trackingUtmSource}
+                    onChange={(e) => update('trackingUtmSource', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className={labelClasses} htmlFor="edit-tracking-medium">UTM medium</label>
+                  <input
+                    id="edit-tracking-medium"
+                    className={inputClasses}
+                    value={fields.trackingUtmMedium}
+                    onChange={(e) => update('trackingUtmMedium', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className={labelClasses} htmlFor="edit-tracking-campaign">UTM campaign</label>
+                  <input
+                    id="edit-tracking-campaign"
+                    className={inputClasses}
+                    value={fields.trackingUtmCampaign}
+                    onChange={(e) => update('trackingUtmCampaign', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className={labelClasses} htmlFor="edit-tracking-content">UTM content</label>
+                  <input
+                    id="edit-tracking-content"
+                    className={inputClasses}
+                    value={fields.trackingUtmContent}
+                    onChange={(e) => update('trackingUtmContent', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className={labelClasses} htmlFor="edit-tracking-term">UTM term</label>
+                  <input
+                    id="edit-tracking-term"
+                    className={inputClasses}
+                    value={fields.trackingUtmTerm}
+                    onChange={(e) => update('trackingUtmTerm', e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 

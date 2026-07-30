@@ -205,6 +205,12 @@ export interface SubmissionEditableFields {
   hasSpokenAtGdgSydneyBefore: boolean;
   isOpenToAudienceQuestions: boolean;
   optOutOfRecording: boolean;
+  trackingUtmSource: string;
+  trackingUtmMedium: string;
+  trackingUtmCampaign: string;
+  trackingUtmContent: string;
+  trackingUtmTerm: string;
+  trackingRef: string;
 }
 
 const TALK_FORMATS: TalkFormat[] = ['talk', 'lightning-talk', 'workshop'];
@@ -271,6 +277,14 @@ export async function updateSubmission(
       hasSpokenAtGdgSydneyBefore: fields.hasSpokenAtGdgSydneyBefore,
       isOpenToAudienceQuestions: fields.isOpenToAudienceQuestions,
       optOutOfRecording: fields.optOutOfRecording,
+      tracking: {
+        utm_source: fields.trackingUtmSource.trim(),
+        utm_medium: fields.trackingUtmMedium.trim(),
+        utm_campaign: fields.trackingUtmCampaign.trim(),
+        utm_content: fields.trackingUtmContent.trim(),
+        utm_term: fields.trackingUtmTerm.trim(),
+        ref: fields.trackingRef.trim(),
+      },
     });
 
     revalidatePath('/admin');
