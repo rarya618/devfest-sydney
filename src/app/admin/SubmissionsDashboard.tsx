@@ -137,8 +137,8 @@ function ReviewerNotesPanel({ submissionId, notes, onError }: ReviewerNotesPanel
                   )}
                 </button>
               </div>
-              <p className="mt-1 text-[10px] text-black-02/35">
-                {note.authorName} &middot; {formatDate(note.createdAt)}
+              <p className="mt-1 text-xs text-black-02/35">
+                <span className="font-medium text-black-02/45">{note.authorName}</span> &middot; {formatDate(note.createdAt)}
               </p>
             </li>
           ))}
@@ -279,7 +279,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         submission.isOpenToAudienceQuestions) && (
         <div className="space-y-2 mb-4">
           {submission.speakerBio && (
-            <p className="text-xs text-black-02/50 bg-off-white border border-black-02/8 rounded-lg px-3 py-2 leading-relaxed">
+            <p className="text-sm text-black-02/50 bg-off-white border border-black-02/8 rounded-lg px-3 py-2 leading-relaxed">
               <span className="font-bold text-black-02/60">Bio: </span>
               {submission.speakerBio}
             </p>
