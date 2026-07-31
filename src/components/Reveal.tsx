@@ -13,6 +13,7 @@ export default function Reveal({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
+  const [animating, setAnimating] = useState(false);
 
   useEffect(() => {
     const node = ref.current;
@@ -22,6 +23,7 @@ export default function Reveal({
       ([entry]) => {
         if (entry.isIntersecting) {
           setVisible(true);
+          setAnimating(true);
           observer.disconnect();
         }
       },
@@ -35,8 +37,9 @@ export default function Reveal({
   return (
     <div
       ref={ref}
-      className={`${className} ${visible ? 'animate-slide-up' : 'opacity-0'}`}
-      style={visible ? { animationDelay: `${delay}s` } : undefined}
+      className={`${className} ${animating ? 'animate-slide-up' : visible ? '' : 'opacity-0'}`}
+      style={animating ? { animationDelay: `${delay}s` } : undefined}
+      onAnimationEnd={() => setAnimating(false)}
     >
       {children}
     </div>

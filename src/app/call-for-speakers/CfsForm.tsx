@@ -47,9 +47,9 @@ interface FormErrors {
   travelSupportLocation?: string;
 }
 
-const FORMATS: { value: TalkFormat; label: string; duration: string; desc: string }[] = [
-  { value: 'talk', label: 'Talk', duration: '30 min', desc: 'A focused technical or builder session.' },
-  { value: 'lightning-talk', label: 'Lightning Talk', duration: '10 min', desc: 'Short and punchy: one focused idea or demo.' },
+const FORMATS: { value: TalkFormat; label: string; duration: string; desc: string; color: string }[] = [
+  { value: 'talk', label: 'Talk', duration: '30 min', desc: 'A focused technical or builder session.', color: 'google-blue' },
+  { value: 'lightning-talk', label: 'Lightning Talk', duration: '10 min', desc: 'Short and punchy: one focused idea or demo.', color: 'google-yellow' },
 ];
 
 const TRACKS: { value: Track; label: string; color: string; desc: string }[] = [
@@ -58,10 +58,10 @@ const TRACKS: { value: Track; label: string; color: string; desc: string }[] = [
   { value: 'workshop', label: 'Workshops Track', color: 'google-yellow', desc: 'A dedicated hands-on stream running in parallel with the Developer and Builder talks.' },
 ];
 
-const LEVELS: { value: ExperienceLevel; label: string; desc: string }[] = [
-  { value: 'beginner', label: 'Beginner', desc: 'New to the topic or speaking' },
-  { value: 'intermediate', label: 'Intermediate', desc: 'Some experience speaking or in the field' },
-  { value: 'advanced', label: 'Advanced', desc: 'Deep expertise, seasoned speaker' },
+const LEVELS: { value: ExperienceLevel; label: string; desc: string; color: string }[] = [
+  { value: 'beginner', label: 'Beginner', desc: 'New to the topic or speaking', color: 'google-green' },
+  { value: 'intermediate', label: 'Intermediate', desc: 'Some experience speaking or in the field', color: 'google-yellow' },
+  { value: 'advanced', label: 'Advanced', desc: 'Deep expertise, seasoned speaker', color: 'google-blue' },
 ];
 
 const ABSTRACT_MAX = 2000;
@@ -123,6 +123,7 @@ export default function CfsForm() {
     return () => observer.disconnect();
   }, []);
 
+  const showFormat = fields.track === 'developer' || fields.track === 'builder';
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email);
   const sectionComplete: Record<string, boolean> = {
     'cfs-section-details': fields.name.trim() !== '' && isEmailValid,
@@ -228,7 +229,7 @@ export default function CfsForm() {
             }}
             className="sr-only peer"
           />
-          <div className="w-5 h-5 rounded-md border border-black-02/20 bg-white peer-checked:bg-google-red peer-checked:border-google-red transition-all group-hover:border-black-02/35 flex items-center justify-center">
+          <div className="w-5 h-5 rounded-md border border-black-02/20 bg-white peer-checked:bg-google-red peer-checked:border-google-red transition-colors duration-150 group-hover:border-black-02/35 flex items-center justify-center">
             {fields[name] && (
               <span
                 className="material-symbols-outlined text-white text-[18px] flex items-center justify-center"
@@ -249,17 +250,17 @@ export default function CfsForm() {
 
   if (submitState === 'success') {
     return (
-      <div className="bg-white border border-black-02/8 rounded-2xl p-12 text-center">
-        <div className="w-14 h-14 rounded-full bg-google-green/15 border border-google-green/25 flex items-center justify-center mx-auto mb-5">
+      <div className="bg-white border border-black-02/8 rounded-2xl p-12 text-center animate-slide-up">
+        <div className="flex items-center justify-center gap-3 mb-3">
           <span
-            className="material-symbols-outlined text-google-green text-[44px] flex items-center justify-center"
+            className="material-symbols-outlined text-google-green text-[32px] flex items-center justify-center shrink-0"
             style={{ fontVariationSettings: "'FILL' 1" }}
             aria-hidden="true"
           >
             check_circle
           </span>
+          <h3 className="text-xl font-bold text-black-02">Session submitted!</h3>
         </div>
-        <h3 className="text-xl font-bold text-black-02 mb-3">Session submitted!</h3>
         <p className="text-black-02/55 text-sm leading-relaxed max-w-sm mx-auto">
           Thanks for submitting to DevFest Sydney. We&apos;ll review your session and be in touch via email.
         </p>
@@ -268,7 +269,7 @@ export default function CfsForm() {
   }
 
   const inputBase =
-    'w-full bg-white border rounded-md px-4 py-3 text-black-02 text-sm placeholder-black-02/30 outline-none transition-colors focus:bg-white';
+    'w-full bg-white border rounded-lg px-4 py-3 text-black-02 text-sm placeholder-black-02/30 outline-none transition-colors focus:bg-white';
   const inputNormal = `${inputBase} border-black-02/15 focus:border-google-red/40`;
   const inputError = `${inputBase} border-google-red/40 bg-google-red/5`;
 
@@ -447,7 +448,7 @@ export default function CfsForm() {
             </label>
             <span
               aria-label={`${fields.abstract.length} of ${ABSTRACT_MAX} characters used`}
-              className={`text-xs font-mono tabular-nums ${fields.abstract.length > ABSTRACT_MAX ? 'text-google-red' : 'text-black-02/35'}`}
+              className={`text-xs tabular-nums ${fields.abstract.length > ABSTRACT_MAX ? 'text-google-red' : 'text-black-02/35'}`}
             >
               {fields.abstract.length}/{ABSTRACT_MAX}
             </span>
@@ -504,7 +505,7 @@ export default function CfsForm() {
                     }));
                     setErrors((prev) => ({ ...prev, track: undefined, format: undefined }));
                   }}
-                  className={`flex flex-col items-start text-left rounded-xl border px-4 py-4 transition-all cursor-pointer
+                  className={`flex flex-col items-start text-left rounded-xl border px-4 py-4 transition-colors duration-200 cursor-pointer
                     ${errors.track && !selected
                       ? 'border-google-red/30 bg-google-red/5 hover:border-google-red/30'
                       : colorMap[t.color]
@@ -532,8 +533,13 @@ export default function CfsForm() {
         </div>
 
         {/* Format */}
-        {(fields.track === 'developer' || fields.track === 'builder') && (
-          <div>
+        <div
+          className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
+            showFormat ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+          }`}
+        >
+          <div className="overflow-hidden">
+            <div className={`pt-1 transition-opacity duration-200 ${showFormat ? 'opacity-100' : 'opacity-0'}`}>
             <p className="text-sm font-bold text-black-02/70 mb-3" id="cfs-format-label">
               Session format <span className="text-google-red" aria-hidden="true">*</span>
             </p>
@@ -545,6 +551,14 @@ export default function CfsForm() {
             >
               {FORMATS.map((f) => {
                 const selected = fields.format === f.value;
+                const formatColorMap: Record<string, string> = {
+                  'google-blue': selected ? 'border-google-blue/50 bg-google-blue/10' : 'border-black-02/10 bg-off-white hover:border-black-02/20',
+                  'google-yellow': selected ? 'border-google-yellow/50 bg-google-yellow/10' : 'border-black-02/10 bg-off-white hover:border-black-02/20',
+                };
+                const formatPillColorMap: Record<string, string> = {
+                  'google-blue': 'bg-google-blue/20 text-google-blue',
+                  'google-yellow': 'bg-google-yellow/20 text-google-yellow',
+                };
                 return (
                   <button
                     key={f.value}
@@ -552,24 +566,27 @@ export default function CfsForm() {
                     role="radio"
                     aria-checked={selected}
                     aria-label={`${f.label}, ${f.duration}`}
+                    tabIndex={showFormat ? 0 : -1}
                     onClick={() => {
                       setFields((prev) => ({ ...prev, format: f.value }));
                       setErrors((prev) => ({ ...prev, format: undefined }));
                     }}
-                    className={`flex flex-col items-start text-left rounded-xl border px-4 py-4 transition-all cursor-pointer
-                      ${selected
-                        ? 'border-google-red/50 bg-google-red/10'
-                        : errors.format
-                          ? 'border-google-red/30 bg-google-red/5 hover:border-google-red/30'
-                          : 'border-black-02/10 bg-off-white hover:border-black-02/20'
+                    className={`flex flex-col items-start text-left rounded-xl border px-4 py-4 transition-colors duration-200 cursor-pointer
+                      ${errors.format && !selected
+                        ? 'border-google-red/30 bg-google-red/5 hover:border-google-red/30'
+                        : formatColorMap[f.color]
                       }`}
                   >
                     <div className="w-full flex items-center justify-between mb-1.5">
-                      <span className={`text-sm font-semibold ${selected ? 'text-black-02' : 'text-black-02/70'}`}>
+                      <span className={`inline-flex items-center gap-2 text-sm font-semibold ${selected ? 'text-black-02' : 'text-black-02/70'}`}>
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${f.color === 'google-blue' ? 'bg-google-blue' : 'bg-google-yellow'}`}
+                          aria-hidden="true"
+                        />
                         {f.label}
                       </span>
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-mono
-                        ${selected ? 'bg-google-red/20 text-google-red' : 'bg-black-02/6 text-black-02/40'}`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-full
+                        ${selected ? formatPillColorMap[f.color] : 'bg-black-02/6 text-black-02/40'}`}>
                         {f.duration}
                       </span>
                     </div>
@@ -583,8 +600,9 @@ export default function CfsForm() {
             {errors.format && (
               <p id="cfs-format-error" role="alert" className="mt-2 text-xs text-google-red/80">{errors.format}</p>
             )}
+            </div>
           </div>
-        )}
+        </div>
 
         {/* Experience level */}
 
@@ -600,6 +618,11 @@ export default function CfsForm() {
           >
             {LEVELS.map((level) => {
               const selected = fields.experienceLevel === level.value;
+              const levelColorMap: Record<string, string> = {
+                'google-green': selected ? 'border-google-green/50 bg-google-green/10' : 'border-black-02/10 bg-off-white hover:border-black-02/20',
+                'google-yellow': selected ? 'border-google-yellow/50 bg-google-yellow/10' : 'border-black-02/10 bg-off-white hover:border-black-02/20',
+                'google-blue': selected ? 'border-google-blue/50 bg-google-blue/10' : 'border-black-02/10 bg-off-white hover:border-black-02/20',
+              };
               return (
                 <button
                   key={level.value}
@@ -611,15 +634,19 @@ export default function CfsForm() {
                     setFields((prev) => ({ ...prev, experienceLevel: level.value }));
                     setErrors((prev) => ({ ...prev, experienceLevel: undefined }));
                   }}
-                  className={`flex flex-col items-start text-left rounded-xl border px-4 py-4 transition-all cursor-pointer
-                    ${selected
-                      ? 'border-google-red/50 bg-google-red/10'
-                      : errors.experienceLevel
-                        ? 'border-google-red/30 bg-google-red/5 hover:border-google-red/30'
-                        : 'border-black-02/10 bg-off-white hover:border-black-02/20'
+                  className={`flex flex-col items-start text-left rounded-xl border px-4 py-4 transition-colors duration-200 cursor-pointer
+                    ${errors.experienceLevel && !selected
+                      ? 'border-google-red/30 bg-google-red/5 hover:border-google-red/30'
+                      : levelColorMap[level.color]
                     }`}
                 >
-                  <span className={`w-full text-sm font-semibold mb-1.5 ${selected ? 'text-black-02' : 'text-black-02/70'}`}>
+                  <span className={`w-full flex items-center gap-2 text-sm font-semibold mb-1.5 ${selected ? 'text-black-02' : 'text-black-02/70'}`}>
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        level.color === 'google-green' ? 'bg-google-green' : level.color === 'google-yellow' ? 'bg-google-yellow' : 'bg-google-blue'
+                      }`}
+                      aria-hidden="true"
+                    />
                     {level.label}
                   </span>
                   <p className={`w-full text-xs leading-relaxed ${selected ? 'text-black-02/60' : 'text-black-02/40'}`}>
@@ -844,28 +871,35 @@ export default function CfsForm() {
             Travel support is limited. We may not be able to cover costs for non-GDE speakers.
           </p>
 
-          {fields.requiresTravelSupport && (
-            <div className="pt-2">
-              <label htmlFor="cfs-travel-location" className="block text-sm font-bold text-black-02/70 mb-2">
-                Which city would you be travelling from? <span className="text-google-red" aria-hidden="true">*</span>
-              </label>
-              <input
-                id="cfs-travel-location"
-                type="text"
-                placeholder="e.g. Melbourne, Australia"
-                aria-required="true"
-                aria-describedby={errors.travelSupportLocation ? 'cfs-travel-location-error' : undefined}
-                aria-invalid={!!errors.travelSupportLocation}
-                className={errors.travelSupportLocation ? inputError : inputNormal}
-                {...field('travelSupportLocation')}
-              />
-              {errors.travelSupportLocation && (
-                <p id="cfs-travel-location-error" role="alert" className="mt-1.5 text-xs text-google-red/80">
-                  {errors.travelSupportLocation}
-                </p>
-              )}
+          <div
+            className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
+              fields.requiresTravelSupport ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+            }`}
+          >
+            <div className="overflow-hidden">
+              <div className={`pt-2 transition-opacity duration-200 ${fields.requiresTravelSupport ? 'opacity-100' : 'opacity-0'}`}>
+                <label htmlFor="cfs-travel-location" className="block text-sm font-bold text-black-02/70 mb-2">
+                  Which city would you be travelling from? <span className="text-google-red" aria-hidden="true">*</span>
+                </label>
+                <input
+                  id="cfs-travel-location"
+                  type="text"
+                  placeholder="e.g. Melbourne, Australia"
+                  aria-required="true"
+                  aria-describedby={errors.travelSupportLocation ? 'cfs-travel-location-error' : undefined}
+                  aria-invalid={!!errors.travelSupportLocation}
+                  tabIndex={fields.requiresTravelSupport ? 0 : -1}
+                  className={errors.travelSupportLocation ? inputError : inputNormal}
+                  {...field('travelSupportLocation')}
+                />
+                {errors.travelSupportLocation && (
+                  <p id="cfs-travel-location-error" role="alert" className="mt-1.5 text-xs text-google-red/80">
+                    {errors.travelSupportLocation}
+                  </p>
+                )}
+              </div>
             </div>
-          )}
+          </div>
           </div>
         </div>
 

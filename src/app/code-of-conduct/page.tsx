@@ -111,7 +111,7 @@ export default function CodeOfConduct() {
                     href={`#${section.slug}`}
                     className="inline-flex items-baseline gap-3 text-sm text-black-02/60 hover:text-black-02 transition-colors"
                   >
-                    <span className="font-mono text-xs text-black-02/30 tabular-nums">0{i + 1}</span>
+                    <span className="text-xs text-black-02/30 tabular-nums">0{i + 1}</span>
                     {section.title}
                   </a>
                 </li>
@@ -134,7 +134,7 @@ export default function CodeOfConduct() {
                       href={`#${section.slug}`}
                       className="flex items-baseline gap-3 text-sm text-black-02/60 hover:text-black-02 transition-colors"
                     >
-                      <span className="font-mono text-xs text-black-02/30 tabular-nums">0{i + 1}</span>
+                      <span className="text-xs text-black-02/30 tabular-nums">0{i + 1}</span>
                       {section.title}
                     </a>
                   </li>
@@ -148,7 +148,7 @@ export default function CodeOfConduct() {
             {sections.map((section, i) => (
               <div key={section.slug} id={section.slug} className="scroll-mt-24">
                 <div className="flex items-baseline gap-4 mb-4">
-                  <span className="font-mono text-sm text-google-green/70 tabular-nums">0{i + 1}</span>
+                  <span className="text-sm text-google-green/70 tabular-nums">0{i + 1}</span>
                   <h2 className="text-xl font-bold text-black-02">{section.title}</h2>
                 </div>
                 {section.content && (

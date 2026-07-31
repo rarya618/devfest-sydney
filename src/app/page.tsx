@@ -231,7 +231,7 @@ export default async function Home() {
               <Reveal
                 key={track.name}
                 delay={i * 0.1}
-                className="bg-white border border-black-02/8 rounded-2xl p-8 transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-black-02/5"
+                className="card-hover-lift bg-white border border-black-02/8 rounded-2xl p-8"
               >
                 <span className="inline-flex items-center gap-2 text-lg font-bold text-black-02 mb-3">
                   <span

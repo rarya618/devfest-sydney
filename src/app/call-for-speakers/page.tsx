@@ -40,6 +40,11 @@ const topics: { label: string; track: 'developer' | 'builder' | 'workshop' }[] =
   { label: 'Founder & PM playbooks', track: 'builder' },
   { label: 'Google Cloud', track: 'developer' },
   { label: 'Developer productivity', track: 'developer' },
+  { label: 'Rapid MVP validation', track: 'builder' },
+  { label: 'From idea to launch', track: 'builder' },
+  { label: 'AI-powered research & discovery', track: 'builder' },
+  { label: 'Design systems for AI products', track: 'builder' },
+  { label: 'Growth & GTM playbooks', track: 'builder' },
   { label: 'Hands-on building', track: 'workshop' },
   { label: 'Live coding sessions', track: 'workshop' },
 ];
