@@ -127,13 +127,6 @@ function validatePayload(body: unknown): SubmissionPayload {
 
 function buildConfirmationEmail(submission: SubmissionPayload): string {
   const font = "font-family:'Google Sans',Roboto,sans-serif;letter-spacing:-0.01em;";
-  const dotColors = ['#4285F4', '#EA4335', '#f9ab00', '#34A853'];
-  const gdgDots = dotColors
-    .map(
-      (c, i) =>
-        `<td style="padding:0 ${i === dotColors.length - 1 ? 0 : 5}px 0 ${i === 0 ? 0 : 5}px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c};font-size:0;line-height:0;">&nbsp;</span></td>`
-    )
-    .join('');
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -154,7 +147,7 @@ function buildConfirmationEmail(submission: SubmissionPayload): string {
               <table cellpadding="0" cellspacing="0" style="margin:0 auto 32px;">
                 <tr>
                   <td style="vertical-align:middle;padding-right:5px;">
-                    <img src="https://devfest.gdgsydney.com/logo.png" alt="" width="53" height="30" style="display:block;" />
+                    <img src="https://devfest.gdgsydney.com/logo.png" alt="" width="53" height="30" style="display:inline-block;vertical-align:middle;" />
                   </td>
                   <td style="vertical-align:middle;">
                     <span style="${font}font-size:18px;font-weight:700;color:#1e1e1e;">DevFest Sydney</span>
@@ -162,26 +155,28 @@ function buildConfirmationEmail(submission: SubmissionPayload): string {
                 </tr>
               </table>
 
-              <!-- Success icon (matches the on-site confirmation state) -->
-              <table cellpadding="0" cellspacing="0" style="margin:0 auto 20px;">
+              <!-- Success icon + heading, single row (matches the on-site confirmation state's filled check_circle) -->
+              <table cellpadding="0" cellspacing="0" style="margin:0 auto 12px;">
                 <tr>
-                  <td style="width:56px;height:56px;border-radius:50%;background:#e3f5e6;border:1px solid rgba(52,168,83,0.25);text-align:center;vertical-align:middle;">
-                    <span style="${font}font-size:22px;line-height:56px;color:#34A853;">&#10003;</span>
+                  <td style="padding-right:12px;vertical-align:middle;">
+                    <table cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="width:22px;height:22px;border-radius:50%;background:#34A853;text-align:center;vertical-align:middle;">
+                          <span style="${font}font-size:13px;line-height:22px;color:#ffffff;">&#10003;</span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td style="vertical-align:middle;">
+                    <h1 style="margin:0;${font}font-size:22px;font-weight:700;color:#1e1e1e;line-height:1.35;letter-spacing:-0.02em;">
+                      Thanks for your proposal, <span style="color:#4285F4;">${submission.name.split(' ')[0]}</span>!
+                    </h1>
                   </td>
                 </tr>
               </table>
-
-              <h1 style="margin:0 0 12px;${font}font-size:26px;font-weight:700;color:#1e1e1e;line-height:1.35;letter-spacing:-0.02em;">
-                Thanks for your proposal, <span style="color:#4285F4;">${submission.name.split(' ')[0]}</span>!
-              </h1>
               <p style="margin:0 0 32px;${font}font-size:14px;color:rgba(30,30,30,0.55);line-height:1.8;">
-                We're so glad you want to speak at DevFest Sydney. Our team reads every proposal, and if yours is picked, we'll email you here with the next steps. No need to follow up, we'll be in touch.
+                Thanks for submitting to DevFest Sydney. We'll review your session and be in touch via email.
               </p>
-
-              <!-- Divider -->
-              <table cellpadding="0" cellspacing="0" style="margin:0 auto 32px;">
-                <tr>${gdgDots}</tr>
-              </table>
 
               <!-- Submission recap -->
               <p style="margin:0 0 6px;${font}font-size:12px;font-weight:700;color:#4285F4;">Your submission</p>
@@ -190,13 +185,13 @@ function buildConfirmationEmail(submission: SubmissionPayload): string {
               <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
                 <tr>
                   <td style="padding:0 14px 0 0;white-space:nowrap;">
-                    <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${TRACK_DOT_COLOR[submission.track]};margin-right:7px;"></span><span style="${font}font-size:13px;font-weight:600;color:rgba(30,30,30,0.8);">${TRACK_LABELS[submission.track]}</span>
+                    <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${TRACK_DOT_COLOR[submission.track]};margin-right:7px;vertical-align:middle;"></span><span style="${font}font-size:13px;font-weight:600;color:rgba(30,30,30,0.8);vertical-align:middle;">${TRACK_LABELS[submission.track]}</span>
                   </td>
                   <td style="padding:0 14px 0 0;white-space:nowrap;">
-                    <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:rgba(30,30,30,0.3);margin-right:7px;"></span><span style="${font}font-size:13px;font-weight:600;color:rgba(30,30,30,0.8);">${FORMAT_LABELS[submission.format]}</span>
+                    <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:rgba(30,30,30,0.3);margin-right:7px;vertical-align:middle;"></span><span style="${font}font-size:13px;font-weight:600;color:rgba(30,30,30,0.8);vertical-align:middle;">${FORMAT_LABELS[submission.format]}</span>
                   </td>
                   <td style="white-space:nowrap;">
-                    <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:rgba(30,30,30,0.3);margin-right:7px;"></span><span style="${font}font-size:13px;font-weight:600;color:rgba(30,30,30,0.8);">${LEVEL_LABELS[submission.experienceLevel]}</span>
+                    <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:rgba(30,30,30,0.3);margin-right:7px;vertical-align:middle;"></span><span style="${font}font-size:13px;font-weight:600;color:rgba(30,30,30,0.8);vertical-align:middle;">${LEVEL_LABELS[submission.experienceLevel]}</span>
                   </td>
                 </tr>
               </table>
