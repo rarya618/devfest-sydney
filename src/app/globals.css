@@ -132,3 +132,21 @@ body {
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--color-black-02) 18%, transparent); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--color-black-02) 30%, transparent); }
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .animate-fade-in,
+  .animate-slide-up {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

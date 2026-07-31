@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import FAQ from '@/components/FAQ';
 import CfsLink from '@/components/CfsLink';
+import Reveal from '@/components/Reveal';
 import { adminDb } from '@/lib/firebase-admin';
 import type { Sponsor, SponsorTier, TeamMember } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
@@ -220,14 +221,18 @@ export default async function Home() {
       {/* ─── TRACKS ─── */}
       <section id="tracks" className="pt-4 pb-24 px-6">
         <div className="max-w-5xl mx-auto">
-          <div className="mb-14 text-center animate-fade-in">
+          <Reveal className="mb-14 text-center">
             <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3">Tracks</p>
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight">However you build, there&apos;s a track for you</h2>
-          </div>
+          </Reveal>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {TRACK_DETAILS.map((track) => (
-              <div key={track.name} className="bg-white border border-black-02/8 rounded-2xl p-8">
+            {TRACK_DETAILS.map((track, i) => (
+              <Reveal
+                key={track.name}
+                delay={i * 0.1}
+                className="bg-white border border-black-02/8 rounded-2xl p-8 transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-black-02/5"
+              >
                 <span className="inline-flex items-center gap-2 text-lg font-bold text-black-02 mb-3">
                   <span
                     className={`w-2 h-2 rounded-full ${
@@ -242,13 +247,13 @@ export default async function Home() {
                   {track.topics.map((topic) => (
                     <span
                       key={topic}
-                      className="px-3 py-1 bg-off-white border border-black-02/8 rounded-full text-xs text-black-02/60"
+                      className="px-3 py-1 bg-off-white border border-black-02/8 rounded-full text-xs text-black-02/60 transition-colors duration-200 hover:border-black-02/20 hover:text-black-02/80"
                     >
                       {topic}
                     </span>
                   ))}
                 </div>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -257,9 +262,13 @@ export default async function Home() {
       {/* ─── FAQ ─── */}
       <section id="faq" className="py-24 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3 text-center">FAQ</p>
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-14 text-center">Common questions</h2>
-          <FAQ isCfsOpen={isCfsOpen} sponsorshipProspectusUrl={sponsorshipProspectusUrl} />
+          <Reveal className="text-center">
+            <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3">FAQ</p>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-14">Common questions</h2>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <FAQ isCfsOpen={isCfsOpen} sponsorshipProspectusUrl={sponsorshipProspectusUrl} />
+          </Reveal>
         </div>
       </section>
 
@@ -418,7 +427,7 @@ export default async function Home() {
 
       {/* ─── FINAL CTA ─── */}
       <section className="py-24 px-6 bg-white border-t border-black-02/8">
-        <div className="max-w-3xl mx-auto text-center">
+        <Reveal className="max-w-3xl mx-auto text-center">
           {isCfsOpen ? (
             <>
               <h2 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-5">Ready to speak?</h2>
@@ -455,7 +464,7 @@ export default async function Home() {
             </>
           )}
           <p className="text-xs text-black-02/35 mt-5">Sydney CBD · 2026</p>
-        </div>
+        </Reveal>
       </section>
         </>
       )}

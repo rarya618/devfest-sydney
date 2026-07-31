@@ -62,7 +62,7 @@ export default function FAQ({
       {faqs.map((faq, i) => (
         <div
           key={i}
-          className="bg-white border border-black-02/8 rounded-2xl px-6 self-start"
+          className="bg-white border border-black-02/8 rounded-2xl px-6 self-start transition-colors duration-200 hover:border-black-02/15"
         >
           <button
             onClick={() => setOpen(open === i ? null : i)}
