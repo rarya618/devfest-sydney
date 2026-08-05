@@ -5,8 +5,8 @@ import { join } from 'node:path';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
-const LOGO_WIDTH = 320;
 const LOGO_HEIGHT = 92;
+const LOGO_WIDTH = 164; // logo.png is 975x548, preserve its aspect ratio
 
 export default async function Image() {
   const [bold, regular, logoBuffer] = await Promise.all([
