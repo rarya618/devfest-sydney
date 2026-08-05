@@ -723,15 +723,15 @@ export default function SubmissionsDashboard({ submissions }: Props) {
 
   return (
     <>
-      <div className="sticky top-[52px] md:top-0 z-20 w-full px-4 py-4 bg-off-white/95 backdrop-blur-sm">
+      <div className="sticky top-[52px] md:top-0 z-20 w-full px-4 pt-4 pb-2 bg-off-white/95 backdrop-blur-sm">
         <div className="flex flex-wrap items-center gap-2">
-          <div className="order-1 flex flex-1 items-center gap-2 min-w-0">
+          <div className="order-1 flex items-center gap-2 min-w-0">
             <h1 className="shrink-0 text-xl font-bold text-black-02 tracking-tight">Submissions</h1>
           </div>
 
           <div
-            className={`order-3 sm:order-2 flex items-center gap-1 shrink-0 basis-full sm:basis-auto overflow-x-auto overflow-y-hidden whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-all duration-300 ease-in-out ${
-              searchOpen || search || selectedCount > 0 ? 'max-w-0 opacity-0' : 'max-w-full sm:max-w-[560px] opacity-100'
+            className={`order-3 xl:order-2 flex items-center justify-center gap-1 shrink-0 basis-full xl:basis-0 xl:flex-1 overflow-x-auto overflow-y-hidden whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-all duration-300 ease-in-out ${
+              searchOpen || search || selectedCount > 0 ? 'max-w-0 max-h-0 opacity-0' : 'max-w-full max-h-10 opacity-100'
             }`}
             aria-hidden={searchOpen || search || selectedCount > 0}
           >
@@ -756,8 +756,8 @@ export default function SubmissionsDashboard({ submissions }: Props) {
           </div>
 
           <div
-            className={`order-4 sm:order-3 flex items-center gap-2 shrink-0 basis-full sm:basis-auto overflow-x-auto overflow-y-hidden whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-all duration-300 ease-in-out ${
-              selectedCount > 0 ? 'max-w-full sm:max-w-[420px] opacity-100' : 'max-w-0 opacity-0'
+            className={`order-4 xl:order-3 flex items-center gap-2 shrink-0 basis-full xl:basis-auto overflow-x-auto overflow-y-hidden whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-all duration-300 ease-in-out ${
+              selectedCount > 0 ? 'max-w-full xl:max-w-[420px] max-h-12 opacity-100' : 'max-w-0 max-h-0 opacity-0'
             }`}
             aria-hidden={selectedCount === 0}
           >
@@ -801,8 +801,8 @@ export default function SubmissionsDashboard({ submissions }: Props) {
 
           <div
             ref={searchContainerRef}
-            className={`order-5 sm:order-4 relative basis-full sm:basis-auto overflow-hidden transition-all duration-300 ease-in-out ${
-              searchOpen || search ? 'flex-1 max-w-full sm:max-w-[24rem] opacity-100' : 'max-w-0 opacity-0'
+            className={`order-5 xl:order-4 relative basis-full xl:basis-auto overflow-hidden transition-all duration-300 ease-in-out ${
+              searchOpen || search ? 'flex-1 max-w-full xl:max-w-[24rem] max-h-12 opacity-100' : 'max-w-0 max-h-0 opacity-0'
             }`}
             aria-hidden={!(searchOpen || search)}
           >
@@ -835,7 +835,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
             </button>
           </div>
 
-          <div className="order-2 sm:order-5 flex flex-1 flex-wrap items-center justify-end gap-2 min-w-0">
+          <div className="order-2 xl:order-5 flex items-center justify-end gap-2 shrink-0 ml-auto">
             {!(searchOpen || search) && (
               <button
                 onClick={() => {
@@ -868,7 +868,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2 4h12M4.5 8h7M7 12h2" />
                 </svg>
-                Filter &amp; sort
+                <span className="hidden sm:inline">Filter &amp; sort</span>
               </button>
 
               {filtersMenuOpen && (
