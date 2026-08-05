@@ -733,7 +733,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
             className={`order-3 xl:order-2 flex items-center justify-center gap-1 shrink-0 basis-full xl:basis-0 xl:flex-1 overflow-x-auto overflow-y-hidden whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-all duration-300 ease-in-out ${
               searchOpen || search || selectedCount > 0 ? 'max-w-0 max-h-0 opacity-0' : 'max-w-full max-h-10 opacity-100'
             }`}
-            aria-hidden={searchOpen || search || selectedCount > 0}
+            aria-hidden={!!(searchOpen || search || selectedCount > 0)}
           >
             {filterTabs.map((tab) => (
               <button
