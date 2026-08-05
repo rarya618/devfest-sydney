@@ -3,6 +3,8 @@ export type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced';
 export type Track = 'developer' | 'builder' | 'workshop' | 'showcase';
 export type SubmissionStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
 export type SponsorTier = 'platinum' | 'gold' | 'silver' | 'community';
+export type VolunteerArea = 'registration' | 'av-tech' | 'speaker-support' | 'workshop-facilitator' | 'general-floater' | 'setup-packdown' | 'photography' | 'social-media' | 'merch-table';
+export type VolunteerStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
 
 export interface Sponsor {
   id: string;
@@ -73,5 +75,22 @@ export interface Submission {
   optOutOfRecording: boolean;
   submittedAt: string; // ISO date string (serialized from Firestore Timestamp)
   status: SubmissionStatus;
+  reviewerNotes: ReviewerNote[];
+}
+
+export interface VolunteerSubmission {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  motivation: string;
+  areasOfInterest: VolunteerArea[];
+  priorExperience: string;
+  googleTechExperience: string;
+  isTorrensStudentOrStaff: boolean;
+  dietaryRequirements: string;
+  tracking: SubmissionTracking;
+  submittedAt: string; // ISO date string (serialized from Firestore Timestamp)
+  status: VolunteerStatus;
   reviewerNotes: ReviewerNote[];
 }

@@ -25,6 +25,12 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 - Accepted speakers are promoted to the `speakers` Firestore collection after review
 - **Multiple submissions per person are allowed by design** (e.g. someone submitting a talk and a workshop). Do not add dedupe/rate-limiting on email for `submit-proposal` without checking with the user first.
 
+### Volunteer Signup Flow
+- `/volunteer` page with a signup form, open/closed state controlled by `VOLUNTEER_OPEN`
+- Form fields: name, email, phone (optional), motivation, availability (full day / morning / afternoon), areas of interest (registration, AV/tech, speaker support, Builder's Space, general floater), prior volunteering experience (optional), dietary requirements (optional)
+- On submit: confirmation email to the volunteer (via Resend), signup stored in Firestore (`volunteers` collection)
+- Reviewed in `/admin/volunteers`: admins can accept, reject, restore, or archive a signup and add reviewer notes. No promotion to a separate public collection (unlike CfS → `speakers`) — volunteers aren't shown publicly.
+
 ### Admin Flow
 - Auth via Firebase Auth (Google sign-in), restricted to emails in the `admins` Firestore collection
 - `/admin/login` — sign-in page, redirects to `/admin` on success
@@ -92,6 +98,7 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 | Variable | Purpose |
 |----------|---------|
 | `CFS_OPEN` | `true` to show CfS form, `false` to show closed message |
+| `VOLUNTEER_OPEN` | `true` to show volunteer signup form, `false` to show closed message |
 | `FIREBASE_PROJECT_ID` | Firebase project identifier |
 | `FIREBASE_CLIENT_EMAIL` | Firebase Admin SDK service account email |
 | `FIREBASE_PRIVATE_KEY` | Firebase Admin SDK private key |

@@ -76,6 +76,25 @@ rules_version='2';
 //   - answer: string (required, 1–2000 chars)
 //   - order: number (optional, non-negative integer)
 //
+// Collection: volunteers
+// Document ID: auto-generated
+// Fields:
+//   - name: string (required, 1–100 chars)
+//   - email: string (required, valid email) — contact email (PII)
+//   - phone: string (optional, max 30 chars)
+//   - motivation: string (required, 1–1000 chars) — why they want to volunteer
+//   - areasOfInterest: list of strings (required, 1+ items) — subset of
+//     'registration' | 'av-tech' | 'speaker-support' | 'workshop-facilitator' | 'general-floater' |
+//     'setup-packdown' | 'photography' | 'social-media' | 'merch-table'
+//   - priorExperience: string (optional, max 1000 chars)
+//   - googleTechExperience: string (optional, max 1000 chars) — experience with Google
+//     technologies (Firebase, Android, Flutter, Gemini, Google Cloud, etc.), used to
+//     assess whether the volunteer could facilitate a hands-on workshop
+//   - isTorrensStudentOrStaff: boolean (required) — whether the volunteer is a
+//     student or staff member at Torrens University
+//   - dietaryRequirements: string (optional, max 300 chars)
+//   - submittedAt: timestamp (required, must be recent)
+//
 // ===============================================================
 
 service cloud.firestore {
@@ -168,6 +187,25 @@ service cloud.firestore {
         data.submittedAt is timestamp;
     }
 
+    function isValidVolunteerSubmission(data) {
+      let allowedAreas = ['registration', 'av-tech', 'speaker-support', 'workshop-facilitator', 'general-floater',
+                          'setup-packdown', 'photography', 'social-media', 'merch-table'];
+      return data.keys().hasOnly(['name', 'email', 'phone', 'motivation',
+                                   'areasOfInterest', 'priorExperience', 'googleTechExperience',
+                                   'isTorrensStudentOrStaff', 'dietaryRequirements', 'submittedAt']) &&
+        data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+        data.email is string && isValidEmail(data.email) &&
+        isValidOptionalString('phone', 1, 30) &&
+        data.motivation is string && data.motivation.size() >= 1 && data.motivation.size() <= 1000 &&
+        data.areasOfInterest is list && data.areasOfInterest.size() >= 1 &&
+        data.areasOfInterest.hasOnly(allowedAreas) &&
+        isValidOptionalString('priorExperience', 1, 1000) &&
+        isValidOptionalString('googleTechExperience', 1, 1000) &&
+        data.isTorrensStudentOrStaff is bool &&
+        isValidOptionalString('dietaryRequirements', 1, 300) &&
+        data.submittedAt is timestamp;
+    }
+
     function isValidSpeaker(data) {
       let allowedFormats = ['talk', 'lightning-talk', 'workshop'];
       let allowedTracks = ['developer', 'builder', 'workshop', 'showcase'];
@@ -235,6 +273,17 @@ service cloud.firestore {
     match /submissions/{submissionId} {
       // Anyone may submit — no auth required for the CfS form
       allow create: if isValidSubmission(request.resource.data) &&
+                       isRecent(request.resource.data.submittedAt);
+      // Only admins may read, update (add notes/status), or delete
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // volunteers — public write (volunteer form), admin-only read
+    // ===============================================================
+    match /volunteers/{volunteerId} {
+      // Anyone may sign up — no auth required for the volunteer form
+      allow create: if isValidVolunteerSubmission(request.resource.data) &&
                        isRecent(request.resource.data.submittedAt);
       // Only admins may read, update (add notes/status), or delete
       allow read, update, delete: if isAdmin();

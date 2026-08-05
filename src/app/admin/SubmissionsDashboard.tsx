@@ -741,16 +741,13 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 onClick={() => setFilter(tab.value)}
                 aria-pressed={filter === tab.value}
                 tabIndex={searchOpen || search || selectedCount > 0 ? -1 : undefined}
-                className={`inline-flex items-center shrink-0 text-sm px-3 py-1.5 rounded-full transition-colors ${
+                className={`shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
                   filter === tab.value
-                    ? 'bg-google-blue text-white font-bold'
-                    : 'text-black-02/40 font-medium hover:text-black-02/65 hover:bg-black-02/[0.04]'
+                    ? 'bg-google-blue/10 border-google-blue/30 text-google-blue'
+                    : 'border-black-02/12 text-black-02/50 hover:border-black-02/25 hover:text-black-02/75'
                 }`}
               >
-                <span className="leading-none">
-                  {tab.label}
-                  <span className="ml-1.5">{counts[tab.value]}</span>
-                </span>
+                {tab.label} ({counts[tab.value]})
               </button>
             ))}
           </div>
@@ -802,7 +799,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
           <div
             ref={searchContainerRef}
             className={`order-5 xl:order-4 relative basis-full xl:basis-auto overflow-hidden transition-all duration-300 ease-in-out ${
-              searchOpen || search ? 'flex-1 max-w-full xl:max-w-[24rem] max-h-12 opacity-100' : 'max-w-0 max-h-0 opacity-0'
+              searchOpen || search ? 'flex-1 mx-auto max-w-full xl:max-w-[24rem] max-h-12 opacity-100' : 'max-w-0 max-h-0 opacity-0'
             }`}
             aria-hidden={!(searchOpen || search)}
           >

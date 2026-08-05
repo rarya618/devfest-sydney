@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import FAQ from '@/components/FAQ';
 import CfsLink from '@/components/CfsLink';
+import VolunteerLink from '@/components/VolunteerLink';
 import Reveal from '@/components/Reveal';
 import { adminDb } from '@/lib/firebase-admin';
 import type { Sponsor, SponsorTier, TeamMember } from '@/lib/types';
@@ -77,6 +78,7 @@ const showSponsors = false;
 
 export default async function Home() {
   const isCfsOpen = process.env.CFS_OPEN === 'true';
+  const isVolunteerOpen = process.env.VOLUNTEER_OPEN === 'true';
   const [sponsors, team, sponsorshipProspectusUrl] = await Promise.all([
     fetchSponsors(),
     fetchTeam(),
@@ -462,6 +464,17 @@ export default async function Home() {
                 </svg>
               </a>
             </>
+          )}
+          {isVolunteerOpen && (
+            <p className="text-sm text-black-02/45 mt-6">
+              Want to help out instead?{' '}
+              <VolunteerLink
+                source="final-cta"
+                className="text-black-02/70 hover:text-black-02/90 underline underline-offset-2 transition-colors"
+              >
+                Become a volunteer
+              </VolunteerLink>
+            </p>
           )}
           <p className="text-xs text-black-02/35 mt-5">Sydney CBD · 2026</p>
         </Reveal>
