@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useTransition, type FormEvent, type ReactNode } from 'react';
+import { useState, useCallback, useEffect, useRef, useTransition, type FormEvent, type ReactNode } from 'react';
 import { promoteSubmission, rejectSubmission, restoreSubmission, undoPromotion, archiveSubmission, addReviewerNote, deleteReviewerNote } from './actions';
 import EditSubmissionModal from './EditSubmissionModal';
 import Alert from '@/components/Alert';
@@ -544,9 +544,50 @@ export default function SubmissionsDashboard({ submissions }: Props) {
   const [trackFilter, setTrackFilter] = useState<TrackFilter>('all');
   const [sort, setSort] = useState<SortOption>('newest');
   const [search, setSearch] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [isBulkPending, startBulkTransition] = useTransition();
+  const [filtersMenuOpen, setFiltersMenuOpen] = useState(false);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+  const filtersMenuRef = useRef<HTMLDivElement>(null);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!filtersMenuOpen && !moreMenuOpen && !searchOpen) return;
+
+    function handlePointerDown(event: MouseEvent) {
+      if (filtersMenuOpen && filtersMenuRef.current && !filtersMenuRef.current.contains(event.target as Node)) {
+        setFiltersMenuOpen(false);
+      }
+      if (moreMenuOpen && moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
+        setMoreMenuOpen(false);
+      }
+      if (searchOpen && searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setSearch('');
+        setSearchOpen(false);
+      }
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setFiltersMenuOpen(false);
+        setMoreMenuOpen(false);
+        if (searchOpen) {
+          setSearch('');
+          setSearchOpen(false);
+        }
+      }
+    }
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [filtersMenuOpen, moreMenuOpen, searchOpen]);
 
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
 
@@ -682,17 +723,24 @@ export default function SubmissionsDashboard({ submissions }: Props) {
 
   return (
     <>
-      <div className="max-w-3xl mx-auto px-4">
+      <div className="sticky top-[52px] md:top-0 z-20 w-full px-4 py-4 bg-off-white/95 backdrop-blur-sm">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="order-1 flex flex-1 items-center gap-2 min-w-0">
+            <h1 className="shrink-0 text-xl font-bold text-black-02 tracking-tight">Submissions</h1>
+          </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-6 sm:mt-8 mb-4 gap-3">
-          <h1 className="text-3xl sm:text-4xl font-bold text-black-02 tracking-tight">Submissions</h1>
-
-          <div className="flex items-center gap-1 -mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto">
+          <div
+            className={`order-3 sm:order-2 flex items-center gap-1 shrink-0 basis-full sm:basis-auto overflow-x-auto overflow-y-hidden whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-all duration-300 ease-in-out ${
+              searchOpen || search || selectedCount > 0 ? 'max-w-0 opacity-0' : 'max-w-full sm:max-w-[560px] opacity-100'
+            }`}
+            aria-hidden={searchOpen || search || selectedCount > 0}
+          >
             {filterTabs.map((tab) => (
               <button
                 key={tab.value}
                 onClick={() => setFilter(tab.value)}
                 aria-pressed={filter === tab.value}
+                tabIndex={searchOpen || search || selectedCount > 0 ? -1 : undefined}
                 className={`inline-flex items-center shrink-0 text-sm px-3 py-1.5 rounded-full transition-colors ${
                   filter === tab.value
                     ? 'bg-google-blue text-white font-bold'
@@ -701,124 +749,233 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               >
                 <span className="leading-none">
                   {tab.label}
-                  <span className="ml-2.5">{counts[tab.value]}</span>
+                  <span className="ml-1.5">{counts[tab.value]}</span>
                 </span>
               </button>
             ))}
           </div>
-        </div>
 
-        {/* Toolbar: search, track filter, sort, export */}
-        <div className="flex flex-wrap items-center gap-2 mb-4">
-          <div className="relative flex-1 min-w-[180px]">
+          <div
+            className={`order-4 sm:order-3 flex items-center gap-2 shrink-0 basis-full sm:basis-auto overflow-x-auto overflow-y-hidden whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-all duration-300 ease-in-out ${
+              selectedCount > 0 ? 'max-w-full sm:max-w-[420px] opacity-100' : 'max-w-0 opacity-0'
+            }`}
+            aria-hidden={selectedCount === 0}
+          >
+            <span className="shrink-0 text-sm text-black-02/40 mr-2">{selectedCount} selected</span>
+            <button
+              onClick={handleBulkReject}
+              disabled={isBulkPending}
+              tabIndex={selectedCount > 0 ? undefined : -1}
+              aria-label={`Reject ${selectedCount} selected submissions`}
+              className="shrink-0 text-sm px-3 py-1.5 rounded-lg bg-google-red/10 border border-google-red/25 text-google-red hover:bg-google-red/15 transition-colors font-medium"
+            >
+              Reject
+            </button>
+            <button
+              onClick={handleBulkAccept}
+              disabled={isBulkPending}
+              tabIndex={selectedCount > 0 ? undefined : -1}
+              aria-label={`Accept ${selectedCount} selected submissions`}
+              className="shrink-0 text-sm px-3 py-1.5 rounded-lg bg-google-green/10 border border-google-green/25 text-google-green hover:bg-google-green/15 transition-colors font-medium"
+            >
+              Accept
+            </button>
+            <button
+              onClick={handleBulkArchive}
+              disabled={isBulkPending}
+              tabIndex={selectedCount > 0 ? undefined : -1}
+              aria-label={`Archive ${selectedCount} selected submissions`}
+              className="shrink-0 text-sm px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
+            >
+              Archive
+            </button>
+            <button
+              onClick={clearSelection}
+              disabled={isBulkPending}
+              tabIndex={selectedCount > 0 ? undefined : -1}
+              className="shrink-0 text-sm px-3 py-1.5 rounded-lg text-black-02/35 hover:text-black-02/60 transition-colors"
+            >
+              Clear
+            </button>
+          </div>
+
+          <div
+            ref={searchContainerRef}
+            className={`order-5 sm:order-4 relative basis-full sm:basis-auto overflow-hidden transition-all duration-300 ease-in-out ${
+              searchOpen || search ? 'flex-1 max-w-full sm:max-w-[24rem] opacity-100' : 'max-w-0 opacity-0'
+            }`}
+            aria-hidden={!(searchOpen || search)}
+          >
             <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-black-02/30" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
               <circle cx="7" cy="7" r="5" />
               <path strokeLinecap="round" d="M11 11l3.5 3.5" />
             </svg>
             <input
+              ref={searchInputRef}
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              tabIndex={searchOpen || search ? undefined : -1}
               placeholder="Search name, email, or talk title…"
-              aria-label="Search submissions"
-              className="w-full rounded-lg border border-black-02/15 bg-white pl-8 pr-3 py-1.5 text-xs text-black-02 placeholder:text-black-02/35 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30"
+              aria-label="Search name, email, or talk title"
+              className="w-full min-w-[16rem] rounded-lg border border-black-02/15 bg-white pl-8 pr-9 py-1.5 text-sm text-black-02 placeholder:text-black-02/35 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30"
             />
+            <button
+              onClick={() => {
+                setSearch('');
+                setSearchOpen(false);
+              }}
+              tabIndex={searchOpen || search ? undefined : -1}
+              aria-label="Close search"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-black-02/30 hover:text-black-02/60 transition-colors"
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                <path strokeLinecap="round" d="M4 4l8 8M12 4l-8 8" />
+              </svg>
+            </button>
           </div>
 
-          <select
-            value={trackFilter}
-            onChange={(e) => setTrackFilter(e.target.value as TrackFilter)}
-            aria-label="Filter by track"
-            className="rounded-lg border border-black-02/15 bg-white px-2.5 py-1.5 text-xs font-medium text-black-02/70 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30"
-          >
-            <option value="all">All tracks</option>
-            {(Object.entries(TRACK_LABELS) as [Track, string][]).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </select>
-
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as SortOption)}
-            aria-label="Sort submissions"
-            className="rounded-lg border border-black-02/15 bg-white px-2.5 py-1.5 text-xs font-medium text-black-02/70 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30"
-          >
-            {(Object.entries(SORT_LABELS) as [SortOption, string][]).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </select>
-
-          <button
-            onClick={handleExport}
-            aria-label="Export visible submissions as CSV"
-            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/60 hover:border-black-02/30 hover:text-black-02/85 transition-colors font-medium"
-          >
-            <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 1.5v8m0 0L5 6.5m3 3l3-3M2.5 11v2A1.5 1.5 0 004 14.5h8a1.5 1.5 0 001.5-1.5v-2" />
-            </svg>
-            Export
-          </button>
-        </div>
-
-        {/* Bulk selection bar */}
-        <div className="flex items-center justify-between gap-3 mb-4 px-1">
-          <label className="flex items-center gap-2 text-xs text-black-02/40">
-            <input
-              type="checkbox"
-              checked={allVisibleSelected}
-              onChange={toggleSelectAllVisible}
-              disabled={sorted.length === 0 || isBulkPending}
-              aria-label="Select all visible submissions"
-              className="w-4 h-4 rounded border-black-02/25 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue/40"
-            />
-            Select all
-          </label>
-
-          {selectedCount > 0 && (
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-black-02/40">{selectedCount} selected</span>
+          <div className="order-2 sm:order-5 flex flex-1 flex-wrap items-center justify-end gap-2 min-w-0">
+            {!(searchOpen || search) && (
               <button
-                onClick={handleBulkReject}
-                disabled={isBulkPending}
-                aria-label={`Reject ${selectedCount} selected submissions`}
-                className="text-xs px-3 py-1.5 rounded-lg bg-google-red/10 border border-google-red/25 text-google-red hover:bg-google-red/15 transition-colors font-medium"
+                onClick={() => {
+                  setSearchOpen(true);
+                  requestAnimationFrame(() => searchInputRef.current?.focus());
+                }}
+                aria-label="Search name, email, or talk title"
+                title="Search"
+                className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-lg border border-black-02/15 text-black-02/60 hover:border-black-02/30 hover:text-black-02/85 transition-colors"
               >
-                Reject
+                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                  <circle cx="7" cy="7" r="5" />
+                  <path strokeLinecap="round" d="M11 11l3.5 3.5" />
+                </svg>
               </button>
+            )}
+
+            <div className="relative shrink-0" ref={filtersMenuRef}>
               <button
-                onClick={handleBulkAccept}
-                disabled={isBulkPending}
-                aria-label={`Accept ${selectedCount} selected submissions`}
-                className="text-xs px-3 py-1.5 rounded-lg bg-google-green/10 border border-google-green/25 text-google-green hover:bg-google-green/15 transition-colors font-medium"
+                onClick={() => setFiltersMenuOpen((open) => !open)}
+                aria-haspopup="menu"
+                aria-expanded={filtersMenuOpen}
+                aria-label="Filter and sort submissions"
+                className={`inline-flex items-center gap-1.5 h-9 text-sm px-3 rounded-lg border transition-colors font-medium ${
+                  filtersMenuOpen || trackFilter !== 'all' || sort !== 'newest'
+                    ? 'border-google-blue/40 text-google-blue bg-google-blue/5'
+                    : 'border-black-02/15 text-black-02/70 hover:border-black-02/30'
+                }`}
               >
-                Accept
+                <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2 4h12M4.5 8h7M7 12h2" />
+                </svg>
+                Filter &amp; sort
               </button>
-              <button
-                onClick={handleBulkArchive}
-                disabled={isBulkPending}
-                aria-label={`Archive ${selectedCount} selected submissions`}
-                className="text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
-              >
-                Archive
-              </button>
-              <button
-                onClick={clearSelection}
-                disabled={isBulkPending}
-                className="text-xs px-3 py-1.5 rounded-lg text-black-02/35 hover:text-black-02/60 transition-colors"
-              >
-                Clear
-              </button>
+
+              {filtersMenuOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 top-full mt-2 w-56 bg-white border border-black-02/10 rounded-2xl shadow-[0_12px_32px_rgba(30,30,30,0.14)] overflow-hidden px-4 py-5 space-y-4 z-30"
+                >
+                  <div>
+                    <label htmlFor="track-filter-select" className="block text-sm font-semibold text-black-02/40 capitalize mb-1">
+                      Track
+                    </label>
+                    <select
+                      id="track-filter-select"
+                      value={trackFilter}
+                      onChange={(e) => setTrackFilter(e.target.value as TrackFilter)}
+                      aria-label="Filter by track"
+                      className="w-full rounded-lg border border-black-02/15 bg-white px-2.5 py-1.5 text-sm font-medium text-black-02/70 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30"
+                    >
+                      <option value="all">All tracks</option>
+                      {(Object.entries(TRACK_LABELS) as [Track, string][]).map(([value, label]) => (
+                        <option key={value} value={value}>{label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="sort-select" className="block text-sm font-semibold text-black-02/40 capitalize mb-1">
+                      Sort
+                    </label>
+                    <select
+                      id="sort-select"
+                      value={sort}
+                      onChange={(e) => setSort(e.target.value as SortOption)}
+                      aria-label="Sort submissions"
+                      className="w-full rounded-lg border border-black-02/15 bg-white px-2.5 py-1.5 text-sm font-medium text-black-02/70 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30"
+                    >
+                      {(Object.entries(SORT_LABELS) as [SortOption, string][]).map(([value, label]) => (
+                        <option key={value} value={value}>{label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
+            <div className="relative shrink-0" ref={moreMenuRef}>
+              <button
+                onClick={() => setMoreMenuOpen((open) => !open)}
+                aria-haspopup="menu"
+                aria-expanded={moreMenuOpen}
+                aria-label="More submission actions"
+                className={`inline-flex items-center justify-center w-9 h-9 rounded-lg border transition-colors ${
+                  moreMenuOpen ? 'border-black-02/30 text-black-02/85 bg-black-02/[0.03]' : 'border-black-02/15 text-black-02/60 hover:border-black-02/30 hover:text-black-02/85'
+                }`}
+              >
+                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  <circle cx="3" cy="8" r="1.25" />
+                  <circle cx="8" cy="8" r="1.25" />
+                  <circle cx="13" cy="8" r="1.25" />
+                </svg>
+              </button>
+
+              {moreMenuOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full mt-2 w-48 bg-white border border-black-02/10 rounded-2xl shadow-[0_12px_32px_rgba(30,30,30,0.14)] overflow-hidden py-1.5 z-30"
+                >
+                  <label className="flex items-center gap-2.5 text-sm text-black-02/75 px-4 py-2.5 hover:bg-black-02/[0.04] transition-colors cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={allVisibleSelected}
+                      onChange={toggleSelectAllVisible}
+                      disabled={sorted.length === 0 || isBulkPending}
+                      aria-label="Select all visible submissions"
+                      className="w-4 h-4 rounded border-black-02/25 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue/40"
+                    />
+                    Select all visible
+                  </label>
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      handleExport();
+                      setMoreMenuOpen(false);
+                    }}
+                    aria-label="Export visible submissions as CSV"
+                    className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-black-02/75 hover:bg-black-02/[0.04] transition-colors"
+                  >
+                    <svg className="w-4 h-4 text-black-02/40 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 1.5v8m0 0L5 6.5m3 3l3-3M2.5 11v2A1.5 1.5 0 004 14.5h8a1.5 1.5 0 001.5-1.5v-2" />
+                    </svg>
+                    Export CSV
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-3xl mx-auto px-4">
         {/* Submissions list */}
         {sorted.length === 0 ? (
           <div className="text-center py-16 text-black-02/30 text-sm">
             No submissions match these filters.
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3 pt-4">
             {sorted.map((submission) => (
               <SubmissionRow
                 key={submission.id}
