@@ -50,6 +50,13 @@ env:
       - BUILD
       - RUNTIME
 
+  # Volunteer signup toggle
+  - variable: VOLUNTEER_OPEN
+    value: "true"
+    availability:
+      - BUILD
+      - RUNTIME
+
   # Firebase Admin SDK — stored as secrets
   # BUILD availability is required: Next.js executes route modules (which
   # import firebase-admin) during the "Collecting page data" build step.
