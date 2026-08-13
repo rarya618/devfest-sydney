@@ -26,10 +26,11 @@ const COLUMNS: { heading: string; links: { label: string; href: string; external
     heading: 'Community',
     links: [
       { label: 'Volunteer', href: '/volunteer' },
-      { label: 'Community page', href: 'https://gdgsydney.com' },
-      { label: 'Slack', href: '/' },
-      { label: 'Instagram', href: '/' },
-      { label: 'LinkedIn', href: '/' },
+      { label: 'Community page', href: 'https://gdg.community.dev/gdg-sydney/', external: true },
+      { label: 'Meetup', href: 'https://www.meetup.com/gdgcloudsydney/', external: true },
+      { label: 'Slack', href: 'https://join.slack.com/t/gdganz/shared_invite/zt-3acfakeqo-4KAJLoq~TISLD_2jYntmSg', external: true },
+      { label: 'Instagram', href: 'https://www.instagram.com/gdgsydney', external: true },
+      { label: 'LinkedIn', href: 'https://www.linkedin.com/company/gdg-sydney/', external: true },
     ],
   },
 ];
@@ -83,6 +84,20 @@ export default function Footer() {
                         </li>
                       );
                     }
+                    if (link.external) {
+                      return (
+                        <li key={link.label}>
+                          <a
+                            href={link.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-base text-white hover:text-white/70 transition-colors"
+                          >
+                            {link.label}
+                          </a>
+                        </li>
+                      );
+                    }
                     return (
                       <li key={link.label}>
                         <Link href={link.href} className="text-base text-white hover:text-white/70 transition-colors">
@@ -113,7 +128,7 @@ export default function Footer() {
               </svg>
             </a>
             <a
-              href="https://gdgsydney.com"
+              href="https://gdg.community.dev/gdg-sydney/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="GDG Sydney community"

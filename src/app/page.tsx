@@ -95,6 +95,15 @@ async function fetchGoogleLogoUrl(): Promise<string | null> {
   }
 }
 
+async function fetchLandingCfsImageUrl(): Promise<string | null> {
+  try {
+    const doc = await adminDb.collection('settings').doc('site').get();
+    return (doc.data()?.landingCfsImageUrl as string | undefined) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchLandingSlideImageUrls(): Promise<string[]> {
   try {
     const doc = await adminDb.collection('settings').doc('site').get();
@@ -114,13 +123,14 @@ function formatCloseDate(iso: string) {
 export default async function Home() {
   const isCfsOpen = process.env.CFS_OPEN === 'true';
   const cfsCloseDate = process.env.CFS_CLOSE_DATE;
-  const [sponsors, team, sponsorshipProspectusUrl, landingHeroImageUrl, googleLogoUrl, landingSlideImageUrls] = await Promise.all([
+  const [sponsors, team, sponsorshipProspectusUrl, landingHeroImageUrl, googleLogoUrl, landingSlideImageUrls, landingCfsImageUrl] = await Promise.all([
     fetchSponsors(),
     fetchTeam(),
     fetchSponsorshipProspectusUrl(),
     fetchLandingHeroImageUrl(),
     fetchGoogleLogoUrl(),
     fetchLandingSlideImageUrls(),
+    fetchLandingCfsImageUrl(),
   ]);
 
   const sponsorsByTier = TIER_ORDER.reduce<Record<SponsorTier, Sponsor[]>>(
@@ -211,7 +221,7 @@ export default async function Home() {
       {/* ─── WHAT TO EXPECT ─── */}
       <section id="about" className="py-24 px-4 sm:px-6 lg:px-12">
         <div className="max-w-3xl animate-slide-up">
-          <h2 className="text-4xl md:text-5xl font-bold leading-tight mb-8">
+          <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-8">
             What to Expect?
           </h2>
 
@@ -230,9 +240,9 @@ export default async function Home() {
 
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
             {tracks.map((track, i) => (
-              <span key={track} className="inline-flex items-center gap-3.5 text-lg font-bold text-white">
+              <span key={track} className="inline-flex items-center gap-3.5 text-base font-bold text-white">
                 <span
-                  className="w-2.5 h-2.5 rounded-full"
+                  className="w-2 h-2 rounded-full"
                   style={{ backgroundColor: ['var(--google-blue)', 'var(--google-green)', 'var(--google-yellow)'][i] }}
                 />
                 {track}
@@ -261,10 +271,10 @@ export default async function Home() {
       {isCfsOpen && (
         <section className="pb-24 px-4 sm:px-6 lg:px-12">
           <Reveal className="max-w-7xl mx-auto">
-            <div className="relative overflow-hidden bg-white/[0.06] border border-google-green/30 border-l-[8px] border-l-google-green rounded-[20px]">
-              <div className="grid md:grid-cols-[1fr_auto] items-stretch">
+            <div className="relative bg-white/[0.06] border border-google-green/30 border-l-[8px] border-l-google-green rounded-[20px] overflow-hidden">
+              <div className="grid md:grid-cols-[1fr_auto]">
                 <div className="p-8 md:p-10">
-                  <div className="space-y-5">
+                  <div className="space-y-2 md:space-y-4">
                     <h3 className="text-3xl md:text-4xl font-bold tracking-tight">Call for speakers</h3>
                     <p className="text-lg text-white/70 leading-relaxed">
                       We&apos;re looking for passionate speakers across the Developer and Builder tracks. Whether
@@ -274,17 +284,24 @@ export default async function Home() {
                   </div>
                   <CfsLink
                     source="cfs-callout"
-                    className="inline-flex items-center gap-2.5 px-8 py-2.5 mt-10 bg-google-green text-white text-base font-bold rounded-lg border border-google-green transition-colors hover:bg-transparent hover:text-google-green"
+                    className="inline-flex items-center gap-2.5 px-8 py-2.5 mt-12 bg-google-green text-white text-base font-bold rounded-lg border border-google-green transition-colors hover:bg-transparent hover:text-google-green"
                   >
                     Submit a session
                   </CfsLink>
                 </div>
-                <div className="flex items-center justify-center h-40 md:h-auto md:w-64 bg-google-green/10">
+                <div className="hidden md:block md:w-64" aria-hidden="true" />
+              </div>
+              {landingCfsImageUrl ? (
+                <div className="hidden md:block absolute inset-y-0 right-0 w-64">
+                  <Image src={landingCfsImageUrl} alt="" fill sizes="16rem" className="object-cover" />
+                </div>
+              ) : (
+                <div className="hidden md:flex items-center justify-center absolute top-0 bottom-0 right-0 w-64 bg-google-green/10">
                   <svg className="w-20 h-20 text-google-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
                   </svg>
                 </div>
-              </div>
+              )}
             </div>
           </Reveal>
         </section>
@@ -294,7 +311,6 @@ export default async function Home() {
       <section id="tracks" className="pt-4 pb-24 px-4 sm:px-6 lg:px-12">
         <div className="max-w-5xl mx-auto">
           <Reveal className="mb-14 text-center">
-            <p className="text-xs font-bold text-white/40 tracking-[0.15em] uppercase mb-3">Tracks</p>
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight">However you build, there&apos;s a track for you</h2>
           </Reveal>
 
