@@ -128,6 +128,15 @@ body {
   animation: slide-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+
 /* Compositor-friendly hover lift: transform is compositable, box-shadow is not,
    so the shadow lives on a separate absolutely-positioned layer that only ever
    transitions opacity — animating box-shadow directly forces a repaint every
@@ -167,7 +176,8 @@ body {
   }
 
   .animate-fade-in,
-  .animate-slide-up {
+  .animate-slide-up,
+  .animate-marquee {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
