@@ -12,9 +12,10 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 ## Scope
 
 ### Pages
-- `/` — Hero, About, Speakers (accepted), Schedule, Venue, Sponsors, Team, FAQ
+- `/` — Hero, About, Speakers (accepted), Schedule, Venue, Sponsors, Team
 - `/call-for-speakers` — CfS form with open/closed state
 - `/code-of-conduct` — Static page
+- `/faq` — Dedicated FAQ page (moved off `/` so it can be linked to directly, e.g. from the footer)
 - `/admin/login` — Google sign-in via Firebase Auth (restricted to authorised emails)
 - `/admin` — Review CfS submissions, promote accepted speakers to `speakers` collection
 
@@ -98,6 +99,7 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 | Variable | Purpose |
 |----------|---------|
 | `CFS_OPEN` | `true` to show CfS form, `false` to show closed message |
+| `CFS_CLOSE_DATE` | Optional ISO datetime (e.g. `2026-08-23T23:59:00+10:00`) the CfS closes. Powers the countdown timer on `/` and `/call-for-speakers`; timer is hidden if unset |
 | `VOLUNTEER_OPEN` | `true` to show volunteer signup form, `false` to show closed message |
 | `FIREBASE_PROJECT_ID` | Firebase project identifier |
 | `FIREBASE_CLIENT_EMAIL` | Firebase Admin SDK service account email |
