@@ -1,7 +1,10 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import Countdown from '@/components/Countdown';
 import CfsForm from './CfsForm';
+import { adminDb } from '@/lib/firebase-admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,6 +30,43 @@ export const metadata: Metadata = {
 
 const isCfsOpen = process.env.CFS_OPEN === 'true';
 
+const REASONS = [
+  { title: 'Driven people in the room', desc: 'Part of a 2,000+ strong community.', color: 'google-blue' },
+  { title: "First talk? That's okay", desc: "If you've built something or learned something worth sharing, that's enough.", color: 'google-green' },
+  { title: "We'll help you get ready", desc: 'Feedback on your talk, support along the way.', color: 'google-red' },
+  { title: 'Free entry, all day', desc: 'Not just for your session.', color: 'google-yellow' },
+];
+
+const REASON_BORDER: Record<string, string> = {
+  'google-blue': 'border-google-blue',
+  'google-green': 'border-google-green',
+  'google-red': 'border-google-red',
+  'google-yellow': 'border-google-yellow',
+};
+
+// Matches the upload order in scripts/upload-cfs-hero-images.mjs (cfs-1, cfs-2, cfs-3).
+// The collage crop is so narrow that a plain center crop can miss the subject or
+// leave too much dead background in frame; these are calibrated per source photo.
+const HERO_IMAGE_OBJECT_POSITIONS = ['47% center', '18% center', '46% center'];
+// The third photo's subject sits noticeably lower in the source frame than the
+// other two, so the extra zoom is paired with an upward shift to line up the faces.
+// The first gets a much lighter touch of the same treatment: a small downward
+// shift compensates for the face drifting up as the center-anchored zoom scales
+// its distance from the frame's vertical center.
+const HERO_IMAGE_TRANSFORMS: Record<number, string> = {
+  0: 'scale(1.12) translateY(3%)',
+  2: 'scale(1.2) translateY(-9%)',
+};
+
+async function fetchCfsHeroImageUrls(): Promise<string[]> {
+  try {
+    const doc = await adminDb.collection('settings').doc('site').get();
+    return (doc.data()?.cfsHeroImageUrls as string[] | undefined) ?? [];
+  } catch {
+    return [];
+  }
+}
+
 const topics: { label: string; track: 'developer' | 'builder' | 'workshop' }[] = [
   { label: 'Agentic app development', track: 'developer' },
   { label: 'AI prototyping', track: 'builder' },
@@ -42,125 +82,155 @@ const topics: { label: string; track: 'developer' | 'builder' | 'workshop' }[] =
   { label: 'Developer productivity', track: 'developer' },
   { label: 'Rapid MVP validation', track: 'builder' },
   { label: 'From idea to launch', track: 'builder' },
-  { label: 'AI-powered research & discovery', track: 'builder' },
-  { label: 'Design systems for AI products', track: 'builder' },
-  { label: 'Growth & GTM playbooks', track: 'builder' },
   { label: 'Hands-on building', track: 'workshop' },
   { label: 'Live coding sessions', track: 'workshop' },
 ];
 
-export default function CallForSpeakers() {
+function formatCloseDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-AU', { day: 'numeric', month: 'long' });
+}
+
+export default async function CallForSpeakers() {
+  const cfsCloseDate = process.env.CFS_CLOSE_DATE;
+  const heroImageUrls = await fetchCfsHeroImageUrls();
+
   return (
-    <div className="bg-off-white text-black-02 min-h-screen">
-      <Navbar light isCfsOpen={isCfsOpen} />
+    <div className="bg-[#202124] text-white min-h-screen">
+      <Navbar accent="green" isCfsOpen={isCfsOpen} />
 
       {/* Hero */}
-      <section className={`relative pb-24 px-6 overflow-hidden ${isCfsOpen ? 'pt-40' : 'pt-36'}`}>
+      <section className={`relative pb-16 px-4 sm:px-6 lg:px-12 overflow-hidden ${isCfsOpen ? 'pt-40' : 'pt-36'}`}>
         <div className="absolute inset-0 hero-atmosphere pointer-events-none" aria-hidden="true" />
 
-        <div className="relative max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight mb-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            Share your story at
-            <br />
-            <span className="text-google-blue">DevFest Sydney</span>
-          </h1>
-
-          <p className="text-black-02/55 text-lg max-w-2xl mx-auto leading-relaxed mb-6 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-            We&apos;re looking for passionate speakers across the Developer and Builder tracks. Whether you&apos;re an engineer,
-            designer, PM, or founder. If you have something worth sharing, we want to hear from you.
-          </p>
-
-          <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5 mb-10 text-sm text-black-02/45 animate-slide-up" style={{ animationDelay: '0.25s' }}>
-            <span>Free attendance for accepted speakers</span>
-            <span className="text-black-02/20" aria-hidden="true">·</span>
-            <span>Speaker support and mentoring</span>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-center gap-5">
-            <a
-              href="#topics"
-              className="inline-flex items-center px-5 py-2.5 bg-transparent text-black-02/80 text-sm font-bold rounded-[3px] border border-black-02/15 transition-colors hover:border-black-02/30 animate-slide-up"
-              style={{ animationDelay: '0.25s' }}
-            >
-              Learn more
-            </a>
+        <div className="relative flex flex-col md:flex-row md:items-stretch gap-10">
+          <div className="md:shrink-0">
             {isCfsOpen && (
+              <p className="mb-4 text-base font-bold text-white/80 animate-fade-in">
+                Now open{cfsCloseDate ? ` · closes ${formatCloseDate(cfsCloseDate)}` : ''}
+              </p>
+            )}
+
+            <h1 className="text-[clamp(3.5rem,15vw,6rem)] md:text-[clamp(3rem,8vw,6rem)] font-bold leading-[0.95] tracking-tight text-white mb-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+              Call for
+              <br />
+              <span className="text-google-green">Speakers</span>
+            </h1>
+
+            <p className="text-white/55 text-lg max-w-lg leading-relaxed mb-14 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+              We&apos;re looking for passionate Developers and Builders like you. Apply now!
+            </p>
+
+            <div className="flex flex-wrap items-center gap-5">
               <a
-                href="#apply"
-                className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-google-blue text-white text-sm font-bold rounded-[3px] border border-google-blue transition-colors hover:bg-transparent hover:text-google-blue animate-slide-up"
-                style={{ animationDelay: '0.3s' }}
+                href="#topics"
+                className="inline-flex items-center px-8 py-2.5 bg-transparent text-white/80 text-base font-bold rounded-lg border border-white/15 transition-colors hover:border-white/30 animate-slide-up"
+                style={{ animationDelay: '0.25s' }}
               >
-                Submit your session
-                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 6l6 6-6 6" />
-                </svg>
+                Learn more
+              </a>
+              {isCfsOpen && (
+                <a
+                  href="#apply"
+                  className="inline-flex items-center gap-2.5 px-8 py-2.5 bg-google-green text-white text-base font-bold rounded-lg border border-google-green transition-colors hover:bg-transparent hover:text-google-green animate-slide-up"
+                  style={{ animationDelay: '0.3s' }}
+                >
+                  Apply to speak
               </a>
             )}
+            </div>
           </div>
 
-          <p className="text-black-02/35 text-sm mt-5 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-            You don&apos;t need to be a seasoned speaker: first-time speakers are welcome.
-          </p>
+          {heroImageUrls.length > 0 && (
+            <div className="flex gap-2 h-72 md:h-auto md:flex-1 animate-fade-in" style={{ animationDelay: '0.15s' }}>
+              {heroImageUrls.map((url, i) => {
+                const isFirst = i === 0;
+                const isLast = i === heroImageUrls.length - 1;
+                const cornerClass = isFirst
+                  ? 'rounded-tl-[20px] rounded-bl-[20px] rounded-tr-lg rounded-br-lg'
+                  : isLast
+                    ? 'rounded-tr-[20px] rounded-br-[20px] rounded-tl-lg rounded-bl-lg'
+                    : 'rounded-lg';
+                // The collage crops each photo down to a narrow sliver (~25% of its
+                // width), so a plain center crop can miss an off-center subject
+                // entirely. This is calibrated per source photo's subject position.
+                const objectPosition = HERO_IMAGE_OBJECT_POSITIONS[i] ?? 'center';
+                const transform = HERO_IMAGE_TRANSFORMS[i];
+                return (
+                  <div key={url} className={`relative flex-1 h-full overflow-hidden ${cornerClass}`}>
+                    <Image
+                      src={url}
+                      alt="A past DevFest Sydney speaker presenting"
+                      fill
+                      sizes="(min-width: 768px) 640px, 480px"
+                      priority={isFirst}
+                      className="object-cover"
+                      style={transform ? { objectPosition, transform } : { objectPosition }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Topics */}
-      <section id="topics" className="py-20 px-6 bg-white">
-        <div className="max-w-5xl mx-auto">
+      {/* Countdown bar */}
+      {isCfsOpen && cfsCloseDate && (
+        <section className="py-10 px-6 bg-white/[0.02] border-y border-white/8">
+          <div className="max-w-4xl mx-auto flex justify-center">
+            <Countdown targetIso={cfsCloseDate} label="Closing in" />
+          </div>
+        </section>
+      )}
+
+      {/* Reasons to apply */}
+      <section id="topics" className="pt-20 pb-0 px-6">
+        <div className="max-w-6xl mx-auto">
           <div className="mb-12 text-center animate-slide-up">
-            <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3">Topic Ideas</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">What are we looking for?</h2>
-            <p className="text-black-02/45 mt-3 text-sm max-w-lg mx-auto">
-              We welcome sessions on any topic relevant to our tracks. Here are some ideas to get you started.
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight">Good reasons to apply</h2>
+            <p className="text-white/70 mt-4 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+              You don&apos;t need a polished deck or years on stage. If you&apos;ve built something or learned something the hard way, that&apos;s a talk.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3 justify-center animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            {topics.map(({ label, track }) => (
-              <span
-                key={label}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-off-white border border-black-02/8 rounded-full text-sm text-black-02/70 hover:text-black-02/90 hover:border-black-02/15 transition-colors"
+          <div className="grid sm:grid-cols-2 gap-8 mb-16 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            {REASONS.map((reason) => (
+              <div
+                key={reason.title}
+                className={`flex flex-col gap-3 bg-white/[0.06] border border-l-8 ${REASON_BORDER[reason.color]} rounded-xl pt-8 pb-10 px-6 md:px-8`}
               >
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    track === 'developer' ? 'bg-google-blue' : track === 'builder' ? 'bg-google-green' : 'bg-google-yellow'
-                  }`}
-                  aria-hidden="true"
-                />
+                <h3 className="text-xl md:text-2xl font-bold text-white">{reason.title}</h3>
+                <p className="text-base text-white/80 leading-relaxed">{reason.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative -mx-6 overflow-hidden border-y border-[#CCCCCC] bg-white/[0.06] animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <div className="absolute inset-y-0 left-0 w-12 sm:w-24 bg-gradient-to-r from-[#202124] to-transparent z-10 pointer-events-none" aria-hidden="true" />
+          <div className="absolute inset-y-0 right-0 w-12 sm:w-24 bg-gradient-to-l from-[#202124] to-transparent z-10 pointer-events-none" aria-hidden="true" />
+          <div className="flex w-max items-center gap-6 py-4 animate-marquee hover:[animation-play-state:paused]" aria-hidden="true">
+            {[...topics, ...topics].map(({ label }, i) => (
+              <span key={i} className="flex items-center gap-2.5 text-base font-normal text-white whitespace-nowrap">
+                <span className="w-2 h-2 rounded-full bg-google-green shrink-0" />
                 {label}
               </span>
             ))}
-            <span className="px-4 py-2 bg-off-white border border-black-02/8 rounded-full text-sm text-black-02/40">
-              and more...
-            </span>
           </div>
-
-          <div className="flex items-center justify-center gap-6 mt-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            <span className="inline-flex items-center gap-2 text-xs text-black-02/45">
-              <span className="w-1.5 h-1.5 rounded-full bg-google-blue" aria-hidden="true" />
-              Developer Track
-            </span>
-            <span className="inline-flex items-center gap-2 text-xs text-black-02/45">
-              <span className="w-1.5 h-1.5 rounded-full bg-google-green" aria-hidden="true" />
-              Builder Track
-            </span>
-            <span className="inline-flex items-center gap-2 text-xs text-black-02/45">
-              <span className="w-1.5 h-1.5 rounded-full bg-google-yellow" aria-hidden="true" />
-              Workshops Track
-            </span>
-          </div>
+          <p className="sr-only">
+            Topics we welcome: {topics.map(({ label }) => label).join(', ')}, and more.
+          </p>
         </div>
       </section>
 
       {/* Form or Closed State */}
-      <section id="apply" className="py-20 px-6">
+      <section id="apply" className="pt-16 pb-20 px-6 bg-[#202124]">
         <div className={isCfsOpen ? 'max-w-4xl mx-auto' : 'max-w-xl mx-auto'}>
           <div className="mb-10 text-center animate-slide-up">
-            <p className="text-xs font-bold text-black-02/40 tracking-[0.15em] uppercase mb-3">Apply</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Submit your session</h2>
-            <p className="text-black-02/45 mt-3 text-sm max-w-md mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight">Apply to speak</h2>
+            <p className="text-white/70 mt-4 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
               Need something to present comfortably, an interpreter, step-free access, or anything else? Tell us in the form below, or email{' '}
-              <a href="mailto:hello@gdgsydney.com" className="text-black-02/60 hover:text-black-02/80 underline underline-offset-2 transition-colors">
+              <a href="mailto:hello@gdgsydney.com" className="text-white/85 hover:text-white underline underline-offset-2 transition-colors">
                 hello@gdgsydney.com
               </a>
               .
@@ -170,19 +240,19 @@ export default function CallForSpeakers() {
           {isCfsOpen ? (
             <CfsForm />
           ) : (
-            <div className="bg-white border border-black-02/8 rounded-2xl p-12 text-center">
-              <div className="w-14 h-14 rounded-full border border-black-02/15 flex items-center justify-center mx-auto mb-5">
-                <svg className="w-6 h-6 text-black-02/35" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+            <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-12 text-center">
+              <div className="w-14 h-14 rounded-full border border-white/15 flex items-center justify-center mx-auto mb-5">
+                <svg className="w-6 h-6 text-white/35" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-black-02/70 mb-3">Applications are now closed</h3>
-              <p className="text-sm text-black-02/45 leading-relaxed max-w-sm mx-auto">
+              <h3 className="text-lg font-bold text-white/70 mb-3">Applications are now closed</h3>
+              <p className="text-sm text-white/45 leading-relaxed max-w-sm mx-auto">
                 The Call for Speakers has closed for DevFest Sydney 2026. Thank you to everyone who submitted a session. We&apos;ll be in touch soon.
               </p>
               <a
                 href="mailto:hello@gdgsydney.com"
-                className="inline-flex mt-6 text-sm text-black-02/50 hover:text-black-02/70 underline underline-offset-2 transition-colors"
+                className="inline-flex mt-6 text-sm text-white/50 hover:text-white/70 underline underline-offset-2 transition-colors"
               >
                 Contact us if you have questions
               </a>
@@ -191,7 +261,7 @@ export default function CallForSpeakers() {
         </div>
       </section>
 
-      <Footer light />
+      <Footer />
     </div>
   );
 }
