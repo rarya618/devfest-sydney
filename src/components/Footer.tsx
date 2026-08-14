@@ -16,16 +16,15 @@ const COLUMNS: { heading: string; links: { label: string; href: string; external
   {
     heading: 'Support',
     links: [
-      { label: 'Code of Conduct', href: '/code-of-conduct' },
-      { label: 'Privacy Policy', href: '/' },
-      { label: 'Terms of Service', href: '/' },
+      { label: 'Volunteer', href: '/volunteer' },
       { label: 'FAQ', href: '/faq' },
+      { label: 'Privacy Policy', href: '/privacy' },
+      { label: 'Code of Conduct', href: '/conduct' },
     ],
   },
   {
-    heading: 'Community',
+    heading: 'Social',
     links: [
-      { label: 'Volunteer', href: '/volunteer' },
       { label: 'Community page', href: 'https://gdg.community.dev/gdg-sydney/', external: true },
       { label: 'Meetup', href: 'https://www.meetup.com/gdgcloudsydney/', external: true },
       { label: 'Slack', href: 'https://join.slack.com/t/gdganz/shared_invite/zt-3acfakeqo-4KAJLoq~TISLD_2jYntmSg', external: true },
@@ -45,7 +44,7 @@ export default function Footer() {
           <span className="text-white/70">Torrens University, Surry Hills</span> */}
         </div>
 
-        <div className="flex flex-col md:flex-row md:justify-between gap-10 px-6 md:px-10 pt-8 pb-12">
+        <div className="flex flex-col items-center text-center md:items-start md:text-left md:flex-row md:justify-between gap-10 px-6 md:px-10 pt-8 pb-12">
           <div>
             <Link href="/" className="inline-flex items-center group" aria-label="DevFest Sydney home">
               <Image
@@ -69,7 +68,7 @@ export default function Footer() {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-x-16 gap-y-8">
+          <div className="flex flex-wrap justify-center md:justify-start gap-x-16 gap-y-8">
             {COLUMNS.map((column) => (
               <div key={column.heading} className="min-w-[150px]">
                 <p className="text-xl font-bold text-white mb-3">{column.heading}</p>
