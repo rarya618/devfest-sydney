@@ -58,22 +58,22 @@ export default function FAQ({
   const faqs = buildFaqs(isCfsOpen);
 
   return (
-    <div className="grid sm:grid-cols-2 gap-4">
+    <div className="grid gap-4">
       {faqs.map((faq, i) => (
         <div
           key={i}
-          className="bg-white border border-black-02/8 rounded-2xl px-6 self-start transition-colors duration-200 hover:border-black-02/15"
+          className="bg-white/[0.03] border border-white/10 rounded-2xl px-8 self-start transition-colors duration-200 hover:border-white/20"
         >
           <button
             onClick={() => setOpen(open === i ? null : i)}
             aria-expanded={open === i}
             className={`w-full pt-5 flex justify-between items-center text-left gap-6 hover:opacity-70 transition-[padding-bottom,opacity] duration-300 ${
-              open === i ? 'pb-2' : 'pb-5'
+              open === i ? 'pb-3' : 'pb-5'
             }`}
           >
-            <span className="font-bold text-black-02/90 text-base">{faq.q}</span>
+            <span className="font-bold text-white/90 text-lg leading-relaxed">{faq.q}</span>
             <span
-              className={`text-black-02/35 text-xl flex-shrink-0 transition-transform duration-200 ${
+              className={`text-white/35 text-3xl leading-none flex-shrink-0 self-center transition-transform duration-200 ${
                 open === i ? 'rotate-45' : ''
               }`}
               aria-hidden="true"
@@ -87,12 +87,12 @@ export default function FAQ({
             }`}
           >
             <div className="overflow-hidden">
-              <p className="pb-5 text-black-02/60 leading-relaxed text-sm">
+              <p className="pb-5 text-white/55 leading-relaxed text-base">
                 {faq.a}
                 {faq.q.includes('Code of Conduct') && (
                   <>
                     {' '}
-                    <Link href="/code-of-conduct" className="text-google-blue hover:underline">
+                    <Link href="/conduct" className="text-google-blue hover:underline">
                       Read the full Code of Conduct.
                     </Link>
                   </>
