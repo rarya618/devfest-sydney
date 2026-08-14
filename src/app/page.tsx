@@ -165,13 +165,13 @@ export default async function Home() {
 
         <div className="relative max-w-2xl">
           {isCfsOpen && (
-            <p className="mb-6 text-base font-bold text-white/60 animate-fade-in">
+            <p className="mb-6 text-base font-bold text-white/80 animate-fade-in">
               Call for Speakers open{cfsCloseDate ? ` · closes ${formatCloseDate(cfsCloseDate)}` : ''}
             </p>
           )}
 
           <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            <h1 className="text-[clamp(3.5rem,15vw,6rem)] md:text-[clamp(3rem,10vw,6rem)] font-bold leading-[0.95] tracking-tight text-white">
+            <h1 className="text-[clamp(4rem,18vw,6rem)] md:text-[clamp(3rem,10vw,6rem)] font-bold leading-[0.95] tracking-tight text-white">
               <span className="block md:inline">Build,</span>{' '}
               <span className="block md:inline">Secure,</span>
               <span className="block text-google-blue">Scale.</span>
@@ -184,7 +184,7 @@ export default async function Home() {
           <div className="flex flex-wrap items-center gap-5 mt-14 animate-slide-up" style={{ animationDelay: '0.3s' }}>
             <a
               href="#about"
-              className="inline-flex items-center px-8 py-2.5 bg-transparent text-white/90 text-base font-bold rounded-lg border border-white/25 transition-colors hover:border-white/50"
+              className="inline-flex items-center px-8 py-2.5 bg-transparent text-white text-base font-bold rounded-lg border border-[#555555] transition-colors hover:border-white"
             >
               Learn more
             </a>
@@ -293,7 +293,7 @@ export default async function Home() {
               </div>
               {landingCfsImageUrl ? (
                 <div className="hidden md:block absolute inset-y-0 right-0 w-64">
-                  <Image src={landingCfsImageUrl} alt="" fill sizes="16rem" className="object-cover" />
+                  <Image src={landingCfsImageUrl} alt="" fill sizes="500px" className="object-cover" />
                 </div>
               ) : (
                 <div className="hidden md:flex items-center justify-center absolute top-0 bottom-0 right-0 w-64 bg-google-green/10">
@@ -319,9 +319,9 @@ export default async function Home() {
               <Reveal
                 key={track.name}
                 delay={i * 0.1}
-                className="card-hover-lift bg-white/[0.08] border border-white/10 rounded-2xl p-6 md:p-7"
+                className="card-hover-lift bg-white/[0.08] rounded-2xl p-6 md:p-7"
               >
-                <span className="inline-flex items-center gap-2 text-lg font-bold text-white mb-3">
+                <span className="inline-flex items-center gap-3 text-lg font-bold text-white mb-3">
                   <span className={`w-2 h-2 rounded-full ${TRACK_DOT[track.color]}`} aria-hidden="true" />
                   {track.name}
                 </span>
@@ -407,7 +407,7 @@ export default async function Home() {
       )}
 
       {/* ─── SUPPORTED BY GOOGLE ─── */}
-      <section className="py-16 px-6 border-t border-white/8">
+      <section id="partners" className="py-16 px-6 border-t border-white/8">
         <div className="max-w-7xl mx-auto flex flex-col items-center gap-6">
           <p className="text-lg font-medium text-white/40">Supported by</p>
           {googleLogoUrl && (
@@ -418,9 +418,8 @@ export default async function Home() {
 
       {/* ─── SPONSORS ─── (hidden until there are sponsors to show) */}
       {showSponsors && (
-        <section id="sponsors" className="py-24 px-6 bg-white/[0.02] border-b border-white/8">
+        <section className="py-24 px-6 bg-white/[0.02] border-b border-white/8">
           <div className="max-w-7xl mx-auto">
-            <p className="text-xs font-bold text-white/40 tracking-[0.15em] uppercase mb-3 text-center">Partners</p>
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-14 text-center">Our sponsors</h2>
 
             {sponsors.length === 0 ? (
