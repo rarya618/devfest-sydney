@@ -123,7 +123,7 @@ export default async function CallForSpeakers() {
             <div className="flex flex-wrap items-center gap-5">
               <a
                 href="#topics"
-                className="inline-flex items-center px-8 py-2.5 bg-transparent text-white/80 text-base font-bold rounded-lg border border-white/15 transition-colors hover:border-white/30 animate-slide-up"
+                className="inline-flex items-center px-8 py-2.5 bg-transparent text-white text-base font-bold rounded-lg border border-[#555555] transition-colors hover:border-white animate-slide-up"
                 style={{ animationDelay: '0.25s' }}
               >
                 Learn more

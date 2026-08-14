@@ -874,7 +874,7 @@ export default function CfsForm() {
           </button>
           <p className="text-xs text-white/35 mt-3">
             By submitting you agree to our{' '}
-            <a href="/code-of-conduct" className="text-white/50 hover:text-white/70 underline underline-offset-2 transition-colors">
+            <a href="/conduct" className="text-white/50 hover:text-white/70 underline underline-offset-2 transition-colors">
               Code of Conduct
             </a>
             .
