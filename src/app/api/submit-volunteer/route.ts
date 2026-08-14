@@ -87,9 +87,19 @@ function validatePayload(body: unknown): VolunteerPayload {
   };
 }
 
+const AREA_DOT_COLORS = ['#34A853', '#F9AB00', '#4285F4', '#EA4335'];
+
 function buildConfirmationEmail(volunteer: VolunteerPayload): string {
   const font = "font-family:'Google Sans',Roboto,sans-serif;letter-spacing:-0.01em;";
-  const areas = volunteer.areasOfInterest.map((area) => AREA_LABELS[area]).join(', ');
+
+  const dot = (color: string, label: string) => `
+    <span style="display:inline-block;background:rgba(255,255,255,0.06);border-radius:20px;padding:8px 16px;margin:0 6px 12px;white-space:nowrap;">
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-right:14px;vertical-align:middle;"></span><span style="${font}font-size:16px;font-weight:700;color:#ffffff;vertical-align:middle;">${label}</span>
+    </span>`;
+
+  const indicators = volunteer.areasOfInterest
+    .map((area, i) => dot(AREA_DOT_COLORS[i % AREA_DOT_COLORS.length], AREA_LABELS[area]))
+    .join('');
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -98,70 +108,49 @@ function buildConfirmationEmail(volunteer: VolunteerPayload): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Volunteer signup received: DevFest Sydney 2026</title>
 </head>
-<body style="margin:0;padding:0;background:#f0f0f0;${font}color:#1e1e1e;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f0f0;padding:48px 16px;">
+<body style="margin:0;padding:0;background:#202124;${font}color:#ffffff;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#202124;padding:48px 16px;">
     <tr>
       <td align="center">
-        <table width="520" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;border:1px solid rgba(30,30,30,0.08);">
+        <table width="600" cellpadding="0" cellspacing="0" style="background:#202124;">
           <tr>
-            <td style="padding:48px 40px 40px;text-align:center;">
+            <td style="padding:60px 40px;text-align:center;">
 
               <!-- Wordmark -->
-              <table cellpadding="0" cellspacing="0" style="margin:0 auto 32px;">
-                <tr>
-                  <td style="vertical-align:middle;padding-right:5px;">
-                    <img src="https://devfest.gdgsydney.com/logo.png" alt="" width="53" height="30" style="display:inline-block;vertical-align:middle;" />
-                  </td>
-                  <td style="vertical-align:middle;">
-                    <span style="${font}font-size:18px;font-weight:700;color:#1e1e1e;">DevFest Sydney</span>
-                  </td>
-                </tr>
-              </table>
+              <img src="https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/site-assets/logo-wordmark.png" alt="DevFest Sydney" width="221" height="40" style="display:block;margin:0 auto 40px;" />
 
-              <!-- Success icon + heading -->
-              <table cellpadding="0" cellspacing="0" style="margin:0 auto 12px;">
-                <tr>
-                  <td style="padding-right:12px;vertical-align:middle;">
-                    <table cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td style="width:22px;height:22px;border-radius:50%;background:#34A853;text-align:center;vertical-align:middle;">
-                          <span style="${font}font-size:13px;line-height:22px;color:#ffffff;">&#10003;</span>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                  <td style="vertical-align:middle;">
-                    <h1 style="margin:0;${font}font-size:22px;font-weight:700;color:#1e1e1e;line-height:1.35;letter-spacing:-0.02em;">
-                      Thanks for signing up, <span style="color:#4285F4;">${volunteer.name.split(' ')[0]}</span>!
-                    </h1>
-                  </td>
-                </tr>
-              </table>
-              <p style="margin:0 0 32px;${font}font-size:14px;color:rgba(30,30,30,0.55);line-height:1.8;">
+              <!-- Heading -->
+              <h1 style="margin:0 0 8px;${font}font-size:40px;font-weight:400;color:#ffffff;line-height:1.4;">
+                Thanks for signing up
+              </h1>
+              <h2 style="margin:0 0 24px;${font}font-size:44px;font-weight:700;color:#EA4335;line-height:1.5;">
+                ${volunteer.name.split(' ')[0]}
+              </h2>
+              <p style="margin:0 0 40px;${font}font-size:24px;font-weight:400;color:#ffffff;line-height:1.75;">
                 Thanks for offering to volunteer at DevFest Sydney. We'll be in touch via email with next steps.
               </p>
 
-              <!-- Signup recap -->
-              <p style="margin:0 0 6px;${font}font-size:12px;font-weight:700;color:#4285F4;">Your signup</p>
-              <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
+              <!-- Signup recap card -->
+              <table cellpadding="0" cellspacing="0" width="100%" style="background:rgba(255,255,255,0.06);border-radius:12px;">
                 <tr>
-                  <td style="white-space:nowrap;">
-                    <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#4285F4;margin-right:7px;vertical-align:middle;"></span><span style="${font}font-size:13px;font-weight:600;color:rgba(30,30,30,0.8);vertical-align:middle;">${areas}</span>
+                  <td style="padding:40px;text-align:center;">
+                    <h3 style="margin:0 0 24px;${font}font-size:32px;font-weight:700;color:#ffffff;line-height:1.5;">Areas you're helping with</h3>
+                    <div>${indicators}</div>
                   </td>
                 </tr>
               </table>
-            </td>
-          </tr>
 
-          <!-- Footer -->
-          <tr>
-            <td style="padding:20px 40px 32px;border-top:1px solid rgba(30,30,30,0.08);text-align:center;">
-              <p style="margin:0;${font}font-size:12px;color:rgba(30,30,30,0.35);line-height:1.8;">
-                Got a question? Just reply to this email, we're happy to help.<br />Organised by <a href="https://gdgsydney.com" style="color:rgba(30,30,30,0.45);text-decoration:underline;">GDG Sydney</a>
+              <!-- Questions -->
+              <div style="margin-top:40px;">
+                <p style="margin:0 0 8px;${font}font-size:24px;font-weight:700;color:#ffffff;line-height:1.5;">Got a question?</p>
+                <p style="margin:0;${font}font-size:20px;font-weight:400;color:#ffffff;line-height:1.5;">Just reply to this email, we're happy to help.</p>
+              </div>
+
+              <p style="margin:40px 0 0;${font}font-size:20px;font-weight:400;color:#ffffff;">
+                Organised by <a href="https://gdgsydney.com" style="color:#ffffff;text-decoration:underline;">GDG Sydney</a>
               </p>
             </td>
           </tr>
-
         </table>
       </td>
     </tr>
@@ -204,7 +193,7 @@ export async function POST(request: NextRequest) {
       to: volunteer.email,
       bcc: 'hello@gdgsydney.com',
       replyTo: 'hello@gdgsydney.com',
-      subject: 'Volunteer signup received: DevFest Sydney 2026',
+      subject: `We've got your DevFest Sydney 2026 volunteer application`,
       html: buildConfirmationEmail(volunteer),
     });
   } catch {
