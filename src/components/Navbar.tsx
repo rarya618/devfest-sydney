@@ -15,8 +15,8 @@ const ACCENT_CLASSES: Record<Accent, string> = {
 
 const NAV_LINKS = [
   { href: '/#about', label: 'About' },
-  { href: '/call-for-speakers', label: 'Call for Speakers' },
-  { href: '/volunteer', label: 'Volunteer' },
+  { href: '/#tracks', label: 'Tracks' },
+  { href: '/#partners', label: 'Partners' },
 ];
 
 export default function Navbar({ accent = 'blue', isCfsOpen = false }: { accent?: Accent; isCfsOpen?: boolean }) {
