@@ -124,19 +124,6 @@ export default function CfsForm() {
   }, []);
 
   const showFormat = fields.track === 'developer' || fields.track === 'builder';
-  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email);
-  const sectionComplete: Record<string, boolean> = {
-    'cfs-section-details': fields.name.trim() !== '' && isEmailValid,
-    'cfs-section-talk':
-      fields.talkTitle.trim() !== '' &&
-      fields.abstract.trim() !== '' &&
-      fields.abstract.length <= ABSTRACT_MAX &&
-      fields.format !== '' &&
-      fields.track !== '' &&
-      fields.experienceLevel !== '',
-    'cfs-section-about': false,
-    'cfs-section-logistics': false,
-  };
 
   function validate(): FormErrors {
     const errs: FormErrors = {};
@@ -229,7 +216,7 @@ export default function CfsForm() {
             }}
             className="sr-only peer"
           />
-          <div className="w-5 h-5 rounded-md border border-black-02/20 bg-white peer-checked:bg-google-red peer-checked:border-google-red transition-colors duration-150 group-hover:border-black-02/35 flex items-center justify-center">
+          <div className="w-5 h-5 rounded-md border border-white/20 bg-white/[0.05] peer-checked:bg-google-red peer-checked:border-google-red transition-colors duration-150 group-hover:border-white/35 flex items-center justify-center">
             {fields[name] && (
               <span
                 className="material-symbols-outlined text-white text-[18px] flex items-center justify-center"
@@ -241,7 +228,7 @@ export default function CfsForm() {
             )}
           </div>
         </div>
-        <span className="text-sm text-black-02/70 group-hover:text-black-02/90 transition-colors select-none">
+        <span className="text-sm text-white/70 group-hover:text-white/90 transition-colors select-none">
           {label}
         </span>
       </label>
@@ -250,7 +237,7 @@ export default function CfsForm() {
 
   if (submitState === 'success') {
     return (
-      <div className="bg-white border border-black-02/8 rounded-2xl p-12 text-center animate-slide-up">
+      <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-12 text-center animate-slide-up">
         <div className="flex items-center justify-center gap-3 mb-3">
           <span
             className="material-symbols-outlined text-google-green text-[32px] flex items-center justify-center shrink-0"
@@ -259,9 +246,9 @@ export default function CfsForm() {
           >
             check_circle
           </span>
-          <h3 className="text-xl font-bold text-black-02">Session submitted!</h3>
+          <h3 className="text-xl font-bold text-white">Session submitted!</h3>
         </div>
-        <p className="text-black-02/55 text-sm leading-relaxed max-w-sm mx-auto">
+        <p className="text-white/55 text-sm leading-relaxed max-w-sm mx-auto">
           Thanks for submitting to DevFest Sydney. We&apos;ll review your session and be in touch via email.
         </p>
       </div>
@@ -269,47 +256,28 @@ export default function CfsForm() {
   }
 
   const inputBase =
-    'w-full bg-white border rounded-lg px-4 py-3 text-black-02 text-sm placeholder-black-02/30 outline-none transition-colors focus:bg-white';
-  const inputNormal = `${inputBase} border-black-02/15 focus:border-google-red/40`;
+    'w-full bg-white/[0.05] border rounded-lg px-5 py-2.5 text-white text-base placeholder-white/30 outline-none transition-colors focus:bg-white/[0.08]';
+  const inputNormal = `${inputBase} border-white/8 focus:border-google-red/40`;
   const inputError = `${inputBase} border-google-red/40 bg-google-red/5`;
 
   return (
     <>
       <nav
         aria-label="Form progress"
-        className="md:hidden sticky top-[68px] z-40 -mt-2 mb-6 bg-off-white/95 backdrop-blur-sm border-b border-black-02/8 px-1 py-2 -mx-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        className="md:hidden sticky top-[88px] z-40 -mt-2 mb-6 bg-[#202124] border-b border-white/8 px-1 py-2 -mx-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
         <ul className="flex items-center gap-1.5 w-max">
-          {SECTIONS.map((section) => {
+          {SECTIONS.map((section, index) => {
             const isActive = activeSection === section.id;
-            const isComplete = sectionComplete[section.id];
             return (
               <li key={section.id}>
                 <a
                   href={`#${section.id}`}
                   aria-current={isActive ? 'true' : undefined}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm whitespace-nowrap transition-colors
-                    ${isActive ? 'bg-google-red/8 text-black-02 font-semibold' : 'text-black-02/50 hover:text-black-02/80 hover:bg-black-02/5'}`}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-bold text-white whitespace-nowrap transition-colors
+                    ${isActive ? 'bg-white/[0.06]' : 'hover:bg-white/5'}`}
                 >
-                  <span
-                    className={`flex items-center justify-center w-5 h-5 rounded-full border shrink-0 transition-colors
-                      ${isComplete
-                        ? 'bg-google-green border-google-green'
-                        : isActive
-                          ? 'border-google-red'
-                          : 'border-black-02/20'
-                      }`}
-                  >
-                    {isComplete && (
-                      <span
-                        className="material-symbols-outlined text-white text-[16px] flex items-center justify-center"
-                        style={{ fontVariationSettings: "'FILL' 1" }}
-                        aria-hidden="true"
-                      >
-                        check_small
-                      </span>
-                    )}
-                  </span>
+                  <span className="text-white/40" aria-hidden="true">{index + 1}</span>
                   {section.label}
                 </a>
               </li>
@@ -321,40 +289,18 @@ export default function CfsForm() {
       <div className="md:flex md:items-start md:gap-10">
       <nav aria-label="Form progress" className="hidden md:block sticky top-28 w-52 shrink-0 self-start">
         <ul className="space-y-1">
-          {SECTIONS.map((section) => {
+          {SECTIONS.map((section, index) => {
             const isActive = activeSection === section.id;
-            const isComplete = sectionComplete[section.id];
             return (
               <li key={section.id}>
                 <a
                   href={`#${section.id}`}
                   aria-current={isActive ? 'true' : undefined}
-                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-colors
-                    ${isActive ? 'bg-google-red/8 text-black-02 font-semibold' : 'text-black-02/50 hover:text-black-02/80 hover:bg-black-02/5'}`}
+                  className={`flex items-center gap-6 px-6 py-3 rounded-lg border border-l-4 text-sm font-bold text-white transition-colors
+                    ${isActive ? 'bg-white/[0.06] border-[#555555]' : 'border-transparent hover:bg-white/5'}`}
                 >
-                  <span
-                    className={`flex items-center justify-center w-5 h-5 rounded-full border shrink-0 transition-colors
-                      ${isComplete
-                        ? 'bg-google-green border-google-green'
-                        : isActive
-                          ? 'border-google-red'
-                          : 'border-black-02/20'
-                      }`}
-                  >
-                    {isComplete && (
-                      <span
-                        className="material-symbols-outlined text-white text-[16px] flex items-center justify-center"
-                        style={{ fontVariationSettings: "'FILL' 1" }}
-                        aria-hidden="true"
-                      >
-                        check_small
-                      </span>
-                    )}
-                  </span>
-                  <span className="flex-1">{section.label}</span>
-                  {!section.required && (
-                    <span className="text-[10px] uppercase tracking-wide text-black-02/30">Optional</span>
-                  )}
+                  <span className="text-xs text-white/40 leading-none self-center" aria-hidden="true">{index + 1}</span>
+                  <span className="leading-none self-center">{section.label}</span>
                 </a>
               </li>
             );
@@ -365,14 +311,14 @@ export default function CfsForm() {
       <form onSubmit={handleSubmit} noValidate className="space-y-10 flex-1 min-w-0">
 
         {/* Section: Your details */}
-        <div id="cfs-section-details" className="scroll-mt-28">
+        <div id="cfs-section-details" className="scroll-mt-28 bg-white/[0.06] rounded-2xl p-6 sm:p-8">
           <div className="mb-6">
-            <h3 className="text-lg font-bold text-black-02">Your details</h3>
+            <h3 className="text-2xl font-bold text-white">Your details</h3>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-5">
           <div>
-            <label htmlFor="cfs-name" className="block text-sm font-bold text-black-02/70 mb-2">
+            <label htmlFor="cfs-name" className="block text-sm font-bold text-white/70 mb-1.5">
               Full name <span className="text-google-red" aria-hidden="true">*</span>
             </label>
             <input
@@ -392,7 +338,7 @@ export default function CfsForm() {
           </div>
 
           <div>
-            <label htmlFor="cfs-email" className="block text-sm font-bold text-black-02/70 mb-2">
+            <label htmlFor="cfs-email" className="block text-sm font-bold text-white/70 mb-1.5">
               Email address <span className="text-google-red" aria-hidden="true">*</span>
             </label>
             <input
@@ -414,15 +360,15 @@ export default function CfsForm() {
         </div>
 
         {/* Section: Your talk */}
-        <div id="cfs-section-talk" className="scroll-mt-28">
+        <div id="cfs-section-talk" className="scroll-mt-28 bg-white/[0.06] rounded-2xl p-6 sm:p-8">
           <div className="mb-6">
-            <h3 className="text-lg font-bold text-black-02">Your session</h3>
+            <h3 className="text-2xl font-bold text-white">Your session</h3>
           </div>
 
           <div className="space-y-7">
         {/* Talk title */}
         <div>
-          <label htmlFor="cfs-title" className="block text-sm font-bold text-black-02/70 mb-2">
+          <label htmlFor="cfs-title" className="block text-sm font-bold text-white/70 mb-1.5">
             Session title <span className="text-google-red" aria-hidden="true">*</span>
           </label>
           <input
@@ -443,12 +389,12 @@ export default function CfsForm() {
         {/* Abstract */}
         <div>
           <div className="flex items-baseline justify-between mb-2">
-            <label htmlFor="cfs-abstract" className="block text-sm font-bold text-black-02/70">
+            <label htmlFor="cfs-abstract" className="block text-sm font-bold text-white/70">
               Abstract <span className="text-google-red" aria-hidden="true">*</span>
             </label>
             <span
               aria-label={`${fields.abstract.length} of ${ABSTRACT_MAX} characters used`}
-              className={`text-xs tabular-nums ${fields.abstract.length > ABSTRACT_MAX ? 'text-google-red' : 'text-black-02/35'}`}
+              className={`text-xs tabular-nums ${fields.abstract.length > ABSTRACT_MAX ? 'text-google-red' : 'text-white/35'}`}
             >
               {fields.abstract.length}/{ABSTRACT_MAX}
             </span>
@@ -466,7 +412,7 @@ export default function CfsForm() {
           {errors.abstract ? (
             <p id="cfs-abstract-error" role="alert" className="mt-1.5 text-xs text-google-red/80">{errors.abstract}</p>
           ) : (
-            <p id="cfs-abstract-hint" className="mt-1.5 text-xs text-black-02/35">
+            <p id="cfs-abstract-hint" className="mt-1.5 text-xs text-white/35">
               Briefly describe your session: the topic, key points, and what attendees will learn.
             </p>
           )}
@@ -474,7 +420,7 @@ export default function CfsForm() {
 
         {/* Track */}
         <div>
-          <p className="text-sm font-bold text-black-02/70 mb-3" id="cfs-track-label">
+          <p className="text-sm font-bold text-white/70 mb-3" id="cfs-track-label">
             Track <span className="text-google-red" aria-hidden="true">*</span>
           </p>
           <div
@@ -486,9 +432,9 @@ export default function CfsForm() {
             {TRACKS.map((t) => {
               const selected = fields.track === t.value;
               const colorMap: Record<string, string> = {
-                'google-blue': selected ? 'border-google-blue/50 bg-google-blue/10' : 'border-black-02/10 bg-off-white hover:border-black-02/20',
-                'google-green': selected ? 'border-google-green/50 bg-google-green/10' : 'border-black-02/10 bg-off-white hover:border-black-02/20',
-                'google-yellow': selected ? 'border-google-yellow/50 bg-google-yellow/10' : 'border-black-02/10 bg-off-white hover:border-black-02/20',
+                'google-blue': selected ? 'border-google-blue/50 bg-google-blue/10' : 'border-white/10 bg-white/[0.04] hover:border-white/20',
+                'google-green': selected ? 'border-google-green/50 bg-google-green/10' : 'border-white/10 bg-white/[0.04] hover:border-white/20',
+                'google-yellow': selected ? 'border-google-yellow/50 bg-google-yellow/10' : 'border-white/10 bg-white/[0.04] hover:border-white/20',
               };
               return (
                 <button
@@ -505,13 +451,13 @@ export default function CfsForm() {
                     }));
                     setErrors((prev) => ({ ...prev, track: undefined, format: undefined }));
                   }}
-                  className={`flex flex-col items-start text-left rounded-xl border px-4 py-4 transition-colors duration-200 cursor-pointer
+                  className={`flex flex-col items-start text-left rounded-lg border px-4 py-4 transition-colors duration-200 cursor-pointer
                     ${errors.track && !selected
                       ? 'border-google-red/30 bg-google-red/5 hover:border-google-red/30'
                       : colorMap[t.color]
                     }`}
                 >
-                  <span className={`w-full flex items-center gap-2 text-sm font-semibold mb-1.5 ${selected ? 'text-black-02' : 'text-black-02/70'}`}>
+                  <span className={`w-full flex items-center gap-2 text-sm font-semibold mb-1.5 ${selected ? 'text-white' : 'text-white/70'}`}>
                     <span
                       className={`w-1.5 h-1.5 rounded-full ${
                         t.color === 'google-blue' ? 'bg-google-blue' : t.color === 'google-green' ? 'bg-google-green' : 'bg-google-yellow'
@@ -520,7 +466,7 @@ export default function CfsForm() {
                     />
                     {t.label}
                   </span>
-                  <p className={`w-full text-xs leading-relaxed ${selected ? 'text-black-02/60' : 'text-black-02/40'}`}>
+                  <p className={`w-full text-xs leading-relaxed ${selected ? 'text-white/60' : 'text-white/40'}`}>
                     {t.desc}
                   </p>
                 </button>
@@ -540,7 +486,7 @@ export default function CfsForm() {
         >
           <div className="overflow-hidden">
             <div className={`pt-1 transition-opacity duration-200 ${showFormat ? 'opacity-100' : 'opacity-0'}`}>
-            <p className="text-sm font-bold text-black-02/70 mb-3" id="cfs-format-label">
+            <p className="text-sm font-bold text-white/70 mb-3" id="cfs-format-label">
               Session format <span className="text-google-red" aria-hidden="true">*</span>
             </p>
             <div
@@ -552,8 +498,8 @@ export default function CfsForm() {
               {FORMATS.map((f) => {
                 const selected = fields.format === f.value;
                 const formatColorMap: Record<string, string> = {
-                  'google-blue': selected ? 'border-google-blue/50 bg-google-blue/10' : 'border-black-02/10 bg-off-white hover:border-black-02/20',
-                  'google-yellow': selected ? 'border-google-yellow/50 bg-google-yellow/10' : 'border-black-02/10 bg-off-white hover:border-black-02/20',
+                  'google-blue': selected ? 'border-google-blue/50 bg-google-blue/10' : 'border-white/10 bg-white/[0.04] hover:border-white/20',
+                  'google-yellow': selected ? 'border-google-yellow/50 bg-google-yellow/10' : 'border-white/10 bg-white/[0.04] hover:border-white/20',
                 };
                 const formatPillColorMap: Record<string, string> = {
                   'google-blue': 'bg-google-blue/20 text-google-blue',
@@ -571,14 +517,14 @@ export default function CfsForm() {
                       setFields((prev) => ({ ...prev, format: f.value }));
                       setErrors((prev) => ({ ...prev, format: undefined }));
                     }}
-                    className={`flex flex-col items-start text-left rounded-xl border px-4 py-4 transition-colors duration-200 cursor-pointer
+                    className={`flex flex-col items-start text-left rounded-lg border px-4 py-4 transition-colors duration-200 cursor-pointer
                       ${errors.format && !selected
                         ? 'border-google-red/30 bg-google-red/5 hover:border-google-red/30'
                         : formatColorMap[f.color]
                       }`}
                   >
                     <div className="w-full flex items-center justify-between mb-1.5">
-                      <span className={`inline-flex items-center gap-2 text-sm font-semibold ${selected ? 'text-black-02' : 'text-black-02/70'}`}>
+                      <span className={`inline-flex items-center gap-2 text-sm font-semibold ${selected ? 'text-white' : 'text-white/70'}`}>
                         <span
                           className={`w-1.5 h-1.5 rounded-full ${f.color === 'google-blue' ? 'bg-google-blue' : 'bg-google-yellow'}`}
                           aria-hidden="true"
@@ -586,11 +532,11 @@ export default function CfsForm() {
                         {f.label}
                       </span>
                       <span className={`text-xs px-2 py-0.5 rounded-full
-                        ${selected ? formatPillColorMap[f.color] : 'bg-black-02/6 text-black-02/40'}`}>
+                        ${selected ? formatPillColorMap[f.color] : 'bg-white/6 text-white/40'}`}>
                         {f.duration}
                       </span>
                     </div>
-                    <p className={`w-full text-xs leading-relaxed ${selected ? 'text-black-02/60' : 'text-black-02/40'}`}>
+                    <p className={`w-full text-xs leading-relaxed ${selected ? 'text-white/60' : 'text-white/40'}`}>
                       {f.desc}
                     </p>
                   </button>
@@ -607,7 +553,7 @@ export default function CfsForm() {
         {/* Experience level */}
 
         <div>
-          <p className="text-sm font-bold text-black-02/70 mb-3" id="cfs-level-label">
+          <p className="text-sm font-bold text-white/70 mb-3" id="cfs-level-label">
             Your experience level <span className="text-google-red" aria-hidden="true">*</span>
           </p>
           <div
@@ -619,9 +565,9 @@ export default function CfsForm() {
             {LEVELS.map((level) => {
               const selected = fields.experienceLevel === level.value;
               const levelColorMap: Record<string, string> = {
-                'google-green': selected ? 'border-google-green/50 bg-google-green/10' : 'border-black-02/10 bg-off-white hover:border-black-02/20',
-                'google-yellow': selected ? 'border-google-yellow/50 bg-google-yellow/10' : 'border-black-02/10 bg-off-white hover:border-black-02/20',
-                'google-blue': selected ? 'border-google-blue/50 bg-google-blue/10' : 'border-black-02/10 bg-off-white hover:border-black-02/20',
+                'google-green': selected ? 'border-google-green/50 bg-google-green/10' : 'border-white/10 bg-white/[0.04] hover:border-white/20',
+                'google-yellow': selected ? 'border-google-yellow/50 bg-google-yellow/10' : 'border-white/10 bg-white/[0.04] hover:border-white/20',
+                'google-blue': selected ? 'border-google-blue/50 bg-google-blue/10' : 'border-white/10 bg-white/[0.04] hover:border-white/20',
               };
               return (
                 <button
@@ -634,13 +580,13 @@ export default function CfsForm() {
                     setFields((prev) => ({ ...prev, experienceLevel: level.value }));
                     setErrors((prev) => ({ ...prev, experienceLevel: undefined }));
                   }}
-                  className={`flex flex-col items-start text-left rounded-xl border px-4 py-4 transition-colors duration-200 cursor-pointer
+                  className={`flex flex-col items-start text-left rounded-lg border px-4 py-4 transition-colors duration-200 cursor-pointer
                     ${errors.experienceLevel && !selected
                       ? 'border-google-red/30 bg-google-red/5 hover:border-google-red/30'
                       : levelColorMap[level.color]
                     }`}
                 >
-                  <span className={`w-full flex items-center gap-2 text-sm font-semibold mb-1.5 ${selected ? 'text-black-02' : 'text-black-02/70'}`}>
+                  <span className={`w-full flex items-center gap-2 text-sm font-semibold mb-1.5 ${selected ? 'text-white' : 'text-white/70'}`}>
                     <span
                       className={`w-1.5 h-1.5 rounded-full ${
                         level.color === 'google-green' ? 'bg-google-green' : level.color === 'google-yellow' ? 'bg-google-yellow' : 'bg-google-blue'
@@ -649,7 +595,7 @@ export default function CfsForm() {
                     />
                     {level.label}
                   </span>
-                  <p className={`w-full text-xs leading-relaxed ${selected ? 'text-black-02/60' : 'text-black-02/40'}`}>
+                  <p className={`w-full text-xs leading-relaxed ${selected ? 'text-white/60' : 'text-white/40'}`}>
                     {level.desc}
                   </p>
                 </button>
@@ -664,14 +610,14 @@ export default function CfsForm() {
         </div>
 
         {/* Section: About you */}
-        <div id="cfs-section-about" className="scroll-mt-28">
+        <div id="cfs-section-about" className="scroll-mt-28 bg-white/[0.06] rounded-2xl p-6 sm:p-8">
           <div className="flex items-baseline gap-3 mb-6">
-            <h3 className="text-lg font-bold text-black-02">About you</h3>
-            <span className="text-xs font-medium text-black-02/35">Optional</span>
+            <h3 className="text-2xl font-bold text-white">About you</h3>
+            <span className="text-xs font-medium text-white/35">Optional</span>
           </div>
           <div className="space-y-5">
             <div>
-              <label htmlFor="cfs-linkedin" className="block text-sm font-bold text-black-02/70 mb-2">
+              <label htmlFor="cfs-linkedin" className="block text-sm font-bold text-white/70 mb-1.5">
                 LinkedIn
               </label>
               <input
@@ -684,7 +630,7 @@ export default function CfsForm() {
             </div>
 
             <div>
-              <label htmlFor="cfs-github" className="block text-sm font-bold text-black-02/70 mb-2">
+              <label htmlFor="cfs-github" className="block text-sm font-bold text-white/70 mb-1.5">
                 GitHub
               </label>
               <input
@@ -697,7 +643,7 @@ export default function CfsForm() {
             </div>
 
             <div>
-              <label htmlFor="cfs-website" className="block text-sm font-bold text-black-02/70 mb-2">
+              <label htmlFor="cfs-website" className="block text-sm font-bold text-white/70 mb-1.5">
                 Website
               </label>
               <input
@@ -708,13 +654,13 @@ export default function CfsForm() {
                 className={inputNormal}
                 {...field('websiteUrl')}
               />
-              <p id="cfs-website-hint" className="mt-1.5 text-xs text-black-02/35">
+              <p id="cfs-website-hint" className="mt-1.5 text-xs text-white/35">
                 Helps us learn more about you. All optional.
               </p>
             </div>
 
             <div>
-              <label htmlFor="cfs-tagline" className="block text-sm font-bold text-black-02/70 mb-2">
+              <label htmlFor="cfs-tagline" className="block text-sm font-bold text-white/70 mb-1.5">
                 Tagline
               </label>
               <input
@@ -725,13 +671,13 @@ export default function CfsForm() {
                 className={inputNormal}
                 {...field('speakerTagline')}
               />
-              <p id="cfs-tagline-hint" className="mt-1.5 text-xs text-black-02/35">
+              <p id="cfs-tagline-hint" className="mt-1.5 text-xs text-white/35">
                 Shown on your speaker profile if you&apos;re accepted.
               </p>
             </div>
 
             <div>
-              <label htmlFor="cfs-bio" className="block text-sm font-bold text-black-02/70 mb-2">
+              <label htmlFor="cfs-bio" className="block text-sm font-bold text-white/70 mb-1.5">
                 Speaker bio
               </label>
               <textarea
@@ -742,13 +688,13 @@ export default function CfsForm() {
                 className={`${inputNormal} resize-none leading-relaxed`}
                 {...field('speakerBio')}
               />
-              <p id="cfs-bio-hint" className="mt-1.5 text-xs text-black-02/35">
+              <p id="cfs-bio-hint" className="mt-1.5 text-xs text-white/35">
                 We&apos;ll use this for your speaker profile if you&apos;re accepted.
               </p>
             </div>
 
             <div>
-              <label htmlFor="cfs-prev-talk" className="block text-sm font-bold text-black-02/70 mb-2">
+              <label htmlFor="cfs-prev-talk" className="block text-sm font-bold text-white/70 mb-1.5">
                 Previous talk recording
               </label>
               <input
@@ -759,13 +705,13 @@ export default function CfsForm() {
                 className={inputNormal}
                 {...field('previousTalkLink')}
               />
-              <p id="cfs-prev-talk-hint" className="mt-1.5 text-xs text-black-02/35">
+              <p id="cfs-prev-talk-hint" className="mt-1.5 text-xs text-white/35">
                 A recording of a previous talk, if you have one.
               </p>
             </div>
 
             <div>
-              <label htmlFor="cfs-how-heard" className="block text-sm font-bold text-black-02/70 mb-2">
+              <label htmlFor="cfs-how-heard" className="block text-sm font-bold text-white/70 mb-1.5">
                 How did you hear about DevFest Sydney?
               </label>
               <input
@@ -805,15 +751,15 @@ export default function CfsForm() {
         </div>
 
         {/* Section: Logistics */}
-        <div id="cfs-section-logistics" className="scroll-mt-28">
+        <div id="cfs-section-logistics" className="scroll-mt-28 bg-white/[0.06] rounded-2xl p-6 sm:p-8">
           <div className="flex items-baseline gap-3 mb-6">
-            <h3 className="text-lg font-bold text-black-02">Logistics</h3>
-            <span className="text-xs font-medium text-black-02/35">Optional</span>
+            <h3 className="text-2xl font-bold text-white">Logistics</h3>
+            <span className="text-xs font-medium text-white/35">Optional</span>
           </div>
 
           <div className="space-y-5">
             <div>
-              <label htmlFor="cfs-co-speakers" className="block text-sm font-bold text-black-02/70 mb-2">
+              <label htmlFor="cfs-co-speakers" className="block text-sm font-bold text-white/70 mb-1.5">
                 Co-speaker email(s)
               </label>
               <input
@@ -824,13 +770,13 @@ export default function CfsForm() {
                 className={inputNormal}
                 {...field('coSpeakerEmails')}
               />
-              <p id="cfs-co-speakers-hint" className="mt-1.5 text-xs text-black-02/35">
+              <p id="cfs-co-speakers-hint" className="mt-1.5 text-xs text-white/35">
                 If you&apos;re presenting with someone else, list their email(s).
               </p>
             </div>
 
             <div>
-              <label htmlFor="cfs-accessibility" className="block text-sm font-bold text-black-02/70 mb-2">
+              <label htmlFor="cfs-accessibility" className="block text-sm font-bold text-white/70 mb-1.5">
                 Accessibility support
               </label>
               <textarea
@@ -841,7 +787,7 @@ export default function CfsForm() {
                 className={`${inputNormal} resize-none leading-relaxed`}
                 {...field('accessibilityNeeds')}
               />
-              <p id="cfs-accessibility-hint" className="mt-1.5 text-xs text-black-02/35">
+              <p id="cfs-accessibility-hint" className="mt-1.5 text-xs text-white/35">
                 Anything we should arrange so you can present comfortably.
               </p>
             </div>
@@ -867,7 +813,7 @@ export default function CfsForm() {
             },
           ].map(renderCheckbox)}
 
-          <p className="text-xs text-black-02/35 leading-relaxed pt-1">
+          <p className="text-xs text-white/35 leading-relaxed pt-1">
             Travel support is limited. We may not be able to cover costs for non-GDE speakers.
           </p>
 
@@ -878,7 +824,7 @@ export default function CfsForm() {
           >
             <div className="overflow-hidden">
               <div className={`pt-2 transition-opacity duration-200 ${fields.requiresTravelSupport ? 'opacity-100' : 'opacity-0'}`}>
-                <label htmlFor="cfs-travel-location" className="block text-sm font-bold text-black-02/70 mb-2">
+                <label htmlFor="cfs-travel-location" className="block text-sm font-bold text-white/70 mb-1.5">
                   Which city would you be travelling from? <span className="text-google-red" aria-hidden="true">*</span>
                 </label>
                 <input
@@ -909,9 +855,9 @@ export default function CfsForm() {
             type="submit"
             disabled={submitState === 'submitting'}
             aria-label="Submit your session"
-            className="inline-flex items-center justify-center gap-2.5 px-5 py-2.5 bg-google-blue text-white text-sm font-bold rounded-[3px]
-              border border-google-blue transition-colors hover:bg-transparent hover:text-google-blue
-              disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-google-blue disabled:hover:text-white"
+            className="inline-flex items-center justify-center gap-2.5 px-8 py-2.5 bg-google-green text-white text-base font-bold rounded-lg
+              border border-google-green transition-colors hover:bg-transparent hover:text-google-green
+              disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-google-green disabled:hover:text-white"
           >
             {submitState === 'submitting' ? (
               <>
@@ -922,16 +868,13 @@ export default function CfsForm() {
               </>
             ) : (
               <>
-                Submit session
-                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 6l6 6-6 6" />
-                </svg>
+                Apply now
               </>
             )}
           </button>
-          <p className="text-xs text-black-02/35 mt-3">
+          <p className="text-xs text-white/35 mt-3">
             By submitting you agree to our{' '}
-            <a href="/code-of-conduct" className="text-black-02/50 hover:text-black-02/70 underline underline-offset-2 transition-colors">
+            <a href="/code-of-conduct" className="text-white/50 hover:text-white/70 underline underline-offset-2 transition-colors">
               Code of Conduct
             </a>
             .
