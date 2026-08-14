@@ -25,7 +25,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: isVolunteerOpen ? 0.7 : 0.3,
     },
     {
-      url: `${siteUrl}/code-of-conduct`,
+      url: `${siteUrl}/conduct`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+    {
+      url: `${siteUrl}/privacy`,
       lastModified: new Date(),
       changeFrequency: 'yearly',
       priority: 0.3,
