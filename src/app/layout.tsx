@@ -12,10 +12,10 @@ export const metadata: Metadata = {
     template: '%s — DevFest Sydney 2026',
   },
   description:
-    'DevFest Sydney is an annual community conference organised by GDG Sydney, presented by Google. Join developers, designers, and founders in Sydney CBD for a full day of talks, workshops, and challenges.',
+    'DevFest Sydney is an annual community conference organised by GDG Sydney, presented by Google. Join developers, designers, and founders on Saturday, 10 October 2026 at Torrens University, Surry Hills, for a full day of talks, workshops, and challenges.',
   openGraph: {
     title: 'DevFest Sydney 2026',
-    description: 'Build, Secure, Scale: Developers and Builders in the Agentic Era. Sydney CBD.',
+    description: 'Build, Secure, Scale: Developers and Builders in the Agentic Era. Sat, 10 October 2026 · Torrens University, Surry Hills.',
     url: siteUrl,
     siteName: 'DevFest Sydney 2026',
     locale: 'en_AU',
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'DevFest Sydney 2026',
-    description: 'Build, Secure, Scale. Sydney CBD · GDG Sydney.',
+    description: 'Build, Secure, Scale. 10 Oct 2026 · Surry Hills · GDG Sydney.',
   },
 };
 
