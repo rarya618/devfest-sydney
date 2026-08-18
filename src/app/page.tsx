@@ -13,6 +13,36 @@ export const metadata: Metadata = {
   alternates: { canonical: '/' },
 };
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://devfest.gdgsydney.com';
+
+const eventJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Event',
+  name: 'DevFest Sydney 2026',
+  description: 'Build, Secure, Scale: Developers and Builders in the Agentic Era.',
+  startDate: '2026-10-10',
+  eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+  eventStatus: 'https://schema.org/EventScheduled',
+  location: {
+    '@type': 'Place',
+    name: 'Torrens University, Surry Hills',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'Shop 1/37 Foveaux St',
+      addressLocality: 'Surry Hills',
+      addressRegion: 'NSW',
+      postalCode: '2010',
+      addressCountry: 'AU',
+    },
+  },
+  organizer: {
+    '@type': 'Organization',
+    name: 'GDG Sydney',
+    url: 'https://gdgsydney.com',
+  },
+  url: siteUrl,
+};
+
 const tracks = ['Developer track', 'Builder track', 'Workshop track'];
 
 const TRACK_DETAILS: { name: string; color: string; audience: string; topics: string[] }[] = [
@@ -95,6 +125,15 @@ async function fetchGoogleLogoUrl(): Promise<string | null> {
   }
 }
 
+async function fetchTorrensLogoUrl(): Promise<string | null> {
+  try {
+    const doc = await adminDb.collection('settings').doc('site').get();
+    return (doc.data()?.torrensLogoUrl as string | undefined) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchLandingCfsImageUrl(): Promise<string | null> {
   try {
     const doc = await adminDb.collection('settings').doc('site').get();
@@ -123,12 +162,13 @@ function formatCloseDate(iso: string) {
 export default async function Home() {
   const isCfsOpen = process.env.CFS_OPEN === 'true';
   const cfsCloseDate = process.env.CFS_CLOSE_DATE;
-  const [sponsors, team, sponsorshipProspectusUrl, landingHeroImageUrl, googleLogoUrl, landingSlideImageUrls, landingCfsImageUrl] = await Promise.all([
+  const [sponsors, team, sponsorshipProspectusUrl, landingHeroImageUrl, googleLogoUrl, torrensLogoUrl, landingSlideImageUrls, landingCfsImageUrl] = await Promise.all([
     fetchSponsors(),
     fetchTeam(),
     fetchSponsorshipProspectusUrl(),
     fetchLandingHeroImageUrl(),
     fetchGoogleLogoUrl(),
+    fetchTorrensLogoUrl(),
     fetchLandingSlideImageUrls(),
     fetchLandingCfsImageUrl(),
   ]);
@@ -143,6 +183,10 @@ export default async function Home() {
 
   return (
     <div className="bg-[#202124] text-white min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd) }}
+      />
       <Navbar accent="blue" isCfsOpen={isCfsOpen} />
 
       {/* ─── HERO ─── */}
@@ -342,7 +386,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ─── VENUE ─── (hidden until the venue is finalised) */}
+      {/* ─── VENUE ─── (hidden while the section is being redesigned) */}
       {showVenue && (
         <section id="venue" className="py-24 px-6">
           <div className="max-w-7xl mx-auto">
@@ -353,7 +397,7 @@ export default async function Home() {
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-x-8 gap-y-5">
                   {[
-                    { label: 'City', value: 'Sydney CBD' },
+                    { label: 'Venue', value: 'Torrens University, Surry Hills' },
                     { label: 'Doors open', value: '8:30 AM' },
                     { label: 'Format', value: 'Multi-track, full day' },
                   ].map((item) => (
@@ -364,7 +408,7 @@ export default async function Home() {
                   ))}
                 </div>
                 <p className="text-sm text-white/50 leading-relaxed pt-5 border-t border-white/10">
-                  The full venue address will be announced closer to the event. Follow GDG Sydney for updates.
+                  Shop 1/37 Foveaux St, Surry Hills NSW 2010
                 </p>
               </div>
 
@@ -376,9 +420,9 @@ export default async function Home() {
                   </svg>
                 </div>
                 <div>
-                  <p className="font-semibold text-white/80 mb-1">Venue to be announced</p>
+                  <p className="font-semibold text-white/80 mb-1">Torrens University, Surry Hills</p>
                   <p className="text-sm text-white/50 leading-relaxed max-w-xs">
-                    We&apos;re finalising the venue. Check back closer to the event for details.
+                    Shop 1/37 Foveaux St, Surry Hills NSW 2010
                   </p>
                 </div>
               </div>
@@ -406,13 +450,18 @@ export default async function Home() {
         </section>
       )}
 
-      {/* ─── SUPPORTED BY GOOGLE ─── */}
+      {/* ─── SUPPORTED BY ─── */}
       <section id="partners" className="py-16 px-6 border-t border-white/8">
         <div className="max-w-7xl mx-auto flex flex-col items-center gap-6">
           <p className="text-lg font-medium text-white/40">Supported by</p>
-          {googleLogoUrl && (
-            <Image src={googleLogoUrl} alt="Google" width={160} height={48} className="h-16 w-auto object-contain opacity-70" />
-          )}
+          <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center gap-16">
+            {googleLogoUrl && (
+              <Image src={googleLogoUrl} alt="Google" width={160} height={48} className="h-16 w-auto object-contain opacity-70" />
+            )}
+            {torrensLogoUrl && (
+              <Image src={torrensLogoUrl} alt="Torrens University" width={120} height={36} className="h-14 w-auto object-contain opacity-70" />
+            )}
+          </div>
         </div>
       </section>
 
