@@ -6,8 +6,8 @@
 |-------|--------|
 | **Event** | DevFest Sydney 2026 |
 | **Organiser** | GDG Sydney, presented by Google |
-| **Date** | TBC — targeting 2026. "Saturday, 10 October 2026" was a placeholder used during early scaffolding and has been removed from the live site; do not reintroduce it until the date is locked in. |
-| **Location** | Sydney CBD |
+| **Date** | Saturday, 10 October 2026 (confirmed) |
+| **Location** | Torrens University, Surry Hills — Shop 1/37 Foveaux St, Surry Hills NSW 2010 |
 | **Format** | Full-day multi-track conference |
 | **Expected attendance** | 150–300+ participants |
 | **Community size** | 2,000+ GDG Sydney members |
