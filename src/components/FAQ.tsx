@@ -8,7 +8,7 @@ function buildFaqs(isCfsOpen: boolean) {
   return [
   {
     q: 'When and where is DevFest Sydney 2026?',
-    a: 'DevFest Sydney 2026 will take place in Sydney CBD. The exact date and venue will be announced shortly.',
+    a: 'DevFest Sydney 2026 takes place on Saturday, 10 October 2026 at Torrens University, Surry Hills.',
   },
   {
     q: 'Who can attend?',
