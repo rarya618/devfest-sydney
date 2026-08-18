@@ -40,8 +40,8 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto bg-white/[0.06] rounded-[40px] pb-6 overflow-hidden">
         <div className="bg-white/10 py-3 px-6 text-center text-sm">
           <span className="font-bold text-white">Sat, 10 October 2026</span>
-          {/* <span className="mx-2 text-white/40">·</span>
-          <span className="text-white/70">Torrens University, Surry Hills</span> */}
+          <span className="mx-2 text-white/40">·</span>
+          <span className="text-white/70">Torrens University, Surry Hills</span>
         </div>
 
         <div className="flex flex-col items-center text-center md:items-start md:text-left md:flex-row md:justify-between gap-10 px-6 md:px-10 pt-8 pb-12">
