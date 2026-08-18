@@ -50,7 +50,7 @@ export default async function Image() {
           DevFest Sydney 2026
         </div>
         <div style={{ display: 'flex', fontSize: 30, color: 'rgba(30,30,30,0.55)', maxWidth: 820 }}>
-          Build, Secure, Scale: Developers and Builders in the Agentic Era. Sydney CBD.
+          Build, Secure, Scale: Developers and Builders in the Agentic Era. Sat, 10 Oct 2026 · Surry Hills.
         </div>
       </div>
     ),
