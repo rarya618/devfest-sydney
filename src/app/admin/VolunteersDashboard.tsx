@@ -37,14 +37,14 @@ function ReviewerNotesPanel({ volunteerId, notes, onError }: ReviewerNotesPanelP
   }
 
   return (
-    <div className="mt-3 pt-3 border-t border-black-02/6 space-y-3">
+    <div className="mt-3 pt-3 border-t border-white/10 space-y-3">
       {notes.length > 0 && (
         <ul className="space-y-2">
           {notes.map((note, index) => (
-            <li key={index} className="text-xs bg-off-white border border-black-02/8 rounded-lg px-3 py-2">
-              <p className="text-black-02/70 leading-relaxed whitespace-pre-wrap">{note.text}</p>
-              <p className="mt-1 text-xs text-black-02/35">
-                <span className="font-medium text-black-02/45">{note.authorName}</span> &middot; {formatDate(note.createdAt)}
+            <li key={index} className="text-xs bg-white/[0.04] border border-white/10 rounded-lg px-3 py-2">
+              <p className="text-white/70 leading-relaxed whitespace-pre-wrap">{note.text}</p>
+              <p className="mt-1 text-xs text-white/40">
+                <span className="font-medium text-white/50">{note.authorName}</span> &middot; {formatDate(note.createdAt)}
               </p>
             </li>
           ))}
@@ -62,13 +62,13 @@ function ReviewerNotesPanel({ volunteerId, notes, onError }: ReviewerNotesPanelP
           rows={2}
           maxLength={2000}
           disabled={isPending}
-          className="flex-1 rounded-lg border border-black-02/15 bg-white px-3 py-2 text-xs text-black-02 placeholder:text-black-02/35 focus:outline-none focus:border-google-green/50 focus:ring-1 focus:ring-google-green/30 resize-none disabled:opacity-50"
+          className="flex-1 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-google-green/50 focus:ring-1 focus:ring-google-green/30 resize-none disabled:opacity-50"
         />
         <button
           type="submit"
           disabled={isPending || !draft.trim()}
           aria-label="Save reviewer note"
-          className="shrink-0 text-xs px-3 py-2 rounded-lg bg-google-green/10 border border-google-green/25 text-google-green hover:bg-google-green/15 transition-colors font-medium disabled:opacity-40"
+          className="shrink-0 text-xs px-3 py-2 rounded-lg bg-google-green/15 border border-google-green/30 text-google-green hover:bg-google-green/20 transition-colors font-medium disabled:opacity-40"
         >
           {isPending ? 'Saving…' : 'Add'}
         </button>
@@ -95,74 +95,74 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
 
   return (
     <div
-      className={`bg-white border border-l-4 border-l-google-green rounded-2xl p-4 sm:p-6 shadow-[0_1px_3px_rgba(30,30,30,0.04)] transition-all hover:shadow-[0_4px_16px_rgba(30,30,30,0.07)] hover:-translate-y-0.5 ${
-        isPending ? 'opacity-50 pointer-events-none' : 'border-black-02/8'
+      className={`bg-white/[0.06] border border-l-4 border-l-google-green rounded-2xl py-5 px-6 sm:py-7 sm:px-8 shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-all hover:shadow-[0_4px_16px_rgba(0,0,0,0.35)] hover:-translate-y-0.5 ${
+        isPending ? 'opacity-50 pointer-events-none' : 'border-white/10'
       }`}
       aria-label={`Volunteer signup from ${volunteer.name}`}
     >
-      <div className="flex flex-wrap items-start justify-between gap-4 mb-3">
+      <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
         <div className="min-w-0">
-          <h3 className="font-bold text-black-02 text-lg leading-snug tracking-tight">{volunteer.name}</h3>
-          <p className="mt-0.5 truncate">
-            <span className="text-sm text-black-02/60">{volunteer.email}</span>
-            {volunteer.phone && <span className="text-xs text-black-02/40"> &middot; {volunteer.phone}</span>}
+          <h3 className="font-bold text-white text-xl leading-snug tracking-tight">{volunteer.name}</h3>
+          <p className="mt-1 truncate">
+            <span className="text-base text-white/70">{volunteer.email}</span>
+            {volunteer.phone && <span className="text-sm text-white/40"> &middot; {volunteer.phone}</span>}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-1.5 shrink-0">
           {volunteer.googleTechExperience && (
-            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border font-medium bg-google-blue/10 text-google-blue border-google-blue/20">
+            <span className="inline-flex items-center gap-1 text-sm pl-3 pr-3.5 py-1.5 rounded-full border font-medium bg-google-blue/15 text-google-blue border-google-blue/25">
               Possible facilitator
             </span>
           )}
           {volunteer.isTorrensStudentOrStaff && (
-            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border font-medium bg-google-yellow/10 text-google-yellow border-google-yellow/20">
+            <span className="inline-flex items-center gap-1 text-sm pl-3 pr-3.5 py-1.5 rounded-full border font-medium bg-google-yellow/15 text-google-yellow border-google-yellow/25">
               Torrens
             </span>
           )}
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-1.5 mb-4">
+      <div className="flex flex-wrap gap-1.5 mb-5">
         {volunteer.areasOfInterest.map((area) => (
-          <span key={area} className="text-xs px-2.5 py-1 rounded-full bg-off-white border border-black-02/8 text-black-02/60">
+          <span key={area} className="text-sm px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-white/70">
             {VOLUNTEER_AREA_LABELS[area]}
           </span>
         ))}
       </div>
 
-      <p className="text-sm text-black-02/50 leading-relaxed mb-4">{volunteer.motivation}</p>
+      <p className="text-base text-white/50 leading-relaxed mb-5">{volunteer.motivation}</p>
 
       {(volunteer.priorExperience || volunteer.googleTechExperience || volunteer.dietaryRequirements) && (
-        <div className="space-y-2 mb-4">
+        <div className="space-y-3 mb-5">
           {volunteer.priorExperience && (
-            <p className="text-xs text-black-02/50 bg-off-white border border-black-02/8 rounded-lg px-3 py-2 leading-relaxed">
-              <span className="font-bold text-black-02/60">Prior experience: </span>
+            <p className="text-base text-white/50 bg-white/[0.04] border border-white/10 rounded-lg px-5 py-3 leading-relaxed">
+              <span className="font-bold text-white/70">Prior experience: </span>
               {volunteer.priorExperience}
             </p>
           )}
           {volunteer.googleTechExperience && (
-            <p className="text-xs text-black-02/50 bg-google-blue/5 border border-google-blue/15 rounded-lg px-3 py-2 leading-relaxed">
+            <p className="text-base text-white/50 bg-google-blue/10 border border-google-blue/20 rounded-lg px-5 py-3 leading-relaxed">
               <span className="font-bold text-google-blue">Google tech experience: </span>
               {volunteer.googleTechExperience}
             </p>
           )}
           {volunteer.dietaryRequirements && (
-            <p className="text-xs text-black-02/50 bg-off-white border border-black-02/8 rounded-lg px-3 py-2 leading-relaxed">
-              <span className="font-bold text-black-02/60">Dietary: </span>
+            <p className="text-base text-white/50 bg-white/[0.04] border border-white/10 rounded-lg px-5 py-3 leading-relaxed">
+              <span className="font-bold text-white/70">Dietary: </span>
               {volunteer.dietaryRequirements}
             </p>
           )}
         </div>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-black-02/6">
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-5 border-t border-white/10">
         <div className="flex items-center gap-3">
-          <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${VOLUNTEER_STATUS_DOT_STYLES[volunteer.status].text}`}>
+          <span className={`inline-flex items-center gap-1.5 text-sm font-medium ${VOLUNTEER_STATUS_DOT_STYLES[volunteer.status].text}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${VOLUNTEER_STATUS_DOT_STYLES[volunteer.status].dot}`} />
             {VOLUNTEER_STATUS_LABELS[volunteer.status]}
           </span>
-          <span className="text-black-02/15 text-xs">&middot;</span>
-          <span className="text-xs text-black-02/30">{formatDate(volunteer.submittedAt)}</span>
+          <span className="text-white/30 text-sm">&middot;</span>
+          <span className="text-sm text-white/40">{formatDate(volunteer.submittedAt)}</span>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -171,7 +171,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
             disabled={isPending}
             aria-expanded={notesOpen}
             aria-label={`${notesOpen ? 'Hide' : 'Show'} reviewer notes for ${volunteer.name}`}
-            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
           >
             <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 3.5h11M2.5 7h11M2.5 10.5h7" />
@@ -184,7 +184,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
                 onClick={() => handleAction(rejectVolunteer)}
                 disabled={isPending}
                 aria-label={`Reject volunteer signup: ${volunteer.name}`}
-                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-google-red/10 border border-google-red/25 text-google-red hover:bg-google-red/15 transition-colors font-medium"
+                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-google-red/15 border border-google-red/30 text-google-red hover:bg-google-red/20 transition-colors font-medium"
               >
                 <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" d="M2.5 2.5l7 7m0-7l-7 7" />
@@ -195,7 +195,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
                 onClick={() => handleAction(acceptVolunteer)}
                 disabled={isPending}
                 aria-label={`Accept volunteer signup: ${volunteer.name}`}
-                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-google-green/10 border border-google-green/25 text-google-green hover:bg-google-green/15 transition-colors font-medium"
+                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-google-green/15 border border-google-green/30 text-google-green hover:bg-google-green/20 transition-colors font-medium"
               >
                 <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.375l2.625 2.625L9.75 3.75" />
@@ -209,7 +209,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
               onClick={() => handleAction(restoreVolunteer)}
               disabled={isPending}
               aria-label={`Restore volunteer signup to pending: ${volunteer.name}`}
-              className="text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
+              className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
             >
               Restore
             </button>
@@ -219,7 +219,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
               onClick={() => handleAction(archiveVolunteer)}
               disabled={isPending}
               aria-label={`Archive volunteer signup: ${volunteer.name}`}
-              className="text-xs px-3 py-1.5 rounded-lg text-black-02/35 hover:text-black-02/60 transition-colors"
+              className="text-xs px-3 py-1.5 rounded-lg text-white/40 hover:text-white/70 transition-colors"
             >
               Archive
             </button>
@@ -297,14 +297,14 @@ export default function VolunteersDashboard({ volunteers }: Props) {
 
   return (
     <>
-      <div className="sticky top-[52px] md:top-0 z-20 w-full px-4 pt-4 pb-2 bg-off-white/95 backdrop-blur-sm">
+      <div className="sticky top-[52px] md:top-0 z-20 w-full px-6 pt-6 pb-4 bg-[#202124]/95 backdrop-blur-sm">
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <h1 className="shrink-0 text-xl font-bold text-black-02 tracking-tight">Volunteers</h1>
+            <h1 className="shrink-0 text-xl font-bold text-white tracking-tight">Volunteers</h1>
           </div>
 
           <div
-            className={`flex items-center justify-center gap-1 shrink-0 basis-full sm:basis-0 sm:flex-1 overflow-x-auto overflow-y-hidden whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-all duration-300 ease-in-out ${
+            className={`flex items-center justify-center gap-0 shrink-0 basis-full sm:basis-0 sm:flex-1 overflow-x-auto overflow-y-hidden whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-all duration-300 ease-in-out ${
               searchOpen || search ? 'max-w-0 max-h-0 opacity-0' : 'max-w-full max-h-10 opacity-100'
             }`}
             aria-hidden={!!(searchOpen || search)}
@@ -315,13 +315,14 @@ export default function VolunteersDashboard({ volunteers }: Props) {
                 onClick={() => setFilter(tab.value)}
                 aria-pressed={filter === tab.value}
                 tabIndex={searchOpen || search ? -1 : undefined}
-                className={`shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+                className={`shrink-0 inline-flex items-center gap-2.5 text-sm px-5 py-2.5 rounded-full transition-colors ${
                   filter === tab.value
-                    ? 'bg-google-green/10 border-google-green/30 text-google-green'
-                    : 'border-black-02/12 text-black-02/50 hover:border-black-02/25 hover:text-black-02/75'
+                    ? 'bg-white/[0.12] text-white font-bold'
+                    : 'text-white/50 font-medium hover:text-white'
                 }`}
               >
-                {tab.label} ({counts[tab.value]})
+                {tab.label}
+                <span>{counts[tab.value]}</span>
               </button>
             ))}
           </div>
@@ -333,7 +334,7 @@ export default function VolunteersDashboard({ volunteers }: Props) {
             }`}
             aria-hidden={!(searchOpen || search)}
           >
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-black-02/30" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
               <circle cx="7" cy="7" r="5" />
               <path strokeLinecap="round" d="M11 11l3.5 3.5" />
             </svg>
@@ -345,7 +346,7 @@ export default function VolunteersDashboard({ volunteers }: Props) {
               tabIndex={searchOpen || search ? undefined : -1}
               placeholder="Search by name or email…"
               aria-label="Search by name or email"
-              className="w-full min-w-[16rem] rounded-lg border border-black-02/15 bg-white pl-8 pr-9 py-1.5 text-sm text-black-02 placeholder:text-black-02/35 focus:outline-none focus:border-google-green/50 focus:ring-1 focus:ring-google-green/30"
+              className="w-full min-w-[16rem] rounded-lg border border-white/10 bg-white/[0.06] pl-8 pr-9 py-1.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-google-green/50 focus:ring-1 focus:ring-google-green/30"
             />
             <button
               onClick={() => {
@@ -354,7 +355,7 @@ export default function VolunteersDashboard({ volunteers }: Props) {
               }}
               tabIndex={searchOpen || search ? undefined : -1}
               aria-label="Close search"
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-black-02/30 hover:text-black-02/60 transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
             >
               <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                 <path strokeLinecap="round" d="M4 4l8 8M12 4l-8 8" />
@@ -371,7 +372,7 @@ export default function VolunteersDashboard({ volunteers }: Props) {
                 }}
                 aria-label="Search by name or email"
                 title="Search"
-                className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-lg border border-black-02/15 text-black-02/60 hover:border-black-02/30 hover:text-black-02/85 transition-colors"
+                className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-lg border border-white/10 text-white/70 hover:border-white/20 hover:text-white transition-colors"
               >
                 <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <circle cx="7" cy="7" r="5" />
@@ -383,13 +384,13 @@ export default function VolunteersDashboard({ volunteers }: Props) {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 pb-8 sm:pb-10">
+      <div className="px-6 pb-8 sm:pb-10">
         {filtered.length === 0 ? (
-          <div className="bg-white border border-black-02/8 rounded-2xl p-12 text-center">
-            <p className="text-sm text-black-02/45">No volunteer signups match this filter.</p>
+          <div className="bg-white/[0.06] border border-white/10 rounded-2xl p-12 text-center">
+            <p className="text-sm text-white/50">No volunteer signups match this filter.</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 items-start">
             {filtered.map((volunteer) => (
               <VolunteerRow key={volunteer.id} volunteer={volunteer} onError={setAlertMessage} />
             ))}
