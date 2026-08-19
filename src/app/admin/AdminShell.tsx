@@ -72,17 +72,16 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-off-white md:flex md:items-start">
+    <div className="min-h-screen bg-[#202124] md:flex md:items-start">
       {/* Mobile top bar */}
-      <div className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-off-white border-b border-black-02/8">
-        <Link href="/" className="inline-flex items-center gap-0.5 hover:opacity-80 transition-opacity" aria-label="Back to DevFest Sydney home">
-          <Image src="/logo.png" alt="GDG" width={100} height={27} className="h-6 w-auto object-contain" />
-          <span className="font-bold text-black-02 text-base tracking-tight">DevFest Sydney</span>
+      <div className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-[#202124] border-b border-white/10">
+        <Link href="/" className="inline-flex items-center hover:opacity-80 transition-opacity" aria-label="Back to DevFest Sydney home">
+          <Image src="/logo-wordmark.png" alt="DevFest Sydney" width={1331} height={240} className="h-8 w-auto object-contain" />
         </Link>
         <button
           onClick={() => setSidebarOpen(true)}
           aria-label="Open admin menu"
-          className="p-2 -mr-2 text-black-02/60 hover:text-black-02 transition-colors"
+          className="p-2 -mr-2 text-white/70 hover:text-white transition-colors"
         >
           <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
             <path strokeLinecap="round" d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17" />
@@ -93,7 +92,7 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
       {/* Overlay for mobile drawer */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black-02/40 z-40 md:hidden"
+          className="fixed inset-0 bg-black/70 z-40 md:hidden"
           onClick={() => setSidebarOpen(false)}
           aria-hidden="true"
         />
@@ -101,25 +100,24 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
 
       {/* Sidebar */}
       <div
-        className={`fixed md:sticky top-0 left-0 z-50 w-64 md:w-56 shrink-0 h-screen flex flex-col border-r border-black-02/8 px-3 py-5 bg-off-white transition-transform duration-200 md:transition-none ${
+        className={`fixed md:sticky top-0 left-0 z-50 w-64 md:w-64 shrink-0 h-screen flex flex-col border-r border-white/10 px-5 pt-7 pb-5 bg-[#202124] transition-transform duration-200 md:transition-none ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0`}
       >
         <div className="flex items-center justify-between gap-2 px-2 mb-6">
-          <Link href="/" className="inline-flex items-center gap-0.5 hover:opacity-80 transition-opacity" aria-label="Back to DevFest Sydney home">
+          <Link href="/" className="inline-flex items-center hover:opacity-80 transition-opacity" aria-label="Back to DevFest Sydney home">
             <Image
-              src="/logo.png"
-              alt="GDG"
-              width={100}
-              height={27}
-              className="h-6 w-auto object-contain"
+              src="/logo-wordmark.png"
+              alt="DevFest Sydney"
+              width={1331}
+              height={240}
+              className="h-8 w-auto object-contain"
             />
-            <span className="font-bold text-black-02 text-lg tracking-tight">DevFest Sydney</span>
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
             aria-label="Close admin menu"
-            className="md:hidden shrink-0 p-1 text-black-02/50 hover:text-black-02 transition-colors"
+            className="md:hidden shrink-0 p-1 text-white/50 hover:text-white transition-colors"
           >
             <svg className="w-5 h-5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
               <path strokeLinecap="round" d="M3 3l10 10M13 3L3 13" />
@@ -137,10 +135,10 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
                     href={item.href}
                     onClick={() => setSidebarOpen(false)}
                     aria-current={active ? 'page' : undefined}
-                    className={`block text-sm px-3 py-2 rounded-lg transition-colors ${
+                    className={`block text-sm px-4 py-2 rounded-lg transition-colors ${
                       active
-                        ? 'bg-google-blue/10 text-google-blue font-bold'
-                        : 'text-black-02/55 font-medium hover:text-black-02/80 hover:bg-black-02/[0.04]'
+                        ? 'bg-white/10 text-white font-bold'
+                        : 'text-white/50 font-medium hover:text-white hover:bg-white/[0.08]'
                     }`}
                   >
                     {item.label}
@@ -155,15 +153,15 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
           {menuOpen && (
             <div
               role="menu"
-              className="absolute left-0 bottom-full mb-2 w-full bg-white border border-black-02/10 rounded-2xl shadow-[0_12px_32px_rgba(30,30,30,0.14)] overflow-hidden"
+              className="absolute left-0 bottom-full mb-2 w-full bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden"
             >
-              <div className="flex items-center gap-3 px-4 py-3.5 bg-black-02/[0.02]">
+              <div className="flex items-center gap-3 px-4 py-3.5 bg-white/[0.04]">
                 <span className="flex items-center justify-center w-9 h-9 rounded-full bg-google-blue text-white text-sm font-bold shrink-0">
                   {getInitials(adminName)}
                 </span>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-black-02 truncate" title={adminName}>{adminName}</p>
-                  <p className="text-xs text-black-02/45 truncate" title={adminEmail}>{adminEmail}</p>
+                  <p className="text-sm font-semibold text-white truncate" title={adminName}>{adminName}</p>
+                  <p className="text-xs text-white/50 truncate" title={adminEmail}>{adminEmail}</p>
                 </div>
               </div>
 
@@ -175,9 +173,9 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
                     setInviting(true);
                   }}
                   aria-label="Invite a new admin"
-                  className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-black-02/75 hover:bg-black-02/[0.04] transition-colors"
+                  className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
                 >
-                  <svg className="w-4 h-4 text-black-02/40 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                  <svg className="w-4 h-4 text-white/40 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                     <circle cx="6" cy="5.5" r="2.75" />
                     <path strokeLinecap="round" d="M1.5 14c0-2.76 2.24-4.5 4.5-4.5s4.5 1.74 4.5 4.5" />
                     <path strokeLinecap="round" d="M12.5 5.5v4M10.5 7.5h4" />
@@ -186,7 +184,7 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
                 </button>
               </div>
 
-              <div className="border-t border-black-02/8 py-1.5">
+              <div className="border-t border-white/10 py-1.5">
                 <button
                   role="menuitem"
                   onClick={() => {
@@ -213,16 +211,16 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
             aria-haspopup="menu"
             aria-expanded={menuOpen}
             className={`w-full flex items-center gap-2.5 px-2 py-2 rounded-lg border transition-colors ${
-              menuOpen ? 'border-black-02/25 bg-black-02/[0.03]' : 'border-transparent hover:border-black-02/15 hover:bg-black-02/[0.03]'
+              menuOpen ? 'border-white/15 bg-white/[0.05]' : 'border-transparent hover:border-white/10 hover:bg-white/[0.06]'
             }`}
           >
             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-google-blue text-white text-xs font-bold shrink-0">
               {getInitials(adminName)}
             </span>
             <span className="min-w-0 flex-1 text-left">
-              <span className="block text-sm font-semibold text-black-02 truncate" title={adminName}>{adminName}</span>
+              <span className="block text-sm font-semibold text-white truncate" title={adminName}>{adminName}</span>
             </span>
-            <svg className={`w-3 h-3 text-black-02/40 shrink-0 transition-transform ${menuOpen ? '' : 'rotate-180'}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+            <svg className={`w-3 h-3 text-white/40 shrink-0 transition-transform ${menuOpen ? '' : 'rotate-180'}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
             </svg>
           </button>
