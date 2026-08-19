@@ -162,7 +162,7 @@ function ReviewerNotesPanel({ submissionId, notes, onError }: ReviewerNotesPanel
           type="submit"
           disabled={isPending || !draft.trim()}
           aria-label="Save reviewer note"
-          className="shrink-0 text-xs px-3 py-2 rounded-lg bg-google-blue/15 border border-google-blue/30 text-google-blue hover:bg-google-blue/20 transition-colors font-medium disabled:opacity-40"
+          className="shrink-0 text-xs font-semibold px-3 py-2 rounded-lg bg-google-blue text-white hover:bg-google-blue/90 transition-colors disabled:opacity-40"
         >
           {isPending ? 'Saving…' : 'Add'}
         </button>
@@ -183,6 +183,9 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
   const [isPending, startTransition] = useTransition();
   const [isEditing, setIsEditing] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
 
   function handleAction(action: (id: string) => Promise<{ error?: string }>) {
     startTransition(async () => {
@@ -191,68 +194,93 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
     });
   }
 
+  useEffect(() => {
+    if (!moreOpen) return;
+
+    function handlePointerDown(event: MouseEvent) {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
+        setMoreOpen(false);
+      }
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setMoreOpen(false);
+    }
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [moreOpen]);
+
   return (
     <div
-      className={`bg-white/[0.06] border border-l-4 rounded-2xl py-5 px-6 sm:py-7 sm:px-8 shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-all hover:shadow-[0_4px_16px_rgba(0,0,0,0.35)] hover:-translate-y-0.5 ${
-        isPending ? 'opacity-50 pointer-events-none' : selected ? 'border-white/10 ring-2 ring-google-blue/30' : 'border-white/10'
-      } ${TRACK_BORDER_COLORS[submission.track]}`}
+      className={`relative bg-white/[0.06] border-l-4 rounded-lg pt-4 pb-5 pl-4 pr-4 sm:pt-5 sm:pb-7 sm:pl-5 sm:pr-5 shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-all hover:shadow-[0_4px_16px_rgba(0,0,0,0.35)] hover:-translate-y-0.5 ${
+        isPending ? 'opacity-50 pointer-events-none' : selected ? 'ring-2 ring-google-blue/30' : ''
+      } ${TRACK_BORDER_COLORS[submission.track]} ${moreOpen ? 'z-40' : ''}`}
       aria-label={`Submission from ${submission.name}: ${submission.talkTitle}`}
     >
-      <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
-        <div className="flex items-start gap-3 min-w-0 w-full sm:w-auto">
-          <input
-            type="checkbox"
-            checked={selected}
-            onChange={onToggleSelect}
-            disabled={bulkActionsPending}
-            aria-label={`Select submission: ${submission.talkTitle}`}
-            className="mt-1.5 shrink-0 w-4 h-4 rounded border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue/40"
-          />
-          <div className="min-w-0">
-            <h3 className="font-bold text-white text-2xl leading-snug tracking-tight">{submission.talkTitle}</h3>
-            <p className="mt-2.5 truncate text-base font-bold text-white/70">{submission.name}</p>
-            <p className="mt-1 text-sm text-white/40 truncate">{submission.email}</p>
-            {submission.speakerTagline && (
-              <p className="text-sm text-white/40 truncate mt-1">{submission.speakerTagline}</p>
-            )}
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-1.5">
-          {submission.isFirstTimeSpeaker && (
-            <span className="inline-flex items-center gap-1 text-sm pl-3 pr-3.5 py-1.5 rounded-full border font-medium bg-google-green/15 text-google-green border-google-green/25">
-              First-time speaker
-            </span>
-          )}
-          {submission.wantsMentoring && (
-            <span className="inline-flex items-center gap-1 text-sm pl-3 pr-3.5 py-1.5 rounded-full border font-medium bg-google-green/15 text-google-green border-google-green/25">
-              Wants mentoring
-            </span>
-          )}
-          {submission.isGoogleDeveloperExpert && (
-            <span className="inline-flex items-center gap-1 text-sm pl-3 pr-3.5 py-1.5 rounded-full border font-medium bg-google-blue/15 text-google-blue border-google-blue/25">
-              <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-              </svg>
-              GDE
-            </span>
-          )}
-          {submission.requiresTravelSupport && (
-            <span className="inline-flex items-center gap-1 text-sm pl-3 pr-3.5 py-1.5 rounded-full border font-medium bg-google-yellow/15 text-google-yellow border-google-yellow/25">
-              <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 15.5V9.75a1.5 1.5 0 011.5-1.5h13.5a1.5 1.5 0 011.5 1.5v5.75M3.75 15.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5M3.75 15.5v.75A1.5 1.5 0 005.25 17.75h13.5a1.5 1.5 0 001.5-1.5v-.75M9 8.25V6.5A1.5 1.5 0 0110.5 5h3A1.5 1.5 0 0115 6.5v1.75" />
-              </svg>
-              Travel support{submission.travelSupportLocation ? ` · ${submission.travelSupportLocation}` : ''}
-            </span>
-          )}
-          {submission.optOutOfRecording && (
-            <span className="inline-flex items-center gap-1 text-sm pl-3 pr-3.5 py-1.5 rounded-full border font-medium bg-google-red/15 text-google-red border-google-red/25">
-              Don&apos;t record
-            </span>
-          )}
-        </div>
+      <div className="flex items-start gap-4">
+      <div className="flex-1 min-w-0">
+      <div className="flex items-start gap-4 mb-2.5">
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={onToggleSelect}
+          disabled={bulkActionsPending}
+          aria-label={`Select submission: ${submission.talkTitle}`}
+          className="mt-2 shrink-0 w-4 h-4 rounded border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue/40"
+        />
+        <h3 className="min-w-0 font-bold text-white text-2xl leading-snug tracking-tight">{submission.talkTitle}</h3>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 mb-5">
+      <div className="flex flex-wrap items-start gap-1.5 gap-y-2.5 mb-5 pl-8">
+        <div className="min-w-0 mr-auto">
+          <p className="text-base font-bold text-white/70 truncate">{submission.name}</p>
+          <p className="mt-1 text-sm text-white/40 truncate">{submission.email}</p>
+          {submission.speakerTagline && (
+            <p className="text-sm text-white/40 truncate mt-1">{submission.speakerTagline}</p>
+          )}
+        </div>
+        {submission.isFirstTimeSpeaker && (
+          <span className="inline-flex items-center gap-1 text-sm leading-none pl-3 pr-3.5 py-1.5 rounded-full border font-medium bg-google-green/15 text-google-green border-google-green/25">
+            First-time speaker
+          </span>
+        )}
+        {submission.wantsMentoring && (
+          <span className="inline-flex items-center gap-1 text-sm leading-none pl-3 pr-3.5 py-1.5 rounded-full border font-medium bg-google-green/15 text-google-green border-google-green/25">
+            Wants mentoring
+          </span>
+        )}
+        {submission.isGoogleDeveloperExpert && (
+          <span className="inline-flex items-center gap-1 text-sm leading-none pl-3 pr-3.5 py-1.5 rounded-full border font-medium bg-google-blue/15 text-google-blue border-google-blue/25">
+            <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+            </svg>
+            GDE
+          </span>
+        )}
+        {submission.requiresTravelSupport && (
+          <span className="inline-flex items-center gap-1 text-sm leading-none pl-3 pr-3.5 py-1.5 rounded-full border font-medium bg-google-yellow/15 text-google-yellow border-google-yellow/25">
+            <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 15.5V9.75a1.5 1.5 0 011.5-1.5h13.5a1.5 1.5 0 011.5 1.5v5.75M3.75 15.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5M3.75 15.5v.75A1.5 1.5 0 005.25 17.75h13.5a1.5 1.5 0 001.5-1.5v-.75M9 8.25V6.5A1.5 1.5 0 0110.5 5h3A1.5 1.5 0 0115 6.5v1.75" />
+            </svg>
+            Travel support{submission.travelSupportLocation ? ` · ${submission.travelSupportLocation}` : ''}
+          </span>
+        )}
+        {submission.optOutOfRecording && (
+          <span className="inline-flex items-center gap-1 text-sm leading-none pl-3 pr-3.5 py-1.5 rounded-full border font-medium bg-google-red/15 text-google-red border-google-red/25">
+            Don&apos;t record
+          </span>
+        )}
+      </div>
+
+      <div
+        className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+      >
+        <div className="overflow-hidden">
+      <div className="flex flex-wrap items-center gap-2 mb-5 pl-8">
         <span className={`inline-block w-1.5 h-1.5 rounded-full ${TRACK_DOT_COLORS[submission.track]}`} />
         <span className={`text-sm font-medium ${TRACK_COLORS[submission.track]}`}>
           {TRACK_LABELS[submission.track]}
@@ -263,7 +291,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         <span className="text-sm text-white/40 capitalize">{submission.experienceLevel}</span>
       </div>
 
-      <p className="text-base text-white/50 leading-relaxed mb-5">{submission.abstract}</p>
+      <p className="text-base text-white/50 leading-relaxed mb-5 pl-8">{submission.abstract}</p>
 
       {(submission.speakerBio ||
         submission.accessibilityNeeds ||
@@ -275,7 +303,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         submission.coSpeakerEmails ||
         submission.hasSpokenAtGdgSydneyBefore ||
         submission.isOpenToAudienceQuestions) && (
-        <div className="space-y-3 mb-5">
+        <div className="space-y-3 mb-5 pl-8">
           {submission.speakerBio && (
             <p className="text-base text-white/50 bg-white/[0.04] border border-white/10 rounded-lg px-5 py-3 leading-relaxed">
               <span className="font-bold text-white/70">Bio: </span>
@@ -332,7 +360,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
       )}
 
       {(submission.linkedinUrl || submission.githubUrl || submission.websiteUrl || submission.previousTalkLink) && (
-        <div className="flex flex-wrap gap-2 mb-5">
+        <div className="flex flex-wrap gap-2 mb-5 pl-8">
           {submission.linkedinUrl && (
             <LinkChip
               label="LinkedIn"
@@ -385,40 +413,36 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
           )}
         </div>
       )}
-
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-5 border-t border-white/10">
-        <div className="flex items-center gap-3">
-          <span className={`inline-flex items-center gap-1.5 text-sm font-medium ${STATUS_DOT_STYLES[submission.status].text}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT_STYLES[submission.status].dot}`} />
-            {STATUS_LABELS[submission.status]}
-          </span>
-          <span className="text-white/30 text-sm">&middot;</span>
-          <span className="text-sm text-white/40">{formatDate(submission.submittedAt)}</span>
         </div>
+      </div>
 
-        <div className="flex flex-wrap gap-2">
+      <div className="flex items-center gap-3 pt-5 pl-8">
+        <span className={`inline-flex items-center gap-1.5 text-sm font-medium ${STATUS_DOT_STYLES[submission.status].text}`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT_STYLES[submission.status].dot}`} />
+          {STATUS_LABELS[submission.status]}
+        </span>
+        <span className="text-white/30 text-sm">&middot;</span>
+        <span className="text-sm text-white/40">{formatDate(submission.submittedAt)}</span>
+      </div>
+      </div>
+
+      <div className="flex flex-col items-center gap-2 shrink-0">
           <button
-            onClick={() => setNotesOpen((open) => !open)}
-            disabled={isPending || bulkActionsPending}
-            aria-expanded={notesOpen}
-            aria-label={`${notesOpen ? 'Hide' : 'Show'} reviewer notes for: ${submission.talkTitle}`}
-            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
+            onClick={() => setIsOpen((open) => !open)}
+            aria-expanded={isOpen}
+            aria-label={`${isOpen ? 'Collapse' : 'Expand'} details for: ${submission.talkTitle}`}
+            className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
           >
-            <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 3.5h11M2.5 7h11M2.5 10.5h7" />
+            <svg
+              className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.75}
+              aria-hidden="true"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6l4 4 4-4" />
             </svg>
-            Notes{submission.reviewerNotes.length > 0 ? ` (${submission.reviewerNotes.length})` : ''}
-          </button>
-          <button
-            onClick={() => setIsEditing(true)}
-            disabled={isPending || bulkActionsPending}
-            aria-label={`Edit submission: ${submission.talkTitle}`}
-            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
-          >
-            <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M11.5 2.5a1.5 1.5 0 012.12 2.12l-8 8-3 .88.88-3 8-8z" />
-            </svg>
-            Edit
           </button>
           {submission.status === 'pending' && (
             <>
@@ -426,59 +450,113 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
                 onClick={() => handleAction(rejectSubmission)}
                 disabled={isPending || bulkActionsPending}
                 aria-label={`Reject proposal: ${submission.talkTitle}`}
-                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-google-red/15 border border-google-red/30 text-google-red hover:bg-google-red/20 transition-colors font-medium"
+                title="Reject"
+                className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-google-red text-white hover:bg-google-red/90 transition-colors disabled:opacity-60"
               >
-                <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" d="M2.5 2.5l7 7m0-7l-7 7" />
                 </svg>
-                Reject
               </button>
               <button
                 onClick={() => handleAction(promoteSubmission)}
                 disabled={isPending || bulkActionsPending}
                 aria-label={`Accept and promote proposal: ${submission.talkTitle}`}
-                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-google-green/15 border border-google-green/30 text-google-green hover:bg-google-green/20 transition-colors font-medium"
+                title="Accept"
+                className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-google-green text-white hover:bg-google-green/90 transition-colors disabled:opacity-60"
               >
-                <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.375l2.625 2.625L9.75 3.75" />
                 </svg>
-                Accept
               </button>
             </>
-          )}
-          {(submission.status === 'rejected' || submission.status === 'archived') && (
-            <button
-              onClick={() => handleAction(restoreSubmission)}
-              disabled={isPending || bulkActionsPending}
-              aria-label={`Restore proposal to pending: ${submission.talkTitle}`}
-              className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
-            >
-              Restore
-            </button>
           )}
           {submission.status === 'accepted' && (
             <button
               onClick={() => handleAction(undoPromotion)}
               disabled={isPending || bulkActionsPending}
               aria-label={`Undo acceptance of proposal: ${submission.talkTitle}`}
-              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
+              title="Undo"
+              className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
             >
-              <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 4L2.5 7.5 6 11M2.5 7.5h6.5a4 4 0 010 8H7" />
               </svg>
-              Undo
             </button>
           )}
-          {submission.status !== 'accepted' && submission.status !== 'archived' && (
+          <div className="relative" ref={moreMenuRef}>
             <button
-              onClick={() => handleAction(archiveSubmission)}
+              onClick={() => setMoreOpen((open) => !open)}
               disabled={isPending || bulkActionsPending}
-              aria-label={`Archive proposal: ${submission.talkTitle}`}
-              className="text-xs px-3 py-1.5 rounded-lg text-white/40 hover:text-white/70 transition-colors"
+              aria-haspopup="menu"
+              aria-expanded={moreOpen}
+              aria-label={`More actions for: ${submission.talkTitle}`}
+              title="More actions"
+              className="relative inline-flex items-center justify-center w-8 h-8 rounded-full border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
             >
-              Archive
+              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <circle cx="3" cy="8" r="1.25" />
+                <circle cx="8" cy="8" r="1.25" />
+                <circle cx="13" cy="8" r="1.25" />
+              </svg>
+              {submission.reviewerNotes.length > 0 && (
+                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue text-white text-[10px] font-bold leading-none">
+                  {submission.reviewerNotes.length}
+                </span>
+              )}
             </button>
-          )}
+
+            {moreOpen && (
+              <div
+                role="menu"
+                className="absolute right-0 top-full mt-2 w-44 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
+              >
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    setNotesOpen((open) => !open);
+                    setMoreOpen(false);
+                  }}
+                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                >
+                  Notes{submission.reviewerNotes.length > 0 ? ` (${submission.reviewerNotes.length})` : ''}
+                </button>
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    setIsEditing(true);
+                    setMoreOpen(false);
+                  }}
+                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                >
+                  Edit
+                </button>
+                {(submission.status === 'rejected' || submission.status === 'archived') && (
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      handleAction(restoreSubmission);
+                      setMoreOpen(false);
+                    }}
+                    className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                  >
+                    Restore
+                  </button>
+                )}
+                {submission.status !== 'accepted' && submission.status !== 'archived' && (
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      handleAction(archiveSubmission);
+                      setMoreOpen(false);
+                    }}
+                    className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                  >
+                    Archive
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -507,7 +585,7 @@ interface Props {
 
 type FilterStatus = 'all' | SubmissionStatus;
 type TrackFilter = 'all' | Track;
-type SortOption = 'newest' | 'oldest' | 'track';
+type SortOption = 'newest' | 'oldest' | 'track' | 'submitter';
 
 const TRACK_SORT_ORDER: Record<Track, number> = {
   developer: 0,
@@ -520,7 +598,34 @@ const SORT_LABELS: Record<SortOption, string> = {
   newest: 'Newest first',
   oldest: 'Oldest first',
   track: 'By track',
+  submitter: 'By submitter',
 };
+
+interface SubmitterGroup {
+  key: string;
+  name: string;
+  email: string;
+  submissions: Submission[];
+  latestAt: number;
+}
+
+function groupBySubmitter(list: Submission[]): SubmitterGroup[] {
+  const groups = new Map<string, SubmitterGroup>();
+  for (const submission of list) {
+    const key = submission.email.trim().toLowerCase();
+    let group = groups.get(key);
+    if (!group) {
+      group = { key, name: submission.name, email: submission.email, submissions: [], latestAt: 0 };
+      groups.set(key, group);
+    }
+    group.submissions.push(submission);
+    const submittedAt = new Date(submission.submittedAt).getTime();
+    if (submittedAt > group.latestAt) group.latestAt = submittedAt;
+  }
+  const result = Array.from(groups.values());
+  result.forEach((group) => group.submissions.sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()));
+  return result.sort((a, b) => b.latestAt - a.latestAt);
+}
 
 function escapeCsvCell(value: string): string {
   return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
@@ -617,15 +722,18 @@ export default function SubmissionsDashboard({ submissions }: Props) {
     return true;
   });
 
-  const sorted = [...filtered].sort((a, b) => {
-    if (sort === 'track') {
-      const trackDiff = TRACK_SORT_ORDER[a.track] - TRACK_SORT_ORDER[b.track];
-      if (trackDiff !== 0) return trackDiff;
-      return new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime();
-    }
-    const diff = new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime();
-    return sort === 'oldest' ? diff : -diff;
-  });
+  const sorted =
+    sort === 'submitter'
+      ? groupBySubmitter(filtered).flatMap((group) => group.submissions)
+      : [...filtered].sort((a, b) => {
+          if (sort === 'track') {
+            const trackDiff = TRACK_SORT_ORDER[a.track] - TRACK_SORT_ORDER[b.track];
+            if (trackDiff !== 0) return trackDiff;
+            return new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime();
+          }
+          const diff = new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime();
+          return sort === 'oldest' ? diff : -diff;
+        });
 
   const filterTabs: { value: FilterStatus; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -763,7 +871,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               disabled={isBulkPending}
               tabIndex={selectedCount > 0 ? undefined : -1}
               aria-label={`Reject ${selectedCount} selected submissions`}
-              className="shrink-0 text-sm px-3 py-1.5 rounded-lg bg-google-red/15 border border-google-red/30 text-google-red hover:bg-google-red/20 transition-colors font-medium"
+              className="shrink-0 text-sm font-semibold px-3 py-1.5 rounded-lg bg-google-red text-white hover:bg-google-red/90 transition-colors disabled:opacity-60"
             >
               Reject
             </button>
@@ -772,7 +880,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               disabled={isBulkPending}
               tabIndex={selectedCount > 0 ? undefined : -1}
               aria-label={`Accept ${selectedCount} selected submissions`}
-              className="shrink-0 text-sm px-3 py-1.5 rounded-lg bg-google-green/15 border border-google-green/30 text-google-green hover:bg-google-green/20 transition-colors font-medium"
+              className="shrink-0 text-sm font-semibold px-3 py-1.5 rounded-lg bg-google-green text-white hover:bg-google-green/90 transition-colors disabled:opacity-60"
             >
               Accept
             </button>
@@ -970,8 +1078,36 @@ export default function SubmissionsDashboard({ submissions }: Props) {
           <div className="text-center py-16 text-white/40 text-sm">
             No submissions match these filters.
           </div>
+        ) : sort === 'submitter' ? (
+          <div className="space-y-8 pt-1">
+            {groupBySubmitter(sorted).map((group) => (
+              <div key={group.key}>
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-3 px-1">
+                  <h2 className="text-base font-bold text-white">{group.name}</h2>
+                  <span className="text-sm text-white/40">{group.email}</span>
+                  {group.submissions.length > 1 && (
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-google-blue/15 text-google-blue border border-google-blue/25">
+                      {group.submissions.length} submissions
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 gap-5 items-start">
+                  {group.submissions.map((submission) => (
+                    <SubmissionRow
+                      key={submission.id}
+                      submission={submission}
+                      onError={setAlertMessage}
+                      selected={selectedIds.has(submission.id)}
+                      onToggleSelect={() => toggleSelect(submission.id)}
+                      bulkActionsPending={isBulkPending}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 pt-4 items-start">
+          <div className="grid grid-cols-1 gap-5 pt-1 items-start">
             {sorted.map((submission) => (
               <SubmissionRow
                 key={submission.id}
