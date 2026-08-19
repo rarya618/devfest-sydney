@@ -113,8 +113,8 @@ export default function SubmissionsOverTimeChart({ submissions }: Props) {
   const tooltipOnRight = tooltipX < CHART_WIDTH / 2;
 
   return (
-    <div className="bg-white border border-black-02/8 rounded-2xl px-5 py-5 mb-6">
-      <h2 className="text-sm font-bold text-black-02/70 mb-4">Cumulative submissions over time</h2>
+    <div className="bg-white/[0.06] border border-white/10 rounded-2xl px-5 py-5 mb-6">
+      <h2 className="text-sm font-bold text-white/70 mb-4">Cumulative submissions over time</h2>
       <div className="relative">
         <svg
           ref={svgRef}
@@ -132,10 +132,10 @@ export default function SubmissionsOverTimeChart({ submissions }: Props) {
                 x2={CHART_WIDTH - PADDING_RIGHT}
                 y1={yForValue(value)}
                 y2={yForValue(value)}
-                className="stroke-black-02/8"
+                className="stroke-white/10"
                 strokeWidth={1}
               />
-              <text x={PADDING_LEFT - 6} y={yForValue(value)} textAnchor="end" dominantBaseline="middle" className="fill-black-02/40" fontSize={9}>
+              <text x={PADDING_LEFT - 6} y={yForValue(value)} textAnchor="end" dominantBaseline="middle" className="fill-white/40" fontSize={9}>
                 {value}
               </text>
             </g>
@@ -147,7 +147,7 @@ export default function SubmissionsOverTimeChart({ submissions }: Props) {
               x={xForIndex(index)}
               y={CHART_HEIGHT - 6}
               textAnchor={index === 0 ? 'start' : index === points.length - 1 ? 'end' : 'middle'}
-              className="fill-black-02/40"
+              className="fill-white/40"
               fontSize={9}
             >
               {points[index].label}
@@ -157,19 +157,19 @@ export default function SubmissionsOverTimeChart({ submissions }: Props) {
           <path d={areaPath} className="fill-google-blue" fillOpacity={0.1} />
           <path d={linePath} className="stroke-google-blue" strokeWidth={2} fill="none" strokeLinejoin="round" strokeLinecap="round" />
 
-          <circle cx={xForIndex(points.length - 1)} cy={yForValue(lastPoint.cumulative)} r={4} className="fill-google-blue stroke-white" strokeWidth={2} />
+          <circle cx={xForIndex(points.length - 1)} cy={yForValue(lastPoint.cumulative)} r={4} className="fill-google-blue stroke-[#202124]" strokeWidth={2} />
 
           {hovered && (
             <>
-              <line x1={tooltipX} x2={tooltipX} y1={PADDING_TOP} y2={PADDING_TOP + plotHeight} className="stroke-black-02/20" strokeWidth={1} />
-              <circle cx={tooltipX} cy={yForValue(hovered.cumulative)} r={4} className="fill-google-blue stroke-white" strokeWidth={2} />
+              <line x1={tooltipX} x2={tooltipX} y1={PADDING_TOP} y2={PADDING_TOP + plotHeight} className="stroke-white/20" strokeWidth={1} />
+              <circle cx={tooltipX} cy={yForValue(hovered.cumulative)} r={4} className="fill-google-blue stroke-[#202124]" strokeWidth={2} />
             </>
           )}
         </svg>
 
         {hovered && (
           <div
-            className="absolute top-2 pointer-events-none bg-black-02 text-white rounded-lg px-3 py-2 text-xs shadow-lg whitespace-nowrap"
+            className="absolute top-2 pointer-events-none bg-[#3c4043] text-white rounded-lg px-3 py-2 text-xs shadow-lg whitespace-nowrap"
             style={{
               left: `${(tooltipX / CHART_WIDTH) * 100}%`,
               transform: tooltipOnRight ? 'translateX(8px)' : 'translateX(calc(-100% - 8px))',
@@ -185,11 +185,11 @@ export default function SubmissionsOverTimeChart({ submissions }: Props) {
       </div>
 
       <details className="mt-4">
-        <summary className="text-xs font-medium text-black-02/45 cursor-pointer select-none">View as table</summary>
+        <summary className="text-xs font-medium text-white/50 cursor-pointer select-none">View as table</summary>
         <div className="mt-3 overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="text-left text-black-02/45 border-b border-black-02/8">
+              <tr className="text-left text-white/50 border-b border-white/10">
                 <th className="py-1.5 pr-4 font-medium">Date</th>
                 <th className="py-1.5 pr-4 font-medium">Submissions</th>
                 <th className="py-1.5 font-medium">Cumulative</th>
@@ -197,10 +197,10 @@ export default function SubmissionsOverTimeChart({ submissions }: Props) {
             </thead>
             <tbody>
               {points.map((point) => (
-                <tr key={point.dateKey} className="border-b border-black-02/8">
-                  <td className="py-1.5 pr-4 text-black-02/70">{point.label}</td>
-                  <td className="py-1.5 pr-4 text-black-02/70">{point.daily}</td>
-                  <td className="py-1.5 text-black-02/70">{point.cumulative}</td>
+                <tr key={point.dateKey} className="border-b border-white/10">
+                  <td className="py-1.5 pr-4 text-white/70">{point.label}</td>
+                  <td className="py-1.5 pr-4 text-white/70">{point.daily}</td>
+                  <td className="py-1.5 text-white/70">{point.cumulative}</td>
                 </tr>
               ))}
             </tbody>
