@@ -47,8 +47,8 @@ function toEditableFields(submission: Submission): SubmissionEditableFields {
 }
 
 const inputClasses =
-  'w-full rounded-lg border border-black-02/15 bg-white px-3 py-2 text-sm text-black-02 placeholder:text-black-02/30 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30';
-const labelClasses = 'block text-xs font-semibold text-black-02/50 mb-1';
+  'w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30';
+const labelClasses = 'block text-xs font-semibold text-white/50 mb-1';
 
 export default function EditSubmissionModal({ submission, onClose, onError }: Props) {
   const [fields, setFields] = useState<SubmissionEditableFields>(() => toEditableFields(submission));
@@ -72,21 +72,21 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
 
   return createPortal(
     <div
-      className="fixed inset-0 z-40 flex items-start sm:items-center justify-center bg-black-02/40 p-4 overflow-y-auto"
+      className="fixed inset-0 z-40 flex items-start sm:items-center justify-center bg-black/70 p-4 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-label={`Edit submission: ${submission.talkTitle}`}
     >
-      <div className="w-full max-w-xl bg-white rounded-2xl shadow-xl my-8">
+      <div className="w-full max-w-xl bg-[#2d2e31] rounded-2xl shadow-xl my-8">
         <form onSubmit={handleSubmit}>
-          <div className="flex items-center justify-between px-6 py-4 border-b border-black-02/8">
-            <h2 className="text-lg font-bold text-black-02">Edit submission</h2>
+          <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+            <h2 className="text-lg font-bold text-white">Edit submission</h2>
             <button
               type="button"
               onClick={onClose}
               disabled={isPending}
               aria-label="Close edit form"
-              className="text-black-02/35 hover:text-black-02/70 transition-colors"
+              className="text-white/40 hover:text-white/70 transition-colors"
             >
               <svg className="w-5 h-5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                 <path d="M4.47 4.47a.75.75 0 0 1 1.06 0L8 6.94l2.47-2.47a.75.75 0 1 1 1.06 1.06L9.06 8l2.47 2.47a.75.75 0 1 1-1.06 1.06L8 9.06l-2.47 2.47a.75.75 0 0 1-1.06-1.06L6.94 8 4.47 5.53a.75.75 0 0 1 0-1.06z" />
@@ -263,10 +263,10 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
               </div>
             </div>
 
-            <div className="space-y-2 pt-2 border-t border-black-02/8">
+            <div className="space-y-2 pt-2 border-t border-white/10">
               <p className={labelClasses}>Flags</p>
               <div className="grid grid-cols-2 gap-2">
-                <label className="flex items-center gap-2 text-sm text-black-02/70">
+                <label className="flex items-center gap-2 text-sm text-white/70">
                   <input
                     type="checkbox"
                     checked={fields.isFirstTimeSpeaker}
@@ -274,7 +274,7 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
                   />
                   First-time speaker
                 </label>
-                <label className="flex items-center gap-2 text-sm text-black-02/70">
+                <label className="flex items-center gap-2 text-sm text-white/70">
                   <input
                     type="checkbox"
                     checked={fields.wantsMentoring}
@@ -282,7 +282,7 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
                   />
                   Wants mentoring
                 </label>
-                <label className="flex items-center gap-2 text-sm text-black-02/70">
+                <label className="flex items-center gap-2 text-sm text-white/70">
                   <input
                     type="checkbox"
                     checked={fields.isGoogleDeveloperExpert}
@@ -290,7 +290,7 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
                   />
                   Google Developer Expert
                 </label>
-                <label className="flex items-center gap-2 text-sm text-black-02/70">
+                <label className="flex items-center gap-2 text-sm text-white/70">
                   <input
                     type="checkbox"
                     checked={fields.hasSpokenAtGdgSydneyBefore}
@@ -298,7 +298,7 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
                   />
                   Spoken at GDG Sydney before
                 </label>
-                <label className="flex items-center gap-2 text-sm text-black-02/70">
+                <label className="flex items-center gap-2 text-sm text-white/70">
                   <input
                     type="checkbox"
                     checked={fields.isOpenToAudienceQuestions}
@@ -306,7 +306,7 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
                   />
                   Open to audience questions
                 </label>
-                <label className="flex items-center gap-2 text-sm text-black-02/70">
+                <label className="flex items-center gap-2 text-sm text-white/70">
                   <input
                     type="checkbox"
                     checked={fields.optOutOfRecording}
@@ -314,7 +314,7 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
                   />
                   Opt out of recording
                 </label>
-                <label className="flex items-center gap-2 text-sm text-black-02/70">
+                <label className="flex items-center gap-2 text-sm text-white/70">
                   <input
                     type="checkbox"
                     checked={fields.requiresTravelSupport}
@@ -336,7 +336,7 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
               )}
             </div>
 
-            <div className="space-y-2 pt-2 border-t border-black-02/8">
+            <div className="space-y-2 pt-2 border-t border-white/10">
               <p className={labelClasses}>Link tracking</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -397,12 +397,12 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-black-02/8">
+          <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-white/10">
             <button
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
+              className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
             >
               Cancel
             </button>
