@@ -50,7 +50,7 @@ export default function LoginForm() {
         onClick={handleGoogleSignIn}
         disabled={loading}
         aria-label="Sign in with Google"
-        className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-white border border-black-02/15 text-black-02 font-semibold text-sm rounded-xl
+        className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-white border border-black-02/15 text-black-02 font-semibold text-base rounded-xl
           hover:bg-off-white active:scale-[0.99] transition-all
           disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100"
       >
