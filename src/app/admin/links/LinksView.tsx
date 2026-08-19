@@ -50,12 +50,14 @@ export default function LinksView() {
 
   return (
     <>
-      <div className="max-w-3xl mx-auto px-4">
-        <h1 className="text-4xl font-bold text-black-02 tracking-tight mt-8 mb-6">Links</h1>
+      <div className="sticky top-[52px] md:top-0 z-20 w-full px-6 pt-8 pb-5 bg-[#202124]/95 backdrop-blur-sm">
+        <h1 className="text-xl font-bold text-white tracking-tight">Links</h1>
+      </div>
 
-        <div className="bg-white border border-black-02/8 rounded-2xl px-5 py-5">
-          <h2 className="text-sm font-bold text-black-02/70 mb-1">Generate a tracking link</h2>
-          <p className="text-xs text-black-02/45 mb-4">
+      <div className="px-6">
+        <div className="bg-white/[0.06] border border-white/10 rounded-2xl px-5 py-5">
+          <h2 className="text-sm font-bold text-white/70 mb-1">Generate a tracking link</h2>
+          <p className="text-xs text-white/50 mb-4">
             Add a source, medium, campaign, or ref to the homepage or Call for Speakers link so submissions show up
             under &quot;Traffic sources&quot; on the Analytics page. Tracking params carry over automatically if
             someone lands on the homepage and clicks through to Call for Speakers.
@@ -64,7 +66,7 @@ export default function LinksView() {
           <div className="grid sm:grid-cols-4 gap-3 mb-4">
             {FIELDS.map(({ key, label, placeholder }) => (
               <div key={key}>
-                <label htmlFor={`link-gen-${key}`} className="block text-xs font-medium text-black-02/45 mb-1.5">
+                <label htmlFor={`link-gen-${key}`} className="block text-xs font-medium text-white/50 mb-1.5">
                   {label}
                 </label>
                 <input
@@ -73,7 +75,7 @@ export default function LinksView() {
                   value={values[key]}
                   onChange={(e) => setValues((prev) => ({ ...prev, [key]: e.target.value }))}
                   placeholder={placeholder}
-                  className="w-full bg-off-white border border-black-02/10 rounded-lg px-3 py-1.5 text-sm text-black-02 placeholder-black-02/30 outline-none focus:border-google-blue/50 transition-colors"
+                  className="w-full bg-white/[0.04] border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white placeholder-white/30 outline-none focus:border-google-blue/50 transition-colors"
                 />
               </div>
             ))}
@@ -82,9 +84,9 @@ export default function LinksView() {
           <div className="space-y-3">
             {DESTINATIONS.map(({ path, label }) => (
               <div key={path}>
-                <p className="text-xs font-medium text-black-02/45 mb-1.5">{label}</p>
+                <p className="text-xs font-medium text-white/50 mb-1.5">{label}</p>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 min-w-0 truncate text-xs text-black-02/70 bg-off-white border border-black-02/10 rounded-lg px-3 py-2">
+                  <code className="flex-1 min-w-0 truncate text-xs text-white/70 bg-white/[0.04] border border-white/10 rounded-lg px-3 py-2">
                     {urlFor(path)}
                   </code>
                   <button
