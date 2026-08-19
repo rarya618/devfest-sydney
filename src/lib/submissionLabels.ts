@@ -3,8 +3,8 @@ import type { SubmissionStatus, Track, TalkFormat, ExperienceLevel } from '@/lib
 export const STATUS_DOT_STYLES: Record<SubmissionStatus, { text: string; dot: string }> = {
   pending: { text: 'text-google-yellow', dot: 'bg-google-yellow' },
   accepted: { text: 'text-google-green', dot: 'bg-google-green' },
-  rejected: { text: 'text-black-02/40', dot: 'bg-black-02/30' },
-  archived: { text: 'text-black-02/30', dot: 'bg-black-02/20' },
+  rejected: { text: 'text-white/40', dot: 'bg-white/40' },
+  archived: { text: 'text-white/30', dot: 'bg-white/30' },
 };
 
 export const STATUS_LABELS: Record<SubmissionStatus, string> = {
