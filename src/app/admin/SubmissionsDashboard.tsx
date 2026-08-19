@@ -36,8 +36,8 @@ interface LinkChipProps {
 }
 
 const LINK_CHIP_ACCENTS: Record<LinkChipProps['accent'], { iconBg: string; iconText: string; hoverBorder: string; hoverBg: string }> = {
-  blue: { iconBg: 'bg-google-blue/10', iconText: 'text-google-blue', hoverBorder: 'group-hover:border-google-blue/25', hoverBg: 'group-hover:bg-google-blue/[0.03]' },
-  red: { iconBg: 'bg-google-red/10', iconText: 'text-google-red', hoverBorder: 'group-hover:border-google-red/25', hoverBg: 'group-hover:bg-google-red/[0.03]' },
+  blue: { iconBg: 'bg-google-blue/15', iconText: 'text-google-blue', hoverBorder: 'group-hover:border-google-blue/30', hoverBg: 'group-hover:bg-google-blue/[0.08]' },
+  red: { iconBg: 'bg-google-red/15', iconText: 'text-google-red', hoverBorder: 'group-hover:border-google-red/30', hoverBg: 'group-hover:bg-google-red/[0.08]' },
 };
 
 function LinkChip({ label, value, icon, accent }: LinkChipProps) {
@@ -50,18 +50,18 @@ function LinkChip({ label, value, icon, accent }: LinkChipProps) {
         {icon}
       </span>
       <span className="min-w-0">
-        <span className="block text-[10px] font-semibold text-black-02/35">{label}</span>
-        <span className="block text-xs text-black-02/70 truncate max-w-[200px] group-hover:text-black-02 transition-colors">{cleanDisplayValue(value)}</span>
+        <span className="block text-[10px] font-semibold text-white/40">{label}</span>
+        <span className="block text-sm text-white/70 truncate max-w-[200px] group-hover:text-white transition-colors">{cleanDisplayValue(value)}</span>
       </span>
       {href && (
-        <svg className="w-3 h-3 text-black-02/25 shrink-0 ml-0.5 group-hover:text-black-02/50 transition-colors" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+        <svg className="w-3 h-3 text-white/30 shrink-0 ml-0.5 group-hover:text-white/50 transition-colors" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" d="M6.5 4H4a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V9.5M9 3h4v4M7 9l6-6" />
         </svg>
       )}
     </>
   );
 
-  const baseClasses = `group inline-flex items-center gap-2.5 pl-1 pr-3.5 py-1.5 rounded-full border border-black-02/10 bg-white transition-colors ${colors.hoverBorder} ${colors.hoverBg}`;
+  const baseClasses = `group inline-flex items-center gap-2.5 pl-1 pr-3.5 py-1.5 rounded-full border border-white/10 bg-white/[0.06] transition-colors ${colors.hoverBorder} ${colors.hoverBg}`;
 
   return href ? (
     <a
@@ -115,18 +115,18 @@ function ReviewerNotesPanel({ submissionId, notes, onError }: ReviewerNotesPanel
   }
 
   return (
-    <div className="mt-3 pt-3 border-t border-black-02/6 space-y-3">
+    <div className="mt-3 pt-3 border-t border-white/10 space-y-3">
       {notes.length > 0 && (
         <ul className="space-y-2">
           {notes.map((note, index) => (
-            <li key={index} className="text-xs bg-off-white border border-black-02/8 rounded-lg px-3 py-2">
+            <li key={index} className="text-xs bg-white/[0.04] border border-white/10 rounded-lg px-3 py-2">
               <div className="flex items-start justify-between gap-2">
-                <p className="text-black-02/70 leading-relaxed whitespace-pre-wrap flex-1">{note.text}</p>
+                <p className="text-white/70 leading-relaxed whitespace-pre-wrap flex-1">{note.text}</p>
                 <button
                   onClick={() => handleDelete(index)}
                   disabled={isDeleting}
                   aria-label={`Delete reviewer note from ${note.authorName}`}
-                  className="shrink-0 text-black-02/30 hover:text-google-red/85 transition-colors disabled:opacity-40"
+                  className="shrink-0 text-white/40 hover:text-google-red/85 transition-colors disabled:opacity-40"
                 >
                   {isDeleting && deletingIndex === index ? (
                     <span className="text-[10px]">Deleting…</span>
@@ -137,8 +137,8 @@ function ReviewerNotesPanel({ submissionId, notes, onError }: ReviewerNotesPanel
                   )}
                 </button>
               </div>
-              <p className="mt-1 text-xs text-black-02/35">
-                <span className="font-medium text-black-02/45">{note.authorName}</span> &middot; {formatDate(note.createdAt)}
+              <p className="mt-1 text-xs text-white/40">
+                <span className="font-medium text-white/50">{note.authorName}</span> &middot; {formatDate(note.createdAt)}
               </p>
             </li>
           ))}
@@ -156,13 +156,13 @@ function ReviewerNotesPanel({ submissionId, notes, onError }: ReviewerNotesPanel
           rows={2}
           maxLength={2000}
           disabled={isPending}
-          className="flex-1 rounded-lg border border-black-02/15 bg-white px-3 py-2 text-xs text-black-02 placeholder:text-black-02/35 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30 resize-none disabled:opacity-50"
+          className="flex-1 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30 resize-none disabled:opacity-50"
         />
         <button
           type="submit"
           disabled={isPending || !draft.trim()}
           aria-label="Save reviewer note"
-          className="shrink-0 text-xs px-3 py-2 rounded-lg bg-google-blue/10 border border-google-blue/25 text-google-blue hover:bg-google-blue/15 transition-colors font-medium disabled:opacity-40"
+          className="shrink-0 text-xs px-3 py-2 rounded-lg bg-google-blue/15 border border-google-blue/30 text-google-blue hover:bg-google-blue/20 transition-colors font-medium disabled:opacity-40"
         >
           {isPending ? 'Saving…' : 'Add'}
         </button>
@@ -193,12 +193,12 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
 
   return (
     <div
-      className={`bg-white border border-l-4 rounded-2xl p-4 sm:p-6 shadow-[0_1px_3px_rgba(30,30,30,0.04)] transition-all hover:shadow-[0_4px_16px_rgba(30,30,30,0.07)] hover:-translate-y-0.5 ${
-        isPending ? 'opacity-50 pointer-events-none' : selected ? 'border-black-02/8 ring-2 ring-google-blue/30' : 'border-black-02/8'
+      className={`bg-white/[0.06] border border-l-4 rounded-2xl py-5 px-6 sm:py-7 sm:px-8 shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-all hover:shadow-[0_4px_16px_rgba(0,0,0,0.35)] hover:-translate-y-0.5 ${
+        isPending ? 'opacity-50 pointer-events-none' : selected ? 'border-white/10 ring-2 ring-google-blue/30' : 'border-white/10'
       } ${TRACK_BORDER_COLORS[submission.track]}`}
       aria-label={`Submission from ${submission.name}: ${submission.talkTitle}`}
     >
-      <div className="flex flex-wrap items-start justify-between gap-4 mb-3">
+      <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
         <div className="flex items-start gap-3 min-w-0 w-full sm:w-auto">
           <input
             type="checkbox"
@@ -206,66 +206,64 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
             onChange={onToggleSelect}
             disabled={bulkActionsPending}
             aria-label={`Select submission: ${submission.talkTitle}`}
-            className="mt-1.5 shrink-0 w-4 h-4 rounded border-black-02/25 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue/40"
+            className="mt-1.5 shrink-0 w-4 h-4 rounded border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue/40"
           />
           <div className="min-w-0">
-            <h3 className="font-bold text-black-02 text-xl leading-snug tracking-tight">{submission.talkTitle}</h3>
-            <p className="mt-1 truncate">
-              <span className="text-sm font-medium text-black-02/70">{submission.name}</span>
-              <span className="text-xs text-black-02/40"> &middot; {submission.email}</span>
-            </p>
+            <h3 className="font-bold text-white text-2xl leading-snug tracking-tight">{submission.talkTitle}</h3>
+            <p className="mt-2.5 truncate text-base font-bold text-white/70">{submission.name}</p>
+            <p className="mt-1 text-sm text-white/40 truncate">{submission.email}</p>
             {submission.speakerTagline && (
-              <p className="text-xs text-black-02/40 truncate mt-0.5">{submission.speakerTagline}</p>
+              <p className="text-sm text-white/40 truncate mt-1">{submission.speakerTagline}</p>
             )}
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
           {submission.isFirstTimeSpeaker && (
-            <span className="inline-flex items-center gap-1 text-xs pl-2 pr-2.5 py-1 rounded-full border font-medium bg-google-green/10 text-google-green border-google-green/20">
+            <span className="inline-flex items-center gap-1 text-sm pl-3 pr-3.5 py-1.5 rounded-full border font-medium bg-google-green/15 text-google-green border-google-green/25">
               First-time speaker
             </span>
           )}
           {submission.wantsMentoring && (
-            <span className="inline-flex items-center gap-1 text-xs pl-2 pr-2.5 py-1 rounded-full border font-medium bg-google-green/10 text-google-green border-google-green/20">
+            <span className="inline-flex items-center gap-1 text-sm pl-3 pr-3.5 py-1.5 rounded-full border font-medium bg-google-green/15 text-google-green border-google-green/25">
               Wants mentoring
             </span>
           )}
           {submission.isGoogleDeveloperExpert && (
-            <span className="inline-flex items-center gap-1 text-xs pl-2 pr-2.5 py-1 rounded-full border font-medium bg-google-blue/10 text-google-blue border-google-blue/20">
-              <svg className="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <span className="inline-flex items-center gap-1 text-sm pl-3 pr-3.5 py-1.5 rounded-full border font-medium bg-google-blue/15 text-google-blue border-google-blue/25">
+              <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
               </svg>
               GDE
             </span>
           )}
           {submission.requiresTravelSupport && (
-            <span className="inline-flex items-center gap-1 text-xs pl-2 pr-2.5 py-1 rounded-full border font-medium bg-google-yellow/10 text-google-yellow border-google-yellow/20">
-              <svg className="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+            <span className="inline-flex items-center gap-1 text-sm pl-3 pr-3.5 py-1.5 rounded-full border font-medium bg-google-yellow/15 text-google-yellow border-google-yellow/25">
+              <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 15.5V9.75a1.5 1.5 0 011.5-1.5h13.5a1.5 1.5 0 011.5 1.5v5.75M3.75 15.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5M3.75 15.5v.75A1.5 1.5 0 005.25 17.75h13.5a1.5 1.5 0 001.5-1.5v-.75M9 8.25V6.5A1.5 1.5 0 0110.5 5h3A1.5 1.5 0 0115 6.5v1.75" />
               </svg>
               Travel support{submission.travelSupportLocation ? ` · ${submission.travelSupportLocation}` : ''}
             </span>
           )}
           {submission.optOutOfRecording && (
-            <span className="inline-flex items-center gap-1 text-xs pl-2 pr-2.5 py-1 rounded-full border font-medium bg-google-red/10 text-google-red border-google-red/20">
+            <span className="inline-flex items-center gap-1 text-sm pl-3 pr-3.5 py-1.5 rounded-full border font-medium bg-google-red/15 text-google-red border-google-red/25">
               Don&apos;t record
             </span>
           )}
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 mb-4">
+      <div className="flex flex-wrap items-center gap-2 mb-5">
         <span className={`inline-block w-1.5 h-1.5 rounded-full ${TRACK_DOT_COLORS[submission.track]}`} />
-        <span className={`text-xs font-medium ${TRACK_COLORS[submission.track]}`}>
+        <span className={`text-sm font-medium ${TRACK_COLORS[submission.track]}`}>
           {TRACK_LABELS[submission.track]}
         </span>
-        <span className="text-black-02/20 text-xs">/</span>
-        <span className="text-xs text-black-02/40">{FORMAT_LABELS[submission.format]}</span>
-        <span className="text-black-02/20 text-xs">/</span>
-        <span className="text-xs text-black-02/40 capitalize">{submission.experienceLevel}</span>
+        <span className="text-white/30 text-sm">/</span>
+        <span className="text-sm text-white/40">{FORMAT_LABELS[submission.format]}</span>
+        <span className="text-white/30 text-sm">/</span>
+        <span className="text-sm text-white/40 capitalize">{submission.experienceLevel}</span>
       </div>
 
-      <p className="text-sm text-black-02/50 leading-relaxed mb-4">{submission.abstract}</p>
+      <p className="text-base text-white/50 leading-relaxed mb-5">{submission.abstract}</p>
 
       {(submission.speakerBio ||
         submission.accessibilityNeeds ||
@@ -277,31 +275,31 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         submission.coSpeakerEmails ||
         submission.hasSpokenAtGdgSydneyBefore ||
         submission.isOpenToAudienceQuestions) && (
-        <div className="space-y-2 mb-4">
+        <div className="space-y-3 mb-5">
           {submission.speakerBio && (
-            <p className="text-sm text-black-02/50 bg-off-white border border-black-02/8 rounded-lg px-3 py-2 leading-relaxed">
-              <span className="font-bold text-black-02/60">Bio: </span>
+            <p className="text-base text-white/50 bg-white/[0.04] border border-white/10 rounded-lg px-5 py-3 leading-relaxed">
+              <span className="font-bold text-white/70">Bio: </span>
               {submission.speakerBio}
             </p>
           )}
 
           {submission.accessibilityNeeds && (
-            <p className="text-xs text-black-02/50 bg-off-white border border-black-02/8 rounded-lg px-3 py-2 leading-relaxed">
-              <span className="font-bold text-black-02/60">Accessibility: </span>
+            <p className="text-sm text-white/50 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
+              <span className="font-bold text-white/70">Accessibility: </span>
               {submission.accessibilityNeeds}
             </p>
           )}
 
           {submission.howDidYouHear && (
-            <p className="text-xs text-black-02/40">
-              <span className="font-medium text-black-02/50">Found us via: </span>
+            <p className="text-sm text-white/40">
+              <span className="font-medium text-white/50">Found us via: </span>
               {submission.howDidYouHear}
             </p>
           )}
 
           {(submission.tracking.utmSource || submission.tracking.utmMedium || submission.tracking.utmCampaign || submission.tracking.ref) && (
-            <p className="text-xs text-black-02/40">
-              <span className="font-medium text-black-02/50">Link tracking: </span>
+            <p className="text-sm text-white/40">
+              <span className="font-medium text-white/50">Link tracking: </span>
               {[
                 submission.tracking.ref && `ref=${submission.tracking.ref}`,
                 submission.tracking.utmSource && `source=${submission.tracking.utmSource}`,
@@ -314,14 +312,14 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
           )}
 
           {submission.coSpeakerEmails && (
-            <p className="text-xs text-black-02/40">
-              <span className="font-medium text-black-02/50">Co-speaker(s): </span>
+            <p className="text-sm text-white/40">
+              <span className="font-medium text-white/50">Co-speaker(s): </span>
               {submission.coSpeakerEmails}
             </p>
           )}
 
           {(submission.hasSpokenAtGdgSydneyBefore || submission.isOpenToAudienceQuestions) && (
-            <p className="text-xs text-black-02/40">
+            <p className="text-sm text-white/40">
               {[
                 submission.hasSpokenAtGdgSydneyBefore && 'Has spoken at GDG Sydney before',
                 submission.isOpenToAudienceQuestions && 'Open to audience questions',
@@ -334,7 +332,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
       )}
 
       {(submission.linkedinUrl || submission.githubUrl || submission.websiteUrl || submission.previousTalkLink) && (
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-2 mb-5">
           {submission.linkedinUrl && (
             <LinkChip
               label="LinkedIn"
@@ -388,14 +386,14 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         </div>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-black-02/6">
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-5 border-t border-white/10">
         <div className="flex items-center gap-3">
-          <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${STATUS_DOT_STYLES[submission.status].text}`}>
+          <span className={`inline-flex items-center gap-1.5 text-sm font-medium ${STATUS_DOT_STYLES[submission.status].text}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT_STYLES[submission.status].dot}`} />
             {STATUS_LABELS[submission.status]}
           </span>
-          <span className="text-black-02/15 text-xs">&middot;</span>
-          <span className="text-xs text-black-02/30">{formatDate(submission.submittedAt)}</span>
+          <span className="text-white/30 text-sm">&middot;</span>
+          <span className="text-sm text-white/40">{formatDate(submission.submittedAt)}</span>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -404,7 +402,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
             disabled={isPending || bulkActionsPending}
             aria-expanded={notesOpen}
             aria-label={`${notesOpen ? 'Hide' : 'Show'} reviewer notes for: ${submission.talkTitle}`}
-            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
           >
             <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 3.5h11M2.5 7h11M2.5 10.5h7" />
@@ -415,7 +413,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
             onClick={() => setIsEditing(true)}
             disabled={isPending || bulkActionsPending}
             aria-label={`Edit submission: ${submission.talkTitle}`}
-            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
           >
             <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M11.5 2.5a1.5 1.5 0 012.12 2.12l-8 8-3 .88.88-3 8-8z" />
@@ -428,7 +426,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
                 onClick={() => handleAction(rejectSubmission)}
                 disabled={isPending || bulkActionsPending}
                 aria-label={`Reject proposal: ${submission.talkTitle}`}
-                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-google-red/10 border border-google-red/25 text-google-red hover:bg-google-red/15 transition-colors font-medium"
+                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-google-red/15 border border-google-red/30 text-google-red hover:bg-google-red/20 transition-colors font-medium"
               >
                 <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" d="M2.5 2.5l7 7m0-7l-7 7" />
@@ -439,7 +437,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
                 onClick={() => handleAction(promoteSubmission)}
                 disabled={isPending || bulkActionsPending}
                 aria-label={`Accept and promote proposal: ${submission.talkTitle}`}
-                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-google-green/10 border border-google-green/25 text-google-green hover:bg-google-green/15 transition-colors font-medium"
+                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-google-green/15 border border-google-green/30 text-google-green hover:bg-google-green/20 transition-colors font-medium"
               >
                 <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.375l2.625 2.625L9.75 3.75" />
@@ -453,7 +451,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
               onClick={() => handleAction(restoreSubmission)}
               disabled={isPending || bulkActionsPending}
               aria-label={`Restore proposal to pending: ${submission.talkTitle}`}
-              className="text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
+              className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
             >
               Restore
             </button>
@@ -463,7 +461,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
               onClick={() => handleAction(undoPromotion)}
               disabled={isPending || bulkActionsPending}
               aria-label={`Undo acceptance of proposal: ${submission.talkTitle}`}
-              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
             >
               <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 4L2.5 7.5 6 11M2.5 7.5h6.5a4 4 0 010 8H7" />
@@ -476,7 +474,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
               onClick={() => handleAction(archiveSubmission)}
               disabled={isPending || bulkActionsPending}
               aria-label={`Archive proposal: ${submission.talkTitle}`}
-              className="text-xs px-3 py-1.5 rounded-lg text-black-02/35 hover:text-black-02/60 transition-colors"
+              className="text-xs px-3 py-1.5 rounded-lg text-white/40 hover:text-white/70 transition-colors"
             >
               Archive
             </button>
@@ -723,14 +721,14 @@ export default function SubmissionsDashboard({ submissions }: Props) {
 
   return (
     <>
-      <div className="sticky top-[52px] md:top-0 z-20 w-full px-4 pt-4 pb-2 bg-off-white/95 backdrop-blur-sm">
+      <div className="sticky top-[52px] md:top-0 z-20 w-full px-6 pt-6 pb-4 bg-[#202124]/95 backdrop-blur-sm">
         <div className="flex flex-wrap items-center gap-2">
           <div className="order-1 flex items-center gap-2 min-w-0">
-            <h1 className="shrink-0 text-xl font-bold text-black-02 tracking-tight">Submissions</h1>
+            <h1 className="shrink-0 text-xl font-bold text-white tracking-tight">Submissions</h1>
           </div>
 
           <div
-            className={`order-3 xl:order-2 flex items-center justify-center gap-1 shrink-0 basis-full xl:basis-0 xl:flex-1 overflow-x-auto overflow-y-hidden whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-all duration-300 ease-in-out ${
+            className={`order-3 xl:order-2 flex items-center justify-center gap-0 shrink-0 basis-full xl:basis-0 xl:flex-1 overflow-x-auto overflow-y-hidden whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-all duration-300 ease-in-out ${
               searchOpen || search || selectedCount > 0 ? 'max-w-0 max-h-0 opacity-0' : 'max-w-full max-h-10 opacity-100'
             }`}
             aria-hidden={!!(searchOpen || search || selectedCount > 0)}
@@ -741,13 +739,14 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 onClick={() => setFilter(tab.value)}
                 aria-pressed={filter === tab.value}
                 tabIndex={searchOpen || search || selectedCount > 0 ? -1 : undefined}
-                className={`shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+                className={`shrink-0 inline-flex items-center gap-2.5 text-sm px-5 py-2.5 rounded-full transition-colors ${
                   filter === tab.value
-                    ? 'bg-google-blue/10 border-google-blue/30 text-google-blue'
-                    : 'border-black-02/12 text-black-02/50 hover:border-black-02/25 hover:text-black-02/75'
+                    ? 'bg-white/[0.12] text-white font-bold'
+                    : 'text-white/50 font-medium hover:text-white'
                 }`}
               >
-                {tab.label} ({counts[tab.value]})
+                {tab.label}
+                <span>{counts[tab.value]}</span>
               </button>
             ))}
           </div>
@@ -758,13 +757,13 @@ export default function SubmissionsDashboard({ submissions }: Props) {
             }`}
             aria-hidden={selectedCount === 0}
           >
-            <span className="shrink-0 text-sm text-black-02/40 mr-2">{selectedCount} selected</span>
+            <span className="shrink-0 text-sm text-white/40 mr-2">{selectedCount} selected</span>
             <button
               onClick={handleBulkReject}
               disabled={isBulkPending}
               tabIndex={selectedCount > 0 ? undefined : -1}
               aria-label={`Reject ${selectedCount} selected submissions`}
-              className="shrink-0 text-sm px-3 py-1.5 rounded-lg bg-google-red/10 border border-google-red/25 text-google-red hover:bg-google-red/15 transition-colors font-medium"
+              className="shrink-0 text-sm px-3 py-1.5 rounded-lg bg-google-red/15 border border-google-red/30 text-google-red hover:bg-google-red/20 transition-colors font-medium"
             >
               Reject
             </button>
@@ -773,7 +772,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               disabled={isBulkPending}
               tabIndex={selectedCount > 0 ? undefined : -1}
               aria-label={`Accept ${selectedCount} selected submissions`}
-              className="shrink-0 text-sm px-3 py-1.5 rounded-lg bg-google-green/10 border border-google-green/25 text-google-green hover:bg-google-green/15 transition-colors font-medium"
+              className="shrink-0 text-sm px-3 py-1.5 rounded-lg bg-google-green/15 border border-google-green/30 text-google-green hover:bg-google-green/20 transition-colors font-medium"
             >
               Accept
             </button>
@@ -782,7 +781,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               disabled={isBulkPending}
               tabIndex={selectedCount > 0 ? undefined : -1}
               aria-label={`Archive ${selectedCount} selected submissions`}
-              className="shrink-0 text-sm px-3 py-1.5 rounded-lg border border-black-02/15 text-black-02/50 hover:border-black-02/30 hover:text-black-02/75 transition-colors"
+              className="shrink-0 text-sm px-3 py-1.5 rounded-lg border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
             >
               Archive
             </button>
@@ -790,7 +789,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               onClick={clearSelection}
               disabled={isBulkPending}
               tabIndex={selectedCount > 0 ? undefined : -1}
-              className="shrink-0 text-sm px-3 py-1.5 rounded-lg text-black-02/35 hover:text-black-02/60 transition-colors"
+              className="shrink-0 text-sm px-3 py-1.5 rounded-lg text-white/40 hover:text-white/70 transition-colors"
             >
               Clear
             </button>
@@ -803,7 +802,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
             }`}
             aria-hidden={!(searchOpen || search)}
           >
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-black-02/30" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
               <circle cx="7" cy="7" r="5" />
               <path strokeLinecap="round" d="M11 11l3.5 3.5" />
             </svg>
@@ -815,7 +814,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               tabIndex={searchOpen || search ? undefined : -1}
               placeholder="Search name, email, or talk title…"
               aria-label="Search name, email, or talk title"
-              className="w-full min-w-[16rem] rounded-lg border border-black-02/15 bg-white pl-8 pr-9 py-1.5 text-sm text-black-02 placeholder:text-black-02/35 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30"
+              className="w-full min-w-[16rem] rounded-lg border border-white/10 bg-white/[0.06] pl-8 pr-9 py-1.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30"
             />
             <button
               onClick={() => {
@@ -824,7 +823,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               }}
               tabIndex={searchOpen || search ? undefined : -1}
               aria-label="Close search"
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-black-02/30 hover:text-black-02/60 transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
             >
               <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                 <path strokeLinecap="round" d="M4 4l8 8M12 4l-8 8" />
@@ -841,7 +840,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 }}
                 aria-label="Search name, email, or talk title"
                 title="Search"
-                className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-lg border border-black-02/15 text-black-02/60 hover:border-black-02/30 hover:text-black-02/85 transition-colors"
+                className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-lg border border-white/10 text-white/70 hover:border-white/20 hover:text-white transition-colors"
               >
                 <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <circle cx="7" cy="7" r="5" />
@@ -858,8 +857,8 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 aria-label="Filter and sort submissions"
                 className={`inline-flex items-center gap-1.5 h-9 text-sm px-3 rounded-lg border transition-colors font-medium ${
                   filtersMenuOpen || trackFilter !== 'all' || sort !== 'newest'
-                    ? 'border-google-blue/40 text-google-blue bg-google-blue/5'
-                    : 'border-black-02/15 text-black-02/70 hover:border-black-02/30'
+                    ? 'border-google-blue/40 text-google-blue bg-google-blue/10'
+                    : 'border-white/10 text-white/70 hover:border-white/20'
                 }`}
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
@@ -871,10 +870,10 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               {filtersMenuOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 top-full mt-2 w-56 bg-white border border-black-02/10 rounded-2xl shadow-[0_12px_32px_rgba(30,30,30,0.14)] overflow-hidden px-4 py-5 space-y-4 z-30"
+                  className="absolute right-0 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 top-full mt-2 w-56 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden px-4 py-5 space-y-4 z-30"
                 >
                   <div>
-                    <label htmlFor="track-filter-select" className="block text-sm font-semibold text-black-02/40 capitalize mb-1">
+                    <label htmlFor="track-filter-select" className="block text-sm font-semibold text-white/40 capitalize mb-1">
                       Track
                     </label>
                     <select
@@ -882,7 +881,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                       value={trackFilter}
                       onChange={(e) => setTrackFilter(e.target.value as TrackFilter)}
                       aria-label="Filter by track"
-                      className="w-full rounded-lg border border-black-02/15 bg-white px-2.5 py-1.5 text-sm font-medium text-black-02/70 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30"
+                      className="w-full rounded-lg border border-white/10 bg-white/[0.06] px-2.5 py-1.5 text-sm font-medium text-white/70 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30"
                     >
                       <option value="all">All tracks</option>
                       {(Object.entries(TRACK_LABELS) as [Track, string][]).map(([value, label]) => (
@@ -892,7 +891,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                   </div>
 
                   <div>
-                    <label htmlFor="sort-select" className="block text-sm font-semibold text-black-02/40 capitalize mb-1">
+                    <label htmlFor="sort-select" className="block text-sm font-semibold text-white/40 capitalize mb-1">
                       Sort
                     </label>
                     <select
@@ -900,7 +899,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                       value={sort}
                       onChange={(e) => setSort(e.target.value as SortOption)}
                       aria-label="Sort submissions"
-                      className="w-full rounded-lg border border-black-02/15 bg-white px-2.5 py-1.5 text-sm font-medium text-black-02/70 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30"
+                      className="w-full rounded-lg border border-white/10 bg-white/[0.06] px-2.5 py-1.5 text-sm font-medium text-white/70 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30"
                     >
                       {(Object.entries(SORT_LABELS) as [SortOption, string][]).map(([value, label]) => (
                         <option key={value} value={value}>{label}</option>
@@ -918,7 +917,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 aria-expanded={moreMenuOpen}
                 aria-label="More submission actions"
                 className={`inline-flex items-center justify-center w-9 h-9 rounded-lg border transition-colors ${
-                  moreMenuOpen ? 'border-black-02/30 text-black-02/85 bg-black-02/[0.03]' : 'border-black-02/15 text-black-02/60 hover:border-black-02/30 hover:text-black-02/85'
+                  moreMenuOpen ? 'border-white/20 text-white bg-white/[0.05]' : 'border-white/10 text-white/70 hover:border-white/20 hover:text-white'
                 }`}
               >
                 <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
@@ -931,16 +930,16 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               {moreMenuOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 top-full mt-2 w-48 bg-white border border-black-02/10 rounded-2xl shadow-[0_12px_32px_rgba(30,30,30,0.14)] overflow-hidden py-1.5 z-30"
+                  className="absolute right-0 top-full mt-2 w-48 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
                 >
-                  <label className="flex items-center gap-2.5 text-sm text-black-02/75 px-4 py-2.5 hover:bg-black-02/[0.04] transition-colors cursor-pointer">
+                  <label className="flex items-center gap-2.5 text-sm text-white px-4 py-2.5 hover:bg-white/[0.08] transition-colors cursor-pointer">
                     <input
                       type="checkbox"
                       checked={allVisibleSelected}
                       onChange={toggleSelectAllVisible}
                       disabled={sorted.length === 0 || isBulkPending}
                       aria-label="Select all visible submissions"
-                      className="w-4 h-4 rounded border-black-02/25 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue/40"
+                      className="w-4 h-4 rounded border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue/40"
                     />
                     Select all visible
                   </label>
@@ -951,9 +950,9 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                       setMoreMenuOpen(false);
                     }}
                     aria-label="Export visible submissions as CSV"
-                    className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-black-02/75 hover:bg-black-02/[0.04] transition-colors"
+                    className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
                   >
-                    <svg className="w-4 h-4 text-black-02/40 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                    <svg className="w-4 h-4 text-white/40 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8 1.5v8m0 0L5 6.5m3 3l3-3M2.5 11v2A1.5 1.5 0 004 14.5h8a1.5 1.5 0 001.5-1.5v-2" />
                     </svg>
                     Export CSV
@@ -965,14 +964,14 @@ export default function SubmissionsDashboard({ submissions }: Props) {
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4">
+      <div className="px-6">
         {/* Submissions list */}
         {sorted.length === 0 ? (
-          <div className="text-center py-16 text-black-02/30 text-sm">
+          <div className="text-center py-16 text-white/40 text-sm">
             No submissions match these filters.
           </div>
         ) : (
-          <div className="space-y-3 pt-4">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 pt-4 items-start">
             {sorted.map((submission) => (
               <SubmissionRow
                 key={submission.id}
