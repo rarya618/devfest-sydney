@@ -17,12 +17,12 @@ interface Props {
 
 function StatTile({ label, count, dotClass }: { label: string; count: number; dotClass?: string }) {
   return (
-    <div className="bg-white border border-black-02/8 rounded-2xl px-5 py-4">
+    <div className="bg-white/[0.06] border border-white/10 rounded-2xl px-5 py-4">
       <div className="flex items-center gap-2 mb-1.5">
         {dotClass && <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`} aria-hidden="true" />}
-        <span className="text-xs font-medium text-black-02/45">{label}</span>
+        <span className="text-xs font-medium text-white/50">{label}</span>
       </div>
-      <p className="text-3xl font-bold text-black-02 tracking-tight">{count}</p>
+      <p className="text-3xl font-bold text-white tracking-tight">{count}</p>
     </div>
   );
 }
@@ -32,13 +32,13 @@ function BarRow({ label, count, total, dotClass }: { label: string; count: numbe
   return (
     <div title={`${label}: ${count} of ${total} (${pct}%)`}>
       <div className="flex items-center justify-between text-sm mb-1.5">
-        <span className="flex items-center gap-2 font-medium text-black-02/70">
+        <span className="flex items-center gap-2 font-medium text-white/70">
           {dotClass && <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotClass}`} aria-hidden="true" />}
           {label}
         </span>
-        <span className="text-black-02/40 text-xs shrink-0">{count} &middot; {pct}%</span>
+        <span className="text-white/40 text-xs shrink-0">{count} &middot; {pct}%</span>
       </div>
-      <div className="h-2 rounded-full bg-black-02/[0.06] overflow-hidden">
+      <div className="h-2 rounded-full bg-white/10 overflow-hidden">
         <div className="h-full rounded-full bg-google-blue" style={{ width: `${pct}%` }} />
       </div>
     </div>
@@ -47,8 +47,8 @@ function BarRow({ label, count, total, dotClass }: { label: string; count: numbe
 
 function BreakdownCard({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="bg-white border border-black-02/8 rounded-2xl px-5 py-5">
-      <h2 className="text-sm font-bold text-black-02/70 mb-4">{title}</h2>
+    <div className="bg-white/[0.06] border border-white/10 rounded-2xl px-5 py-5">
+      <h2 className="text-sm font-bold text-white/70 mb-4">{title}</h2>
       <div className="space-y-4">{children}</div>
     </div>
   );
@@ -97,9 +97,12 @@ export default function AnalyticsView({ submissions }: Props) {
   const channels = Object.entries(channelCounts).sort((a, b) => b[1] - a[1]);
 
   return (
-    <div className="max-w-3xl mx-auto px-4">
-      <h1 className="text-4xl font-bold text-black-02 tracking-tight mt-8 mb-6">Analytics</h1>
+    <>
+      <div className="sticky top-[52px] md:top-0 z-20 w-full px-6 pt-8 pb-5 bg-[#202124]/95 backdrop-blur-sm">
+        <h1 className="text-xl font-bold text-white tracking-tight">Analytics</h1>
+      </div>
 
+      <div className="px-6">
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <StatTile label="Total" count={total} />
         <StatTile label={STATUS_LABELS.pending} count={statusCounts.pending} dotClass={STATUS_DOT_STYLES.pending.dot} />
@@ -108,7 +111,7 @@ export default function AnalyticsView({ submissions }: Props) {
       </div>
 
       {total === 0 ? (
-        <div className="text-center py-16 text-black-02/30 text-sm">No submissions yet.</div>
+        <div className="text-center py-16 text-white/40 text-sm">No submissions yet.</div>
       ) : (
         <>
           <SubmissionsOverTimeChart submissions={submissions} />
@@ -164,6 +167,7 @@ export default function AnalyticsView({ submissions }: Props) {
           </div>
         </>
       )}
-    </div>
+      </div>
+    </>
   );
 }
