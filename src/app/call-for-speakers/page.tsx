@@ -96,7 +96,7 @@ export default async function CallForSpeakers() {
 
   return (
     <div className="bg-[#202124] text-white min-h-screen">
-      <Navbar accent="green" isCfsOpen={isCfsOpen} />
+      <Navbar accent="green" isCfsOpen={isCfsOpen} cfsCloseDate={cfsCloseDate} />
 
       {/* Hero */}
       <section className={`relative pb-16 px-4 sm:px-6 lg:px-12 overflow-hidden ${isCfsOpen ? 'pt-40' : 'pt-36'}`}>
@@ -106,7 +106,7 @@ export default async function CallForSpeakers() {
           <div className="md:shrink-0">
             {isCfsOpen && (
               <p className="mb-4 text-base font-bold text-white/80 animate-fade-in">
-                Now open{cfsCloseDate ? ` · closes ${formatCloseDate(cfsCloseDate)}` : ''}
+                Extended{cfsCloseDate ? ` · now closes ${formatCloseDate(cfsCloseDate)}` : ''}
               </p>
             )}
 
