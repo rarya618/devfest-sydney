@@ -38,11 +38,12 @@ async function fetchSponsorshipProspectusUrl(): Promise<string | null> {
 
 export default async function FaqPage() {
   const isCfsOpen = process.env.CFS_OPEN === 'true';
+  const cfsCloseDate = process.env.CFS_CLOSE_DATE;
   const sponsorshipProspectusUrl = await fetchSponsorshipProspectusUrl();
 
   return (
     <div className="bg-[#202124] text-white min-h-screen">
-      <Navbar accent="blue" isCfsOpen={isCfsOpen} />
+      <Navbar accent="blue" isCfsOpen={isCfsOpen} cfsCloseDate={cfsCloseDate} />
 
       <section className="pt-36 pb-24 px-6">
         <div className="max-w-3xl mx-auto">

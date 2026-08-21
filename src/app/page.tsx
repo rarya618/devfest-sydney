@@ -187,7 +187,7 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd) }}
       />
-      <Navbar accent="blue" isCfsOpen={isCfsOpen} />
+      <Navbar accent="blue" isCfsOpen={isCfsOpen} cfsCloseDate={cfsCloseDate} />
 
       {/* ─── HERO ─── */}
       <section className="relative min-h-screen flex items-center pt-12 px-4 sm:px-6 lg:px-12 overflow-hidden">
@@ -210,7 +210,7 @@ export default async function Home() {
         <div className="relative max-w-2xl">
           {isCfsOpen && (
             <p className="mb-6 text-base font-bold text-white/80 animate-fade-in">
-              Call for Speakers open{cfsCloseDate ? ` · closes ${formatCloseDate(cfsCloseDate)}` : ''}
+              Call for Speakers extended{cfsCloseDate ? ` · now closes ${formatCloseDate(cfsCloseDate)}` : ''}
             </p>
           )}
 
