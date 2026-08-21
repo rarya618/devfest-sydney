@@ -208,11 +208,11 @@ export default async function Home() {
         )}
 
         <div className="relative max-w-2xl">
-          {isCfsOpen && (
-            <p className="mb-6 text-base font-bold text-white/80 animate-fade-in">
-              Call for Speakers extended{cfsCloseDate ? ` · now closes ${formatCloseDate(cfsCloseDate)}` : ''}
-            </p>
-          )}
+          <p className="mb-6 flex items-center gap-2.5 text-base font-bold text-white/80 animate-fade-in">
+            <span>Saturday, 10 October 2026</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-white/80 shrink-0" aria-hidden="true" />
+            <span>Torrens University, Surry Hills</span>
+          </p>
 
           <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
             <h1 className="text-[clamp(4rem,18vw,6rem)] md:text-[clamp(3rem,10vw,6rem)] font-bold leading-[0.95] tracking-tight text-white">
