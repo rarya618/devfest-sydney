@@ -201,7 +201,7 @@ export default async function Home() {
               sizes="100vw"
               className="object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#202124] via-[#202124]/70 to-[#202124]/30" aria-hidden="true" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#202124]/80 via-[#202124]/50 to-[#202124]/10" aria-hidden="true" />
           </>
         ) : (
           <div className="absolute inset-0 hero-atmosphere pointer-events-none" aria-hidden="true" />
