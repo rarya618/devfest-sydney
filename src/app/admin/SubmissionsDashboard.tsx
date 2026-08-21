@@ -239,7 +239,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
           aria-label={`Select submission: ${submission.talkTitle}`}
           className="mt-2 shrink-0 w-4 h-4 rounded border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue/40"
         />
-        <h3 className="min-w-0 font-bold text-white text-2xl leading-snug tracking-tight">{submission.talkTitle}</h3>
+        <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{submission.talkTitle}</h3>
       </div>
 
       <div className="flex flex-wrap items-start gap-1.5 gap-y-2.5 mb-5 pl-8">
@@ -423,7 +423,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         </div>
       </div>
 
-      <div className="flex items-center gap-3 pt-5 pl-8">
+      <div className="flex items-center gap-3 pt-2 pl-8">
         <span className={`inline-flex items-center gap-1.5 text-sm font-medium ${STATUS_DOT_STYLES[submission.status].text}`}>
           <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT_STYLES[submission.status].dot}`} />
           {STATUS_LABELS[submission.status]}
