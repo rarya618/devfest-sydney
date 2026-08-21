@@ -132,7 +132,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
     >
       <div className="flex items-start gap-4">
       <div className="flex-1 min-w-0">
-      <h3 className="font-bold text-white text-2xl leading-snug tracking-tight mb-2.5">{volunteer.name}</h3>
+      <h3 className="font-bold text-white text-xl leading-snug tracking-tight mb-2.5">{volunteer.name}</h3>
 
       <div className="flex flex-wrap items-start gap-1.5 gap-y-2.5 mb-5">
         <div className="min-w-0 mr-auto">
@@ -151,36 +151,37 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
         )}
       </div>
 
-      <div
-        className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
-      >
-        <div className="overflow-hidden">
       <div className="flex flex-wrap gap-1.5 mb-5">
         {volunteer.areasOfInterest.map((area) => (
-          <span key={area} className="text-sm px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-white/70">
+          <span key={area} className="text-xs px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-white/70">
             {VOLUNTEER_AREA_LABELS[area]}
           </span>
         ))}
       </div>
 
-      <p className="text-base text-white/50 leading-relaxed mb-5">{volunteer.motivation}</p>
+      <div
+        className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+      >
+        <div className="overflow-hidden">
+
+      <p className="text-sm text-white/50 leading-relaxed mb-5">{volunteer.motivation}</p>
 
       {(volunteer.priorExperience || volunteer.googleTechExperience || volunteer.dietaryRequirements) && (
         <div className="space-y-3 mb-5">
           {volunteer.priorExperience && (
-            <p className="text-base text-white/50 bg-white/[0.04] border border-white/10 rounded-lg px-5 py-3 leading-relaxed">
+            <p className="text-sm text-white/50 bg-white/[0.04] border border-white/10 rounded-lg px-5 py-3 leading-relaxed">
               <span className="font-bold text-white/70">Prior experience: </span>
               {volunteer.priorExperience}
             </p>
           )}
           {volunteer.googleTechExperience && (
-            <p className="text-base text-white/50 bg-google-blue/10 border border-google-blue/20 rounded-lg px-5 py-3 leading-relaxed">
+            <p className="text-sm text-white/50 bg-google-blue/10 border border-google-blue/20 rounded-lg px-5 py-3 leading-relaxed">
               <span className="font-bold text-google-blue">Google tech experience: </span>
               {volunteer.googleTechExperience}
             </p>
           )}
           {volunteer.dietaryRequirements && (
-            <p className="text-base text-white/50 bg-white/[0.04] border border-white/10 rounded-lg px-5 py-3 leading-relaxed">
+            <p className="text-sm text-white/50 bg-white/[0.04] border border-white/10 rounded-lg px-5 py-3 leading-relaxed">
               <span className="font-bold text-white/70">Dietary: </span>
               {volunteer.dietaryRequirements}
             </p>
@@ -190,13 +191,13 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 pt-5">
-        <span className={`inline-flex items-center gap-1.5 text-sm font-medium ${VOLUNTEER_STATUS_DOT_STYLES[volunteer.status].text}`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${VOLUNTEER_STATUS_DOT_STYLES[volunteer.status].dot}`} />
+      <div className="flex items-center gap-3 pt-2">
+        <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${VOLUNTEER_STATUS_DOT_STYLES[volunteer.status].text}`}>
+          <span className={`w-[5px] h-[5px] rounded-full ${VOLUNTEER_STATUS_DOT_STYLES[volunteer.status].dot}`} />
           {VOLUNTEER_STATUS_LABELS[volunteer.status]}
         </span>
-        <span className="text-white/30 text-sm">&middot;</span>
-        <span className="text-sm text-white/40">{formatDate(volunteer.submittedAt)}</span>
+        <span className="text-white/30 text-xs">&middot;</span>
+        <span className="text-xs text-white/40">{formatDate(volunteer.submittedAt)}</span>
       </div>
       </div>
 
