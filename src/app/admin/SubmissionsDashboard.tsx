@@ -24,10 +24,6 @@ function toHref(value: string): string | null {
   return null;
 }
 
-function cleanDisplayValue(value: string): string {
-  return value.trim().replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/\/$/, '');
-}
-
 interface LinkChipProps {
   label: string;
   value: string;
@@ -46,22 +42,17 @@ function LinkChip({ label, value, icon, accent }: LinkChipProps) {
 
   const content = (
     <>
-      <span className={`flex items-center justify-center w-7 h-7 rounded-full shrink-0 ${colors.iconBg} ${colors.iconText}`}>
+      <span className={`flex items-center justify-center w-5 h-5 rounded-full shrink-0 ${colors.iconBg} ${colors.iconText}`}>
         {icon}
       </span>
-      <span className="min-w-0">
-        <span className="block text-[10px] font-semibold text-white/40">{label}</span>
-        <span className="block text-sm text-white/70 truncate max-w-[200px] group-hover:text-white transition-colors">{cleanDisplayValue(value)}</span>
+      <span className="text-sm font-medium text-white/70 group-hover:text-white transition-colors">
+        {label}
+        {!href && <span className="ml-1.5 font-normal text-white/40">{value.trim()}</span>}
       </span>
-      {href && (
-        <svg className="w-3 h-3 text-white/30 shrink-0 ml-0.5 group-hover:text-white/50 transition-colors" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6.5 4H4a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V9.5M9 3h4v4M7 9l6-6" />
-        </svg>
-      )}
     </>
   );
 
-  const baseClasses = `group inline-flex items-center gap-2.5 pl-1 pr-3.5 py-1.5 rounded-full border border-white/10 bg-white/[0.06] transition-colors ${colors.hoverBorder} ${colors.hoverBg}`;
+  const baseClasses = `group inline-flex items-center gap-1.5 pl-1 pr-3 py-1 rounded-full border border-white/10 bg-white/[0.06] transition-colors ${colors.hoverBorder} ${colors.hoverBg}`;
 
   return href ? (
     <a
@@ -230,7 +221,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
     >
       <div className="flex items-start gap-4">
       <div className="flex-1 min-w-0">
-      <div className="flex items-start gap-4 mb-2.5">
+      <div className="flex items-start gap-4 mb-2">
         <input
           type="checkbox"
           checked={selected}
@@ -288,17 +279,17 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
       >
         <div className="overflow-hidden">
       <div className="flex flex-wrap items-center gap-2 mb-5 pl-8">
-        <span className={`inline-block w-1.5 h-1.5 rounded-full ${TRACK_DOT_COLORS[submission.track]}`} />
-        <span className={`text-sm font-medium ${TRACK_COLORS[submission.track]}`}>
+        <span className={`inline-block w-[5px] h-[5px] rounded-full ${TRACK_DOT_COLORS[submission.track]}`} />
+        <span className={`text-xs font-medium ${TRACK_COLORS[submission.track]}`}>
           {TRACK_LABELS[submission.track]}
         </span>
-        <span className="text-white/30 text-sm">/</span>
-        <span className="text-sm text-white/40">{FORMAT_LABELS[submission.format]}</span>
-        <span className="text-white/30 text-sm">/</span>
-        <span className="text-sm text-white/40 capitalize">{submission.experienceLevel}</span>
+        <span className="text-white/30 text-xs">/</span>
+        <span className="text-xs text-white/40">{FORMAT_LABELS[submission.format]}</span>
+        <span className="text-white/30 text-xs">/</span>
+        <span className="text-xs text-white/40 capitalize">{submission.experienceLevel}</span>
       </div>
 
-      <p className="text-base text-white/50 leading-relaxed mb-5 pl-8">{submission.abstract}</p>
+      <p className="text-sm text-white/50 leading-relaxed mb-5 pl-8">{submission.abstract}</p>
 
       {(submission.speakerBio ||
         submission.accessibilityNeeds ||
@@ -312,7 +303,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         submission.isOpenToAudienceQuestions) && (
         <div className="space-y-3 mb-5 pl-8">
           {submission.speakerBio && (
-            <p className="text-base text-white/50 bg-white/[0.04] border border-white/10 rounded-lg px-5 py-3 leading-relaxed">
+            <p className="text-sm text-white/50 bg-white/[0.04] border border-white/10 rounded-lg px-5 py-3 leading-relaxed">
               <span className="font-bold text-white/70">Bio: </span>
               {submission.speakerBio}
             </p>
@@ -424,12 +415,12 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
       </div>
 
       <div className="flex items-center gap-3 pt-2 pl-8">
-        <span className={`inline-flex items-center gap-1.5 text-sm font-medium ${STATUS_DOT_STYLES[submission.status].text}`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT_STYLES[submission.status].dot}`} />
+        <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${STATUS_DOT_STYLES[submission.status].text}`}>
+          <span className={`w-[5px] h-[5px] rounded-full ${STATUS_DOT_STYLES[submission.status].dot}`} />
           {STATUS_LABELS[submission.status]}
         </span>
-        <span className="text-white/30 text-sm">&middot;</span>
-        <span className="text-sm text-white/40">{formatDate(submission.submittedAt)}</span>
+        <span className="text-white/30 text-xs">&middot;</span>
+        <span className="text-xs text-white/40">{formatDate(submission.submittedAt)}</span>
       </div>
       </div>
 
