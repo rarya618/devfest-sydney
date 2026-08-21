@@ -50,7 +50,7 @@ env:
       - BUILD
       - RUNTIME
   - variable: CFS_CLOSE_DATE
-    value: "2026-08-23T23:59:00+10:00"
+    value: "2026-08-30T23:59:00+10:00"
     availability:
       - BUILD
       - RUNTIME
