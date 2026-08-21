@@ -89,21 +89,90 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
         </button>
       </div>
 
-      {/* Overlay for mobile drawer */}
+      {/* Mobile dropdown menu */}
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/70 z-40 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-          aria-hidden="true"
-        />
+        <>
+          <div
+            className="fixed inset-0 z-40 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="md:hidden fixed top-[57px] right-3 mt-2 z-50 w-72 max-w-[calc(100vw-1.5rem)] bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden">
+            <nav aria-label="Admin sections" className="py-1.5">
+              <ul>
+                {NAV_ITEMS.map((item) => {
+                  const active = item.href === '/admin' ? pathname === '/admin' : pathname.startsWith(item.href);
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        onClick={() => setSidebarOpen(false)}
+                        aria-current={active ? 'page' : undefined}
+                        className={`block text-sm px-4 py-2.5 transition-colors ${
+                          active
+                            ? 'bg-white/10 text-white font-bold'
+                            : 'text-white/60 font-medium hover:text-white hover:bg-white/[0.08]'
+                        }`}
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+
+            <div className="border-t border-white/10 flex items-center gap-3 px-4 py-3.5 bg-white/[0.04]">
+              <span className="flex items-center justify-center w-9 h-9 rounded-full bg-google-blue text-white text-sm font-bold shrink-0">
+                {getInitials(adminName)}
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-white truncate" title={adminName}>{adminName}</p>
+                <p className="text-xs text-white/50 truncate" title={adminEmail}>{adminEmail}</p>
+              </div>
+            </div>
+
+            <div className="border-t border-white/10 py-1.5">
+              <button
+                onClick={() => {
+                  setSidebarOpen(false);
+                  setInviting(true);
+                }}
+                aria-label="Invite a new admin"
+                className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+              >
+                <svg className="w-4 h-4 text-white/40 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                  <circle cx="6" cy="5.5" r="2.75" />
+                  <path strokeLinecap="round" d="M1.5 14c0-2.76 2.24-4.5 4.5-4.5s4.5 1.74 4.5 4.5" />
+                  <path strokeLinecap="round" d="M12.5 5.5v4M10.5 7.5h4" />
+                </svg>
+                Invite admin
+              </button>
+            </div>
+
+            <div className="border-t border-white/10 py-1.5">
+              <button
+                onClick={() => {
+                  setSidebarOpen(false);
+                  handleSignOut();
+                }}
+                disabled={signingOut}
+                aria-label="Sign out of admin panel"
+                className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-google-red/85 hover:bg-google-red/[0.06] transition-colors disabled:opacity-50"
+              >
+                <svg className="w-4 h-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 14H3.5A1.5 1.5 0 012 12.5v-9A1.5 1.5 0 013.5 2H6" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 11.5L14 8l-3.5-3.5M14 8H6" />
+                </svg>
+                {signingOut ? 'Signing out…' : 'Sign out'}
+              </button>
+            </div>
+          </div>
+        </>
       )}
 
-      {/* Sidebar */}
-      <div
-        className={`fixed md:sticky top-0 left-0 z-50 w-64 md:w-64 shrink-0 h-screen flex flex-col border-r border-white/10 px-5 pt-7 pb-5 bg-[#202124] transition-transform duration-200 md:transition-none ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0`}
-      >
+      {/* Sidebar (desktop only) */}
+      <div className="hidden md:sticky md:flex top-0 left-0 z-50 w-64 shrink-0 h-screen flex-col border-r border-white/10 px-5 pt-7 pb-5 bg-[#202124]">
         <div className="flex items-center justify-between gap-2 px-2 mb-6">
           <Link href="/" className="inline-flex items-center hover:opacity-80 transition-opacity" aria-label="Back to DevFest Sydney home">
             <Image
@@ -114,15 +183,6 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
               className="h-8 w-auto object-contain"
             />
           </Link>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            aria-label="Close admin menu"
-            className="md:hidden shrink-0 p-1 text-white/50 hover:text-white transition-colors"
-          >
-            <svg className="w-5 h-5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-              <path strokeLinecap="round" d="M3 3l10 10M13 3L3 13" />
-            </svg>
-          </button>
         </div>
 
         <nav aria-label="Admin sections" className="flex-1">
@@ -133,7 +193,6 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    onClick={() => setSidebarOpen(false)}
                     aria-current={active ? 'page' : undefined}
                     className={`block text-sm px-4 py-2 rounded-lg transition-colors ${
                       active
