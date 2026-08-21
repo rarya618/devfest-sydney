@@ -19,7 +19,19 @@ const NAV_LINKS = [
   { href: '/#partners', label: 'Partners' },
 ];
 
-export default function Navbar({ accent = 'blue', isCfsOpen = false }: { accent?: Accent; isCfsOpen?: boolean }) {
+function formatCloseDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-AU', { day: 'numeric', month: 'long' });
+}
+
+export default function Navbar({
+  accent = 'blue',
+  isCfsOpen = false,
+  cfsCloseDate,
+}: {
+  accent?: Accent;
+  isCfsOpen?: boolean;
+  cfsCloseDate?: string;
+}) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -39,9 +51,9 @@ export default function Navbar({ accent = 'blue', isCfsOpen = false }: { accent?
         >
           <CfsLink
             source="banner"
-            className="block bg-google-red text-white text-center py-2 text-xs font-semibold tracking-wide hover:underline underline-offset-2"
+            className="block bg-google-red text-white text-center py-2 text-xs font-semibold tracking-wide underline underline-offset-2 decoration-white/40 hover:decoration-white transition-colors"
           >
-            Call for Speakers is open — submit your session
+            Call for Speakers extended{cfsCloseDate ? ` to ${formatCloseDate(cfsCloseDate)}` : ''}. Submit your session here
           </CfsLink>
         </div>
       )}
