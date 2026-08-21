@@ -237,7 +237,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
           onChange={onToggleSelect}
           disabled={bulkActionsPending}
           aria-label={`Select submission: ${submission.talkTitle}`}
-          className="mt-2 shrink-0 w-4 h-4 rounded border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue/40"
+          className="mt-1.5 shrink-0 w-4 h-4 rounded border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue/40"
         />
         <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{submission.talkTitle}</h3>
       </div>
