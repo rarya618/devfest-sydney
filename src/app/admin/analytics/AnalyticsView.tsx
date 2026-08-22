@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import {
   STATUS_LABELS,
-  STATUS_DOT_STYLES,
   TRACK_LABELS,
   TRACK_DOT_COLORS,
   FORMAT_LABELS,
@@ -15,14 +14,58 @@ interface Props {
   submissions: Submission[];
 }
 
-function StatTile({ label, count, dotClass }: { label: string; count: number; dotClass?: string }) {
+type StatAccent = 'neutral' | 'blue' | 'yellow' | 'green' | 'muted';
+
+const STAT_ACCENT_STYLES: Record<StatAccent, { border: string; bg: string; iconBg: string; iconText: string; countText: string }> = {
+  neutral: { border: 'border-white/15', bg: 'bg-white/[0.06]', iconBg: 'bg-white/10', iconText: 'text-white/70', countText: 'text-white' },
+  blue: { border: 'border-google-blue/25', bg: 'bg-google-blue/[0.08]', iconBg: 'bg-google-blue/15', iconText: 'text-google-blue', countText: 'text-google-blue' },
+  yellow: { border: 'border-google-yellow/25', bg: 'bg-google-yellow/[0.08]', iconBg: 'bg-google-yellow/15', iconText: 'text-google-yellow', countText: 'text-google-yellow' },
+  green: { border: 'border-google-green/25', bg: 'bg-google-green/[0.08]', iconBg: 'bg-google-green/15', iconText: 'text-google-green', countText: 'text-google-green' },
+  muted: { border: 'border-white/10', bg: 'bg-white/[0.06]', iconBg: 'bg-white/10', iconText: 'text-white/40', countText: 'text-white/50' },
+};
+
+const STAT_ICON_PATHS: Record<string, string> = {
+  layers: 'M12 3 2 8l10 5 10-5-10-5ZM2 12l10 5 10-5M2 16l10 5 10-5',
+  users: 'M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M11 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+  clock: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM12 6v6l4 2',
+  check: 'M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4 12 14.01l-3-3',
+  x: 'M18 6 6 18M6 6l12 12',
+};
+
+function StatIcon({ name, className }: { name: keyof typeof STAT_ICON_PATHS; className?: string }) {
   return (
-    <div className="bg-white/[0.06] border border-white/10 rounded-2xl px-5 py-4">
-      <div className="flex items-center gap-2 mb-1.5">
-        {dotClass && <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`} aria-hidden="true" />}
-        <span className="text-xs font-medium text-white/50">{label}</span>
-      </div>
-      <p className="text-3xl font-bold text-white tracking-tight">{count}</p>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d={STAT_ICON_PATHS[name]} />
+    </svg>
+  );
+}
+
+function StatTile({
+  label,
+  count,
+  subtext,
+  accent = 'neutral',
+  icon,
+}: {
+  label: string;
+  count: number;
+  subtext?: string;
+  accent?: StatAccent;
+  icon: keyof typeof STAT_ICON_PATHS;
+}) {
+  const styles = STAT_ACCENT_STYLES[count === 0 ? 'muted' : accent];
+  return (
+    <div
+      title={subtext}
+      className={`group inline-flex items-center gap-3 rounded-full border ${styles.border} ${styles.bg} pl-2 pr-6 py-2 transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(0,0,0,0.35)]`}
+    >
+      <span className={`flex items-center justify-center w-8 h-8 rounded-full shrink-0 ${styles.iconBg} ${styles.iconText}`}>
+        <StatIcon name={icon} className="w-4 h-4" />
+      </span>
+      <span className="flex flex-col leading-tight">
+        <span className="text-[11px] font-medium text-white/50">{label}</span>
+        <span className={`text-lg font-bold tracking-tight ${styles.countText}`}>{count}</span>
+      </span>
     </div>
   );
 }
@@ -104,12 +147,36 @@ export default function AnalyticsView({ submissions }: Props) {
       </div>
 
       <div className="px-6">
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
-        <StatTile label="Total" count={total} />
-        <StatTile label="Unique applicants" count={uniqueApplicantCount} />
-        <StatTile label={STATUS_LABELS.pending} count={statusCounts.pending} dotClass={STATUS_DOT_STYLES.pending.dot} />
-        <StatTile label={STATUS_LABELS.accepted} count={statusCounts.accepted} dotClass={STATUS_DOT_STYLES.accepted.dot} />
-        <StatTile label={STATUS_LABELS.rejected} count={statusCounts.rejected} dotClass={STATUS_DOT_STYLES.rejected.dot} />
+      <div className="flex flex-wrap gap-2.5 mb-6">
+        <StatTile label="Total" count={total} icon="layers" accent="neutral" />
+        <StatTile
+          label="Unique applicants"
+          count={uniqueApplicantCount}
+          subtext={total > 0 ? `${Math.round((uniqueApplicantCount / total) * 100)}% of submissions` : undefined}
+          icon="users"
+          accent="blue"
+        />
+        <StatTile
+          label={STATUS_LABELS.pending}
+          count={statusCounts.pending}
+          subtext={total > 0 ? `${Math.round((statusCounts.pending / total) * 100)}% of total` : undefined}
+          icon="clock"
+          accent="yellow"
+        />
+        <StatTile
+          label={STATUS_LABELS.accepted}
+          count={statusCounts.accepted}
+          subtext={total > 0 ? `${Math.round((statusCounts.accepted / total) * 100)}% of total` : undefined}
+          icon="check"
+          accent="green"
+        />
+        <StatTile
+          label={STATUS_LABELS.rejected}
+          count={statusCounts.rejected}
+          subtext={total > 0 ? `${Math.round((statusCounts.rejected / total) * 100)}% of total` : undefined}
+          icon="x"
+          accent="muted"
+        />
       </div>
 
       {total === 0 ? (
