@@ -172,8 +172,8 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
       )}
 
       {/* Sidebar (desktop only) */}
-      <div className="hidden md:sticky md:flex top-0 left-0 z-50 w-64 shrink-0 h-screen flex-col border-r border-white/10 px-5 pt-7 pb-5 bg-[#202124]">
-        <div className="flex items-center justify-between gap-2 px-2 mb-6">
+      <div className="hidden md:sticky md:flex top-0 left-0 z-50 w-64 shrink-0 h-screen flex-col border-r border-white/10 px-3 pt-7 pb-5 bg-[#202124]">
+        <div className="flex items-center justify-between gap-2 pl-3 pr-2 mb-6">
           <Link href="/" className="inline-flex items-center hover:opacity-80 transition-opacity" aria-label="Back to DevFest Sydney home">
             <Image
               src="/logo-wordmark.png"
