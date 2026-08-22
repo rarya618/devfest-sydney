@@ -214,7 +214,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
   return (
     <div
       onClick={handleCardClick}
-      className={`relative cursor-pointer bg-white/[0.06] border-l-4 rounded-lg pt-4 pb-5 pl-4 pr-4 sm:pt-5 sm:pb-7 sm:pl-5 sm:pr-5 shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-all hover:shadow-[0_4px_16px_rgba(0,0,0,0.35)] hover:-translate-y-0.5 ${
+      className={`relative cursor-pointer bg-white/[0.06] border-l-4 rounded-lg pt-4 pb-5 pl-4 pr-4 sm:pt-5 sm:pb-7 sm:pl-5 sm:pr-5 transition-colors hover:bg-white/[0.08] ${
         isPending ? 'opacity-50 pointer-events-none' : selected ? 'ring-2 ring-google-blue/30' : ''
       } ${TRACK_BORDER_COLORS[submission.track]} ${moreOpen ? 'z-40' : ''}`}
       aria-label={`Submission from ${submission.name}: ${submission.talkTitle}`}
@@ -850,11 +850,11 @@ export default function SubmissionsDashboard({ submissions }: Props) {
 
   return (
     <>
-      <div className="sticky top-[52px] md:top-0 z-20 w-full px-6 pt-6 pb-4 bg-[#202124]/95 backdrop-blur-sm border-b border-white/8">
+      <div className="sticky top-[52px] md:top-0 z-20 w-full px-6 pt-[1.125rem] pb-3 bg-[#202124]/95 backdrop-blur-sm">
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <div className="min-w-0">
-            <h1 className="text-2xl font-bold text-white tracking-tight">Submissions</h1>
-            <p className="mt-1 text-sm text-white/40">
+            <h1 className="text-xl font-bold text-white tracking-tight">Submissions</h1>
+            <p className="mt-0.5 text-sm text-white/40">
               {counts.all} total &middot; {counts.pending} pending review
             </p>
           </div>
