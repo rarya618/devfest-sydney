@@ -646,8 +646,23 @@ export default function SubmissionsDashboard({ submissions }: Props) {
   const [sort, setSort] = useState<SortOption>('newest');
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchWidthOpen, setSearchWidthOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (searchOpen || search) {
+      const timeout = setTimeout(() => setSearchWidthOpen(true), 20);
+      return () => clearTimeout(timeout);
+    }
+    setSearchWidthOpen(false);
+  }, [searchOpen, search]);
+
+  useEffect(() => {
+    if (searchWidthOpen) {
+      searchInputRef.current?.focus();
+    }
+  }, [searchWidthOpen]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [isBulkPending, startBulkTransition] = useTransition();
@@ -850,7 +865,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
 
   return (
     <>
-      <div className="sticky top-[52px] md:top-0 z-20 w-full px-6 pt-[1.125rem] pb-3 bg-[#202124]/95 backdrop-blur-sm">
+      <div className="sticky top-[4.25rem] md:top-0 z-20 w-full px-4 md:px-6 pt-2 md:pt-[1.125rem] pb-3 bg-[#202124]/95 backdrop-blur-sm">
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <div className="min-w-0 min-h-[3.25rem] flex items-center">
             {selectedCount > 0 ? (
@@ -898,24 +913,20 @@ export default function SubmissionsDashboard({ submissions }: Props) {
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center justify-end gap-2 shrink-0 ml-auto">
+          <div className="flex flex-wrap items-center gap-2 min-w-0">
             <div
               ref={searchContainerRef}
               className={`relative shrink-0 h-10 rounded-full transition-all duration-300 ease-in-out ${
-                searchOpen || search ? 'w-full sm:w-80 bg-white/[0.06]' : 'w-10 bg-white/[0.06] hover:bg-white/[0.1]'
+                searchWidthOpen ? 'w-full sm:w-80 bg-white/[0.06]' : 'w-10 bg-white/[0.06] hover:bg-white/[0.1]'
               }`}
             >
               <button
-                onClick={() => {
-                  setSearchOpen(true);
-                  requestAnimationFrame(() => searchInputRef.current?.focus());
-                }}
+                onClick={() => setSearchOpen(true)}
                 tabIndex={searchOpen || search ? -1 : undefined}
                 aria-label="Search name, email, or talk title"
                 title="Search"
                 className={`absolute left-0 top-0 inline-flex items-center justify-center w-10 h-10 rounded-full text-white/70 hover:text-white transition-opacity duration-200 ${
-                  searchOpen || search ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                  searchWidthOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
                 }`}
               >
                 <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
@@ -933,12 +944,12 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 placeholder="Search name, email, or talk title…"
                 aria-label="Search name, email, or talk title"
                 className={`w-full h-10 rounded-full bg-transparent pl-9 pr-9 py-0 text-sm text-white placeholder:text-white/30 focus:outline-none transition-opacity duration-200 ${
-                  searchOpen || search ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                  searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}
               />
               <svg
                 className={`absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40 pointer-events-none transition-opacity duration-200 ${
-                  searchOpen || search ? 'opacity-100' : 'opacity-0'
+                  searchWidthOpen ? 'opacity-100' : 'opacity-0'
                 }`}
                 viewBox="0 0 16 16"
                 fill="none"
@@ -957,7 +968,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 tabIndex={searchOpen || search ? undefined : -1}
                 aria-label="Close search"
                 className={`absolute right-2 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-opacity duration-200 ${
-                  searchOpen || search ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                  searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
@@ -965,6 +976,8 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 </svg>
               </button>
             </div>
+
+            {(searchOpen || search) && <div className="basis-full h-0 sm:hidden" aria-hidden="true" />}
 
             <div className="relative shrink-0" ref={statusMenuRef}>
               <button
@@ -1158,17 +1171,16 @@ export default function SubmissionsDashboard({ submissions }: Props) {
             </div>
           </div>
         </div>
-        </div>
       </div>
 
-      <div className="px-6">
+      <div className="px-4 md:px-6">
         {/* Submissions list */}
         {sorted.length === 0 ? (
           <div className="text-center py-16 text-white/40 text-sm">
             No submissions match these filters.
           </div>
         ) : sort === 'submitter' ? (
-          <div className="space-y-8 pt-1">
+          <div className="space-y-8 pt-0.5">
             {groupBySubmitter(sorted).map((group) => (
               <div key={group.key}>
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-3 px-1">
@@ -1196,7 +1208,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 pt-1 items-start">
+          <div className="grid grid-cols-1 gap-5 items-start">
             {sorted.map((submission) => (
               <SubmissionRow
                 key={submission.id}
