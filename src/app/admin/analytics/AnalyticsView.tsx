@@ -67,6 +67,7 @@ function getChannel(submission: Submission): string {
 
 export default function AnalyticsView({ submissions }: Props) {
   const total = submissions.length;
+  const uniqueApplicantCount = new Set(submissions.map((submission) => submission.email.trim().toLowerCase())).size;
 
   const statusCounts: Record<SubmissionStatus, number> = { pending: 0, accepted: 0, rejected: 0, archived: 0 };
   const trackCounts: Partial<Record<Track, number>> = {};
@@ -103,8 +104,9 @@ export default function AnalyticsView({ submissions }: Props) {
       </div>
 
       <div className="px-6">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
         <StatTile label="Total" count={total} />
+        <StatTile label="Unique applicants" count={uniqueApplicantCount} />
         <StatTile label={STATUS_LABELS.pending} count={statusCounts.pending} dotClass={STATUS_DOT_STYLES.pending.dot} />
         <StatTile label={STATUS_LABELS.accepted} count={statusCounts.accepted} dotClass={STATUS_DOT_STYLES.accepted.dot} />
         <StatTile label={STATUS_LABELS.rejected} count={statusCounts.rejected} dotClass={STATUS_DOT_STYLES.rejected.dot} />
