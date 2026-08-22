@@ -29,11 +29,11 @@ export default function AdminsView({ admins, currentAdminEmail }: Props) {
 
   return (
     <>
-      <div className="sticky top-[52px] md:top-0 z-20 w-full px-6 pt-8 pb-5 bg-[#202124]/95 backdrop-blur-sm">
+      <div className="sticky top-[4.25rem] md:top-0 z-20 w-full px-4 md:px-6 pt-4 pb-4 md:pt-8 md:pb-5 bg-[#202124]/95 backdrop-blur-sm">
         <h1 className="text-xl font-bold text-white tracking-tight">Admins</h1>
       </div>
 
-      <div className="px-6">
+      <div className="px-4 md:px-6">
         <div className="space-y-3">
           {admins.map((admin) => {
             const isSelf = admin.email === currentAdminEmail;
