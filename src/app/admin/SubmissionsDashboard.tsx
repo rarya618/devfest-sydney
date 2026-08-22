@@ -653,11 +653,15 @@ export default function SubmissionsDashboard({ submissions }: Props) {
   const [isBulkPending, startBulkTransition] = useTransition();
   const [filtersMenuOpen, setFiltersMenuOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+  const [trackStatsOpen, setTrackStatsOpen] = useState(false);
+  const [statusMenuOpen, setStatusMenuOpen] = useState(false);
   const filtersMenuRef = useRef<HTMLDivElement>(null);
   const moreMenuRef = useRef<HTMLDivElement>(null);
+  const trackStatsRef = useRef<HTMLDivElement>(null);
+  const statusMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!filtersMenuOpen && !moreMenuOpen && !searchOpen) return;
+    if (!filtersMenuOpen && !moreMenuOpen && !searchOpen && !trackStatsOpen && !statusMenuOpen) return;
 
     function handlePointerDown(event: MouseEvent) {
       if (filtersMenuOpen && filtersMenuRef.current && !filtersMenuRef.current.contains(event.target as Node)) {
@@ -665,6 +669,12 @@ export default function SubmissionsDashboard({ submissions }: Props) {
       }
       if (moreMenuOpen && moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
         setMoreMenuOpen(false);
+      }
+      if (trackStatsOpen && trackStatsRef.current && !trackStatsRef.current.contains(event.target as Node)) {
+        setTrackStatsOpen(false);
+      }
+      if (statusMenuOpen && statusMenuRef.current && !statusMenuRef.current.contains(event.target as Node)) {
+        setStatusMenuOpen(false);
       }
       if (searchOpen && searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
         setSearch('');
@@ -675,6 +685,8 @@ export default function SubmissionsDashboard({ submissions }: Props) {
       if (event.key === 'Escape') {
         setFiltersMenuOpen(false);
         setMoreMenuOpen(false);
+        setTrackStatsOpen(false);
+        setStatusMenuOpen(false);
         if (searchOpen) {
           setSearch('');
           setSearchOpen(false);
@@ -688,7 +700,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
       document.removeEventListener('mousedown', handlePointerDown);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [filtersMenuOpen, moreMenuOpen, searchOpen]);
+  }, [filtersMenuOpen, moreMenuOpen, searchOpen, trackStatsOpen, statusMenuOpen]);
 
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
 
@@ -699,6 +711,17 @@ export default function SubmissionsDashboard({ submissions }: Props) {
     rejected: submissions.filter((s) => s.status === 'rejected').length,
     archived: submissions.filter((s) => s.status === 'archived').length,
   };
+
+  const trackCounts: Record<Track, number> = {
+    developer: 0,
+    builder: 0,
+    workshop: 0,
+    showcase: 0,
+  };
+  for (const submission of submissions) {
+    if (submission.status === 'archived') continue;
+    trackCounts[submission.track] += 1;
+  }
 
   const normalizedSearch = search.trim().toLowerCase();
 
@@ -827,117 +850,126 @@ export default function SubmissionsDashboard({ submissions }: Props) {
 
   return (
     <>
-      <div className="sticky top-[52px] md:top-0 z-20 w-full px-6 pt-6 pb-4 bg-[#202124]/95 backdrop-blur-sm">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="order-1 flex items-center gap-2 min-w-0">
-            <h1 className="shrink-0 text-xl font-bold text-white tracking-tight">Submissions</h1>
-          </div>
+      <div className="sticky top-[52px] md:top-0 z-20 w-full px-6 pt-6 pb-4 bg-[#202124]/95 backdrop-blur-sm border-b border-white/8">
+        <div className="mb-5">
+          <h1 className="text-2xl font-bold text-white tracking-tight">Submissions</h1>
+          <p className="mt-1 text-sm text-white/40">
+            {counts.all} total &middot; {counts.pending} pending review
+          </p>
+        </div>
 
-          <div
-            className={`order-3 xl:order-2 flex items-center justify-center gap-0 shrink-0 basis-full xl:basis-0 xl:flex-1 overflow-x-auto overflow-y-hidden whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-all duration-300 ease-in-out ${
-              searchOpen || search || selectedCount > 0 ? 'max-w-0 max-h-0 opacity-0' : 'max-w-full max-h-10 opacity-100'
-            }`}
-            aria-hidden={!!(searchOpen || search || selectedCount > 0)}
-          >
-            {filterTabs.map((tab) => (
+        <div className="flex flex-wrap items-center gap-2">
+          {selectedCount > 0 && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="shrink-0 text-sm text-white/40 mr-2">{selectedCount} selected</span>
               <button
-                key={tab.value}
-                onClick={() => setFilter(tab.value)}
-                aria-pressed={filter === tab.value}
-                tabIndex={searchOpen || search || selectedCount > 0 ? -1 : undefined}
-                className={`shrink-0 inline-flex items-center gap-2.5 text-sm px-5 py-2.5 rounded-full transition-colors ${
-                  filter === tab.value
-                    ? 'bg-white/[0.12] text-white font-bold'
-                    : 'text-white/50 font-medium hover:text-white'
+                onClick={handleBulkReject}
+                disabled={isBulkPending}
+                aria-label={`Reject ${selectedCount} selected submissions`}
+                className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-red text-white hover:bg-google-red/90 transition-colors disabled:opacity-60"
+              >
+                Reject
+              </button>
+              <button
+                onClick={handleBulkAccept}
+                disabled={isBulkPending}
+                aria-label={`Accept ${selectedCount} selected submissions`}
+                className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-green text-white hover:bg-google-green/90 transition-colors disabled:opacity-60"
+              >
+                Accept
+              </button>
+              <button
+                onClick={handleBulkArchive}
+                disabled={isBulkPending}
+                aria-label={`Archive ${selectedCount} selected submissions`}
+                className="shrink-0 h-10 text-sm px-4 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
+              >
+                Archive
+              </button>
+              <button
+                onClick={clearSelection}
+                disabled={isBulkPending}
+                className="shrink-0 h-10 text-sm px-4 rounded-full text-white/40 hover:text-white/70 transition-colors"
+              >
+                Clear
+              </button>
+            </div>
+          )}
+
+          {(searchOpen || search) && (
+            <div ref={searchContainerRef} className="relative flex-1 min-w-[16rem] max-w-full xl:max-w-[24rem]">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                <circle cx="7" cy="7" r="5" />
+                <path strokeLinecap="round" d="M11 11l3.5 3.5" />
+              </svg>
+              <input
+                ref={searchInputRef}
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search name, email, or talk title…"
+                aria-label="Search name, email, or talk title"
+                className="w-full h-10 min-w-[16rem] rounded-full bg-white/[0.06] pl-9 pr-9 py-0 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-google-blue/30"
+              />
+              <button
+                onClick={() => {
+                  setSearch('');
+                  setSearchOpen(false);
+                }}
+                aria-label="Close search"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
+              >
+                <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                  <path strokeLinecap="round" d="M4 4l8 8M12 4l-8 8" />
+                </svg>
+              </button>
+            </div>
+          )}
+
+          <div className="flex items-center justify-end gap-2 shrink-0 ml-auto">
+            <div className="relative shrink-0" ref={statusMenuRef}>
+              <button
+                onClick={() => setStatusMenuOpen((open) => !open)}
+                aria-haspopup="menu"
+                aria-expanded={statusMenuOpen}
+                aria-label="Filter submissions by status"
+                className={`inline-flex items-center gap-2 h-10 text-sm px-4 rounded-full transition-colors font-bold ${
+                  statusMenuOpen ? 'bg-white/[0.12] text-white' : 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
                 }`}
               >
-                {tab.label}
-                <span>{counts[tab.value]}</span>
+                {filterTabs.find((tab) => tab.value === filter)?.label}
+                <span className="font-medium text-white/60">{counts[filter]}</span>
+                <svg className={`w-3 h-3 text-white/40 transition-transform ${statusMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
+                </svg>
               </button>
-            ))}
-          </div>
 
-          <div
-            className={`order-4 xl:order-3 flex items-center gap-2 shrink-0 basis-full xl:basis-auto overflow-x-auto overflow-y-hidden whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-all duration-300 ease-in-out ${
-              selectedCount > 0 ? 'max-w-full xl:max-w-[420px] max-h-12 opacity-100' : 'max-w-0 max-h-0 opacity-0'
-            }`}
-            aria-hidden={selectedCount === 0}
-          >
-            <span className="shrink-0 text-sm text-white/40 mr-2">{selectedCount} selected</span>
-            <button
-              onClick={handleBulkReject}
-              disabled={isBulkPending}
-              tabIndex={selectedCount > 0 ? undefined : -1}
-              aria-label={`Reject ${selectedCount} selected submissions`}
-              className="shrink-0 text-sm font-semibold px-3 py-1.5 rounded-lg bg-google-red text-white hover:bg-google-red/90 transition-colors disabled:opacity-60"
-            >
-              Reject
-            </button>
-            <button
-              onClick={handleBulkAccept}
-              disabled={isBulkPending}
-              tabIndex={selectedCount > 0 ? undefined : -1}
-              aria-label={`Accept ${selectedCount} selected submissions`}
-              className="shrink-0 text-sm font-semibold px-3 py-1.5 rounded-lg bg-google-green text-white hover:bg-google-green/90 transition-colors disabled:opacity-60"
-            >
-              Accept
-            </button>
-            <button
-              onClick={handleBulkArchive}
-              disabled={isBulkPending}
-              tabIndex={selectedCount > 0 ? undefined : -1}
-              aria-label={`Archive ${selectedCount} selected submissions`}
-              className="shrink-0 text-sm px-3 py-1.5 rounded-lg border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
-            >
-              Archive
-            </button>
-            <button
-              onClick={clearSelection}
-              disabled={isBulkPending}
-              tabIndex={selectedCount > 0 ? undefined : -1}
-              className="shrink-0 text-sm px-3 py-1.5 rounded-lg text-white/40 hover:text-white/70 transition-colors"
-            >
-              Clear
-            </button>
-          </div>
+              {statusMenuOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full mt-2 w-48 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
+                >
+                  {filterTabs.map((tab) => (
+                    <button
+                      key={tab.value}
+                      role="menuitem"
+                      onClick={() => {
+                        setFilter(tab.value);
+                        setStatusMenuOpen(false);
+                      }}
+                      aria-pressed={filter === tab.value}
+                      className={`w-full flex items-center justify-between gap-3 text-left text-sm px-4 py-2.5 transition-colors ${
+                        filter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
+                      }`}
+                    >
+                      {tab.label}
+                      <span className="text-white/40">{counts[tab.value]}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
-          <div
-            ref={searchContainerRef}
-            className={`order-5 xl:order-4 relative basis-full xl:basis-auto overflow-hidden transition-all duration-300 ease-in-out ${
-              searchOpen || search ? 'flex-1 mx-auto max-w-full xl:max-w-[24rem] max-h-12 opacity-100' : 'max-w-0 max-h-0 opacity-0'
-            }`}
-            aria-hidden={!(searchOpen || search)}
-          >
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-              <circle cx="7" cy="7" r="5" />
-              <path strokeLinecap="round" d="M11 11l3.5 3.5" />
-            </svg>
-            <input
-              ref={searchInputRef}
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              tabIndex={searchOpen || search ? undefined : -1}
-              placeholder="Search name, email, or talk title…"
-              aria-label="Search name, email, or talk title"
-              className="w-full min-w-[16rem] rounded-lg border border-white/10 bg-white/[0.06] pl-8 pr-9 py-1.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30"
-            />
-            <button
-              onClick={() => {
-                setSearch('');
-                setSearchOpen(false);
-              }}
-              tabIndex={searchOpen || search ? undefined : -1}
-              aria-label="Close search"
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
-            >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                <path strokeLinecap="round" d="M4 4l8 8M12 4l-8 8" />
-              </svg>
-            </button>
-          </div>
-
-          <div className="order-2 xl:order-5 flex items-center justify-end gap-2 shrink-0 ml-auto">
             {!(searchOpen || search) && (
               <button
                 onClick={() => {
@@ -946,7 +978,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 }}
                 aria-label="Search name, email, or talk title"
                 title="Search"
-                className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-lg border border-white/10 text-white/70 hover:border-white/20 hover:text-white transition-colors"
+                className="shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
               >
                 <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <circle cx="7" cy="7" r="5" />
@@ -955,28 +987,64 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               </button>
             )}
 
+            <div className="relative shrink-0" ref={trackStatsRef}>
+              <button
+                onClick={() => setTrackStatsOpen((open) => !open)}
+                aria-haspopup="menu"
+                aria-expanded={trackStatsOpen}
+                aria-label="View submission counts by track"
+                className={`inline-flex items-center gap-2 h-10 text-sm px-4 rounded-full transition-colors font-medium ${
+                  trackStatsOpen
+                    ? 'bg-white/[0.12] text-white'
+                    : 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
+                }`}
+              >
+                <span className="hidden sm:inline">By track</span>
+                <span className="sm:hidden">Tracks</span>
+                <svg className={`w-3 h-3 text-white/40 transition-transform ${trackStatsOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
+                </svg>
+              </button>
+
+              {trackStatsOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full mt-2 w-56 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-2 z-30"
+                >
+                  {(Object.keys(TRACK_LABELS) as Track[]).map((track) => (
+                    <div key={track} className="flex items-center justify-between gap-3 px-4 py-2 text-sm">
+                      <span className="inline-flex items-center gap-2 text-white/70 font-medium">
+                        <span className={`w-[5px] h-[5px] rounded-full ${TRACK_DOT_COLORS[track]}`} />
+                        {TRACK_LABELS[track]}
+                      </span>
+                      <span className="text-white font-semibold">{trackCounts[track]}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="relative shrink-0" ref={filtersMenuRef}>
               <button
                 onClick={() => setFiltersMenuOpen((open) => !open)}
                 aria-haspopup="menu"
                 aria-expanded={filtersMenuOpen}
                 aria-label="Filter and sort submissions"
-                className={`inline-flex items-center gap-1.5 h-9 text-sm px-3 rounded-lg border transition-colors font-medium ${
+                className={`inline-flex items-center justify-center w-10 h-10 rounded-full transition-colors ${
                   filtersMenuOpen || trackFilter !== 'all' || sort !== 'newest'
-                    ? 'border-google-blue/40 text-google-blue bg-google-blue/10'
-                    : 'border-white/10 text-white/70 hover:border-white/20'
+                    ? 'text-google-blue bg-google-blue/15'
+                    : 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
                 }`}
               >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2 4h12M4.5 8h7M7 12h2" />
                 </svg>
-                <span className="hidden sm:inline">Filter &amp; sort</span>
               </button>
 
               {filtersMenuOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 top-full mt-2 w-56 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden px-4 py-5 space-y-4 z-30"
+                  className="absolute right-0 top-full mt-2 w-56 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden px-4 py-5 space-y-4 z-30"
                 >
                   <div>
                     <label htmlFor="track-filter-select" className="block text-sm font-semibold text-white/40 capitalize mb-1">
@@ -1022,8 +1090,8 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 aria-haspopup="menu"
                 aria-expanded={moreMenuOpen}
                 aria-label="More submission actions"
-                className={`inline-flex items-center justify-center w-9 h-9 rounded-lg border transition-colors ${
-                  moreMenuOpen ? 'border-white/20 text-white bg-white/[0.05]' : 'border-white/10 text-white/70 hover:border-white/20 hover:text-white'
+                className={`inline-flex items-center justify-center w-10 h-10 rounded-full transition-colors ${
+                  moreMenuOpen ? 'bg-white/[0.12] text-white' : 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
                 }`}
               >
                 <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
