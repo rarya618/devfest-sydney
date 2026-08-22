@@ -865,7 +865,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
 
   return (
     <>
-      <div className="sticky top-[4.25rem] md:top-0 z-20 w-full px-4 md:px-6 pt-2 md:pt-[1.125rem] pb-3 bg-[#202124]/95 backdrop-blur-sm">
+      <div className="sticky top-[4.25rem] md:top-0 z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-[#202124]/95 backdrop-blur-sm">
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <div className="min-w-0 min-h-[3.25rem] flex items-center">
             {selectedCount > 0 ? (
@@ -1173,7 +1173,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
         </div>
       </div>
 
-      <div className="px-4 md:px-6">
+      <div className="px-4 md:px-5">
         {/* Submissions list */}
         {sorted.length === 0 ? (
           <div className="text-center py-16 text-white/40 text-sm">
