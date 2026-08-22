@@ -50,11 +50,11 @@ export default function LinksView() {
 
   return (
     <>
-      <div className="sticky top-[52px] md:top-0 z-20 w-full px-6 pt-8 pb-5 bg-[#202124]/95 backdrop-blur-sm">
+      <div className="sticky top-[4.25rem] md:top-0 z-20 w-full px-4 md:px-6 pt-4 pb-4 md:pt-8 md:pb-5 bg-[#202124]/95 backdrop-blur-sm">
         <h1 className="text-xl font-bold text-white tracking-tight">Links</h1>
       </div>
 
-      <div className="px-6">
+      <div className="px-4 md:px-6">
         <div className="bg-white/[0.06] border border-white/10 rounded-2xl px-5 py-5">
           <h2 className="text-sm font-bold text-white/70 mb-1">Generate a tracking link</h2>
           <p className="text-xs text-white/50 mb-4">
