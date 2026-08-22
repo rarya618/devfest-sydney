@@ -74,7 +74,7 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
   return (
     <div className="min-h-screen bg-[#202124] md:flex md:items-start">
       {/* Mobile top bar */}
-      <div className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-[#202124] border-b border-white/10">
+      <div className="md:hidden sticky top-0 z-30 flex items-center justify-between pl-3 pr-4 pt-4 pb-3 bg-[#202124]">
         <Link href="/" className="inline-flex items-center hover:opacity-80 transition-opacity" aria-label="Back to DevFest Sydney home">
           <Image src="/logo-wordmark.png" alt="DevFest Sydney" width={1331} height={240} className="h-8 w-auto object-contain" />
         </Link>
