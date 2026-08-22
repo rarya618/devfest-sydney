@@ -852,51 +852,53 @@ export default function SubmissionsDashboard({ submissions }: Props) {
     <>
       <div className="sticky top-[52px] md:top-0 z-20 w-full px-6 pt-[1.125rem] pb-3 bg-[#202124]/95 backdrop-blur-sm">
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-          <div className="min-w-0">
-            <h1 className="text-xl font-bold text-white tracking-tight">Submissions</h1>
-            <p className="mt-0.5 text-sm text-white/40">
-              {counts.all} total &middot; {counts.pending} pending review
-            </p>
+          <div className="min-w-0 min-h-[3.25rem] flex items-center">
+            {selectedCount > 0 ? (
+              <div key="bulk-actions" className="flex items-center gap-2 flex-wrap animate-fade-in-fast">
+                <span className="shrink-0 text-sm text-white/40 mr-2">{selectedCount} selected</span>
+                <button
+                  onClick={handleBulkReject}
+                  disabled={isBulkPending}
+                  aria-label={`Reject ${selectedCount} selected submissions`}
+                  className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-red text-white hover:bg-google-red/90 transition-colors disabled:opacity-60"
+                >
+                  Reject
+                </button>
+                <button
+                  onClick={handleBulkAccept}
+                  disabled={isBulkPending}
+                  aria-label={`Accept ${selectedCount} selected submissions`}
+                  className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-green text-white hover:bg-google-green/90 transition-colors disabled:opacity-60"
+                >
+                  Accept
+                </button>
+                <button
+                  onClick={handleBulkArchive}
+                  disabled={isBulkPending}
+                  aria-label={`Archive ${selectedCount} selected submissions`}
+                  className="shrink-0 h-10 text-sm px-4 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
+                >
+                  Archive
+                </button>
+                <button
+                  onClick={clearSelection}
+                  disabled={isBulkPending}
+                  className="shrink-0 h-10 text-sm px-4 rounded-full text-white/40 hover:text-white/70 transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
+            ) : (
+              <div key="title" className="animate-fade-in-fast">
+                <h1 className="text-xl font-bold text-white tracking-tight">Submissions</h1>
+                <p className="mt-0.5 text-sm text-white/40">
+                  {counts.all} total &middot; {counts.pending} pending review
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-          {selectedCount > 0 && (
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="shrink-0 text-sm text-white/40 mr-2">{selectedCount} selected</span>
-              <button
-                onClick={handleBulkReject}
-                disabled={isBulkPending}
-                aria-label={`Reject ${selectedCount} selected submissions`}
-                className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-red text-white hover:bg-google-red/90 transition-colors disabled:opacity-60"
-              >
-                Reject
-              </button>
-              <button
-                onClick={handleBulkAccept}
-                disabled={isBulkPending}
-                aria-label={`Accept ${selectedCount} selected submissions`}
-                className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-green text-white hover:bg-google-green/90 transition-colors disabled:opacity-60"
-              >
-                Accept
-              </button>
-              <button
-                onClick={handleBulkArchive}
-                disabled={isBulkPending}
-                aria-label={`Archive ${selectedCount} selected submissions`}
-                className="shrink-0 h-10 text-sm px-4 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-              >
-                Archive
-              </button>
-              <button
-                onClick={clearSelection}
-                disabled={isBulkPending}
-                className="shrink-0 h-10 text-sm px-4 rounded-full text-white/40 hover:text-white/70 transition-colors"
-              >
-                Clear
-              </button>
-            </div>
-          )}
-
           <div className="flex items-center justify-end gap-2 shrink-0 ml-auto">
             <div
               ref={searchContainerRef}
