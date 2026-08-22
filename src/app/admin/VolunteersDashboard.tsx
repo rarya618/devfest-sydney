@@ -330,9 +330,46 @@ export default function VolunteersDashboard({ volunteers }: Props) {
   const [filter, setFilter] = useState<FilterStatus>('all');
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchWidthOpen, setSearchWidthOpen] = useState(false);
+  const [statusMenuOpen, setStatusMenuOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
+  const statusMenuRef = useRef<HTMLDivElement>(null);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (searchOpen || search) {
+      const timeout = setTimeout(() => setSearchWidthOpen(true), 20);
+      return () => clearTimeout(timeout);
+    }
+    setSearchWidthOpen(false);
+  }, [searchOpen, search]);
+
+  useEffect(() => {
+    if (searchWidthOpen) {
+      searchInputRef.current?.focus();
+    }
+  }, [searchWidthOpen]);
+
+  useEffect(() => {
+    if (!statusMenuOpen) return;
+
+    function handlePointerDown(event: MouseEvent) {
+      if (statusMenuOpen && statusMenuRef.current && !statusMenuRef.current.contains(event.target as Node)) {
+        setStatusMenuOpen(false);
+      }
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setStatusMenuOpen(false);
+    }
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [statusMenuOpen]);
 
   useEffect(() => {
     if (!searchOpen) return;
@@ -383,94 +420,128 @@ export default function VolunteersDashboard({ volunteers }: Props) {
 
   return (
     <>
-      <div className="sticky top-[52px] md:top-0 z-20 w-full px-6 pt-6 pb-4 bg-[#202124]/95 backdrop-blur-sm">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <h1 className="shrink-0 text-xl font-bold text-white tracking-tight">Volunteers</h1>
+      <div className="sticky top-[4.25rem] md:top-0 z-20 w-full px-4 md:px-6 pt-2 md:pt-[1.125rem] pb-3 bg-[#202124]/95 backdrop-blur-sm">
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+          <div className="min-w-0">
+            <h1 className="text-xl font-bold text-white tracking-tight">Volunteers</h1>
+            <p className="mt-0.5 text-sm text-white/40">
+              {counts.all} total &middot; {counts.pending} pending review
+            </p>
           </div>
 
-          <div
-            className={`flex items-center justify-center gap-0 shrink-0 basis-full sm:basis-0 sm:flex-1 overflow-x-auto overflow-y-hidden whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-all duration-300 ease-in-out ${
-              searchOpen || search ? 'max-w-0 max-h-0 opacity-0' : 'max-w-full max-h-10 opacity-100'
-            }`}
-            aria-hidden={!!(searchOpen || search)}
-          >
-            {filterTabs.map((tab) => (
-              <button
-                key={tab.value}
-                onClick={() => setFilter(tab.value)}
-                aria-pressed={filter === tab.value}
-                tabIndex={searchOpen || search ? -1 : undefined}
-                className={`shrink-0 inline-flex items-center gap-2.5 text-sm px-5 py-2.5 rounded-full transition-colors ${
-                  filter === tab.value
-                    ? 'bg-white/[0.12] text-white font-bold'
-                    : 'text-white/50 font-medium hover:text-white'
-                }`}
-              >
-                {tab.label}
-                <span>{counts[tab.value]}</span>
-              </button>
-            ))}
-          </div>
-
-          <div
-            ref={searchContainerRef}
-            className={`relative basis-full sm:basis-auto overflow-hidden transition-all duration-300 ease-in-out ${
-              searchOpen || search ? 'flex-1 mx-auto max-w-full sm:max-w-[24rem] max-h-12 opacity-100' : 'max-w-0 max-h-0 opacity-0'
-            }`}
-            aria-hidden={!(searchOpen || search)}
-          >
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-              <circle cx="7" cy="7" r="5" />
-              <path strokeLinecap="round" d="M11 11l3.5 3.5" />
-            </svg>
-            <input
-              ref={searchInputRef}
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              tabIndex={searchOpen || search ? undefined : -1}
-              placeholder="Search by name or email…"
-              aria-label="Search by name or email"
-              className="w-full min-w-[16rem] rounded-lg border border-white/10 bg-white/[0.06] pl-8 pr-9 py-1.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-google-green/50 focus:ring-1 focus:ring-google-green/30"
-            />
-            <button
-              onClick={() => {
-                setSearch('');
-                setSearchOpen(false);
-              }}
-              tabIndex={searchOpen || search ? undefined : -1}
-              aria-label="Close search"
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
+          <div className="flex flex-wrap items-center gap-2 min-w-0">
+            <div
+              ref={searchContainerRef}
+              className={`relative shrink-0 h-10 rounded-full transition-all duration-300 ease-in-out ${
+                searchWidthOpen ? 'w-full sm:w-80 bg-white/[0.06]' : 'w-10 bg-white/[0.06] hover:bg-white/[0.1]'
+              }`}
             >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                <path strokeLinecap="round" d="M4 4l8 8M12 4l-8 8" />
-              </svg>
-            </button>
-          </div>
-
-          <div className="flex items-center justify-end gap-2 shrink-0 ml-auto">
-            {!(searchOpen || search) && (
               <button
-                onClick={() => {
-                  setSearchOpen(true);
-                  requestAnimationFrame(() => searchInputRef.current?.focus());
-                }}
+                onClick={() => setSearchOpen(true)}
+                tabIndex={searchOpen || search ? -1 : undefined}
                 aria-label="Search by name or email"
                 title="Search"
-                className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-lg border border-white/10 text-white/70 hover:border-white/20 hover:text-white transition-colors"
+                className={`absolute left-0 top-0 inline-flex items-center justify-center w-10 h-10 rounded-full text-white/70 hover:text-white transition-opacity duration-200 ${
+                  searchWidthOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                }`}
               >
                 <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <circle cx="7" cy="7" r="5" />
                   <path strokeLinecap="round" d="M11 11l3.5 3.5" />
                 </svg>
               </button>
-            )}
+
+              <input
+                ref={searchInputRef}
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                tabIndex={searchOpen || search ? undefined : -1}
+                placeholder="Search by name or email…"
+                aria-label="Search by name or email"
+                className={`w-full h-10 rounded-full bg-transparent pl-9 pr-9 py-0 text-sm text-white placeholder:text-white/30 focus:outline-none transition-opacity duration-200 ${
+                  searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                }`}
+              />
+              <svg
+                className={`absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40 pointer-events-none transition-opacity duration-200 ${
+                  searchWidthOpen ? 'opacity-100' : 'opacity-0'
+                }`}
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.75}
+                aria-hidden="true"
+              >
+                <circle cx="7" cy="7" r="5" />
+                <path strokeLinecap="round" d="M11 11l3.5 3.5" />
+              </svg>
+              <button
+                onClick={() => {
+                  setSearch('');
+                  setSearchOpen(false);
+                }}
+                tabIndex={searchOpen || search ? undefined : -1}
+                aria-label="Close search"
+                className={`absolute right-2 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-opacity duration-200 ${
+                  searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                }`}
+              >
+                <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                  <path strokeLinecap="round" d="M4 4l8 8M12 4l-8 8" />
+                </svg>
+              </button>
+            </div>
+
+            {(searchOpen || search) && <div className="basis-full h-0 sm:hidden" aria-hidden="true" />}
+
+            <div className="relative shrink-0" ref={statusMenuRef}>
+              <button
+                onClick={() => setStatusMenuOpen((open) => !open)}
+                aria-haspopup="menu"
+                aria-expanded={statusMenuOpen}
+                aria-label="Filter volunteers by status"
+                className={`inline-flex items-center gap-2 h-10 text-sm px-4 rounded-full transition-colors font-bold ${
+                  statusMenuOpen ? 'bg-white/[0.12] text-white' : 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
+                }`}
+              >
+                {filterTabs.find((tab) => tab.value === filter)?.label}
+                <span className="font-medium text-white/60">{counts[filter]}</span>
+                <svg className={`w-3 h-3 text-white/40 transition-transform ${statusMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
+                </svg>
+              </button>
+
+              {statusMenuOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full mt-2 w-48 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
+                >
+                  {filterTabs.map((tab) => (
+                    <button
+                      key={tab.value}
+                      role="menuitem"
+                      onClick={() => {
+                        setFilter(tab.value);
+                        setStatusMenuOpen(false);
+                      }}
+                      aria-pressed={filter === tab.value}
+                      className={`w-full flex items-center justify-between gap-3 text-left text-sm px-4 py-2.5 transition-colors ${
+                        filter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
+                      }`}
+                    >
+                      {tab.label}
+                      <span className="text-white/40">{counts[tab.value]}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="px-6 pb-8 sm:pb-10">
+      <div className="px-4 md:px-6 pb-8 sm:pb-10">
         {filtered.length === 0 ? (
           <div className="bg-white/[0.06] border border-white/10 rounded-2xl p-12 text-center">
             <p className="text-sm text-white/50">No volunteer signups match this filter.</p>
