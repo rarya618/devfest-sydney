@@ -851,14 +851,15 @@ export default function SubmissionsDashboard({ submissions }: Props) {
   return (
     <>
       <div className="sticky top-[52px] md:top-0 z-20 w-full px-6 pt-6 pb-4 bg-[#202124]/95 backdrop-blur-sm border-b border-white/8">
-        <div className="mb-5">
-          <h1 className="text-2xl font-bold text-white tracking-tight">Submissions</h1>
-          <p className="mt-1 text-sm text-white/40">
-            {counts.all} total &middot; {counts.pending} pending review
-          </p>
-        </div>
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold text-white tracking-tight">Submissions</h1>
+            <p className="mt-1 text-sm text-white/40">
+              {counts.all} total &middot; {counts.pending} pending review
+            </p>
+          </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
           {selectedCount > 0 && (
             <div className="flex items-center gap-2 flex-wrap">
               <span className="shrink-0 text-sm text-white/40 mr-2">{selectedCount} selected</span>
@@ -896,37 +897,73 @@ export default function SubmissionsDashboard({ submissions }: Props) {
             </div>
           )}
 
-          {(searchOpen || search) && (
-            <div ref={searchContainerRef} className="relative flex-1 min-w-[16rem] max-w-full xl:max-w-[24rem]">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                <circle cx="7" cy="7" r="5" />
-                <path strokeLinecap="round" d="M11 11l3.5 3.5" />
-              </svg>
+          <div className="flex items-center justify-end gap-2 shrink-0 ml-auto">
+            <div
+              ref={searchContainerRef}
+              className={`relative shrink-0 h-10 rounded-full transition-all duration-300 ease-in-out ${
+                searchOpen || search ? 'w-full sm:w-80 bg-white/[0.06]' : 'w-10 bg-white/[0.06] hover:bg-white/[0.1]'
+              }`}
+            >
+              <button
+                onClick={() => {
+                  setSearchOpen(true);
+                  requestAnimationFrame(() => searchInputRef.current?.focus());
+                }}
+                tabIndex={searchOpen || search ? -1 : undefined}
+                aria-label="Search name, email, or talk title"
+                title="Search"
+                className={`absolute left-0 top-0 inline-flex items-center justify-center w-10 h-10 rounded-full text-white/70 hover:text-white transition-opacity duration-200 ${
+                  searchOpen || search ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                }`}
+              >
+                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                  <circle cx="7" cy="7" r="5" />
+                  <path strokeLinecap="round" d="M11 11l3.5 3.5" />
+                </svg>
+              </button>
+
               <input
                 ref={searchInputRef}
                 type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                tabIndex={searchOpen || search ? undefined : -1}
                 placeholder="Search name, email, or talk title…"
                 aria-label="Search name, email, or talk title"
-                className="w-full h-10 min-w-[16rem] rounded-full bg-white/[0.06] pl-9 pr-9 py-0 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-google-blue/30"
+                className={`w-full h-10 rounded-full bg-transparent pl-9 pr-9 py-0 text-sm text-white placeholder:text-white/30 focus:outline-none transition-opacity duration-200 ${
+                  searchOpen || search ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                }`}
               />
+              <svg
+                className={`absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40 pointer-events-none transition-opacity duration-200 ${
+                  searchOpen || search ? 'opacity-100' : 'opacity-0'
+                }`}
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.75}
+                aria-hidden="true"
+              >
+                <circle cx="7" cy="7" r="5" />
+                <path strokeLinecap="round" d="M11 11l3.5 3.5" />
+              </svg>
               <button
                 onClick={() => {
                   setSearch('');
                   setSearchOpen(false);
                 }}
+                tabIndex={searchOpen || search ? undefined : -1}
                 aria-label="Close search"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
+                className={`absolute right-2 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-opacity duration-200 ${
+                  searchOpen || search ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                }`}
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" d="M4 4l8 8M12 4l-8 8" />
                 </svg>
               </button>
             </div>
-          )}
 
-          <div className="flex items-center justify-end gap-2 shrink-0 ml-auto">
             <div className="relative shrink-0" ref={statusMenuRef}>
               <button
                 onClick={() => setStatusMenuOpen((open) => !open)}
@@ -969,23 +1006,6 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 </div>
               )}
             </div>
-
-            {!(searchOpen || search) && (
-              <button
-                onClick={() => {
-                  setSearchOpen(true);
-                  requestAnimationFrame(() => searchInputRef.current?.focus());
-                }}
-                aria-label="Search name, email, or talk title"
-                title="Search"
-                className="shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-              >
-                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <circle cx="7" cy="7" r="5" />
-                  <path strokeLinecap="round" d="M11 11l3.5 3.5" />
-                </svg>
-              </button>
-            )}
 
             <div className="relative shrink-0" ref={trackStatsRef}>
               <button
@@ -1135,6 +1155,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               )}
             </div>
           </div>
+        </div>
         </div>
       </div>
 
