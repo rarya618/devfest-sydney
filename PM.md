@@ -111,10 +111,16 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 | `RESEND_FROM_EMAIL` | Sender address for confirmation emails |
 | `NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY` | Firebase App Check (reCAPTCHA Enterprise site key) |
 | `NEXT_PUBLIC_APP_CHECK_DEBUG_TOKEN` | App Check debug token for local dev (`true` to auto-generate, or paste a registered UUID) |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 measurement ID (`src/components/GoogleAnalytics.tsx`, `src/lib/gtag.ts`); page load + client-side route change tracking |
 
 ## Current Status
 
 **Active milestone:** 7 — SEO (complete for all current public pages)
 **Verified:** `/`, `/call-for-speakers`, and `/code-of-conduct` each have correct `<title>`, canonical URL, and page-specific OpenGraph/Twitter metadata. `/call-for-speakers` has its own dynamic OG image (`opengraph-image.tsx`, on-brand GDG dots + wordmark, generated via `next/og`, no stored asset); `/` and `/code-of-conduct` share the site-wide default (`src/app/opengraph-image.tsx` — note: file-convention OG images do NOT cascade to child routes, so `/code-of-conduct` references it explicitly via `openGraph.images`/`twitter.images`). `sitemap.xml` and `robots.txt` (disallows `/admin`, `/api`) added. Minimal `Organization` JSON-LD added to the root layout. Confirmed via curl (200s, correct tags, valid sitemap/robots output) and visually inspected both OG images.
 **Date and venue confirmed 2026-08-18:** Saturday, 10 October 2026 at Torrens University, Surry Hills (Shop 1/37 Foveaux St, Surry Hills NSW 2010). Added to `EVENT.md`, footer date/venue line, FAQ answer, root layout metadata/OG copy, and homepage OG image. `Event` JSON-LD added to `/` (`src/app/page.tsx`) now that `startDate` is confirmed — previously deferred pending this. The `/` page Venue section itself is built but hidden again (`showVenue = false`) at the user's request — they're redesigning it before it goes live.
-**Next task:** Milestone 8 — Speaker & schedule pages (deferred until closer to the CfS closing date), or Milestone 9 — Polish & launch in the meantime.
+**Next task (requested by user 2026-08-24, start of next session):**
+1. Venue section for the landing page — redesign and re-enable (currently hidden via `showVenue = false` in `src/app/page.tsx`, pending redesign per above).
+2. Ticket section — add to the landing page, plus a new dedicated `/tickets`-style page (links out to Humanitix; no in-house payment/ticketing code per `PM.md` rules).
+3. Partners section — update the landing page's Partners section to include sponsors, plus a new dedicated sponsors page.
+
+Otherwise: Milestone 8 — Speaker & schedule pages (deferred until closer to the CfS closing date), or Milestone 9 — Polish & launch.
