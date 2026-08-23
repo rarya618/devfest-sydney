@@ -5,7 +5,11 @@ import AdminsView from './AdminsView';
 import type { AdminUser } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
 
-export const metadata = { title: 'Admins — DevFest Sydney 2026' };
+export const metadata = {
+  title: 'Admins — DevFest Sydney 2026',
+  openGraph: { title: 'Admins — DevFest Sydney 2026', images: ['/admin/opengraph-image'] },
+  twitter: { card: 'summary_large_image', title: 'Admins — DevFest Sydney 2026', images: ['/admin/opengraph-image'] },
+};
 
 async function fetchAdmins(): Promise<AdminUser[]> {
   const snapshot = await adminDb.collection('admins').orderBy('addedAt', 'asc').get();
