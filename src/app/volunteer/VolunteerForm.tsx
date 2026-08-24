@@ -205,7 +205,7 @@ export default function VolunteerForm() {
       </nav>
 
       <div className="md:flex md:items-start md:gap-10">
-      <nav aria-label="Form progress" className="hidden md:block sticky top-28 w-52 shrink-0 self-start">
+      <nav aria-label="Form progress" className="hidden md:block sticky top-28 w-64 shrink-0 self-start">
         <ul className="space-y-1">
           {SECTIONS.map((section, index) => {
             const isActive = activeSection === section.id;
@@ -214,7 +214,7 @@ export default function VolunteerForm() {
                 <a
                   href={`#${section.id}`}
                   aria-current={isActive ? 'true' : undefined}
-                  className={`flex items-center gap-6 px-6 py-3 rounded-lg border border-l-4 text-sm font-bold text-white transition-colors
+                  className={`flex items-center gap-6 px-6 py-3 rounded border-l-4 text-base font-bold text-white transition-colors
                     ${isActive ? 'bg-white/[0.06] border-[#555555]' : 'border-transparent hover:bg-white/5'}`}
                 >
                   <span className="text-xs text-white/40 leading-none self-center" aria-hidden="true">{index + 1}</span>
