@@ -855,8 +855,8 @@ export default function CfsForm() {
             type="submit"
             disabled={submitState === 'submitting'}
             aria-label="Submit your session"
-            className="inline-flex items-center justify-center gap-2.5 px-8 py-2.5 bg-google-green text-white text-base font-bold rounded-lg
-              border border-google-green transition-colors hover:bg-transparent hover:text-google-green
+            className="inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-green text-white text-base font-bold rounded
+              border border-google-green transition-opacity hover:opacity-80
               disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-google-green disabled:hover:text-white"
           >
             {submitState === 'submitting' ? (
