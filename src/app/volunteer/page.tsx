@@ -87,7 +87,7 @@ export default async function Volunteer() {
           <div className="flex flex-wrap items-center justify-center gap-5">
             <a
               href="#areas"
-              className="inline-flex items-center px-8 py-2.5 bg-transparent text-white text-base font-bold rounded-lg border border-[#555555] transition-colors hover:border-white animate-slide-up"
+              className="inline-flex items-center px-7 py-2 bg-transparent text-white text-base font-bold rounded border border-[#555555] transition-colors hover:border-white animate-slide-up"
               style={{ animationDelay: '0.25s' }}
             >
               Learn more
@@ -95,7 +95,7 @@ export default async function Volunteer() {
             {isVolunteerOpen && (
               <a
                 href="#signup"
-                className="inline-flex items-center gap-2.5 px-8 py-2.5 bg-google-red text-white text-base font-bold rounded-lg border border-google-red transition-colors hover:bg-transparent hover:text-google-red animate-slide-up"
+                className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-red text-white text-base font-bold rounded border border-google-red transition-opacity hover:opacity-80 animate-slide-up"
                 style={{ animationDelay: '0.3s' }}
               >
                 Sign up
