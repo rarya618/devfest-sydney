@@ -209,7 +209,7 @@ export default async function CallForSpeakers() {
         <div className="relative -mx-6 overflow-hidden border-y border-[#CCCCCC] bg-white/[0.06] animate-slide-up" style={{ animationDelay: '0.2s' }}>
           <div className="absolute inset-y-0 left-0 w-12 sm:w-24 bg-gradient-to-r from-[#202124] to-transparent z-10 pointer-events-none" aria-hidden="true" />
           <div className="absolute inset-y-0 right-0 w-12 sm:w-24 bg-gradient-to-l from-[#202124] to-transparent z-10 pointer-events-none" aria-hidden="true" />
-          <div className="flex w-max items-center gap-6 py-4 animate-marquee hover:[animation-play-state:paused]" aria-hidden="true">
+          <div className="flex w-max items-center gap-10 py-4 animate-marquee hover:[animation-play-state:paused]" aria-hidden="true">
             {[...topics, ...topics].map(({ label }, i) => (
               <span key={i} className="flex items-center gap-2.5 text-base font-normal text-white whitespace-nowrap">
                 <span className="w-2 h-2 rounded-full bg-google-green shrink-0" />
