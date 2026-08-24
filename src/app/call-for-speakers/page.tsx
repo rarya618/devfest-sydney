@@ -197,7 +197,7 @@ export default async function CallForSpeakers() {
             {REASONS.map((reason) => (
               <div
                 key={reason.title}
-                className={`flex flex-col gap-3 bg-white/[0.06] border border-l-8 ${REASON_BORDER[reason.color]} rounded-xl pt-8 pb-10 px-6 md:px-8`}
+                className={`flex flex-col gap-3 bg-white/[0.06] border-l-6 ${REASON_BORDER[reason.color]} rounded-lg pt-8 pb-10 px-6 md:px-8`}
               >
                 <h3 className="text-xl md:text-2xl font-bold text-white">{reason.title}</h3>
                 <p className="text-base text-white/80 leading-relaxed">{reason.desc}</p>
