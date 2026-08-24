@@ -453,8 +453,8 @@ export default function VolunteerForm() {
             type="submit"
             disabled={submitState === 'submitting'}
             aria-label="Submit volunteer signup"
-            className="inline-flex items-center justify-center gap-2.5 px-8 py-2.5 bg-google-red text-white text-base font-bold rounded-lg
-              border border-google-red transition-colors hover:bg-transparent hover:text-google-red
+            className="inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-red text-white text-base font-bold rounded
+              border border-google-red transition-opacity hover:opacity-80
               disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-google-red disabled:hover:text-white"
           >
             {submitState === 'submitting' ? (
