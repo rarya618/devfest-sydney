@@ -444,11 +444,14 @@ export default function CfsForm() {
                   aria-checked={selected}
                   aria-label={t.label}
                   onClick={() => {
-                    setFields((prev) => ({
-                      ...prev,
-                      track: t.value,
-                      format: t.value === 'workshop' ? 'workshop' : prev.format === 'workshop' ? '' : prev.format,
-                    }));
+                    setFields((prev) => {
+                      const nextTrack = prev.track === t.value ? '' : t.value;
+                      return {
+                        ...prev,
+                        track: nextTrack,
+                        format: nextTrack === 'workshop' ? 'workshop' : nextTrack === '' ? '' : prev.format === 'workshop' ? '' : prev.format,
+                      };
+                    });
                     setErrors((prev) => ({ ...prev, track: undefined, format: undefined }));
                   }}
                   className={`flex flex-col items-start text-left rounded-lg border px-6 py-5 transition-colors duration-200 cursor-pointer
@@ -514,7 +517,7 @@ export default function CfsForm() {
                     aria-label={`${f.label}, ${f.duration}`}
                     tabIndex={showFormat ? 0 : -1}
                     onClick={() => {
-                      setFields((prev) => ({ ...prev, format: f.value }));
+                      setFields((prev) => ({ ...prev, format: prev.format === f.value ? '' : f.value }));
                       setErrors((prev) => ({ ...prev, format: undefined }));
                     }}
                     className={`flex flex-col items-start text-left rounded-lg border px-6 py-5 transition-colors duration-200 cursor-pointer
@@ -577,7 +580,7 @@ export default function CfsForm() {
                   aria-checked={selected}
                   aria-label={level.label}
                   onClick={() => {
-                    setFields((prev) => ({ ...prev, experienceLevel: level.value }));
+                    setFields((prev) => ({ ...prev, experienceLevel: prev.experienceLevel === level.value ? '' : level.value }));
                     setErrors((prev) => ({ ...prev, experienceLevel: undefined }));
                   }}
                   className={`flex flex-col items-start text-left rounded-lg border px-6 py-5 transition-colors duration-200 cursor-pointer
