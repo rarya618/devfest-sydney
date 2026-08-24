@@ -113,11 +113,15 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 | `NEXT_PUBLIC_FIREBASE_API_KEY` | Firebase client SDK |
 | `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | Firebase client SDK |
 | `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | Firebase client SDK |
+| `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` | Firebase client SDK |
+| `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | Firebase client SDK |
+| `NEXT_PUBLIC_FIREBASE_APP_ID` | Firebase client SDK |
 | `RESEND_API_KEY` | Resend email sending |
 | `RESEND_FROM_EMAIL` | Sender address for confirmation emails |
 | `NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY` | Firebase App Check (reCAPTCHA Enterprise site key) |
 | `NEXT_PUBLIC_APP_CHECK_DEBUG_TOKEN` | App Check debug token for local dev (`true` to auto-generate, or paste a registered UUID) |
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 measurement ID (`src/components/GoogleAnalytics.tsx`, `src/lib/gtag.ts`); page load + client-side route change tracking |
+| `NEXT_PUBLIC_SITE_URL` | Canonical site URL for metadata, sitemap, and robots.txt; defaults to `https://devfest.gdgsydney.com` |
 
 ## Current Status
 
