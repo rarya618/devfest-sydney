@@ -14,10 +14,16 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 ### Pages
 - `/` — Hero, About, Speakers (accepted), Schedule, Venue, Sponsors, Team
 - `/call-for-speakers` — CfS form with open/closed state
+- `/volunteer` — Volunteer signup form with open/closed state
 - `/conduct` — Code of Conduct, static page
 - `/faq` — Dedicated FAQ page (moved off `/` so it can be linked to directly, e.g. from the footer)
+- `/privacy` — Privacy policy, static page
 - `/admin/login` — Google sign-in via Firebase Auth (restricted to authorised emails)
 - `/admin` — Review CfS submissions, promote accepted speakers to `speakers` collection
+- `/admin/volunteers` — Review volunteer signups (accept, reject, restore, archive)
+- `/admin/admins` — Manage authorised admin emails
+- `/admin/analytics` — Submission stats and trends
+- `/admin/links` — Generate UTM-tagged tracking links
 
 ### Call for Speakers Flow
 - Form fields: name, email, talk title, abstract, format (talk / workshop / lightning talk), experience level, social/profile links, previous talk link (optional)
