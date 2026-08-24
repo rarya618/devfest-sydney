@@ -185,7 +185,7 @@ export default async function CallForSpeakers() {
 
       {/* Reasons to apply */}
       <section id="topics" className="pt-20 pb-0 px-6">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <div className="mb-12 text-center animate-slide-up">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight">Good reasons to apply</h2>
             <p className="text-white/70 mt-4 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
