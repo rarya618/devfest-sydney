@@ -8,9 +8,9 @@ import CfsLink from './CfsLink';
 type Accent = 'blue' | 'green' | 'red';
 
 const ACCENT_CLASSES: Record<Accent, string> = {
-  blue: 'bg-google-blue border-google-blue hover:text-google-blue',
-  green: 'bg-google-green border-google-green hover:text-google-green',
-  red: 'bg-google-red border-google-red hover:text-google-red',
+  blue: 'bg-google-blue border-google-blue',
+  green: 'bg-google-green border-google-green',
+  red: 'bg-google-red border-google-red',
 };
 
 const NAV_LINKS = [
@@ -77,7 +77,7 @@ export default function Navbar({
 
           <div className="flex items-center gap-8">
             {/* Links */}
-            <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white">
+            <div className="hidden md:flex items-center gap-8 text-sm font-bold text-white">
               {NAV_LINKS.map((link) => (
                 <Link key={link.href} href={link.href} className="hover:text-white/80 transition-colors">
                   {link.label}
@@ -88,7 +88,7 @@ export default function Navbar({
             {/* CTA */}
             <CfsLink
               source="navbar"
-              className={`hidden md:inline-flex items-center px-6 py-2 text-white text-sm font-bold rounded-lg border transition-colors hover:bg-transparent ${ACCENT_CLASSES[accent]}`}
+              className={`hidden md:inline-flex items-center px-5.5 py-1.75 text-white text-sm font-bold rounded-sm border transition-opacity hover:opacity-80 ${ACCENT_CLASSES[accent]}`}
             >
               Apply to speak
             </CfsLink>
@@ -124,14 +124,14 @@ export default function Navbar({
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-base font-medium text-white hover:text-white/80 transition-colors"
+                className="text-base font-bold text-white hover:text-white/80 transition-colors"
               >
                 {link.label}
               </Link>
             ))}
             <CfsLink
               source="navbar"
-              className={`inline-flex items-center justify-center px-6 py-2.5 text-white text-sm font-bold rounded-lg border transition-colors hover:bg-transparent ${ACCENT_CLASSES[accent]}`}
+              className={`inline-flex items-center justify-center px-5.5 py-1.75 text-white text-sm font-bold rounded-sm border transition-opacity hover:opacity-80 ${ACCENT_CLASSES[accent]}`}
             >
               Apply to speak
             </CfsLink>
