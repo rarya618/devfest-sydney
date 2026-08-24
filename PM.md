@@ -14,7 +14,7 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 ### Pages
 - `/` — Hero, About, Speakers (accepted), Schedule, Venue, Sponsors, Team
 - `/call-for-speakers` — CfS form with open/closed state
-- `/code-of-conduct` — Static page
+- `/conduct` — Code of Conduct, static page
 - `/faq` — Dedicated FAQ page (moved off `/` so it can be linked to directly, e.g. from the footer)
 - `/admin/login` — Google sign-in via Firebase Auth (restricted to authorised emails)
 - `/admin` — Review CfS submissions, promote accepted speakers to `speakers` collection
@@ -116,7 +116,7 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 ## Current Status
 
 **Active milestone:** 7 — SEO (complete for all current public pages)
-**Verified:** `/`, `/call-for-speakers`, and `/code-of-conduct` each have correct `<title>`, canonical URL, and page-specific OpenGraph/Twitter metadata. `/call-for-speakers` has its own dynamic OG image (`opengraph-image.tsx`, on-brand GDG dots + wordmark, generated via `next/og`, no stored asset); `/` and `/code-of-conduct` share the site-wide default (`src/app/opengraph-image.tsx` — note: file-convention OG images do NOT cascade to child routes, so `/code-of-conduct` references it explicitly via `openGraph.images`/`twitter.images`). `sitemap.xml` and `robots.txt` (disallows `/admin`, `/api`) added. Minimal `Organization` JSON-LD added to the root layout. Confirmed via curl (200s, correct tags, valid sitemap/robots output) and visually inspected both OG images.
+**Verified:** `/`, `/call-for-speakers`, and `/conduct` each have correct `<title>`, canonical URL, and page-specific OpenGraph/Twitter metadata. `/call-for-speakers` has its own dynamic OG image (`opengraph-image.tsx`, on-brand GDG dots + wordmark, generated via `next/og`, no stored asset); `/` and `/conduct` share the site-wide default (`src/app/opengraph-image.tsx` — note: file-convention OG images do NOT cascade to child routes, so `/conduct` references it explicitly via `openGraph.images`/`twitter.images`). `sitemap.xml` and `robots.txt` (disallows `/admin`, `/api`) added. Minimal `Organization` JSON-LD added to the root layout. Confirmed via curl (200s, correct tags, valid sitemap/robots output) and visually inspected both OG images.
 **Date and venue confirmed 2026-08-18:** Saturday, 10 October 2026 at Torrens University, Surry Hills (Shop 1/37 Foveaux St, Surry Hills NSW 2010). Added to `EVENT.md`, footer date/venue line, FAQ answer, root layout metadata/OG copy, and homepage OG image. `Event` JSON-LD added to `/` (`src/app/page.tsx`) now that `startDate` is confirmed — previously deferred pending this. The `/` page Venue section itself is built but hidden again (`showVenue = false`) at the user's request — they're redesigning it before it goes live.
 **Next task (requested by user 2026-08-24, start of next session):**
 1. Venue section for the landing page — redesign and re-enable (currently hidden via `showVenue = false` in `src/app/page.tsx`, pending redesign per above).

@@ -24,7 +24,7 @@ See [`EVENT.md`](./EVENT.md) for event details (theme, tracks, special features)
 | `/call-for-speakers` | CfS form, open/closed based on `CFS_OPEN` |
 | `/volunteer` | Volunteer signup form, open/closed based on `VOLUNTEER_OPEN` |
 | `/faq` | Dedicated FAQ page |
-| `/code-of-conduct` | Static page |
+| `/conduct` | Code of Conduct, static page |
 | `/privacy` | Privacy policy |
 | `/admin/login` | Google sign-in, restricted to authorised emails |
 | `/admin` | Review CfS submissions, promote accepted speakers |
