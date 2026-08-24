@@ -166,7 +166,7 @@ export default function VolunteerForm() {
           </span>
           <h3 className="text-xl font-bold text-white">Thanks for signing up!</h3>
         </div>
-        <p className="text-white/55 text-sm leading-relaxed max-w-sm mx-auto">
+        <p className="text-white/65 text-sm leading-relaxed max-w-sm mx-auto">
           Thanks for offering to volunteer at DevFest Sydney. We&apos;ll be in touch via email with next steps.
         </p>
       </div>
@@ -174,7 +174,7 @@ export default function VolunteerForm() {
   }
 
   const inputBase =
-    'w-full bg-white/[0.05] border rounded-lg px-5 py-2.5 text-white text-base placeholder-white/30 outline-none transition-colors focus:bg-white/[0.08]';
+    'w-full bg-white/[0.05] border rounded-lg px-5 py-2.5 text-white text-base placeholder-white/60 outline-none transition-colors focus:bg-white/[0.08]';
   const inputNormal = `${inputBase} border-white/8 focus:border-google-green/40`;
   const inputError = `${inputBase} border-google-red/40 bg-google-red/5`;
 
@@ -195,7 +195,7 @@ export default function VolunteerForm() {
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-bold text-white whitespace-nowrap transition-colors
                     ${isActive ? 'bg-white/[0.06]' : 'hover:bg-white/5'}`}
                 >
-                  <span className="text-white/40" aria-hidden="true">{index + 1}</span>
+                  <span className="text-white/65" aria-hidden="true">{index + 1}</span>
                   {section.label}
                 </a>
               </li>
@@ -217,7 +217,7 @@ export default function VolunteerForm() {
                   className={`flex items-center gap-6 px-6 py-3 rounded border-l-4 text-base font-bold text-white transition-colors
                     ${isActive ? 'bg-white/[0.06] border-[#555555]' : 'border-transparent hover:bg-white/5'}`}
                 >
-                  <span className="text-xs text-white/40 leading-none self-center" aria-hidden="true">{index + 1}</span>
+                  <span className="text-xs text-white/65 leading-none self-center" aria-hidden="true">{index + 1}</span>
                   <span className="leading-none self-center">{section.label}</span>
                 </a>
               </li>
@@ -236,7 +236,7 @@ export default function VolunteerForm() {
 
           <div className="grid sm:grid-cols-2 gap-5">
             <div>
-              <label htmlFor="vol-name" className="block text-sm font-bold text-white/70 mb-1.5">
+              <label htmlFor="vol-name" className="block text-sm font-bold text-white/85 mb-1.5">
                 Full name <span className="text-google-red" aria-hidden="true">*</span>
               </label>
               <input
@@ -256,7 +256,7 @@ export default function VolunteerForm() {
             </div>
 
             <div>
-              <label htmlFor="vol-email" className="block text-sm font-bold text-white/70 mb-1.5">
+              <label htmlFor="vol-email" className="block text-sm font-bold text-white/85 mb-1.5">
                 Email address <span className="text-google-red" aria-hidden="true">*</span>
               </label>
               <input
@@ -277,7 +277,7 @@ export default function VolunteerForm() {
           </div>
 
           <div className="mt-5">
-            <label htmlFor="vol-phone" className="block text-sm font-bold text-white/70 mb-1.5">
+            <label htmlFor="vol-phone" className="block text-sm font-bold text-white/85 mb-1.5">
               Phone number
             </label>
             <input
@@ -289,7 +289,7 @@ export default function VolunteerForm() {
               className={inputNormal}
               {...field('phone')}
             />
-            <p id="vol-phone-hint" className="mt-1.5 text-xs text-white/35">Optional, in case we need to reach you on the day.</p>
+            <p id="vol-phone-hint" className="mt-1.5 text-xs text-white/50">Optional, in case we need to reach you on the day.</p>
           </div>
         </div>
 
@@ -302,12 +302,12 @@ export default function VolunteerForm() {
           <div className="space-y-7">
             <div>
               <div className="flex items-baseline justify-between mb-1.5">
-                <label htmlFor="vol-motivation" className="block text-sm font-bold text-white/70">
+                <label htmlFor="vol-motivation" className="block text-sm font-bold text-white/85">
                   Why would you like to volunteer? <span className="text-google-red" aria-hidden="true">*</span>
                 </label>
                 <span
                   aria-label={`${fields.motivation.length} of ${MOTIVATION_MAX} characters used`}
-                  className={`text-xs tabular-nums ${fields.motivation.length > MOTIVATION_MAX ? 'text-google-red' : 'text-white/35'}`}
+                  className={`text-xs tabular-nums ${fields.motivation.length > MOTIVATION_MAX ? 'text-google-red' : 'text-white/50'}`}
                 >
                   {fields.motivation.length}/{MOTIVATION_MAX}
                 </span>
@@ -328,7 +328,7 @@ export default function VolunteerForm() {
             </div>
 
             <div>
-              <p className="text-sm font-bold text-white/70 mb-3" id="vol-areas-label">
+              <p className="text-sm font-bold text-white/85 mb-3" id="vol-areas-label">
                 Areas of interest <span className="text-google-red" aria-hidden="true">*</span>
               </p>
               <div
@@ -376,7 +376,7 @@ export default function VolunteerForm() {
             </div>
 
             <div>
-              <label htmlFor="vol-experience" className="block text-sm font-bold text-white/70 mb-1.5">
+              <label htmlFor="vol-experience" className="block text-sm font-bold text-white/85 mb-1.5">
                 Prior volunteering experience
               </label>
               <textarea
@@ -389,7 +389,7 @@ export default function VolunteerForm() {
             </div>
 
             <div>
-              <label htmlFor="vol-google-tech" className="block text-sm font-bold text-white/70 mb-1.5">
+              <label htmlFor="vol-google-tech" className="block text-sm font-bold text-white/85 mb-1.5">
                 Experience with Google technologies
               </label>
               <textarea
@@ -400,7 +400,7 @@ export default function VolunteerForm() {
                 className={`${inputNormal} resize-none leading-relaxed`}
                 {...field('googleTechExperience')}
               />
-              <p id="vol-google-tech-hint" className="mt-1.5 text-xs text-white/35">
+              <p id="vol-google-tech-hint" className="mt-1.5 text-xs text-white/50">
                 Optional. Helps us know if you could facilitate a hands-on workshop.
               </p>
             </div>
@@ -427,14 +427,14 @@ export default function VolunteerForm() {
                     )}
                   </div>
                 </div>
-                <span className="text-sm text-white/70 group-hover:text-white/90 transition-colors select-none">
+                <span className="text-sm text-white/85 group-hover:text-white/90 transition-colors select-none">
                   Are you a student or staff member at Torrens University?
                 </span>
               </label>
             </div>
 
             <div>
-              <label htmlFor="vol-dietary" className="block text-sm font-bold text-white/70 mb-1.5">
+              <label htmlFor="vol-dietary" className="block text-sm font-bold text-white/85 mb-1.5">
                 Dietary requirements
               </label>
               <input
@@ -470,9 +470,9 @@ export default function VolunteerForm() {
               </>
             )}
           </button>
-          <p className="text-xs text-white/35 mt-3">
+          <p className="text-xs text-white/50 mt-3">
             By submitting you agree to our{' '}
-            <a href="/conduct" className="text-white/50 hover:text-white/70 underline underline-offset-2 transition-colors">
+            <a href="/conduct" className="text-white/50 hover:text-white/85 underline underline-offset-2 transition-colors">
               Code of Conduct
             </a>
             .
