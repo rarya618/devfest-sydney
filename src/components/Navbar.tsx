@@ -16,6 +16,7 @@ const ACCENT_CLASSES: Record<Accent, string> = {
 const NAV_LINKS = [
   { href: '/#about', label: 'About' },
   { href: '/#tracks', label: 'Tracks' },
+  { href: '/#venue', label: 'Venue' },
   { href: '/#partners', label: 'Partners' },
 ];
 
