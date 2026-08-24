@@ -20,9 +20,16 @@ See [`EVENT.md`](./EVENT.md) for event details (theme, tracks, special features)
 |---|---|
 | `/` | Hero, About, Tracks, FAQ (Speakers, Schedule, Venue, Sponsors, Team pending real content) |
 | `/call-for-speakers` | CfS form, open/closed based on `CFS_OPEN` |
+| `/volunteer` | Volunteer signup form, open/closed based on `VOLUNTEER_OPEN` |
+| `/faq` | Dedicated FAQ page |
 | `/code-of-conduct` | Static page |
+| `/privacy` | Privacy policy |
 | `/admin/login` | Google sign-in, restricted to authorised emails |
 | `/admin` | Review CfS submissions, promote accepted speakers |
+| `/admin/volunteers` | Review volunteer signups (accept, reject, restore, archive) |
+| `/admin/admins` | Manage authorised admin emails |
+| `/admin/analytics` | Submission stats and trends |
+| `/admin/links` | Manage tracked links |
 
 ## Getting started
 
@@ -38,6 +45,8 @@ Requires a `.env.local` with the variables below. See [`PM.md`](./PM.md#mileston
 | Variable | Purpose |
 |---|---|
 | `CFS_OPEN` | `true` to show the CfS form, `false` to show the closed message |
+| `CFS_CLOSE_DATE` | Optional ISO datetime the CfS closes; powers the countdown timer, hidden if unset |
+| `VOLUNTEER_OPEN` | `true` to show the volunteer signup form, `false` to show the closed message |
 | `FIREBASE_PROJECT_ID` | Firebase project identifier |
 | `FIREBASE_CLIENT_EMAIL` | Firebase Admin SDK service account email |
 | `FIREBASE_PRIVATE_KEY` | Firebase Admin SDK private key |
@@ -48,13 +57,14 @@ Requires a `.env.local` with the variables below. See [`PM.md`](./PM.md#mileston
 | `RESEND_FROM_EMAIL` | Sender address for confirmation emails |
 | `NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY` | Firebase App Check (reCAPTCHA Enterprise site key) |
 | `NEXT_PUBLIC_APP_CHECK_DEBUG_TOKEN` | App Check debug token for local dev |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 measurement ID |
 
 ## Scripts
 
-- `npm run dev` — start the dev server
-- `npm run build` — production build
-- `npm run start` — run the production build
-- `npm run lint` — lint the codebase
+- `npm run dev`: start the dev server
+- `npm run build`: production build
+- `npm run start`: run the production build
+- `npm run lint`: lint the codebase
 
 ## Contributing
 
