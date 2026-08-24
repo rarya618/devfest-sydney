@@ -72,6 +72,11 @@ const TRACK_DOT: Record<string, string> = {
   'google-yellow': 'bg-google-yellow',
 };
 
+const VENUE_ADDRESS = 'Shop 1/37 Foveaux St, Surry Hills NSW 2010';
+const VENUE_DIRECTIONS_URL = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(VENUE_ADDRESS)}`;
+const VENUE_MAP_EMBED_URL = `https://www.google.com/maps?q=${encodeURIComponent(VENUE_ADDRESS)}&output=embed`;
+const VENUE_CALENDAR_URL = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('DevFest Sydney 2026')}&dates=20261010T090000/20261010T170000&ctz=Australia/Sydney&details=${encodeURIComponent('A full day of talks, workshops, and building together at DevFest Sydney 2026.')}&location=${encodeURIComponent(VENUE_ADDRESS)}`;
+
 const TIER_ORDER: SponsorTier[] = ['platinum', 'gold', 'silver', 'community'];
 const TIER_LABELS: Record<SponsorTier, string> = {
   platinum: 'Platinum',
@@ -152,7 +157,7 @@ async function fetchLandingSlideImageUrls(): Promise<string[]> {
   }
 }
 
-const showVenue = false;
+const showVenue = true;
 const showSponsors = false;
 
 function formatCloseDate(iso: string) {
@@ -228,14 +233,14 @@ export default async function Home() {
           <div className="flex flex-wrap items-center gap-5 mt-14 animate-slide-up" style={{ animationDelay: '0.3s' }}>
             <a
               href="#about"
-              className="inline-flex items-center px-8 py-2.5 bg-transparent text-white text-base font-bold rounded-lg border border-[#555555] transition-colors hover:border-white"
+              className="inline-flex items-center px-7 py-2 bg-transparent text-white text-base font-bold rounded border border-[#555555] transition-colors hover:border-white"
             >
               Learn more
             </a>
             {isCfsOpen ? (
               <CfsLink
                 source="hero"
-                className="inline-flex items-center gap-2.5 px-8 py-2.5 bg-google-blue text-white text-base font-bold rounded-lg border border-google-blue transition-colors hover:bg-transparent hover:text-google-blue"
+                className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-blue text-white text-base font-bold rounded border border-google-blue transition-opacity hover:opacity-80"
               >
                 Apply to speak
               </CfsLink>
@@ -244,7 +249,7 @@ export default async function Home() {
                 href="https://gdgsydney.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 px-8 py-2.5 bg-google-blue text-white text-base font-bold rounded-lg border border-google-blue transition-colors hover:bg-transparent hover:text-google-blue"
+                className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-blue text-white text-base font-bold rounded border border-google-blue transition-opacity hover:opacity-80"
               >
                 Follow GDG Sydney
               </a>
@@ -264,7 +269,7 @@ export default async function Home() {
 
       {/* ─── WHAT TO EXPECT ─── */}
       <section id="about" className="py-24 px-4 sm:px-6 lg:px-12">
-        <div className="max-w-3xl animate-slide-up">
+        <div className="max-w-5xl mx-auto animate-slide-up">
           <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-8">
             What to Expect?
           </h2>
@@ -314,13 +319,13 @@ export default async function Home() {
       {/* ─── CFS CALLOUT ─── */}
       {isCfsOpen && (
         <section className="pb-24 px-4 sm:px-6 lg:px-12">
-          <Reveal className="max-w-7xl mx-auto">
-            <div className="relative bg-white/[0.06] border border-google-green/30 border-l-[8px] border-l-google-green rounded-[20px] overflow-hidden">
+          <Reveal className="max-w-5xl mx-auto">
+            <div className="relative bg-white/[0.06] border-l-[8px] border-google-green rounded-xl overflow-hidden">
               <div className="grid md:grid-cols-[1fr_auto]">
-                <div className="p-8 md:p-10">
-                  <div className="space-y-2 md:space-y-4">
+                <div className="p-8 pb-10 md:p-10 md:pb-12">
+                  <div className="space-y-3 md:space-y-5">
                     <h3 className="text-3xl md:text-4xl font-bold tracking-tight">Call for speakers</h3>
-                    <p className="text-lg text-white/70 leading-relaxed">
+                    <p className="text-lg text-white/70 leading-[1.8] max-w-md">
                       We&apos;re looking for passionate speakers across the Developer and Builder tracks. Whether
                       you&apos;re an engineer, designer, PM, or founder. If you have something worth sharing, we
                       want to hear from you.
@@ -328,19 +333,21 @@ export default async function Home() {
                   </div>
                   <CfsLink
                     source="cfs-callout"
-                    className="inline-flex items-center gap-2.5 px-8 py-2.5 mt-12 bg-google-green text-white text-base font-bold rounded-lg border border-google-green transition-colors hover:bg-transparent hover:text-google-green"
+                    className="inline-flex items-center gap-2.5 px-7 py-2 mt-12 bg-google-green text-white text-base font-bold rounded border border-google-green transition-opacity hover:opacity-80"
                   >
                     Submit a session
                   </CfsLink>
                 </div>
-                <div className="hidden md:block md:w-64" aria-hidden="true" />
+                <div className="hidden md:block md:w-[280px]" aria-hidden="true" />
               </div>
               {landingCfsImageUrl ? (
-                <div className="hidden md:block absolute inset-y-0 right-0 w-64">
-                  <Image src={landingCfsImageUrl} alt="" fill sizes="500px" className="object-cover" />
+                <div className="hidden md:block absolute top-0 bottom-0 right-12 w-[280px] pl-6">
+                  <div className="relative w-full h-full">
+                    <Image src={landingCfsImageUrl} alt="" fill sizes="500px" className="object-cover" />
+                  </div>
                 </div>
               ) : (
-                <div className="hidden md:flex items-center justify-center absolute top-0 bottom-0 right-0 w-64 bg-google-green/10">
+                <div className="hidden md:flex items-center justify-center absolute top-0 bottom-0 right-12 w-[280px] pl-6 bg-google-green/10">
                   <svg className="w-20 h-20 text-google-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
                   </svg>
@@ -386,47 +393,60 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ─── VENUE ─── (hidden while the section is being redesigned) */}
+      {/* ─── VENUE ─── */}
       {showVenue && (
         <section id="venue" className="py-24 px-6">
-          <div className="max-w-7xl mx-auto">
-            <p className="text-xs font-bold text-white/40 tracking-[0.15em] uppercase mb-3">Venue</p>
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-14">Where it happens</h2>
-
-            <div className="grid md:grid-cols-2 gap-10 md:gap-16">
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-x-8 gap-y-5">
-                  {[
-                    { label: 'Venue', value: 'Torrens University, Surry Hills' },
-                    { label: 'Doors open', value: '8:30 AM' },
-                    { label: 'Format', value: 'Multi-track, full day' },
-                  ].map((item) => (
-                    <div key={item.label}>
-                      <p className="text-xs text-white/40 uppercase tracking-widest mb-1">{item.label}</p>
-                      <p className="text-sm font-medium text-white/85">{item.value}</p>
+          <div className="max-w-5xl mx-auto">
+            <Reveal>
+              <div className="flex flex-col md:flex-row md:items-center gap-10 md:gap-10 rounded-xl border-l-[8px] border-google-blue bg-white/[0.06] p-8 pt-8 pb-8 md:p-10 md:pt-10 md:pb-12">
+                <div className="flex-1 flex flex-col">
+                  <div className="space-y-4 md:space-y-6">
+                    <div className="space-y-4">
+                      <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">Torrens University, Surry Hills</h2>
+                      <div className="flex flex-col gap-1 text-lg font-bold leading-relaxed text-white">
+                        <span>{VENUE_ADDRESS}</span>
+                        <span>Saturday, 10th October 2026</span>
+                      </div>
                     </div>
-                  ))}
+                    <p className="text-lg leading-relaxed text-white/70 max-w-xl">
+                      A full day of talks, workshops, and building together, right in the heart of Surry Hills.
+                      Auditorium, breakout rooms, and a dedicated Builder&apos;s Space for hands-on hacking between
+                      sessions.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-5 mt-14">
+                    <a
+                      href={VENUE_DIRECTIONS_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-blue text-white text-base font-bold rounded border border-google-blue transition-opacity hover:opacity-80"
+                      aria-label="Get directions to Torrens University, Surry Hills on Google Maps"
+                    >
+                      Get directions
+                    </a>
+                    <a
+                      href={VENUE_CALENDAR_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center px-7 py-2 bg-transparent text-white text-base font-bold rounded border border-[#555555] transition-colors hover:border-white"
+                      aria-label="Add DevFest Sydney 2026 to your calendar"
+                    >
+                      Add to calendar
+                    </a>
+                  </div>
                 </div>
-                <p className="text-sm text-white/50 leading-relaxed pt-5 border-t border-white/10">
-                  Shop 1/37 Foveaux St, Surry Hills NSW 2010
-                </p>
-              </div>
 
-              <div className="md:pl-16 md:border-l md:border-white/10 flex flex-col gap-4">
-                <div className="w-12 h-12 rounded-full bg-google-blue/10 flex items-center justify-center">
-                  <svg className="w-6 h-6 text-google-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="font-semibold text-white/80 mb-1">Torrens University, Surry Hills</p>
-                  <p className="text-sm text-white/50 leading-relaxed max-w-xs">
-                    Shop 1/37 Foveaux St, Surry Hills NSW 2010
-                  </p>
+                <div className="w-full aspect-[420/300] md:aspect-auto md:w-[320px] md:h-[300px] shrink-0 rounded-lg overflow-hidden bg-white/[0.06]">
+                  <iframe
+                    src={VENUE_MAP_EMBED_URL}
+                    title="Map showing Torrens University, Surry Hills"
+                    className="w-full h-full border-0"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
                 </div>
               </div>
-            </div>
+            </Reveal>
           </div>
         </section>
       )}
