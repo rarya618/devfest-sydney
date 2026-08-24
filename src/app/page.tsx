@@ -359,7 +359,7 @@ export default async function Home() {
       )}
 
       {/* ─── TRACKS ─── */}
-      <section id="tracks" className="pt-4 pb-24 px-4 sm:px-6 lg:px-12">
+      <section id="tracks" className="pt-4 pb-12 px-4 sm:px-6 lg:px-12">
         <div className="max-w-5xl mx-auto">
           <Reveal className="mb-14 text-center">
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight">However you build, there&apos;s a track for you</h2>
@@ -395,7 +395,7 @@ export default async function Home() {
 
       {/* ─── VENUE ─── */}
       {showVenue && (
-        <section id="venue" className="py-24 px-6">
+        <section id="venue" className="pt-12 pb-24 px-6">
           <div className="max-w-5xl mx-auto">
             <Reveal>
               <div className="flex flex-col md:flex-row md:items-center gap-10 md:gap-10 rounded-xl border-l-[8px] border-google-blue bg-white/[0.06] p-8 pt-8 pb-8 md:p-10 md:pt-10 md:pb-12">
