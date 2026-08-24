@@ -37,7 +37,7 @@ const COLUMNS: { heading: string; links: { label: string; href: string; external
 export default function Footer() {
   return (
     <footer className="px-6 pb-8">
-      <div className="max-w-7xl mx-auto bg-white/[0.06] rounded-[40px] pb-6 overflow-hidden">
+      <div className="bg-white/[0.06] rounded-[40px] pb-6 overflow-hidden">
         <div className="bg-white/10 py-3 px-6 flex items-center justify-center gap-2.5 text-sm">
           <span className="font-bold text-white">Sat, 10 October 2026</span>
           <span className="w-1 h-1 rounded-full bg-white/40 shrink-0" aria-hidden="true" />
