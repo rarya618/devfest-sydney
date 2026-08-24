@@ -54,4 +54,4 @@ At the start of every session:
 | Auth | Firebase Auth with Google sign-in provider |
 | Forms | React controlled components + native validation — no form libraries unless complexity demands it |
 | Styling | Tailwind CSS |
-| Fonts | `next/font/local` for Google Sans; Google Fonts CDN for Roboto Mono |
+| Fonts | `@font-face` in `globals.css` for Google Sans (local Product Sans TTFs in `src/fonts/`); Google Fonts CDN for Roboto Mono |
