@@ -136,8 +136,21 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
 
       <div className="flex flex-wrap items-start gap-1.5 gap-y-2.5 mb-5">
         <div className="min-w-0 mr-auto">
-          <p className="text-base font-bold text-white/70 truncate">{volunteer.email}</p>
-          {volunteer.phone && <p className="mt-1 text-sm text-white/40 truncate">{volunteer.phone}</p>}
+          <p className="flex items-center gap-1.5 text-base font-bold text-white/70 truncate">
+            <svg className="w-3.5 h-3.5 shrink-0 text-white/40" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+              <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 5 6-5" />
+            </svg>
+            <span className="truncate">{volunteer.email}</span>
+          </p>
+          {volunteer.phone && (
+            <p className="mt-1 flex items-center gap-1.5 text-sm text-white/40 truncate">
+              <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.5 2h2l1 3-1.5 1a8 8 0 004.5 4.5l1-1.5 3 1v2a1.5 1.5 0 01-1.5 1.5A10.5 10.5 0 012 3.5 1.5 1.5 0 013.5 2z" />
+              </svg>
+              <span className="truncate">{volunteer.phone}</span>
+            </p>
+          )}
         </div>
         {volunteer.googleTechExperience && (
           <span className="inline-flex items-center gap-1 text-sm leading-none pl-3 pr-3.5 py-1.5 rounded-full border font-medium bg-google-blue/15 text-google-blue border-google-blue/25">
@@ -201,7 +214,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
       </div>
       </div>
 
-      <div className="flex flex-col items-center gap-2 shrink-0">
+      <div className="flex flex-col items-center gap-2 shrink-0 self-start">
           <button
             onClick={() => setIsOpen((open) => !open)}
             aria-expanded={isOpen}
@@ -220,30 +233,31 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
             </svg>
           </button>
           {volunteer.status === 'pending' && (
-            <>
+            <div className="inline-flex flex-col rounded-full border border-white/15 overflow-hidden">
               <button
                 onClick={() => handleAction(rejectVolunteer)}
                 disabled={isPending}
                 aria-label={`Reject volunteer signup: ${volunteer.name}`}
                 title="Reject"
-                className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-google-red text-white hover:bg-google-red/90 transition-colors disabled:opacity-60"
+                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-red hover:text-white transition-colors disabled:opacity-60"
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" d="M2.5 2.5l7 7m0-7l-7 7" />
                 </svg>
               </button>
+              <span className="h-px bg-white/15" />
               <button
                 onClick={() => handleAction(acceptVolunteer)}
                 disabled={isPending}
                 aria-label={`Accept volunteer signup: ${volunteer.name}`}
                 title="Accept"
-                className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-google-green text-white hover:bg-google-green/90 transition-colors disabled:opacity-60"
+                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-green hover:text-white transition-colors disabled:opacity-60"
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.375l2.625 2.625L9.75 3.75" />
                 </svg>
               </button>
-            </>
+            </div>
           )}
           {(volunteer.status === 'rejected' || volunteer.status === 'archived' || volunteer.status === 'accepted') && (
             <button
