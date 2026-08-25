@@ -125,7 +125,7 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
             onClick={() => setSidebarOpen(false)}
             aria-hidden="true"
           />
-          <div className="md:hidden fixed top-[57px] right-3 mt-2 z-50 w-72 max-w-[calc(100vw-1.5rem)] bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden">
+          <div className="md:hidden fixed top-[57px] right-3 mt-2 z-50 w-72 max-w-[calc(100vw-1.5rem)] bg-[#191a1d] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden">
             <nav aria-label="Admin sections" className="py-1.5">
               <ul>
                 {NAV_ITEMS.map((item) => {
