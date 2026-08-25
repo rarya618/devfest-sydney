@@ -42,7 +42,7 @@ export default async function FaqPage() {
   const sponsorshipProspectusUrl = await fetchSponsorshipProspectusUrl();
 
   return (
-    <div className="bg-[#202124] text-white min-h-screen">
+    <div className="bg-[#17181a] text-white min-h-screen">
       <Navbar accent="blue" isCfsOpen={isCfsOpen} cfsCloseDate={cfsCloseDate} />
 
       <section className="pt-36 pb-24 px-6">

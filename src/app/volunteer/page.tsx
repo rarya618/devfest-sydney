@@ -54,7 +54,7 @@ export default async function Volunteer() {
   const heroImageUrl = await fetchVolunteerHeroImageUrl();
 
   return (
-    <div className="bg-[#202124] text-white min-h-screen">
+    <div className="bg-[#17181a] text-white min-h-screen">
       <Navbar accent="red" />
 
       {/* Hero */}
@@ -62,7 +62,7 @@ export default async function Volunteer() {
         {heroImageUrl ? (
           <>
             <Image src={heroImageUrl} alt="" fill priority sizes="100vw" className="object-cover scale-125 sm:scale-100" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#202124]/95 via-[#202124]/75 to-[#202124]/40" aria-hidden="true" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#17181a]/95 via-[#17181a]/75 to-[#17181a]/40" aria-hidden="true" />
           </>
         ) : (
           <div className="absolute inset-0 hero-atmosphere pointer-events-none" aria-hidden="true" />
@@ -108,8 +108,8 @@ export default async function Volunteer() {
       {/* Areas marquee */}
       <section id="areas" className="pt-0 pb-0 px-6">
         <div className="relative -mx-6 overflow-hidden border-y border-[#CCCCCC] bg-white/[0.06] animate-slide-up">
-          <div className="absolute inset-y-0 left-0 w-12 sm:w-24 bg-gradient-to-r from-[#202124] to-transparent z-10 pointer-events-none" aria-hidden="true" />
-          <div className="absolute inset-y-0 right-0 w-12 sm:w-24 bg-gradient-to-l from-[#202124] to-transparent z-10 pointer-events-none" aria-hidden="true" />
+          <div className="absolute inset-y-0 left-0 w-12 sm:w-24 bg-gradient-to-r from-[#17181a] to-transparent z-10 pointer-events-none" aria-hidden="true" />
+          <div className="absolute inset-y-0 right-0 w-12 sm:w-24 bg-gradient-to-l from-[#17181a] to-transparent z-10 pointer-events-none" aria-hidden="true" />
           <div className="flex w-max items-center gap-10 py-4 animate-marquee hover:[animation-play-state:paused]" aria-hidden="true">
             {[...areas, ...areas].map(({ label }, i) => (
               <span key={i} className="flex items-center gap-2.5 text-base font-normal text-white whitespace-nowrap">
@@ -125,7 +125,7 @@ export default async function Volunteer() {
       </section>
 
       {/* Form or Closed State */}
-      <section id="signup" className="pt-16 pb-20 px-6 bg-[#202124]">
+      <section id="signup" className="pt-16 pb-20 px-6 bg-[#17181a]">
         <div className={isVolunteerOpen ? 'max-w-4xl mx-auto' : 'max-w-xl mx-auto'}>
           <div className="mb-10 text-center animate-slide-up">
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight">Help bring DevFest Sydney to life</h2>
@@ -141,7 +141,7 @@ export default async function Volunteer() {
           {isVolunteerOpen ? (
             <VolunteerForm />
           ) : (
-            <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-12 text-center">
+            <div className="bg-white/[0.025] border border-white/10 rounded-2xl p-12 text-center">
               <div className="w-14 h-14 rounded-full border border-white/15 flex items-center justify-center mx-auto mb-5">
                 <svg className="w-6 h-6 text-white/35" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25z" />

@@ -157,12 +157,12 @@ export default function SubmissionsOverTimeChart({ submissions }: Props) {
           <path d={areaPath} className="fill-google-blue" fillOpacity={0.1} />
           <path d={linePath} className="stroke-google-blue" strokeWidth={2} fill="none" strokeLinejoin="round" strokeLinecap="round" />
 
-          <circle cx={xForIndex(points.length - 1)} cy={yForValue(lastPoint.cumulative)} r={4} className="fill-google-blue stroke-[#202124]" strokeWidth={2} />
+          <circle cx={xForIndex(points.length - 1)} cy={yForValue(lastPoint.cumulative)} r={4} className="fill-google-blue stroke-[#17181a]" strokeWidth={2} />
 
           {hovered && (
             <>
               <line x1={tooltipX} x2={tooltipX} y1={PADDING_TOP} y2={PADDING_TOP + plotHeight} className="stroke-white/20" strokeWidth={1} />
-              <circle cx={tooltipX} cy={yForValue(hovered.cumulative)} r={4} className="fill-google-blue stroke-[#202124]" strokeWidth={2} />
+              <circle cx={tooltipX} cy={yForValue(hovered.cumulative)} r={4} className="fill-google-blue stroke-[#17181a]" strokeWidth={2} />
             </>
           )}
         </svg>

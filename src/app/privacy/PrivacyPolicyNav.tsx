@@ -30,7 +30,7 @@ export function PrivacyPolicyMobileNav({ sections }: { sections: Section[] }) {
   return (
     <nav
       aria-label="Sections"
-      className="lg:hidden sticky top-[88px] z-40 mt-10 bg-[#202124] border-y border-white/8 px-6 py-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+      className="lg:hidden sticky top-[88px] z-40 mt-10 bg-[#17181a] border-y border-white/8 px-6 py-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
     >
       <ul className="flex items-center gap-1.5 w-max">
         {sections.map((section, i) => {

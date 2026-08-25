@@ -25,7 +25,7 @@ export default async function AdminLoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#202124] flex items-center justify-center px-4">
+    <main className="min-h-screen bg-[#17181a] flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <Link href="/" className="inline-flex items-center hover:opacity-80 transition-opacity" aria-label="Back to DevFest Sydney home">

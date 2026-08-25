@@ -85,7 +85,7 @@ We expect participants to follow these rules at all event venues and event-relat
 
 export default function CodeOfConduct() {
   return (
-    <div className="bg-[#202124] text-white min-h-screen">
+    <div className="bg-[#17181a] text-white min-h-screen">
       <Navbar accent="green" />
 
       <section className="relative pt-36 pb-10 px-6 overflow-hidden">

@@ -155,7 +155,7 @@ export default function VolunteerForm() {
 
   if (submitState === 'success') {
     return (
-      <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-12 text-center animate-slide-up">
+      <div className="bg-white/[0.025] border border-white/10 rounded-2xl p-12 text-center animate-slide-up">
         <div className="flex items-center justify-center gap-3 mb-3">
           <span
             className="material-symbols-outlined text-google-green text-[32px] flex items-center justify-center shrink-0"
@@ -182,7 +182,7 @@ export default function VolunteerForm() {
     <>
       <nav
         aria-label="Form progress"
-        className="md:hidden sticky top-[88px] z-40 -mt-2 mb-6 bg-[#202124] border-b border-white/8 px-1 py-2 -mx-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        className="md:hidden sticky top-[88px] z-40 -mt-2 mb-6 bg-[#17181a] border-b border-white/8 px-1 py-2 -mx-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
         <ul className="flex items-center gap-1.5 w-max">
           {SECTIONS.map((section, index) => {
@@ -229,7 +229,7 @@ export default function VolunteerForm() {
       <form onSubmit={handleSubmit} noValidate className="space-y-10 flex-1 min-w-0">
 
         {/* Section: Your details */}
-        <div id="vol-section-details" className="scroll-mt-28 bg-white/[0.06] rounded-2xl p-6 sm:p-8">
+        <div id="vol-section-details" className="scroll-mt-28 bg-white/[0.035] rounded-2xl p-6 sm:p-8">
           <div className="mb-6">
             <h3 className="text-2xl font-bold text-white">Your details</h3>
           </div>
@@ -294,7 +294,7 @@ export default function VolunteerForm() {
         </div>
 
         {/* Section: General questions */}
-        <div id="vol-section-questions" className="scroll-mt-28 bg-white/[0.06] rounded-2xl p-6 sm:p-8">
+        <div id="vol-section-questions" className="scroll-mt-28 bg-white/[0.035] rounded-2xl p-6 sm:p-8">
           <div className="mb-6">
             <h3 className="text-2xl font-bold text-white">General questions</h3>
           </div>

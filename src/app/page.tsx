@@ -187,7 +187,7 @@ export default async function Home() {
   );
 
   return (
-    <div className="bg-[#202124] text-white min-h-screen">
+    <div className="bg-[#17181a] text-white min-h-screen">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd) }}
@@ -206,7 +206,7 @@ export default async function Home() {
               sizes="100vw"
               className="object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#202124]/80 via-[#202124]/50 to-[#202124]/10" aria-hidden="true" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#17181a]/80 via-[#17181a]/50 to-[#17181a]/10" aria-hidden="true" />
           </>
         ) : (
           <div className="absolute inset-0 hero-atmosphere pointer-events-none" aria-hidden="true" />
@@ -320,7 +320,7 @@ export default async function Home() {
       {isCfsOpen && (
         <section className="pb-24 px-4 sm:px-6 lg:px-12">
           <Reveal className="max-w-5xl mx-auto">
-            <div className="relative bg-white/[0.06] border-l-[8px] border-google-green rounded-xl overflow-hidden">
+            <div className="relative bg-white/[0.035] border-l-[8px] border-google-green rounded-xl overflow-hidden">
               <div className="grid md:grid-cols-[1fr_auto]">
                 <div className="p-8 pb-10 md:p-10 md:pb-12">
                   <div className="space-y-3 md:space-y-5">
@@ -370,7 +370,7 @@ export default async function Home() {
               <Reveal
                 key={track.name}
                 delay={i * 0.1}
-                className="card-hover-lift bg-white/[0.08] rounded-2xl p-6 md:p-7"
+                className="card-hover-lift bg-white/[0.045] rounded-2xl p-6 md:p-7"
               >
                 <span className="inline-flex items-center gap-3 text-lg font-bold text-white mb-3">
                   <span className={`w-2 h-2 rounded-full ${TRACK_DOT[track.color]}`} aria-hidden="true" />
@@ -398,7 +398,7 @@ export default async function Home() {
         <section id="venue" className="pt-12 pb-24 px-6">
           <div className="max-w-5xl mx-auto">
             <Reveal>
-              <div className="flex flex-col md:flex-row md:items-center gap-10 md:gap-10 rounded-xl border-l-[8px] border-google-blue bg-white/[0.06] p-8 pt-8 pb-8 md:p-10 md:pt-10 md:pb-12">
+              <div className="flex flex-col md:flex-row md:items-center gap-10 md:gap-10 rounded-xl border-l-[8px] border-google-blue bg-white/[0.035] p-8 pt-8 pb-8 md:p-10 md:pt-10 md:pb-12">
                 <div className="flex-1 flex flex-col">
                   <div className="space-y-4 md:space-y-6">
                     <div className="space-y-4">
