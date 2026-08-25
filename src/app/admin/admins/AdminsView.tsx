@@ -4,6 +4,7 @@ import { useState, useCallback, useTransition } from 'react';
 import { removeAdmin } from '../actions';
 import { getInitials, formatDate } from '@/lib/format';
 import Alert from '@/components/Alert';
+import { useMobileBarHidden } from '../MobileBarContext';
 import type { AdminUser } from '@/lib/types';
 
 interface Props {
@@ -15,6 +16,7 @@ export default function AdminsView({ admins, currentAdminEmail }: Props) {
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [removingEmail, setRemovingEmail] = useState<string | null>(null);
+  const mobileBarHidden = useMobileBarHidden();
 
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
 
@@ -29,7 +31,7 @@ export default function AdminsView({ admins, currentAdminEmail }: Props) {
 
   return (
     <>
-      <div className="sticky top-[4.25rem] md:top-0 z-20 w-full px-4 md:px-5 pt-4 pb-4 md:pt-8 md:pb-5 bg-[#17181a]/95 backdrop-blur-sm">
+      <div className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-4 pb-4 md:pt-8 md:pb-5 bg-[#17181a]/95 backdrop-blur-sm`}>
         <h1 className="text-xl font-bold text-white tracking-tight">Admins</h1>
       </div>
 

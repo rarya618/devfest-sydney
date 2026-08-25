@@ -9,6 +9,7 @@ import { auth } from '@/lib/firebase';
 import { getInitials } from '@/lib/format';
 import Alert from '@/components/Alert';
 import InviteAdminForm from './InviteAdminForm';
+import { MobileBarContext } from './MobileBarContext';
 
 const NAV_ITEMS: { href: string; label: string }[] = [
   { href: '/admin', label: 'Submissions' },
@@ -32,7 +33,30 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
   const [inviting, setInviting] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mobileBarHidden, setMobileBarHidden] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const lastScrollYRef = useRef(0);
+
+  useEffect(() => {
+    lastScrollYRef.current = window.scrollY;
+
+    function handleScroll() {
+      const currentY = window.scrollY;
+      const delta = currentY - lastScrollYRef.current;
+
+      if (currentY <= 0) {
+        setMobileBarHidden(false);
+      } else if (delta > 4) {
+        setMobileBarHidden(true);
+      } else if (delta < -4) {
+        setMobileBarHidden(false);
+      }
+      lastScrollYRef.current = currentY;
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -74,7 +98,11 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
   return (
     <div className="min-h-screen bg-[#17181a] md:flex md:items-start">
       {/* Mobile top bar */}
-      <div className="md:hidden sticky top-0 z-30 flex items-center justify-between pl-3 pr-4 pt-4 pb-3 bg-[#17181a]">
+      <div
+        className={`md:hidden sticky top-0 z-30 flex items-center justify-between pl-3 pr-4 pt-4 pb-3 bg-[#17181a] transition-transform duration-300 ease-in-out ${
+          mobileBarHidden ? '-translate-y-full' : 'translate-y-0'
+        }`}
+      >
         <Link href="/" className="inline-flex items-center hover:opacity-80 transition-opacity" aria-label="Back to DevFest Sydney home">
           <Image src="/logo-wordmark.png" alt="DevFest Sydney" width={1331} height={240} className="h-8 w-auto object-contain" />
         </Link>
@@ -286,7 +314,9 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
         </div>
       </div>
 
-      <main className="flex-1 min-w-0 w-full pb-10">{children}</main>
+      <main className="flex-1 min-w-0 w-full pb-10">
+        <MobileBarContext.Provider value={mobileBarHidden}>{children}</MobileBarContext.Provider>
+      </main>
 
       {inviting && (
         <InviteAdminForm

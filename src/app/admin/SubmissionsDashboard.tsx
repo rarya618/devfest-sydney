@@ -16,6 +16,7 @@ import {
   EXPERIENCE_LABELS,
 } from '@/lib/submissionLabels';
 import type { ReviewerNote, Submission, SubmissionStatus, Track } from '@/lib/types';
+import { useMobileBarHidden } from './MobileBarContext';
 
 function toHref(value: string): string | null {
   const trimmed = value.trim();
@@ -936,6 +937,7 @@ function downloadCsv(filename: string, rows: string[][]) {
 }
 
 export default function SubmissionsDashboard({ submissions }: Props) {
+  const mobileBarHidden = useMobileBarHidden();
   const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
   const [filter, setFilter] = useState<FilterStatus>('all');
   const [trackFilter, setTrackFilter] = useState<TrackFilter>('all');
@@ -1161,7 +1163,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
 
   return (
     <>
-      <div className="sticky top-[4.25rem] md:top-0 z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-[#17181a]/95 backdrop-blur-sm">
+      <div className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-[#17181a]/95 backdrop-blur-sm`}>
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <div className="min-w-0 min-h-[3.25rem] flex items-center">
             {selectedCount > 0 ? (

@@ -9,6 +9,7 @@ import {
 import type { Submission, SubmissionStatus, Track, TalkFormat, ExperienceLevel } from '@/lib/types';
 import { INTERNAL_UTM_SOURCE } from '@/lib/tracking';
 import SubmissionsOverTimeChart from './SubmissionsOverTimeChart';
+import StickyAdminHeader from '../StickyAdminHeader';
 
 interface Props {
   submissions: Submission[];
@@ -57,7 +58,7 @@ function StatTile({
   return (
     <div
       title={subtext}
-      className={`group inline-flex items-center gap-3 rounded-full border ${styles.border} ${styles.bg} pl-2 pr-6 py-2 transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(0,0,0,0.35)]`}
+      className={`group inline-flex items-center gap-3 rounded-full border ${styles.border} ${styles.bg} pl-2 pr-6 py-2`}
     >
       <span className={`flex items-center justify-center w-8 h-8 rounded-full shrink-0 ${styles.iconBg} ${styles.iconText}`}>
         <StatIcon name={icon} className="w-4 h-4" />
@@ -142,9 +143,9 @@ export default function AnalyticsView({ submissions }: Props) {
 
   return (
     <>
-      <div className="sticky top-[4.25rem] md:top-0 z-20 w-full px-4 md:px-5 pt-4 pb-4 md:pt-8 md:pb-5 bg-[#17181a]/95 backdrop-blur-sm">
+      <StickyAdminHeader className="z-20 w-full px-4 md:px-5 pt-4 pb-4 md:pt-8 md:pb-5 bg-[#17181a]/95 backdrop-blur-sm">
         <h1 className="text-xl font-bold text-white tracking-tight">Analytics</h1>
-      </div>
+      </StickyAdminHeader>
 
       <div className="px-4 md:px-5">
       <div className="flex flex-wrap gap-2.5 mb-6">

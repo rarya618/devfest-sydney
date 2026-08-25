@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PointerEvent } from 'react';
 import type { Submission } from '@/lib/types';
 
@@ -17,6 +17,7 @@ interface DayPoint {
 
 const CHART_WIDTH = 640;
 const CHART_HEIGHT = 200;
+const CHART_HEIGHT_MOBILE = 300;
 const PADDING_LEFT = 32;
 const PADDING_RIGHT = 12;
 const PADDING_TOP = 12;
@@ -60,14 +61,26 @@ export default function SubmissionsOverTimeChart({ submissions }: Props) {
   const points = useMemo(() => buildDayPoints(submissions), [submissions]);
   const svgRef = useRef<SVGSVGElement>(null);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 639px)');
+    setIsMobile(query.matches);
+    const handleChange = (event: MediaQueryListEvent) => setIsMobile(event.matches);
+    query.addEventListener('change', handleChange);
+    return () => query.removeEventListener('change', handleChange);
+  }, []);
+
+  const chartHeight = isMobile ? CHART_HEIGHT_MOBILE : CHART_HEIGHT;
+  const labelFontSize = isMobile ? 13 : 9;
+  const paddingLeft = isMobile ? 40 : PADDING_LEFT;
   const maxCumulative = points.length > 0 ? points[points.length - 1].cumulative : 0;
-  const plotWidth = CHART_WIDTH - PADDING_LEFT - PADDING_RIGHT;
-  const plotHeight = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
+  const plotWidth = CHART_WIDTH - paddingLeft - PADDING_RIGHT;
+  const plotHeight = chartHeight - PADDING_TOP - PADDING_BOTTOM;
 
   const xForIndex = useCallback(
-    (index: number) => (points.length <= 1 ? PADDING_LEFT + plotWidth / 2 : PADDING_LEFT + (index / (points.length - 1)) * plotWidth),
-    [points.length, plotWidth]
+    (index: number) => (points.length <= 1 ? paddingLeft + plotWidth / 2 : paddingLeft + (index / (points.length - 1)) * plotWidth),
+    [points.length, plotWidth, paddingLeft]
   );
 
   const yForValue = useCallback(
@@ -89,12 +102,12 @@ export default function SubmissionsOverTimeChart({ submissions }: Props) {
       if (points.length === 0 || !svgRef.current) return;
       const rect = svgRef.current.getBoundingClientRect();
       const relativeX = ((event.clientX - rect.left) / rect.width) * CHART_WIDTH;
-      const clamped = Math.min(Math.max(relativeX, PADDING_LEFT), PADDING_LEFT + plotWidth);
-      const ratio = plotWidth > 0 ? (clamped - PADDING_LEFT) / plotWidth : 0;
+      const clamped = Math.min(Math.max(relativeX, paddingLeft), paddingLeft + plotWidth);
+      const ratio = plotWidth > 0 ? (clamped - paddingLeft) / plotWidth : 0;
       const index = Math.round(ratio * (points.length - 1));
       setHoverIndex(Math.min(Math.max(index, 0), points.length - 1));
     },
-    [points.length, plotWidth]
+    [points.length, plotWidth, paddingLeft]
   );
 
   const handlePointerLeave = useCallback(() => setHoverIndex(null), []);
@@ -118,7 +131,7 @@ export default function SubmissionsOverTimeChart({ submissions }: Props) {
       <div className="relative">
         <svg
           ref={svgRef}
-          viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
+          viewBox={`0 0 ${CHART_WIDTH} ${chartHeight}`}
           className="w-full h-auto touch-none"
           role="img"
           aria-label={`Cumulative submissions over time, reaching ${maxCumulative} total by ${lastPoint.label}`}
@@ -128,14 +141,14 @@ export default function SubmissionsOverTimeChart({ submissions }: Props) {
           {gridValues.map((value) => (
             <g key={value}>
               <line
-                x1={PADDING_LEFT}
+                x1={paddingLeft}
                 x2={CHART_WIDTH - PADDING_RIGHT}
                 y1={yForValue(value)}
                 y2={yForValue(value)}
                 className="stroke-white/10"
                 strokeWidth={1}
               />
-              <text x={PADDING_LEFT - 6} y={yForValue(value)} textAnchor="end" dominantBaseline="middle" className="fill-white/40" fontSize={9}>
+              <text x={paddingLeft - 6} y={yForValue(value)} textAnchor="end" dominantBaseline="middle" className="fill-white/40" fontSize={labelFontSize}>
                 {value}
               </text>
             </g>
@@ -145,10 +158,10 @@ export default function SubmissionsOverTimeChart({ submissions }: Props) {
             <text
               key={index}
               x={xForIndex(index)}
-              y={CHART_HEIGHT - 6}
+              y={chartHeight - 6}
               textAnchor={index === 0 ? 'start' : index === points.length - 1 ? 'end' : 'middle'}
               className="fill-white/40"
-              fontSize={9}
+              fontSize={labelFontSize}
             >
               {points[index].label}
             </text>
