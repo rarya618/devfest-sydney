@@ -214,7 +214,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
   return (
     <div
       onClick={handleCardClick}
-      className={`relative cursor-pointer bg-white/[0.035] border-l-4 rounded-lg pt-4 pb-5 pl-4 pr-4 sm:pt-5 sm:pb-7 sm:pl-5 sm:pr-5 transition-colors hover:bg-white/[0.07] ${
+      className={`relative cursor-pointer bg-white/[0.035] border-l-4 rounded-lg pt-4 pb-4 pl-4 pr-4 sm:pt-5 sm:pb-6 sm:pl-5 sm:pr-5 transition-colors hover:bg-white/[0.07] ${
         isPending ? 'opacity-50 pointer-events-none' : selected ? 'ring-2 ring-google-blue/30' : ''
       } ${TRACK_BORDER_COLORS[submission.track]} ${moreOpen ? 'z-40' : ''}`}
       aria-label={`Submission from ${submission.name}: ${submission.talkTitle}`}
@@ -233,44 +233,55 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{submission.talkTitle}</h3>
       </div>
 
-      <div className="flex flex-wrap items-start gap-1.5 gap-y-2.5 mb-5 pl-8">
-        <div className="min-w-0 mr-auto">
+      <div className="mb-3 pl-8">
+        <div className="min-w-0">
           <p className="text-base font-bold text-white/90 truncate">{submission.name}</p>
-          <p className="mt-1 text-sm text-white/55 truncate">{submission.email}</p>
+          <p className="mt-1 flex items-center gap-1.5 text-sm text-white/55 truncate">
+            <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+              <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 5 6-5" />
+            </svg>
+            <span className="truncate">{submission.email}</span>
+          </p>
           {submission.speakerTagline && (
             <p className="text-sm text-white/55 truncate mt-1">{submission.speakerTagline}</p>
           )}
         </div>
-        {submission.isFirstTimeSpeaker && (
-          <span className="inline-flex items-center gap-1 text-xs leading-none px-3.5 py-1.5 rounded-full border font-medium bg-google-green/15 text-google-green border-google-green/25">
-            First-time speaker
-          </span>
-        )}
-        {submission.wantsMentoring && (
-          <span className="inline-flex items-center gap-1 text-xs leading-none px-3.5 py-1.5 rounded-full border font-medium bg-google-green/15 text-google-green border-google-green/25">
-            Wants mentoring
-          </span>
-        )}
-        {submission.isGoogleDeveloperExpert && (
-          <span className="inline-flex items-center gap-1 text-xs leading-none px-3.5 py-1.5 rounded-full border font-medium bg-google-blue/15 text-google-blue border-google-blue/25">
-            <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-            </svg>
-            GDE
-          </span>
-        )}
-        {submission.requiresTravelSupport && (
-          <span className="inline-flex items-center gap-1 text-xs leading-none px-3.5 py-1.5 rounded-full border font-medium bg-google-yellow/15 text-google-yellow border-google-yellow/25">
-            <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 15.5V9.75a1.5 1.5 0 011.5-1.5h13.5a1.5 1.5 0 011.5 1.5v5.75M3.75 15.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5M3.75 15.5v.75A1.5 1.5 0 005.25 17.75h13.5a1.5 1.5 0 001.5-1.5v-.75M9 8.25V6.5A1.5 1.5 0 0110.5 5h3A1.5 1.5 0 0115 6.5v1.75" />
-            </svg>
-            Travel support{submission.travelSupportLocation ? ` · ${submission.travelSupportLocation}` : ''}
-          </span>
-        )}
-        {submission.optOutOfRecording && (
-          <span className="inline-flex items-center gap-1 text-xs leading-none px-3.5 py-1.5 rounded-full border font-medium bg-google-red/15 text-google-red border-google-red/25">
-            Don&apos;t record
-          </span>
+        {(submission.isFirstTimeSpeaker ||
+          submission.wantsMentoring ||
+          submission.isGoogleDeveloperExpert ||
+          submission.requiresTravelSupport ||
+          submission.optOutOfRecording) && (
+          <div className="flex flex-wrap items-center gap-1.5 gap-y-2 mt-3">
+            {submission.isFirstTimeSpeaker && (
+              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-green/15 text-google-green border-google-green/25">
+                First-time speaker
+              </span>
+            )}
+            {submission.wantsMentoring && (
+              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-green/15 text-google-green border-google-green/25">
+                Wants mentoring
+              </span>
+            )}
+            {submission.isGoogleDeveloperExpert && (
+              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue border-google-blue/25">
+                GDE
+              </span>
+            )}
+            {submission.requiresTravelSupport && (
+              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25">
+                <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 15.5V9.75a1.5 1.5 0 011.5-1.5h13.5a1.5 1.5 0 011.5 1.5v5.75M3.75 15.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5M3.75 15.5v.75A1.5 1.5 0 005.25 17.75h13.5a1.5 1.5 0 001.5-1.5v-.75M9 8.25V6.5A1.5 1.5 0 0110.5 5h3A1.5 1.5 0 0115 6.5v1.75" />
+                </svg>
+                Travel support{submission.travelSupportLocation ? ` · ${submission.travelSupportLocation}` : ''}
+              </span>
+            )}
+            {submission.optOutOfRecording && (
+              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-red/15 text-google-red border-google-red/25">
+                Don&apos;t record
+              </span>
+            )}
+          </div>
         )}
       </div>
 
@@ -424,7 +435,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
       </div>
       </div>
 
-      <div className="flex flex-col items-center gap-2 shrink-0">
+      <div className="flex flex-col items-center gap-2 shrink-0 self-start">
           <button
             onClick={() => setIsOpen((open) => !open)}
             aria-expanded={isOpen}
@@ -443,30 +454,31 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
             </svg>
           </button>
           {submission.status === 'pending' && (
-            <>
+            <div className="inline-flex flex-col rounded-full border border-white/15 overflow-hidden">
               <button
                 onClick={() => handleAction(rejectSubmission)}
                 disabled={isPending || bulkActionsPending}
                 aria-label={`Reject proposal: ${submission.talkTitle}`}
                 title="Reject"
-                className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-google-red text-white hover:bg-google-red/90 transition-colors disabled:opacity-60"
+                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-red hover:text-white transition-colors disabled:opacity-60"
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" d="M2.5 2.5l7 7m0-7l-7 7" />
                 </svg>
               </button>
+              <span className="h-px bg-white/15" />
               <button
                 onClick={() => handleAction(promoteSubmission)}
                 disabled={isPending || bulkActionsPending}
                 aria-label={`Accept and promote proposal: ${submission.talkTitle}`}
                 title="Accept"
-                className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-google-green text-white hover:bg-google-green/90 transition-colors disabled:opacity-60"
+                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-green hover:text-white transition-colors disabled:opacity-60"
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.375l2.625 2.625L9.75 3.75" />
                 </svg>
               </button>
-            </>
+            </div>
           )}
           {submission.status === 'accepted' && (
             <button
@@ -577,6 +589,289 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
   );
 }
 
+function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulkActionsPending }: SubmissionRowProps) {
+  const [isPending, startTransition] = useTransition();
+  const [isEditing, setIsEditing] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
+
+  const links = [
+    submission.linkedinUrl && { label: 'LinkedIn', value: submission.linkedinUrl },
+    submission.githubUrl && { label: 'GitHub', value: submission.githubUrl },
+    submission.websiteUrl && { label: 'Website', value: submission.websiteUrl },
+    submission.previousTalkLink && { label: 'Previous talk', value: submission.previousTalkLink },
+  ].filter((link): link is { label: string; value: string } => Boolean(link));
+
+  function handleAction(action: (id: string) => Promise<{ error?: string }>) {
+    startTransition(async () => {
+      const result = await action(submission.id);
+      if (result.error) onError(result.error);
+    });
+  }
+
+  useEffect(() => {
+    if (!moreOpen) return;
+
+    function handlePointerDown(event: MouseEvent) {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
+        setMoreOpen(false);
+      }
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setMoreOpen(false);
+    }
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [moreOpen]);
+
+  function handleRowClick(event: React.MouseEvent<HTMLDivElement>) {
+    const target = event.target as HTMLElement;
+    if (target.closest('button, a, input, textarea, select, [role="menu"], [role="dialog"]')) return;
+    setIsOpen((open) => !open);
+  }
+
+  return (
+    <div
+      onClick={handleRowClick}
+      className={`relative cursor-pointer bg-white/[0.035] border-l-4 rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[0.07] ${
+        isPending ? 'opacity-50 pointer-events-none' : selected ? 'ring-2 ring-google-blue/30' : ''
+      } ${TRACK_BORDER_COLORS[submission.track]} ${moreOpen ? 'z-40' : ''}`}
+      aria-label={`Submission from ${submission.name}: ${submission.talkTitle}`}
+    >
+      <div className="flex items-center gap-3">
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={onToggleSelect}
+          disabled={bulkActionsPending}
+          aria-label={`Select submission: ${submission.talkTitle}`}
+          className="shrink-0 w-4 h-4 rounded-md border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue/40"
+        />
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-baseline gap-2.5">
+            <h3 className="font-bold text-white text-sm truncate">{submission.talkTitle}</h3>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-white/45 truncate">
+            <span className="font-bold text-white/70">{submission.name}</span>
+            <span>&middot;</span>
+            <span className="truncate">{FORMAT_LABELS[submission.format]} &middot; {EXPERIENCE_LABELS[submission.experienceLevel]}</span>
+            {submission.isGoogleDeveloperExpert && (
+              <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-blue/15 text-google-blue">GDE</span>
+            )}
+            {submission.isFirstTimeSpeaker && (
+              <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-green/15 text-google-green">First-timer</span>
+            )}
+          </div>
+        </div>
+
+        <span className="hidden sm:flex flex-col items-end shrink-0 text-[11px] text-white/45 leading-snug text-right">
+          <span className={`font-bold ${STATUS_DOT_STYLES[submission.status].text}`}>{STATUS_LABELS[submission.status]}</span>
+          {formatDate(submission.submittedAt)}
+        </span>
+
+        {submission.status === 'pending' && (
+          <div className="hidden md:inline-flex shrink-0 rounded-full border border-white/15 overflow-hidden">
+            <button
+              onClick={() => handleAction(rejectSubmission)}
+              disabled={isPending || bulkActionsPending}
+              aria-label={`Reject proposal: ${submission.talkTitle}`}
+              title="Reject"
+              className="inline-flex items-center justify-center px-3 h-8 text-white/70 hover:bg-google-red hover:text-white transition-colors disabled:opacity-60"
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                <path strokeLinecap="round" d="M2.5 2.5l7 7m0-7l-7 7" />
+              </svg>
+            </button>
+            <span className="w-px bg-white/15" />
+            <button
+              onClick={() => handleAction(promoteSubmission)}
+              disabled={isPending || bulkActionsPending}
+              aria-label={`Accept and promote proposal: ${submission.talkTitle}`}
+              title="Accept"
+              className="inline-flex items-center justify-center px-3 h-8 text-white/70 hover:bg-google-green hover:text-white transition-colors disabled:opacity-60"
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.375l2.625 2.625L9.75 3.75" />
+              </svg>
+            </button>
+          </div>
+        )}
+        {submission.status === 'accepted' && (
+          <button
+            onClick={() => handleAction(undoPromotion)}
+            disabled={isPending || bulkActionsPending}
+            aria-label={`Undo acceptance of proposal: ${submission.talkTitle}`}
+            title="Undo"
+            className="hidden md:inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 4L2.5 7.5 6 11M2.5 7.5h6.5a4 4 0 010 8H7" />
+            </svg>
+          </button>
+        )}
+
+        <div className="relative shrink-0" ref={moreMenuRef}>
+          <button
+            onClick={() => setMoreOpen((open) => !open)}
+            disabled={isPending || bulkActionsPending}
+            aria-haspopup="menu"
+            aria-expanded={moreOpen}
+            aria-label={`More actions for: ${submission.talkTitle}`}
+            title="More actions"
+            className="relative inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <circle cx="3" cy="8" r="1.25" />
+              <circle cx="8" cy="8" r="1.25" />
+              <circle cx="13" cy="8" r="1.25" />
+            </svg>
+            {submission.reviewerNotes.length > 0 && (
+              <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue text-white text-[10px] font-bold leading-none">
+                {submission.reviewerNotes.length}
+              </span>
+            )}
+          </button>
+
+          {moreOpen && (
+            <div
+              role="menu"
+              className="absolute right-0 top-full mt-2 w-44 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
+            >
+              <button
+                role="menuitem"
+                onClick={() => {
+                  setNotesOpen((open) => !open);
+                  setMoreOpen(false);
+                }}
+                className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+              >
+                Notes{submission.reviewerNotes.length > 0 ? ` (${submission.reviewerNotes.length})` : ''}
+              </button>
+              <button
+                role="menuitem"
+                onClick={() => {
+                  setIsEditing(true);
+                  setMoreOpen(false);
+                }}
+                className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+              >
+                Edit
+              </button>
+              {(submission.status === 'rejected' || submission.status === 'archived') && (
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    handleAction(restoreSubmission);
+                    setMoreOpen(false);
+                  }}
+                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                >
+                  Restore
+                </button>
+              )}
+              {submission.status !== 'accepted' && submission.status !== 'archived' && (
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    handleAction(archiveSubmission);
+                    setMoreOpen(false);
+                  }}
+                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                >
+                  Archive
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={() => setIsOpen((open) => !open)}
+          aria-expanded={isOpen}
+          aria-label={`${isOpen ? 'Collapse' : 'Expand'} details for: ${submission.talkTitle}`}
+          className="inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
+        >
+          <svg
+            className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.75}
+            aria-hidden="true"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6l4 4 4-4" />
+          </svg>
+        </button>
+      </div>
+
+      <div
+        className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+      >
+        <div className="overflow-hidden">
+          <div className="mt-2.5 pl-7 pr-1 pb-0.5 space-y-3">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-white/45 sm:hidden">
+              <span className={`font-bold ${STATUS_DOT_STYLES[submission.status].text}`}>{STATUS_LABELS[submission.status]}</span>
+              <span>&middot;</span>
+              <span>{formatDate(submission.submittedAt)}</span>
+            </div>
+            <p className="text-sm text-white/65 leading-relaxed">{submission.abstract}</p>
+            {submission.speakerBio && (
+              <p className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
+                <span className="font-bold text-white/85">Bio: </span>
+                {submission.speakerBio}
+              </p>
+            )}
+            {links.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {links.map((link) => (
+                  <LinkChip
+                    key={link.label}
+                    label={link.label}
+                    value={link.value}
+                    accent={link.label === 'Previous talk' ? 'red' : 'blue'}
+                    icon={
+                      <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                        <circle cx="8" cy="8" r="6.5" />
+                        <path strokeLinecap="round" d="M2 8h12M8 1.5c1.5 1.7 2.3 3.9 2.3 6.5s-.8 4.8-2.3 6.5c-1.5-1.7-2.3-3.9-2.3-6.5S6.5 3.2 8 1.5z" />
+                      </svg>
+                    }
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {notesOpen && (
+        <div className="mt-2 pl-7">
+          <ReviewerNotesPanel
+            submissionId={submission.id}
+            notes={submission.reviewerNotes}
+            onError={onError}
+          />
+        </div>
+      )}
+
+      {isEditing && (
+        <EditSubmissionModal
+          submission={submission}
+          onClose={() => setIsEditing(false)}
+          onError={onError}
+        />
+      )}
+    </div>
+  );
+}
+
 interface Props {
   submissions: Submission[];
 }
@@ -641,6 +936,7 @@ function downloadCsv(filename: string, rows: string[][]) {
 }
 
 export default function SubmissionsDashboard({ submissions }: Props) {
+  const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
   const [filter, setFilter] = useState<FilterStatus>('all');
   const [trackFilter, setTrackFilter] = useState<TrackFilter>('all');
   const [sort, setSort] = useState<SortOption>('newest');
@@ -1119,6 +1415,36 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               )}
             </div>
 
+            <div className="inline-flex shrink-0 rounded-full bg-white/[0.06] p-1 gap-1">
+              <button
+                onClick={() => setViewMode('cards')}
+                aria-pressed={viewMode === 'cards'}
+                aria-label="Card view"
+                title="Card view"
+                className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors ${
+                  viewMode === 'cards' ? 'bg-white/[0.14] text-white' : 'text-white/50 hover:text-white'
+                }`}
+              >
+                <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                  <rect x="2" y="2.5" width="12" height="4.5" rx="1" />
+                  <rect x="2" y="9" width="12" height="4.5" rx="1" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                aria-pressed={viewMode === 'list'}
+                aria-label="List view"
+                title="List view"
+                className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors ${
+                  viewMode === 'list' ? 'bg-white/[0.14] text-white' : 'text-white/50 hover:text-white'
+                }`}
+              >
+                <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                  <path strokeLinecap="round" d="M2 4h12M2 8h12M2 12h12" />
+                </svg>
+              </button>
+            </div>
+
             <div className="relative shrink-0" ref={moreMenuRef}>
               <button
                 onClick={() => setMoreMenuOpen((open) => !open)}
@@ -1192,33 +1518,55 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                     </span>
                   )}
                 </div>
-                <div className="grid grid-cols-1 gap-5 items-start">
-                  {group.submissions.map((submission) => (
-                    <SubmissionRow
-                      key={submission.id}
-                      submission={submission}
-                      onError={setAlertMessage}
-                      selected={selectedIds.has(submission.id)}
-                      onToggleSelect={() => toggleSelect(submission.id)}
-                      bulkActionsPending={isBulkPending}
-                    />
-                  ))}
+                <div className={`grid grid-cols-1 items-start ${viewMode === 'list' ? 'gap-2' : 'gap-5'}`}>
+                  {group.submissions.map((submission) =>
+                    viewMode === 'list' ? (
+                      <SubmissionListRow
+                        key={submission.id}
+                        submission={submission}
+                        onError={setAlertMessage}
+                        selected={selectedIds.has(submission.id)}
+                        onToggleSelect={() => toggleSelect(submission.id)}
+                        bulkActionsPending={isBulkPending}
+                      />
+                    ) : (
+                      <SubmissionRow
+                        key={submission.id}
+                        submission={submission}
+                        onError={setAlertMessage}
+                        selected={selectedIds.has(submission.id)}
+                        onToggleSelect={() => toggleSelect(submission.id)}
+                        bulkActionsPending={isBulkPending}
+                      />
+                    )
+                  )}
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 items-start">
-            {sorted.map((submission) => (
-              <SubmissionRow
-                key={submission.id}
-                submission={submission}
-                onError={setAlertMessage}
-                selected={selectedIds.has(submission.id)}
-                onToggleSelect={() => toggleSelect(submission.id)}
-                bulkActionsPending={isBulkPending}
-              />
-            ))}
+          <div className={`grid grid-cols-1 items-start ${viewMode === 'list' ? 'gap-2' : 'gap-5'}`}>
+            {sorted.map((submission) =>
+              viewMode === 'list' ? (
+                <SubmissionListRow
+                  key={submission.id}
+                  submission={submission}
+                  onError={setAlertMessage}
+                  selected={selectedIds.has(submission.id)}
+                  onToggleSelect={() => toggleSelect(submission.id)}
+                  bulkActionsPending={isBulkPending}
+                />
+              ) : (
+                <SubmissionRow
+                  key={submission.id}
+                  submission={submission}
+                  onError={setAlertMessage}
+                  selected={selectedIds.has(submission.id)}
+                  onToggleSelect={() => toggleSelect(submission.id)}
+                  bulkActionsPending={isBulkPending}
+                />
+              )
+            )}
           </div>
         )}
       </div>
