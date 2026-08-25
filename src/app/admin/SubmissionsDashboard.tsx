@@ -1295,7 +1295,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               {statusMenuOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 top-full mt-2 w-48 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
+                  className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-48 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
                 >
                   {filterTabs.map((tab) => (
                     <button
@@ -1340,7 +1340,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               {trackStatsOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 top-full mt-2 w-56 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-2 z-30"
+                  className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-56 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-2 z-30"
                 >
                   {(Object.keys(TRACK_LABELS) as Track[]).map((track) => (
                     <div key={track} className="flex items-center justify-between gap-3 px-4 py-2 text-sm">
@@ -1375,7 +1375,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               {filtersMenuOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 top-full mt-2 w-56 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden px-4 py-5 space-y-4 z-30"
+                  className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-56 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden px-4 py-5 space-y-4 z-30"
                 >
                   <div>
                     <label htmlFor="track-filter-select" className="block text-sm font-semibold text-white/40 capitalize mb-1">
