@@ -214,13 +214,13 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
   return (
     <div
       onClick={handleCardClick}
-      className={`relative cursor-pointer bg-white/[0.06] border-l-4 rounded-lg pt-4 pb-5 pl-4 pr-4 sm:pt-5 sm:pb-7 sm:pl-5 sm:pr-5 transition-colors hover:bg-white/[0.08] ${
+      className={`relative cursor-pointer bg-white/[0.035] border-l-4 rounded-lg pt-4 pb-5 pl-4 pr-4 sm:pt-5 sm:pb-7 sm:pl-5 sm:pr-5 transition-colors hover:bg-white/[0.07] ${
         isPending ? 'opacity-50 pointer-events-none' : selected ? 'ring-2 ring-google-blue/30' : ''
       } ${TRACK_BORDER_COLORS[submission.track]} ${moreOpen ? 'z-40' : ''}`}
       aria-label={`Submission from ${submission.name}: ${submission.talkTitle}`}
     >
-      <div className="flex items-start gap-4">
-      <div className="flex-1 min-w-0">
+      <div className="flex items-stretch gap-4">
+      <div className="flex-1 min-w-0 flex flex-col">
       <div className="flex items-start gap-4 mb-2">
         <input
           type="checkbox"
@@ -228,17 +228,17 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
           onChange={onToggleSelect}
           disabled={bulkActionsPending}
           aria-label={`Select submission: ${submission.talkTitle}`}
-          className="mt-1.5 shrink-0 w-4 h-4 rounded border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue/40"
+          className="mt-[0.28125rem] shrink-0 w-4 h-4 rounded-md border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue/40"
         />
         <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{submission.talkTitle}</h3>
       </div>
 
       <div className="flex flex-wrap items-start gap-1.5 gap-y-2.5 mb-5 pl-8">
         <div className="min-w-0 mr-auto">
-          <p className="text-base font-bold text-white/70 truncate">{submission.name}</p>
-          <p className="mt-1 text-sm text-white/40 truncate">{submission.email}</p>
+          <p className="text-base font-bold text-white/90 truncate">{submission.name}</p>
+          <p className="mt-1 text-sm text-white/55 truncate">{submission.email}</p>
           {submission.speakerTagline && (
-            <p className="text-sm text-white/40 truncate mt-1">{submission.speakerTagline}</p>
+            <p className="text-sm text-white/55 truncate mt-1">{submission.speakerTagline}</p>
           )}
         </div>
         {submission.isFirstTimeSpeaker && (
@@ -284,12 +284,12 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
           {TRACK_LABELS[submission.track]}
         </span>
         <span className="text-white/30 text-xs">/</span>
-        <span className="text-xs text-white/40">{FORMAT_LABELS[submission.format]}</span>
+        <span className="text-xs text-white/55">{FORMAT_LABELS[submission.format]}</span>
         <span className="text-white/30 text-xs">/</span>
-        <span className="text-xs text-white/40 capitalize">{submission.experienceLevel}</span>
+        <span className="text-xs text-white/55 capitalize">{submission.experienceLevel}</span>
       </div>
 
-      <p className="text-sm text-white/50 leading-relaxed mb-5 pl-8">{submission.abstract}</p>
+      <p className="text-sm text-white/65 leading-relaxed mb-5 pl-8">{submission.abstract}</p>
 
       {(submission.speakerBio ||
         submission.accessibilityNeeds ||
@@ -303,29 +303,29 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         submission.isOpenToAudienceQuestions) && (
         <div className="space-y-3 mb-5 pl-8">
           {submission.speakerBio && (
-            <p className="text-sm text-white/50 bg-white/[0.04] border border-white/10 rounded-lg px-5 py-3 leading-relaxed">
-              <span className="font-bold text-white/70">Bio: </span>
+            <p className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
+              <span className="font-bold text-white/85">Bio: </span>
               {submission.speakerBio}
             </p>
           )}
 
           {submission.accessibilityNeeds && (
-            <p className="text-sm text-white/50 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
-              <span className="font-bold text-white/70">Accessibility: </span>
+            <p className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
+              <span className="font-bold text-white/85">Accessibility: </span>
               {submission.accessibilityNeeds}
             </p>
           )}
 
           {submission.howDidYouHear && (
-            <p className="text-sm text-white/40">
-              <span className="font-medium text-white/50">Found us via: </span>
+            <p className="text-sm text-white/55">
+              <span className="font-medium text-white/70">Found us via: </span>
               {submission.howDidYouHear}
             </p>
           )}
 
           {(submission.tracking.utmSource || submission.tracking.utmMedium || submission.tracking.utmCampaign || submission.tracking.ref) && (
-            <p className="text-sm text-white/40">
-              <span className="font-medium text-white/50">Link tracking: </span>
+            <p className="text-sm text-white/55">
+              <span className="font-medium text-white/70">Link tracking: </span>
               {[
                 submission.tracking.ref && `ref=${submission.tracking.ref}`,
                 submission.tracking.utmSource && `source=${submission.tracking.utmSource}`,
@@ -338,14 +338,14 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
           )}
 
           {submission.coSpeakerEmails && (
-            <p className="text-sm text-white/40">
-              <span className="font-medium text-white/50">Co-speaker(s): </span>
+            <p className="text-sm text-white/55">
+              <span className="font-medium text-white/70">Co-speaker(s): </span>
               {submission.coSpeakerEmails}
             </p>
           )}
 
           {(submission.hasSpokenAtGdgSydneyBefore || submission.isOpenToAudienceQuestions) && (
-            <p className="text-sm text-white/40">
+            <p className="text-sm text-white/55">
               {[
                 submission.hasSpokenAtGdgSydneyBefore && 'Has spoken at GDG Sydney before',
                 submission.isOpenToAudienceQuestions && 'Open to audience questions',
@@ -414,13 +414,13 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         </div>
       </div>
 
-      <div className="flex items-center gap-3 pt-2 pl-8">
-        <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${STATUS_DOT_STYLES[submission.status].text}`}>
+      <div className="flex items-center gap-3 mt-auto pt-2 pl-8">
+        <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${STATUS_DOT_STYLES[submission.status].text}`}>
           <span className={`w-[5px] h-[5px] rounded-full ${STATUS_DOT_STYLES[submission.status].dot}`} />
           {STATUS_LABELS[submission.status]}
         </span>
-        <span className="text-white/30 text-xs">&middot;</span>
-        <span className="text-xs text-white/40">{formatDate(submission.submittedAt)}</span>
+        <span className="text-white/30 text-xs font-bold">&middot;</span>
+        <span className="text-xs font-bold text-white/55">{formatDate(submission.submittedAt)}</span>
       </div>
       </div>
 
