@@ -42,24 +42,43 @@ export default function Navbar({
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, [mobileMenuOpen]);
+
   return (
     <div className="fixed top-0 left-0 right-0 z-50">
+      {mobileMenuOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-40 bg-black/60"
+          onClick={() => setMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
       {isCfsOpen && (
         <div
           className={`overflow-hidden transition-[max-height,opacity] duration-300 ${
-            scrolled ? 'max-h-0 opacity-0' : 'max-h-12 opacity-100'
+            scrolled ? 'max-h-0 opacity-0' : 'max-h-16 opacity-100'
           }`}
         >
           <CfsLink
             source="banner"
-            className="block bg-google-red text-white text-center py-2 text-xs font-semibold tracking-wide underline underline-offset-2 decoration-white/40 hover:decoration-white transition-colors"
+            className="block bg-google-red text-white text-center py-2 text-sm font-semibold tracking-wide underline underline-offset-2 decoration-white/40 hover:decoration-white transition-colors"
           >
             Call for Speakers extended{cfsCloseDate ? ` to ${formatCloseDate(cfsCloseDate)}` : ''}. Submit your session here
           </CfsLink>
         </div>
       )}
       <nav
-        className={`transition-all duration-300 ${
+        className={`relative z-50 transition-all duration-300 ${
           scrolled ? 'bg-[#17181a]/90 backdrop-blur-lg shadow-sm shadow-black/20' : 'bg-transparent'
         }`}
       >
