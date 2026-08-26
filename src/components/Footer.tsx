@@ -38,9 +38,11 @@ export default function Footer() {
   return (
     <footer className="px-6 pb-8">
       <div className="bg-white/[0.06] rounded-[40px] pb-8 overflow-hidden">
-        <div className="bg-white/10 py-3 px-6 flex items-center justify-center gap-2.5 text-base">
-          <span className="font-bold text-white">Sat, 10 October 2026</span>
-          <span className="w-1 h-1 rounded-full bg-white/70 shrink-0" aria-hidden="true" />
+        <div className="bg-white/10 py-3 px-6 flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 text-base text-center">
+          <span className="flex items-center gap-2.5">
+            <span className="font-bold text-white">Sat, 10 October 2026</span>
+            <span className="w-1 h-1 rounded-full bg-white/70 shrink-0" aria-hidden="true" />
+          </span>
           <span className="font-bold text-white">Torrens University, Surry Hills</span>
         </div>
 

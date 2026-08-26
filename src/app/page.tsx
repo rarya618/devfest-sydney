@@ -213,9 +213,11 @@ export default async function Home() {
         )}
 
         <div className="relative max-w-2xl">
-          <p className="mb-6 flex items-center gap-2.5 text-base font-bold text-white/80 animate-fade-in">
-            <span>Saturday, 10 October 2026</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-white/80 shrink-0" aria-hidden="true" />
+          <p className="mb-6 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2.5 text-base font-bold text-white/80 animate-fade-in">
+            <span className="flex items-center gap-2.5">
+              <span>Saturday, 10 October 2026</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-white/80 shrink-0" aria-hidden="true" />
+            </span>
             <span>Torrens University, Surry Hills</span>
           </p>
 
@@ -474,7 +476,7 @@ export default async function Home() {
       <section id="partners" className="py-16 px-6 border-t border-white/8">
         <div className="max-w-7xl mx-auto flex flex-col items-center gap-6">
           <p className="text-lg font-medium text-white/40">Supported by</p>
-          <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center gap-16">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center gap-8 sm:gap-16">
             {googleLogoUrl && (
               <Image src={googleLogoUrl} alt="Google" width={160} height={48} className="h-16 w-auto object-contain opacity-70" />
             )}
