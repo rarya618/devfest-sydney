@@ -209,6 +209,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
   function handleCardClick(event: React.MouseEvent<HTMLDivElement>) {
     const target = event.target as HTMLElement;
     if (target.closest('button, a, input, textarea, select, [role="menu"], [role="dialog"]')) return;
+    if (window.getSelection()?.toString()) return;
     setIsOpen((open) => !open);
   }
 
@@ -635,6 +636,7 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
   function handleRowClick(event: React.MouseEvent<HTMLDivElement>) {
     const target = event.target as HTMLElement;
     if (target.closest('button, a, input, textarea, select, [role="menu"], [role="dialog"]')) return;
+    if (window.getSelection()?.toString()) return;
     setIsOpen((open) => !open);
   }
 
