@@ -2,7 +2,7 @@
 
 @font-face {
   font-family: 'Google Sans';
-  src: url('../fonts/Product Sans Regular.ttf') format('truetype');
+  src: url('../fonts/GoogleSans-Regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -10,31 +10,47 @@
 
 @font-face {
   font-family: 'Google Sans';
-  src: url('../fonts/Product Sans Italic.ttf') format('truetype');
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Google Sans';
-  src: url('../fonts/Product Sans Bold.ttf') format('truetype');
-  font-weight: 700;
+  src: url('../fonts/GoogleSans-Medium.woff2') format('woff2');
+  font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
   font-family: 'Google Sans';
-  src: url('../fonts/Product Sans Bold Italic.ttf') format('truetype');
+  src: url('../fonts/GoogleSans-Bold.woff2') format('woff2');
   font-weight: 700;
-  font-style: italic;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Google Sans Mono';
+  src: url('../fonts/GoogleSansMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Google Sans Mono';
+  src: url('../fonts/GoogleSansMono-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Google Sans Mono';
+  src: url('../fonts/GoogleSansMono-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
   font-display: swap;
 }
 
 @theme {
   --font-sans: 'Google Sans', sans-serif;
-  --font-mono: 'Roboto Mono', monospace;
+  --font-mono: 'Google Sans Mono', monospace;
 
   /* Core Google colours */
   --color-google-blue: #4285F4;
