@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { areTicketsOpen } from '@/lib/tickets';
+import { isCfsOpen, formatCloseDateTime } from '@/lib/cfs';
 import Countdown from '@/components/Countdown';
 import CfsForm from './CfsForm';
 import { adminDb } from '@/lib/firebase-admin';
@@ -27,8 +29,6 @@ export const metadata: Metadata = {
     description,
   },
 };
-
-const isCfsOpen = process.env.CFS_OPEN === 'true';
 
 const REASONS = [
   { title: 'Driven people in the room', desc: 'Part of a 2,000+ strong community.', color: 'google-blue' },
@@ -86,27 +86,24 @@ const topics: { label: string; track: 'developer' | 'builder' | 'workshop' }[] =
   { label: 'Live coding sessions', track: 'workshop' },
 ];
 
-function formatCloseDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-AU', { day: 'numeric', month: 'long' });
-}
-
 export default async function CallForSpeakers() {
   const cfsCloseDate = process.env.CFS_CLOSE_DATE;
+  const cfsOpen = isCfsOpen();
   const heroImageUrls = await fetchCfsHeroImageUrls();
 
   return (
     <div className="bg-[#17181a] text-white min-h-screen">
-      <Navbar accent="green" isCfsOpen={isCfsOpen} cfsCloseDate={cfsCloseDate} />
+      <Navbar accent="green" isCfsOpen={cfsOpen} cfsCloseDate={cfsCloseDate} areTicketsOpen={areTicketsOpen()} />
 
       {/* Hero */}
-      <section className={`relative pb-16 px-4 sm:px-6 lg:px-12 overflow-hidden ${isCfsOpen ? 'pt-40' : 'pt-36'}`}>
+      <section className={`relative pb-16 px-4 sm:px-6 lg:px-12 overflow-hidden ${cfsOpen ? 'pt-40' : 'pt-36'}`}>
         <div className="absolute inset-0 hero-atmosphere pointer-events-none" aria-hidden="true" />
 
         <div className="relative flex flex-col md:flex-row md:items-stretch gap-10">
           <div className="md:shrink-0">
-            {isCfsOpen && (
+            {cfsOpen && (
               <p className="mb-4 text-base font-bold text-white/80 animate-fade-in">
-                Extended{cfsCloseDate ? ` · now closes ${formatCloseDate(cfsCloseDate)}` : ''}
+                Open{cfsCloseDate ? ` · closes ${formatCloseDateTime(cfsCloseDate)}` : ''}
               </p>
             )}
 
@@ -128,7 +125,7 @@ export default async function CallForSpeakers() {
               >
                 Learn more
               </a>
-              {isCfsOpen && (
+              {cfsOpen && (
                 <a
                   href="#apply"
                   className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-green text-white text-base font-bold rounded border border-google-green transition-opacity hover:opacity-80 animate-slide-up"
@@ -175,7 +172,7 @@ export default async function CallForSpeakers() {
       </section>
 
       {/* Countdown bar */}
-      {isCfsOpen && cfsCloseDate && (
+      {cfsOpen && cfsCloseDate && (
         <section className="py-10 px-6 bg-white/[0.02] border-y border-white/8">
           <div className="max-w-4xl mx-auto flex justify-center">
             <Countdown targetIso={cfsCloseDate} label="Closing in" />
@@ -225,7 +222,7 @@ export default async function CallForSpeakers() {
 
       {/* Form or Closed State */}
       <section id="apply" className="pt-16 pb-20 px-6 bg-[#17181a]">
-        <div className={isCfsOpen ? 'max-w-4xl mx-auto' : 'max-w-xl mx-auto'}>
+        <div className={cfsOpen ? 'max-w-4xl mx-auto' : 'max-w-xl mx-auto'}>
           <div className="mb-10 text-center animate-slide-up">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight">Apply to speak</h2>
             <p className="text-white/70 mt-4 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
@@ -237,7 +234,7 @@ export default async function CallForSpeakers() {
             </p>
           </div>
 
-          {isCfsOpen ? (
+          {cfsOpen ? (
             <CfsForm />
           ) : (
             <div className="bg-white/[0.025] border border-white/10 rounded-2xl p-12 text-center">
