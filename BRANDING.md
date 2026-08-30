@@ -20,10 +20,10 @@ The main typeface. Use **Bold** for titles and large sentences; **Regular** for 
 | Regular (400) | Body copy, captions, form labels |
 | Bold (700) | Headings, CTAs, hero text |
 
-### Secondary — Google Sans Mono (Roboto Mono substitute)
+### Secondary — Google Sans Mono
 Used for short lines, speaker names, data labels, and anywhere a "code-style" feel is needed. Not for long-form body copy.
 
-**Implementation:** Local font files (Product Sans TTF) declared as `font-family: 'Google Sans'`. Roboto Mono loaded via Google Fonts as the Mono substitute. Both set as defaults in `tailwind.config.ts`.
+**Implementation:** Local Google Sans and Google Sans Mono files in `src/fonts/`, subset to Latin and served as woff2, declared via `@font-face` in `globals.css` at weights 400, 500 and 700. Mapped to `--font-sans` and `--font-mono` in the `@theme` block.
 
 ## Color Palette
 
@@ -76,4 +76,4 @@ Used for short lines, speaker names, data labels, and anywhere a "code-style" fe
 
 - Google colors are defined as Tailwind utilities: `text-google-blue`, `bg-google-red`, etc. in `tailwind.config.ts`.
 - The yellow in the codebase is `#f9ab00` (Yellow 600) — **not** `#FBBC05`.
-- Use `font-mono` Tailwind class to apply Google Sans Mono (Roboto Mono) for code-style accents.
+- Use `font-mono` Tailwind class to apply Google Sans Mono for code-style accents.

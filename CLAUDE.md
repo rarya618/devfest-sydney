@@ -25,7 +25,7 @@ At the start of every session:
 - **Tailwind for styling** — use Tailwind classes as the first and default approach. Only fall back to inline styles, `globals.css`, or custom CSS when a class genuinely cannot express the style needed. No separate CSS modules or styled-components.
 - **Tailwind v4** — this project uses Tailwind v4. Always refer to v4 docs. Config lives in `globals.css` via `@theme` — there is no `tailwind.config.ts`.
 - **Google brand colors** — always use the Tailwind utilities (`text-google-blue`, `bg-google-red`, etc.) rather than hardcoded hex values. Refer to `BRANDING.md` for the full palette.
-- **Font usage** — `font-sans` (Google Sans) for all UI text, `font-mono` (Roboto Mono) for code-style accents, data labels, and short metadata lines.
+- **Font usage** — `font-sans` (Google Sans) for all UI text, `font-mono` (Google Sans Mono) for code-style accents, data labels, and short metadata lines. Available weights are 400, 500 and 700 only; there are no italic faces.
 - **TypeScript strictly** — no `any` types. Define interfaces for all Firestore document shapes.
 - **Descriptive variable names** — names should clearly communicate intent. Avoid single-letter variables, abbreviations, and generic names like `data`, `item`, or `temp`.
 - **Error handling** — all errors must be caught and surfaced to the user as a custom-built alert component anchored to the bottom-left of the screen. Error messages must be written in plain, descriptive English — no raw error objects, status codes, or technical jargon shown to the user.
@@ -54,4 +54,4 @@ At the start of every session:
 | Auth | Firebase Auth with Google sign-in provider |
 | Forms | React controlled components + native validation — no form libraries unless complexity demands it |
 | Styling | Tailwind CSS |
-| Fonts | `@font-face` in `globals.css` for Google Sans (local Product Sans TTFs in `src/fonts/`); Google Fonts CDN for Roboto Mono |
+| Fonts | `@font-face` in `globals.css` for Google Sans and Google Sans Mono (local woff2 files in `src/fonts/`) |
