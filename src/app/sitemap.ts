@@ -1,7 +1,11 @@
 import type { MetadataRoute } from 'next';
+import { areTicketsOpen } from '@/lib/tickets';
+import { isCfsOpen } from '@/lib/cfs';
+
+// The /tickets priority follows areTicketsOpen(), so don't freeze this at build time.
+export const dynamic = 'force-dynamic';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://devfest.gdgsydney.com';
-const isCfsOpen = process.env.CFS_OPEN === 'true';
 const isVolunteerOpen = process.env.VOLUNTEER_OPEN === 'true';
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -13,10 +17,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
+      url: `${siteUrl}/tickets`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: areTicketsOpen() ? 0.9 : 0.4,
+    },
+    {
       url: `${siteUrl}/call-for-speakers`,
       lastModified: new Date(),
       changeFrequency: 'daily',
-      priority: isCfsOpen ? 0.9 : 0.4,
+      priority: isCfsOpen() ? 0.9 : 0.4,
     },
     {
       url: `${siteUrl}/volunteer`,
