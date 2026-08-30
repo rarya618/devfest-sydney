@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
+import { isCfsOpen } from '@/lib/cfs';
 import { Resend } from 'resend';
 import { FieldValue } from 'firebase-admin/firestore';
 
@@ -198,6 +199,15 @@ function buildConfirmationEmail(submission: SubmissionPayload): string {
 }
 
 export async function POST(request: NextRequest) {
+  // Hiding the form is not the same as closing submissions: without this the endpoint
+  // keeps accepting proposals after the deadline, from a stale tab or a direct post.
+  if (!isCfsOpen()) {
+    return NextResponse.json(
+      { message: 'The Call for Speakers has closed, so we can no longer accept submissions. Thank you for your interest.' },
+      { status: 403 }
+    );
+  }
+
   let submission: SubmissionPayload;
 
   try {
