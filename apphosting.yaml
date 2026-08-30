@@ -50,7 +50,21 @@ env:
       - BUILD
       - RUNTIME
   - variable: CFS_CLOSE_DATE
-    value: "2026-08-30T23:59:00+10:00"
+    value: "2026-08-31T00:00:00+10:00"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Tickets (Humanitix)
+  # ISO datetime tickets go on sale. Sales open at that moment on their own, with no
+  # deploy: the pages showing ticket CTAs render per request. Empty keeps tickets closed.
+  - variable: TICKETS_ON_SALE_DATE
+    value: "2026-08-31T00:00:00+10:00"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_HUMANITIX_URL
+    value: https://events.humanitix.com/devfest-sydney
     availability:
       - BUILD
       - RUNTIME
