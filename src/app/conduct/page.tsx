@@ -1,7 +1,12 @@
 import type { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { areTicketsOpen } from '@/lib/tickets';
 import { CodeOfConductMobileNav, CodeOfConductSidebar } from './CodeOfConductNav';
+
+// The navbar ticket CTA follows the on-sale date, so this page is rendered per request
+// rather than prerendered: see the note in `src/app/page.tsx`.
+export const dynamic = 'force-dynamic';
 
 const title = 'Code of Conduct';
 const description = 'DevFest Sydney is dedicated to providing a harassment-free and inclusive experience for everyone. Read our community standards.';
@@ -86,7 +91,7 @@ We expect participants to follow these rules at all event venues and event-relat
 export default function CodeOfConduct() {
   return (
     <div className="bg-[#17181a] text-white min-h-screen">
-      <Navbar accent="green" />
+      <Navbar accent="green" areTicketsOpen={areTicketsOpen()} />
 
       <section className="relative pt-36 pb-10 px-6 overflow-hidden">
         <div className="relative max-w-4xl mx-auto text-center">

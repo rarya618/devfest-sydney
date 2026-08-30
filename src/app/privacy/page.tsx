@@ -1,7 +1,12 @@
 import type { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { areTicketsOpen } from '@/lib/tickets';
 import { PrivacyPolicyMobileNav, PrivacyPolicySidebar } from './PrivacyPolicyNav';
+
+// The navbar ticket CTA follows the on-sale date, so this page is rendered per request
+// rather than prerendered: see the note in `src/app/page.tsx`.
+export const dynamic = 'force-dynamic';
 
 const title = 'Privacy Policy';
 const description = 'How DevFest Sydney collects, uses, and protects your personal information.';
@@ -74,7 +79,7 @@ This may include your name, email address, phone number, talk or session details
 export default function PrivacyPolicy() {
   return (
     <div className="bg-[#17181a] text-white min-h-screen">
-      <Navbar accent="blue" />
+      <Navbar accent="blue" areTicketsOpen={areTicketsOpen()} />
 
       <section className="relative pt-36 pb-10 px-6 overflow-hidden">
         <div className="relative max-w-4xl mx-auto text-center">

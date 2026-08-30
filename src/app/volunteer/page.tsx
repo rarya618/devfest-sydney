@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { areTicketsOpen } from '@/lib/tickets';
 import VolunteerForm from './VolunteerForm';
 import { adminDb } from '@/lib/firebase-admin';
 
@@ -55,7 +56,7 @@ export default async function Volunteer() {
 
   return (
     <div className="bg-[#17181a] text-white min-h-screen">
-      <Navbar accent="red" />
+      <Navbar accent="red" areTicketsOpen={areTicketsOpen()} />
 
       {/* Hero */}
       <section className={`relative pb-30 px-6 overflow-hidden ${isVolunteerOpen ? 'pt-36' : 'pt-28'}`}>

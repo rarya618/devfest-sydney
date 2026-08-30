@@ -1,9 +1,15 @@
 import type { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { areTicketsOpen } from '@/lib/tickets';
+import { isCfsOpen } from '@/lib/cfs';
 import FAQ from '@/components/FAQ';
 import Reveal from '@/components/Reveal';
 import { adminDb } from '@/lib/firebase-admin';
+
+// The navbar ticket CTA follows the on-sale date, so this page is rendered per request
+// rather than prerendered: see the note in `src/app/page.tsx`.
+export const dynamic = 'force-dynamic';
 
 const title = 'FAQ';
 const description = 'Common questions about DevFest Sydney 2026 — registration, tracks, sponsorship, volunteering, and more.';
@@ -37,13 +43,13 @@ async function fetchSponsorshipProspectusUrl(): Promise<string | null> {
 }
 
 export default async function FaqPage() {
-  const isCfsOpen = process.env.CFS_OPEN === 'true';
+  const cfsOpen = isCfsOpen();
   const cfsCloseDate = process.env.CFS_CLOSE_DATE;
   const sponsorshipProspectusUrl = await fetchSponsorshipProspectusUrl();
 
   return (
     <div className="bg-[#17181a] text-white min-h-screen">
-      <Navbar accent="blue" isCfsOpen={isCfsOpen} cfsCloseDate={cfsCloseDate} />
+      <Navbar accent="blue" isCfsOpen={cfsOpen} cfsCloseDate={cfsCloseDate} areTicketsOpen={areTicketsOpen()} />
 
       <section className="pt-36 pb-24 px-6">
         <div className="max-w-3xl mx-auto">
@@ -51,7 +57,7 @@ export default async function FaqPage() {
             <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-14">Common questions</h1>
           </Reveal>
           <Reveal delay={0.1}>
-            <FAQ isCfsOpen={isCfsOpen} sponsorshipProspectusUrl={sponsorshipProspectusUrl} />
+            <FAQ isCfsOpen={cfsOpen} sponsorshipProspectusUrl={sponsorshipProspectusUrl} />
           </Reveal>
         </div>
       </section>
