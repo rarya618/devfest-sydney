@@ -3,16 +3,16 @@ import Link from 'next/link';
 import VolunteerLink from './VolunteerLink';
 
 const COLUMNS: { heading: string; links: { label: string; href: string; external?: boolean }[] }[] = [
-  // {
-  //   heading: 'Event',
-  //   links: [
-  //     { label: 'Agenda', href: '/#tracks' },
-  //     { label: 'Speakers', href: '/' },
-  //     { label: 'Venue', href: '/#venue' },
-  //     { label: 'Sponsors', href: '/#sponsors' },
-  //     { label: 'Tickets', href: '/' },
-  //   ],
-  // },
+  {
+    heading: 'Event',
+    links: [
+      // Speakers, Agenda, and Sponsors join this column once those pages exist.
+      { label: 'Tickets', href: '/tickets' },
+      { label: 'Tracks', href: '/#tracks' },
+      { label: 'Venue', href: '/#venue' },
+      { label: 'Partners', href: '/#partners' },
+    ],
+  },
   {
     heading: 'Support',
     links: [
