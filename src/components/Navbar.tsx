@@ -5,7 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import CfsLink from './CfsLink';
 import TicketsLink from './TicketsLink';
-import { formatCloseDateTime } from '@/lib/cfs';
 
 type Accent = 'blue' | 'green' | 'red';
 
@@ -77,14 +76,16 @@ export default function Navbar({
               source="banner"
               className="block bg-google-blue text-white text-center py-2 text-sm font-semibold tracking-wide underline underline-offset-2 decoration-white/40 hover:decoration-white transition-colors"
             >
-              Tickets for DevFest Sydney 2026 are on sale. Get yours here
+              DevFest Sydney 2026 tickets are on sale now. Grab yours before they go
             </TicketsLink>
           ) : (
             <CfsLink
               source="banner"
               className="block bg-google-red text-white text-center py-2 text-sm font-semibold tracking-wide underline underline-offset-2 decoration-white/40 hover:decoration-white transition-colors"
             >
-              Call for Speakers{cfsCloseDate ? ` closes ${formatCloseDateTime(cfsCloseDate)}` : ' is open'}. Submit your session here
+              {cfsCloseDate
+                ? 'Last chance: the Call for Speakers closes at midnight tonight. Submit your session'
+                : 'The Call for Speakers is open. Submit your session'}
             </CfsLink>
           )}
         </div>
