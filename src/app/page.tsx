@@ -1,8 +1,12 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CfsLink from '@/components/CfsLink';
+import TicketsLink from '@/components/TicketsLink';
+import { areTicketsOpen, TICKET_INCLUSIONS, TICKET_INCLUSION_DOT } from '@/lib/tickets';
+import { isCfsOpen } from '@/lib/cfs';
 import Reveal from '@/components/Reveal';
 import Countdown from '@/components/Countdown';
 import { adminDb } from '@/lib/firebase-admin';
@@ -12,6 +16,12 @@ import type { Timestamp } from 'firebase-admin/firestore';
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
 };
+
+// Tickets open on a date rather than a deploy, so this page must be rendered per request.
+// A prerender (with or without `revalidate`) freezes the ticket CTAs at whatever
+// areTicketsOpen() returned during the build: ISR regeneration was measured NOT to pick
+// the change up, while force-dynamic does so immediately.
+export const dynamic = 'force-dynamic';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://devfest.gdgsydney.com';
 
@@ -139,15 +149,6 @@ async function fetchTorrensLogoUrl(): Promise<string | null> {
   }
 }
 
-async function fetchLandingCfsImageUrl(): Promise<string | null> {
-  try {
-    const doc = await adminDb.collection('settings').doc('site').get();
-    return (doc.data()?.landingCfsImageUrl as string | undefined) ?? null;
-  } catch {
-    return null;
-  }
-}
-
 async function fetchLandingSlideImageUrls(): Promise<string[]> {
   try {
     const doc = await adminDb.collection('settings').doc('site').get();
@@ -160,14 +161,11 @@ async function fetchLandingSlideImageUrls(): Promise<string[]> {
 const showVenue = true;
 const showSponsors = false;
 
-function formatCloseDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-AU', { day: 'numeric', month: 'long' });
-}
-
 export default async function Home() {
-  const isCfsOpen = process.env.CFS_OPEN === 'true';
+  const cfsOpen = isCfsOpen();
+  const ticketsOnSale = areTicketsOpen();
   const cfsCloseDate = process.env.CFS_CLOSE_DATE;
-  const [sponsors, team, sponsorshipProspectusUrl, landingHeroImageUrl, googleLogoUrl, torrensLogoUrl, landingSlideImageUrls, landingCfsImageUrl] = await Promise.all([
+  const [sponsors, team, sponsorshipProspectusUrl, landingHeroImageUrl, googleLogoUrl, torrensLogoUrl, landingSlideImageUrls] = await Promise.all([
     fetchSponsors(),
     fetchTeam(),
     fetchSponsorshipProspectusUrl(),
@@ -175,7 +173,6 @@ export default async function Home() {
     fetchGoogleLogoUrl(),
     fetchTorrensLogoUrl(),
     fetchLandingSlideImageUrls(),
-    fetchLandingCfsImageUrl(),
   ]);
 
   const sponsorsByTier = TIER_ORDER.reduce<Record<SponsorTier, Sponsor[]>>(
@@ -192,7 +189,7 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd) }}
       />
-      <Navbar accent="blue" isCfsOpen={isCfsOpen} cfsCloseDate={cfsCloseDate} />
+      <Navbar accent="blue" isCfsOpen={cfsOpen} cfsCloseDate={cfsCloseDate} areTicketsOpen={ticketsOnSale} />
 
       {/* ─── HERO ─── */}
       <section className="relative min-h-screen flex items-center pt-12 px-4 sm:px-6 lg:px-12 overflow-hidden">
@@ -239,7 +236,15 @@ export default async function Home() {
             >
               Learn more
             </a>
-            {isCfsOpen ? (
+            {ticketsOnSale ? (
+              <TicketsLink
+                source="hero"
+                aria-label="Get tickets for DevFest Sydney 2026 on Humanitix"
+                className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-blue text-white text-base font-bold rounded border border-google-blue transition-opacity hover:opacity-80"
+              >
+                Get tickets
+              </TicketsLink>
+            ) : cfsOpen ? (
               <CfsLink
                 source="hero"
                 className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-blue text-white text-base font-bold rounded border border-google-blue transition-opacity hover:opacity-80"
@@ -261,7 +266,7 @@ export default async function Home() {
       </section>
 
       {/* ─── CFS COUNTDOWN BAR ─── */}
-      {isCfsOpen && cfsCloseDate && (
+      {cfsOpen && cfsCloseDate && (
         <section className="py-10 px-6 bg-white/[0.03] border-y border-white/8">
           <div className="max-w-4xl mx-auto flex justify-center">
             <Countdown targetIso={cfsCloseDate} label="Call for Speakers closes in" />
@@ -318,45 +323,59 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ─── CFS CALLOUT ─── */}
-      {isCfsOpen && (
-        <section className="pb-24 px-4 sm:px-6 lg:px-12">
-          <Reveal className="max-w-5xl mx-auto">
-            <div className="relative bg-white/[0.035] border-l-[8px] border-google-green rounded-xl overflow-hidden">
-              <div className="grid md:grid-cols-[1fr_auto]">
-                <div className="p-8 pb-10 md:p-10 md:pb-12">
-                  <div className="space-y-3 md:space-y-5">
-                    <h3 className="text-3xl md:text-4xl font-bold tracking-tight">Call for speakers</h3>
-                    <p className="text-lg text-white/70 leading-[1.8] max-w-md">
-                      We&apos;re looking for passionate speakers across the Developer and Builder tracks. Whether
-                      you&apos;re an engineer, designer, PM, or founder. If you have something worth sharing, we
-                      want to hear from you.
+      {/* ─── TICKETS ─── (hidden until tickets are on sale on Humanitix) */}
+      {ticketsOnSale && (
+        <section id="tickets" className="pb-24 px-4 sm:px-6 lg:px-12">
+          <div className="max-w-5xl mx-auto">
+            <Reveal>
+              <div className="rounded-xl border-l-[8px] border-google-blue bg-white/[0.035] p-8 md:p-10">
+                <div className="flex flex-col lg:flex-row lg:items-start gap-10 lg:gap-14">
+                  <div className="lg:w-[42%] lg:shrink-0">
+                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
+                      One ticket, the whole day
+                    </h2>
+                    <p className="text-lg leading-relaxed text-white/70 mb-10">
+                      Talks, workshops, and hands-on building from morning to evening. No track to
+                      pick in advance, and no session you need a separate ticket for.
+                    </p>
+                    <div className="flex flex-wrap items-center gap-5">
+                      <TicketsLink
+                        source="landing-section"
+                        aria-label="Get tickets for DevFest Sydney 2026 on Humanitix"
+                        className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-blue text-white text-base font-bold rounded border border-google-blue transition-opacity hover:opacity-80"
+                      >
+                        Get tickets
+                      </TicketsLink>
+                      <Link
+                        href="/tickets"
+                        className="inline-flex items-center px-7 py-2 bg-transparent text-white text-base font-bold rounded border border-[#555555] transition-colors hover:border-white"
+                      >
+                        What&apos;s included
+                      </Link>
+                    </div>
+                    <p className="mt-6 text-sm text-white/45">
+                      Ticketing is handled by <span className="font-mono">Humanitix</span>.
                     </p>
                   </div>
-                  <CfsLink
-                    source="cfs-callout"
-                    className="inline-flex items-center gap-2.5 px-7 py-2 mt-12 bg-google-green text-white text-base font-bold rounded border border-google-green transition-opacity hover:opacity-80"
-                  >
-                    Submit a session
-                  </CfsLink>
+
+                  <ul className="flex-1 grid sm:grid-cols-2 gap-x-8 gap-y-7">
+                    {TICKET_INCLUSIONS.map((inclusion) => (
+                      <li key={inclusion.title}>
+                        <span className="inline-flex items-center gap-3 text-base font-bold text-white mb-2">
+                          <span
+                            className={`w-2 h-2 rounded-full shrink-0 ${TICKET_INCLUSION_DOT[inclusion.color]}`}
+                            aria-hidden="true"
+                          />
+                          {inclusion.title}
+                        </span>
+                        <p className="text-white/55 leading-relaxed">{inclusion.description}</p>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <div className="hidden md:block md:w-[280px]" aria-hidden="true" />
               </div>
-              {landingCfsImageUrl ? (
-                <div className="hidden md:block absolute top-0 bottom-0 right-12 w-[280px] pl-6">
-                  <div className="relative w-full h-full">
-                    <Image src={landingCfsImageUrl} alt="" fill sizes="500px" className="object-cover" />
-                  </div>
-                </div>
-              ) : (
-                <div className="hidden md:flex items-center justify-center absolute top-0 bottom-0 right-12 w-[280px] pl-6 bg-google-green/10">
-                  <svg className="w-20 h-20 text-google-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
-                  </svg>
-                </div>
-              )}
-            </div>
-          </Reveal>
+            </Reveal>
+          </div>
         </section>
       )}
 
