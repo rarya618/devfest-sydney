@@ -16,6 +16,7 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 - `/call-for-speakers` — CfS form with open/closed state
 - `/volunteer` — Volunteer signup form with open/closed state
 - `/conduct` — Code of Conduct, static page
+- `/tickets` — Ticket info page; links out to Humanitix, open/closed state controlled by `NEXT_PUBLIC_TICKETS_OPEN`
 - `/faq` — Dedicated FAQ page (moved off `/` so it can be linked to directly, e.g. from the footer)
 - `/privacy` — Privacy policy, static page
 - `/admin/login` — Google sign-in via Firebase Auth (restricted to authorised emails)
@@ -47,6 +48,8 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 ### Ticketing
 - Handled by **Humanitix** (external platform) — no in-house payment or ticketing code
 - The hero/registration CTA links out to the Humanitix event page
+- Ticket CTAs carry UTM params (`utm_source=devfest-site`, `utm_medium=internal`, `ref=<cta>`) so Humanitix sales can be attributed to the CTA that drove them. Unlike CfS/volunteer links, the params ride the visible URL: localStorage attribution can't cross to Humanitix
+- Ticket prices and tiers live only in Humanitix. The site deliberately does not restate them, so there is nothing to keep in sync
 
 ### Dynamic Content (managed via Firestore)
 - Speakers — `speakers` collection (populated after CfS closes)
@@ -107,6 +110,8 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 | `CFS_OPEN` | `true` to show CfS form, `false` to show closed message |
 | `CFS_CLOSE_DATE` | Optional ISO datetime (e.g. `2026-08-23T23:59:00+10:00`) the CfS closes. Powers the countdown timer on `/` and `/call-for-speakers`; timer is hidden if unset |
 | `VOLUNTEER_OPEN` | `true` to show volunteer signup form, `false` to show closed message |
+| `TICKETS_ON_SALE_DATE` | ISO datetime (e.g. `2026-09-05T09:00:00+10:00`) tickets go on sale, same shape as `CFS_CLOSE_DATE`. Ticket CTAs turn themselves on at that moment with no deploy. Unset means tickets stay closed |
+| `NEXT_PUBLIC_HUMANITIX_URL` | Humanitix event URL the ticket CTAs link out to. Tickets stay closed if this is unset, whatever the date or override say. Public because `TicketsLink` renders inside the client-side `Navbar` |
 | `FIREBASE_PROJECT_ID` | Firebase project identifier |
 | `FIREBASE_CLIENT_EMAIL` | Firebase Admin SDK service account email |
 | `FIREBASE_PRIVATE_KEY` | Firebase Admin SDK private key |
@@ -129,8 +134,9 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 **Verified:** `/`, `/call-for-speakers`, and `/conduct` each have correct `<title>`, canonical URL, and page-specific OpenGraph/Twitter metadata. `/call-for-speakers` has its own dynamic OG image (`opengraph-image.tsx`, on-brand GDG dots + wordmark, generated via `next/og`, no stored asset); `/` and `/conduct` share the site-wide default (`src/app/opengraph-image.tsx` — note: file-convention OG images do NOT cascade to child routes, so `/conduct` references it explicitly via `openGraph.images`/`twitter.images`). `sitemap.xml` and `robots.txt` (disallows `/admin`, `/api`) added. Minimal `Organization` JSON-LD added to the root layout. Confirmed via curl (200s, correct tags, valid sitemap/robots output) and visually inspected both OG images.
 **Date and venue confirmed 2026-08-18:** Saturday, 10 October 2026 at Torrens University, Surry Hills (Shop 1/37 Foveaux St, Surry Hills NSW 2010). Added to `EVENT.md`, footer date/venue line, FAQ answer, root layout metadata/OG copy, and homepage OG image. `Event` JSON-LD added to `/` (`src/app/page.tsx`) now that `startDate` is confirmed — previously deferred pending this.
 **Venue section shipped:** the `/` page Venue section is built and live (`showVenue = true` in `src/app/page.tsx`, commit `3d84295 Add venue section to landing page`). Next task #1 below is complete.
+**Ticket pivot shipped 2026-08-30 (behind a flag):** with the CfS closing 30 August, the site's primary conversion moves from proposals to ticket sales. `/tickets` page (open + "not on sale yet" states, own metadata/canonical/OG image), a ticket section on `/` (it replaced the CfS callout that sat between About and Tracks, and inherited that slot), and ticket CTAs in the hero, navbar, mobile menu, top banner, nav links, and footer. Sales open on a schedule rather than a deploy: `areTicketsOpen()` in `src/lib/tickets.ts` is evaluated server-side per render against `TICKETS_ON_SALE_DATE`. `Navbar` is a client component and takes the result as a prop; `Footer` is a server component and calls the helper directly. Every page carrying a ticket CTA is `force-dynamic`, joining `/call-for-speakers` and `/volunteer`. **This is load-bearing, not a preference:** `revalidate = 60` was tried first and measured NOT to work. A production server built with an on-sale moment 45 seconds out still served the closed page 2 minutes later, and a runtime-only override on the same build showed 4 ticket CTAs on the force-dynamic `/call-for-speakers` while `/` stayed at 0. A prerender freezes the CTA state at build time; only per-request rendering picks the change up. **To go live: publish the Humanitix event, confirm `https://events.humanitix.com/devfest-sydney` resolves (it currently 404s), then deploy.** `TICKETS_ON_SALE_DATE` is set to `2026-08-31T00:00:00+10:00`, matching `CFS_CLOSE_DATE`: tickets go on sale the moment the CfS closes. Until the Humanitix URL resolves, tickets stay closed regardless of the date. Before the on-sale moment the landing page simply has no section in that slot, since the CfS callout it replaced is gone. The CfS countdown bar above About is untouched and disappears on its own when `CFS_OPEN` goes false. The `landingCfsImageUrl` field on `settings/site` is no longer read by anything.
+**Deferred:** `offers` on the `/` Event JSON-LD. Google wants `price` and `priceCurrency`, which aren't known until ticket tiers are set in Humanitix. Add once they are.
 **Next task:**
-1. Ticket section — add to the landing page, plus a new dedicated `/tickets`-style page (links out to Humanitix; no in-house payment/ticketing code per `PM.md` rules).
-2. Partners section — update the landing page's Partners section to include sponsors, plus a new dedicated sponsors page. Data-fetching plumbing (`fetchSponsors()`, `fetchSponsorshipProspectusUrl()` in `src/app/page.tsx`) already exists; the section itself is still hidden (`showSponsors = false`) pending the actual UI.
+1. Partners section — update the landing page's Partners section to include sponsors, plus a new dedicated sponsors page. Data-fetching plumbing (`fetchSponsors()`, `fetchSponsorshipProspectusUrl()` in `src/app/page.tsx`) already exists; the section itself is still hidden (`showSponsors = false`) pending the actual UI.
 
 Otherwise: Milestone 8 — Speaker & schedule pages (deferred until closer to the CfS closing date), or Milestone 9 — Polish & launch.
