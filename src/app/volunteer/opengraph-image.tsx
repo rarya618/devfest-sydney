@@ -10,8 +10,8 @@ const LOGO_WIDTH = 164; // logo.png is 975x548, preserve its aspect ratio
 
 export default async function Image() {
   const [bold, regular, logoBuffer] = await Promise.all([
-    readFile(join(process.cwd(), 'src/fonts/Product Sans Bold.ttf')),
-    readFile(join(process.cwd(), 'src/fonts/Product Sans Regular.ttf')),
+    readFile(join(process.cwd(), 'src/fonts/GoogleSans-Bold.ttf')),
+    readFile(join(process.cwd(), 'src/fonts/GoogleSans-Regular.ttf')),
     readFile(join(process.cwd(), 'public/logo.png')),
   ]);
   const logoSrc = `data:image/png;base64,${logoBuffer.toString('base64')}`;
