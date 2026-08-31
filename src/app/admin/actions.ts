@@ -217,16 +217,48 @@ const TALK_FORMATS: TalkFormat[] = ['talk', 'lightning-talk', 'workshop'];
 const TRACKS: Track[] = ['developer', 'builder', 'workshop', 'showcase'];
 const EXPERIENCE_LEVELS: ExperienceLevel[] = ['beginner', 'intermediate', 'advanced'];
 
-export async function updateSubmission(
-  submissionId: string,
-  fields: SubmissionEditableFields
-): Promise<{ error?: string }> {
-  try {
-    await verifyAdminSession();
-  } catch {
-    return { error: 'Your session has expired. Please sign in again.' };
-  }
+// The exact shape a submission document takes in Firestore, matching what
+// /api/submit-proposal writes. Kept explicit so a manually added proposal and a
+// form-submitted one are indistinguishable to everything downstream.
+interface SubmissionDocumentFields {
+  name: string;
+  email: string;
+  talkTitle: string;
+  abstract: string;
+  format: TalkFormat;
+  track: Track;
+  experienceLevel: ExperienceLevel;
+  linkedinUrl: string;
+  githubUrl: string;
+  websiteUrl: string;
+  speakerTagline: string;
+  speakerBio: string;
+  previousTalkLink: string;
+  accessibilityNeeds: string;
+  travelSupportLocation: string;
+  coSpeakerEmails: string;
+  requiresTravelSupport: boolean;
+  isGoogleDeveloperExpert: boolean;
+  isFirstTimeSpeaker: boolean;
+  wantsMentoring: boolean;
+  hasSpokenAtGdgSydneyBefore: boolean;
+  isOpenToAudienceQuestions: boolean;
+  optOutOfRecording: boolean;
+  tracking: {
+    utm_source: string;
+    utm_medium: string;
+    utm_campaign: string;
+    utm_content: string;
+    utm_term: string;
+    ref: string;
+  };
+}
 
+// Shared by updateSubmission and createSubmission so the two can never drift: an
+// admin-entered proposal is held to the same rules as an edited one.
+function validateSubmissionFields(
+  fields: SubmissionEditableFields
+): { error: string } | { values: SubmissionDocumentFields } {
   const name = fields.name.trim();
   const email = fields.email.trim().toLowerCase();
   const talkTitle = fields.talkTitle.trim();
@@ -248,12 +280,8 @@ export async function updateSubmission(
     return { error: 'Please select a valid experience level.' };
   }
 
-  try {
-    const submissionRef = adminDb.collection('submissions').doc(submissionId);
-    const snap = await submissionRef.get();
-    if (!snap.exists) return { error: 'Submission not found.' };
-
-    await submissionRef.update({
+  return {
+    values: {
       name,
       email,
       talkTitle,
@@ -285,13 +313,91 @@ export async function updateSubmission(
         utm_term: fields.trackingUtmTerm.trim(),
         ref: fields.trackingRef.trim(),
       },
-    });
+    },
+  };
+}
+
+export async function updateSubmission(
+  submissionId: string,
+  fields: SubmissionEditableFields
+): Promise<{ error?: string }> {
+  try {
+    await verifyAdminSession();
+  } catch {
+    return { error: 'Your session has expired. Please sign in again.' };
+  }
+
+  const validated = validateSubmissionFields(fields);
+  if ('error' in validated) return { error: validated.error };
+
+  try {
+    const submissionRef = adminDb.collection('submissions').doc(submissionId);
+    const snap = await submissionRef.get();
+    if (!snap.exists) return { error: 'Submission not found.' };
+
+    await submissionRef.update({ ...validated.values });
 
     revalidatePath('/admin');
     return {};
   } catch {
     return { error: 'Could not save these changes. Please try again.' };
   }
+}
+
+// A proposal that reached us outside the form: emailed after the deadline, an invited
+// speaker, a showcase entry taken down by an organiser. No confirmation email is sent,
+// unlike /api/submit-proposal: whoever is entering this is already in a thread with the
+// speaker, so an automated "we've got your submission" would only be confusing.
+export async function createSubmission(
+  fields: SubmissionEditableFields,
+  submittedAtIso: string
+): Promise<{ error?: string }> {
+  let authorName: string;
+  try {
+    ({ name: authorName } = await verifyAdminSession());
+  } catch {
+    return { error: 'Your session has expired. Please sign in again.' };
+  }
+
+  const validated = validateSubmissionFields(fields);
+  if ('error' in validated) return { error: validated.error };
+
+  // Defaults to now, but an organiser can set the date the proposal actually reached
+  // them. Without that, a late entry sorts to the top of the dashboard and lands on the
+  // analytics chart on the day it was typed in rather than the day it was sent.
+  let submittedAt: Timestamp;
+  if (submittedAtIso.trim()) {
+    const parsedDate = new Date(submittedAtIso);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return { error: 'Please enter a valid date and time for when this was submitted.' };
+    }
+    submittedAt = Timestamp.fromDate(parsedDate);
+  } else {
+    submittedAt = Timestamp.now();
+  }
+
+  try {
+    await adminDb.collection('submissions').add({
+      ...validated.values,
+      submittedAt,
+      status: 'pending',
+      // Provenance as a reviewer note rather than a bespoke field: the notes panel
+      // already renders in the dashboard, so a reviewer months from now can see this
+      // never came through the public form. A hidden flag nothing displays could not.
+      reviewerNotes: [
+        {
+          text: `Added manually by ${authorName}. This proposal did not come through the public Call for Speakers form.`,
+          authorName,
+          createdAt: Timestamp.now(),
+        },
+      ],
+    });
+  } catch {
+    return { error: 'Could not add this submission. Please try again.' };
+  }
+
+  revalidatePath('/admin');
+  return {};
 }
 
 export async function undoPromotion(submissionId: string): Promise<{ error?: string }> {
