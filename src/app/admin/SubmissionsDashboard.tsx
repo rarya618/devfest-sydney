@@ -970,6 +970,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const [trackStatsOpen, setTrackStatsOpen] = useState(false);
   const [statusMenuOpen, setStatusMenuOpen] = useState(false);
+  const [isAddingSubmission, setIsAddingSubmission] = useState(false);
   const filtersMenuRef = useRef<HTMLDivElement>(null);
   const moreMenuRef = useRef<HTMLDivElement>(null);
   const trackStatsRef = useRef<HTMLDivElement>(null);
@@ -1485,6 +1486,20 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                   <button
                     role="menuitem"
                     onClick={() => {
+                      setIsAddingSubmission(true);
+                      setMoreMenuOpen(false);
+                    }}
+                    aria-label="Add a submission that did not come through the form"
+                    className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                  >
+                    <svg className="w-4 h-4 text-white/40 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                      <path strokeLinecap="round" d="M8 3.5v9M3.5 8h9" />
+                    </svg>
+                    Add submission
+                  </button>
+                  <button
+                    role="menuitem"
+                    onClick={() => {
                       handleExport();
                       setMoreMenuOpen(false);
                     }}
@@ -1574,6 +1589,13 @@ export default function SubmissionsDashboard({ submissions }: Props) {
           </div>
         )}
       </div>
+
+      {isAddingSubmission && (
+        <EditSubmissionModal
+          onClose={() => setIsAddingSubmission(false)}
+          onError={setAlertMessage}
+        />
+      )}
 
       {alertMessage && <Alert message={alertMessage} onDismiss={dismissAlert} />}
     </>
