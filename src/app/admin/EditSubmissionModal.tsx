@@ -2,15 +2,51 @@
 
 import { useState, useTransition, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { updateSubmission, type SubmissionEditableFields } from './actions';
+import { createSubmission, updateSubmission, type SubmissionEditableFields } from './actions';
 import { TRACK_LABELS, FORMAT_LABELS, EXPERIENCE_LABELS } from '@/lib/submissionLabels';
 import type { Submission } from '@/lib/types';
 
 interface Props {
-  submission: Submission;
+  // Absent means create mode: a proposal that arrived outside the form is entered here
+  // rather than written to Firestore by hand.
+  submission?: Submission;
   onClose: () => void;
   onError: (message: string) => void;
 }
+
+const BLANK_FIELDS: SubmissionEditableFields = {
+  name: '',
+  email: '',
+  talkTitle: '',
+  abstract: '',
+  format: 'talk',
+  track: 'developer',
+  experienceLevel: 'beginner',
+  linkedinUrl: '',
+  githubUrl: '',
+  websiteUrl: '',
+  speakerTagline: '',
+  speakerBio: '',
+  previousTalkLink: '',
+  accessibilityNeeds: '',
+  travelSupportLocation: '',
+  coSpeakerEmails: '',
+  requiresTravelSupport: false,
+  isGoogleDeveloperExpert: false,
+  isFirstTimeSpeaker: false,
+  wantsMentoring: false,
+  hasSpokenAtGdgSydneyBefore: false,
+  isOpenToAudienceQuestions: false,
+  optOutOfRecording: false,
+  // Pre-filled so a manual entry is attributable in analytics rather than looking like
+  // organic form traffic. The admin can overwrite them below.
+  trackingUtmSource: 'manual',
+  trackingUtmMedium: 'admin',
+  trackingUtmCampaign: '',
+  trackingUtmContent: '',
+  trackingUtmTerm: '',
+  trackingRef: '',
+};
 
 function toEditableFields(submission: Submission): SubmissionEditableFields {
   return {
@@ -51,7 +87,12 @@ const inputClasses =
 const labelClasses = 'block text-xs font-semibold text-white/50 mb-1';
 
 export default function EditSubmissionModal({ submission, onClose, onError }: Props) {
-  const [fields, setFields] = useState<SubmissionEditableFields>(() => toEditableFields(submission));
+  const isCreating = submission === undefined;
+  const [fields, setFields] = useState<SubmissionEditableFields>(() =>
+    submission ? toEditableFields(submission) : BLANK_FIELDS
+  );
+  // Create mode only: an empty value means "now", which is what the server does with it.
+  const [submittedAt, setSubmittedAt] = useState('');
   const [isPending, startTransition] = useTransition();
 
   function update<K extends keyof SubmissionEditableFields>(key: K, value: SubmissionEditableFields[K]) {
@@ -61,7 +102,9 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
     startTransition(async () => {
-      const result = await updateSubmission(submission.id, fields);
+      const result = submission
+        ? await updateSubmission(submission.id, fields)
+        : await createSubmission(fields, submittedAt);
       if (result.error) {
         onError(result.error);
         return;
@@ -75,17 +118,19 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
       className="fixed inset-0 z-40 flex items-start sm:items-center justify-center bg-black/70 p-4 overflow-y-auto"
       role="dialog"
       aria-modal="true"
-      aria-label={`Edit submission: ${submission.talkTitle}`}
+      aria-label={isCreating ? 'Add a submission' : `Edit submission: ${submission.talkTitle}`}
     >
       <div className="w-full max-w-xl bg-[#2d2e31] rounded-2xl shadow-xl my-8">
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-            <h2 className="text-lg font-bold text-white">Edit submission</h2>
+            <h2 className="text-lg font-bold text-white">
+              {isCreating ? 'Add submission' : 'Edit submission'}
+            </h2>
             <button
               type="button"
               onClick={onClose}
               disabled={isPending}
-              aria-label="Close edit form"
+              aria-label={isCreating ? 'Close add submission form' : 'Close edit form'}
               className="text-white/40 hover:text-white/70 transition-colors"
             >
               <svg className="w-5 h-5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
@@ -95,6 +140,25 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
           </div>
 
           <div className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+            {isCreating && (
+              <div className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-3">
+                <p className="text-xs text-white/50 mb-2.5">
+                  This proposal did not come through the public form, so a note recording
+                  that is added automatically. No confirmation email is sent to the speaker.
+                </p>
+                <label className={labelClasses} htmlFor="add-submitted-at">
+                  Submitted at (leave blank for now)
+                </label>
+                <input
+                  id="add-submitted-at"
+                  type="datetime-local"
+                  className={`${inputClasses} [color-scheme:dark]`}
+                  value={submittedAt}
+                  onChange={(e) => setSubmittedAt(e.target.value)}
+                />
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className={labelClasses} htmlFor="edit-name">Name</label>
@@ -409,10 +473,10 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
             <button
               type="submit"
               disabled={isPending}
-              aria-label="Save changes to submission"
+              aria-label={isCreating ? 'Add this submission' : 'Save changes to submission'}
               className="text-xs px-4 py-1.5 rounded-lg bg-google-blue text-white font-medium hover:bg-google-blue/90 transition-colors disabled:opacity-50"
             >
-              {isPending ? 'Saving…' : 'Save changes'}
+              {isPending ? (isCreating ? 'Adding…' : 'Saving…') : isCreating ? 'Add submission' : 'Save changes'}
             </button>
           </div>
         </form>
