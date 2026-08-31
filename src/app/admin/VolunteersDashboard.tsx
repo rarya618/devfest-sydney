@@ -63,13 +63,13 @@ function ReviewerNotesPanel({ volunteerId, notes, onError }: ReviewerNotesPanelP
           rows={2}
           maxLength={2000}
           disabled={isPending}
-          className="flex-1 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-google-green/50 focus:ring-1 focus:ring-google-green/30 resize-none disabled:opacity-50"
+          className="flex-1 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30 resize-none disabled:opacity-50"
         />
         <button
           type="submit"
           disabled={isPending || !draft.trim()}
           aria-label="Save reviewer note"
-          className="shrink-0 text-xs px-3 py-2 rounded-lg bg-google-green/15 border border-google-green/30 text-google-green hover:bg-google-green/20 transition-colors font-medium disabled:opacity-40"
+          className="shrink-0 text-xs font-semibold px-3 py-2 rounded-lg bg-google-blue text-white hover:bg-google-blue/90 transition-colors disabled:opacity-40"
         >
           {isPending ? 'Saving…' : 'Add'}
         </button>
@@ -120,32 +120,33 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
   function handleCardClick(event: React.MouseEvent<HTMLDivElement>) {
     const target = event.target as HTMLElement;
     if (target.closest('button, a, input, textarea, select, [role="menu"], [role="dialog"]')) return;
+    if (window.getSelection()?.toString()) return;
     setIsOpen((open) => !open);
   }
 
   return (
     <div
       onClick={handleCardClick}
-      className={`relative cursor-pointer bg-white/[0.06] border-l-4 border-l-google-green rounded-lg pt-4 pb-5 pl-4 pr-4 sm:pt-5 sm:pb-7 sm:pl-5 sm:pr-5 transition-colors hover:bg-white/[0.08] ${
+      className={`relative cursor-pointer bg-white/[0.035] border-l-4 border-l-google-green rounded-lg pt-4 pb-4 pl-4 pr-4 sm:pt-5 sm:pb-6 sm:pl-5 sm:pr-5 transition-colors hover:bg-white/[0.07] ${
         isPending ? 'opacity-50 pointer-events-none' : ''
       } ${moreOpen ? 'z-40' : ''}`}
       aria-label={`Volunteer signup from ${volunteer.name}`}
     >
-      <div className="flex items-start gap-4">
-      <div className="flex-1 min-w-0">
-      <h3 className="font-bold text-white text-xl leading-snug tracking-tight mb-2.5">{volunteer.name}</h3>
+      <div className="flex items-stretch gap-4">
+      <div className="flex-1 min-w-0 flex flex-col">
+      <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight mb-2">{volunteer.name}</h3>
 
-      <div className="flex flex-wrap items-start gap-1.5 gap-y-2.5 mb-5">
-        <div className="min-w-0 mr-auto">
-          <p className="flex items-center gap-1.5 text-base font-bold text-white/70 truncate">
-            <svg className="w-3.5 h-3.5 shrink-0 text-white/40" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+      <div className="mb-3">
+        <div className="min-w-0">
+          <p className="flex items-center gap-1.5 text-sm text-white/55 truncate">
+            <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
               <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 5 6-5" />
             </svg>
             <span className="truncate">{volunteer.email}</span>
           </p>
           {volunteer.phone && (
-            <p className="mt-1 flex items-center gap-1.5 text-sm text-white/40 truncate">
+            <p className="mt-1 flex items-center gap-1.5 text-sm text-white/55 truncate">
               <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.5 2h2l1 3-1.5 1a8 8 0 004.5 4.5l1-1.5 3 1v2a1.5 1.5 0 01-1.5 1.5A10.5 10.5 0 012 3.5 1.5 1.5 0 013.5 2z" />
               </svg>
@@ -153,21 +154,25 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
             </p>
           )}
         </div>
-        {volunteer.googleTechExperience && (
-          <span className="inline-flex items-center gap-1 text-sm leading-none pl-3 pr-3.5 py-1.5 rounded-full border font-medium bg-google-blue/15 text-google-blue border-google-blue/25">
-            Possible facilitator
-          </span>
-        )}
-        {volunteer.isTorrensStudentOrStaff && (
-          <span className="inline-flex items-center gap-1 text-sm leading-none pl-3 pr-3.5 py-1.5 rounded-full border font-medium bg-google-yellow/15 text-google-yellow border-google-yellow/25">
-            Torrens
-          </span>
+        {(volunteer.googleTechExperience || volunteer.isTorrensStudentOrStaff) && (
+          <div className="flex flex-wrap items-center gap-1.5 gap-y-2 mt-3">
+            {volunteer.googleTechExperience && (
+              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue border-google-blue/25">
+                Possible facilitator
+              </span>
+            )}
+            {volunteer.isTorrensStudentOrStaff && (
+              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25">
+                Torrens
+              </span>
+            )}
+          </div>
         )}
       </div>
 
-      <div className="flex flex-wrap gap-1.5 mb-5">
+      <div className="flex flex-wrap items-center gap-1.5 gap-y-2 mb-4">
         {volunteer.areasOfInterest.map((area) => (
-          <span key={area} className="text-xs px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-white/70">
+          <span key={area} className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-medium">
             {VOLUNTEER_AREA_LABELS[area]}
           </span>
         ))}
@@ -178,25 +183,25 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
       >
         <div className="overflow-hidden">
 
-      <p className="text-sm text-white/50 leading-relaxed mb-5">{volunteer.motivation}</p>
+      <p className="text-sm text-white/65 leading-relaxed mb-5">{volunteer.motivation}</p>
 
       {(volunteer.priorExperience || volunteer.googleTechExperience || volunteer.dietaryRequirements) && (
         <div className="space-y-3 mb-5">
           {volunteer.priorExperience && (
-            <p className="text-sm text-white/50 bg-white/[0.04] border border-white/10 rounded-lg px-5 py-3 leading-relaxed">
-              <span className="font-bold text-white/70">Prior experience: </span>
+            <p className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
+              <span className="font-bold text-white/85">Prior experience: </span>
               {volunteer.priorExperience}
             </p>
           )}
           {volunteer.googleTechExperience && (
-            <p className="text-sm text-white/50 bg-google-blue/10 border border-google-blue/20 rounded-lg px-5 py-3 leading-relaxed">
+            <p className="text-sm text-white/65 bg-google-blue/10 border border-google-blue/20 rounded-lg px-4 py-3 leading-relaxed">
               <span className="font-bold text-google-blue">Google tech experience: </span>
               {volunteer.googleTechExperience}
             </p>
           )}
           {volunteer.dietaryRequirements && (
-            <p className="text-sm text-white/50 bg-white/[0.04] border border-white/10 rounded-lg px-5 py-3 leading-relaxed">
-              <span className="font-bold text-white/70">Dietary: </span>
+            <p className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
+              <span className="font-bold text-white/85">Dietary: </span>
               {volunteer.dietaryRequirements}
             </p>
           )}
@@ -205,13 +210,13 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 pt-2">
-        <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${VOLUNTEER_STATUS_DOT_STYLES[volunteer.status].text}`}>
+      <div className="flex items-center gap-3 mt-auto pt-2">
+        <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${VOLUNTEER_STATUS_DOT_STYLES[volunteer.status].text}`}>
           <span className={`w-[5px] h-[5px] rounded-full ${VOLUNTEER_STATUS_DOT_STYLES[volunteer.status].dot}`} />
           {VOLUNTEER_STATUS_LABELS[volunteer.status]}
         </span>
-        <span className="text-white/30 text-xs">&middot;</span>
-        <span className="text-xs text-white/40">{formatDate(volunteer.submittedAt)}</span>
+        <span className="text-white/30 text-xs font-bold">&middot;</span>
+        <span className="text-xs font-bold text-white/55">{formatDate(volunteer.submittedAt)}</span>
       </div>
       </div>
 
@@ -220,7 +225,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
             onClick={() => setIsOpen((open) => !open)}
             aria-expanded={isOpen}
             aria-label={`${isOpen ? 'Collapse' : 'Expand'} details for: ${volunteer.name}`}
-            className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
+            className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
           >
             <svg
               className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
@@ -266,7 +271,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
               disabled={isPending}
               aria-label={`Restore volunteer signup to pending: ${volunteer.name}`}
               title="Restore"
-              className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
+              className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
             >
               <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 4L2.5 7.5 6 11M2.5 7.5h6.5a4 4 0 010 8H7" />
@@ -281,7 +286,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
               aria-expanded={moreOpen}
               aria-label={`More actions for: ${volunteer.name}`}
               title="More actions"
-              className="relative inline-flex items-center justify-center w-8 h-8 rounded-full border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
+              className="relative inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
             >
               <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                 <circle cx="3" cy="8" r="1.25" />
