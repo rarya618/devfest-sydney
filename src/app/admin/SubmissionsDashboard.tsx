@@ -996,8 +996,9 @@ export default function SubmissionsDashboard({ submissions }: Props) {
       if (statusMenuOpen && statusMenuRef.current && !statusMenuRef.current.contains(event.target as Node)) {
         setStatusMenuOpen(false);
       }
-      if (searchOpen && searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
-        setSearch('');
+      // Only collapse an empty search box on an outside click. With a query typed, clicking a
+      // submission is part of working through the results, so the search view has to survive it.
+      if (searchOpen && !search && searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
         setSearchOpen(false);
       }
     }
@@ -1020,7 +1021,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
       document.removeEventListener('mousedown', handlePointerDown);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [filtersMenuOpen, moreMenuOpen, searchOpen, trackStatsOpen, statusMenuOpen]);
+  }, [filtersMenuOpen, moreMenuOpen, searchOpen, search, trackStatsOpen, statusMenuOpen]);
 
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
 
