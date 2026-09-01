@@ -1057,7 +1057,8 @@ export default function SubmissionsDashboard({ submissions }: Props) {
       normalizedSearch &&
       !s.name.toLowerCase().includes(normalizedSearch) &&
       !s.email.toLowerCase().includes(normalizedSearch) &&
-      !s.talkTitle.toLowerCase().includes(normalizedSearch)
+      !s.talkTitle.toLowerCase().includes(normalizedSearch) &&
+      !s.abstract.toLowerCase().includes(normalizedSearch)
     ) {
       return false;
     }
@@ -1293,7 +1294,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               <button
                 onClick={() => setSearchOpen(true)}
                 tabIndex={searchOpen || search ? -1 : undefined}
-                aria-label="Search name, email, or talk title"
+                aria-label="Search name, email, talk title, or abstract"
                 title="Search"
                 className={`absolute left-0 top-0 inline-flex items-center justify-center w-10 h-10 rounded-full text-white/70 hover:text-white transition-opacity duration-200 ${
                   searchWidthOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
@@ -1311,8 +1312,8 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 tabIndex={searchOpen || search ? undefined : -1}
-                placeholder="Search name, email, or talk title…"
-                aria-label="Search name, email, or talk title"
+                placeholder="Search name, email, talk title, or abstract…"
+                aria-label="Search name, email, talk title, or abstract"
                 className={`w-full h-10 rounded-full bg-transparent pl-9 pr-9 py-0 text-sm text-white placeholder:text-white/30 focus:outline-none transition-opacity duration-200 ${
                   searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}
