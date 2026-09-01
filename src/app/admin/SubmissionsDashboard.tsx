@@ -923,6 +923,10 @@ function groupBySubmitter(list: Submission[]): SubmitterGroup[] {
   return result.sort((a, b) => b.latestAt - a.latestAt);
 }
 
+function formatCsvBoolean(value: boolean): string {
+  return value ? 'Yes' : 'No';
+}
+
 function escapeCsvCell(value: string): string {
   return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
 }
@@ -1145,7 +1149,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
     );
   }
 
-  function handleExport() {
+  function handleExportSummary() {
     const rows = [
       ['Name', 'Email', 'Talk title', 'Track', 'Format', 'Experience', 'Status', 'Submitted at'],
       ...sorted.map((s) => [
@@ -1160,6 +1164,70 @@ export default function SubmissionsDashboard({ submissions }: Props) {
       ]),
     ];
     downloadCsv(`submissions-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+  }
+
+  function handleExportFull() {
+    const rows = [
+      [
+        'Name',
+        'Email',
+        'Talk title',
+        'Abstract',
+        'Speaker tagline',
+        'Speaker bio',
+        'Track',
+        'Format',
+        'Experience',
+        'Status',
+        'Submitted at',
+        'LinkedIn',
+        'GitHub',
+        'Website',
+        'Previous talk link',
+        'Co-speaker emails',
+        'How did you hear',
+        'Accessibility needs',
+        'Needs travel support',
+        'Travel support location',
+        'Google Developer Expert',
+        'First-time speaker',
+        'Wants mentoring',
+        'Spoken at GDG Sydney before',
+        'Open to audience questions',
+        'Opted out of recording',
+        'Reviewer notes',
+      ],
+      ...sorted.map((s) => [
+        s.name,
+        s.email,
+        s.talkTitle,
+        s.abstract,
+        s.speakerTagline,
+        s.speakerBio,
+        TRACK_LABELS[s.track],
+        FORMAT_LABELS[s.format],
+        EXPERIENCE_LABELS[s.experienceLevel],
+        STATUS_LABELS[s.status],
+        formatDate(s.submittedAt),
+        s.linkedinUrl,
+        s.githubUrl,
+        s.websiteUrl,
+        s.previousTalkLink,
+        s.coSpeakerEmails,
+        s.howDidYouHear,
+        s.accessibilityNeeds,
+        formatCsvBoolean(s.requiresTravelSupport),
+        s.travelSupportLocation,
+        formatCsvBoolean(s.isGoogleDeveloperExpert),
+        formatCsvBoolean(s.isFirstTimeSpeaker),
+        formatCsvBoolean(s.wantsMentoring),
+        formatCsvBoolean(s.hasSpokenAtGdgSydneyBefore),
+        formatCsvBoolean(s.isOpenToAudienceQuestions),
+        formatCsvBoolean(s.optOutOfRecording),
+        s.reviewerNotes.map((note) => `${note.authorName} (${formatDate(note.createdAt)}): ${note.text}`).join('\n'),
+      ]),
+    ];
+    downloadCsv(`submissions-full-${new Date().toISOString().slice(0, 10)}.csv`, rows);
   }
 
   const selectedCount = visibleSelectedIds.length;
@@ -1500,16 +1568,31 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                   <button
                     role="menuitem"
                     onClick={() => {
-                      handleExport();
+                      handleExportSummary();
                       setMoreMenuOpen(false);
                     }}
-                    aria-label="Export visible submissions as CSV"
+                    aria-label="Export visible submissions as a summary CSV"
                     className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
                   >
                     <svg className="w-4 h-4 text-white/40 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8 1.5v8m0 0L5 6.5m3 3l3-3M2.5 11v2A1.5 1.5 0 004 14.5h8a1.5 1.5 0 001.5-1.5v-2" />
                     </svg>
                     Export CSV
+                  </button>
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      handleExportFull();
+                      setMoreMenuOpen(false);
+                    }}
+                    aria-label="Export visible submissions as a full CSV including abstracts and speaker bios"
+                    className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                  >
+                    <svg className="w-4 h-4 text-white/40 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 1.5v8m0 0L5 6.5m3 3l3-3M2.5 11v2A1.5 1.5 0 004 14.5h8a1.5 1.5 0 001.5-1.5v-2" />
+                      <path strokeLinecap="round" d="M4.5 3.5h7" />
+                    </svg>
+                    Export CSV (full)
                   </button>
                 </div>
               )}
