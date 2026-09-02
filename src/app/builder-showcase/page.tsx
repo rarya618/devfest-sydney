@@ -54,6 +54,29 @@ const HOW_IT_WORKS = [
   },
 ];
 
+// Prize tiers are not finalised yet, so each `prize` reads "To be announced" for now.
+// When they are locked in, edit the strings here and nothing else needs to change.
+const PRIZES = [
+  {
+    place: 'Winner',
+    prize: 'To be announced',
+    desc: 'The demo the room votes for, announced on stage before the day is out.',
+    color: 'google-yellow',
+  },
+  {
+    place: 'Runner-up',
+    prize: 'To be announced',
+    desc: 'Second on the night, and second to hear their name called.',
+    color: 'google-blue',
+  },
+  {
+    place: 'Every presenter',
+    prize: 'To be announced',
+    desc: 'Everyone who makes the lineup gets something for putting their work in front of the room.',
+    color: 'google-green',
+  },
+];
+
 const SHOWCASE_FAQS: ShowcaseFaqItem[] = [
   {
     q: 'Does my project need to be finished?',
@@ -78,6 +101,10 @@ const SHOWCASE_FAQS: ShowcaseFaqItem[] = [
   {
     q: 'How is the winner decided?',
     a: 'The room votes. Every attendee picks their favourite demo once the presentations are done, and we announce the winner before the day is out.',
+  },
+  {
+    q: 'What do I win?',
+    a: 'The audience-voted winner and the runner-up both take home a prize, and everyone who makes the lineup gets something for presenting. We are still finalising exactly what those prizes are and will announce them here before entries close.',
   },
   {
     q: 'When will I hear back?',
@@ -161,6 +188,32 @@ export default async function BuilderShowcase() {
               </li>
             ))}
           </ol>
+        </div>
+      </section>
+
+      {/* Prizes */}
+      <section id="prizes" className="scroll-mt-28 pt-4 pb-20 px-6">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight text-center mb-4 animate-slide-up">
+            Prizes
+          </h2>
+          <p className="text-white/70 text-lg text-center max-w-2xl mx-auto leading-relaxed mb-12 animate-slide-up" style={{ animationDelay: '0.05s' }}>
+            The room votes, and the demos it picks go home with more than the applause.
+            We are still finalising the prize pool and will announce it here before entries close.
+          </p>
+
+          <ul className="grid sm:grid-cols-3 gap-8 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            {PRIZES.map((tier) => (
+              <li
+                key={tier.place}
+                className={`flex flex-col gap-3 bg-white/[0.035] border-t-6 ${STEP_BORDER[tier.color]} rounded-lg pt-8 pb-10 px-6 md:px-8`}
+              >
+                <p className="font-mono text-sm uppercase tracking-wider text-white/50">{tier.place}</p>
+                <h3 className="text-xl md:text-2xl font-bold text-white">{tier.prize}</h3>
+                <p className="text-base text-white/80 leading-relaxed">{tier.desc}</p>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
