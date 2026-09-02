@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { areTicketsOpen } from '@/lib/tickets';
 import { isCfsOpen } from '@/lib/cfs';
+import { isShowcaseOpen } from '@/lib/showcase';
 
 // The /tickets priority follows areTicketsOpen(), so don't freeze this at build time.
 export const dynamic = 'force-dynamic';
@@ -27,6 +28,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: isCfsOpen() ? 0.9 : 0.4,
+    },
+    {
+      url: `${siteUrl}/builder-showcase`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: isShowcaseOpen() ? 0.8 : 0.4,
     },
     {
       url: `${siteUrl}/volunteer`,
