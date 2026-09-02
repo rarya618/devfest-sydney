@@ -111,8 +111,8 @@ rules_version='2';
 //   - repoUrl: string (optional, max 500 chars, may be empty)
 //   - linkedinUrl: string (optional, max 500 chars, may be empty)
 //   - builtWith: string (optional, max 300 chars)
-//   - coPresenterNames: string (optional, max 300 chars) - anyone demoing with them
-//   - coPresenterEmails: string (optional, max 500 chars) - so co-presenters can be contacted
+//   - coPresenters: list of maps (optional, max 4) - anyone demoing with them,
+//     each { name: string (1-100 chars), email: string (valid email or empty, max 200) }
 //   - demoRequirements: string (optional, max 500 chars) - what they need on the day
 //   - isFirstTimePresenter: boolean (required)
 //   - tracking: map (optional) - UTM attribution captured at submit time
