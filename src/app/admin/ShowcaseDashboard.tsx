@@ -178,9 +178,9 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
             First-time presenter
           </span>
         )}
-        {(entry.coPresenterNames || entry.coPresenterEmails) && (
+        {entry.coPresenters.length > 0 && (
           <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-medium">
-            Presenting as a team
+            {entry.coPresenters.length === 1 ? 'Presenting as a pair' : `Presenting as a team of ${entry.coPresenters.length + 1}`}
           </span>
         )}
         {entry.demoRequirements && (
@@ -197,7 +197,7 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
 
       <p className="text-sm text-white/65 leading-relaxed mb-5">{entry.description}</p>
 
-      {(entry.builtWith || entry.coPresenterNames || entry.coPresenterEmails || entry.demoRequirements) && (
+      {(entry.builtWith || entry.coPresenters.length > 0 || entry.demoRequirements) && (
         <div className="space-y-3 mb-5">
           {entry.builtWith && (
             <p className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
@@ -205,17 +205,26 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
               {entry.builtWith}
             </p>
           )}
-          {entry.coPresenterNames && (
-            <p className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
-              <span className="font-bold text-white/85">Co-presenters: </span>
-              {entry.coPresenterNames}
-            </p>
-          )}
-          {entry.coPresenterEmails && (
-            <p className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
-              <span className="font-bold text-white/85">Co-presenter emails: </span>
-              {entry.coPresenterEmails}
-            </p>
+          {entry.coPresenters.length > 0 && (
+            <div className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
+              <p className="font-bold text-white/85 mb-1.5">Co-presenters</p>
+              <ul className="space-y-1">
+                {entry.coPresenters.map((coPresenter, index) => (
+                  <li key={index} className="flex flex-wrap items-baseline gap-x-2">
+                    <span>{coPresenter.name}</span>
+                    {coPresenter.email && (
+                      <a
+                        href={`mailto:${coPresenter.email}`}
+                        aria-label={`Email ${coPresenter.name}`}
+                        className="text-white/45 hover:text-white/70 underline underline-offset-2 transition-colors"
+                      >
+                        {coPresenter.email}
+                      </a>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
           {entry.demoRequirements && (
             <p className="text-sm text-white/65 bg-google-red/10 border border-google-red/20 rounded-lg px-4 py-3 leading-relaxed">
