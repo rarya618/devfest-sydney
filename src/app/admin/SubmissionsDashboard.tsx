@@ -302,7 +302,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         <span className="text-xs text-white/55 capitalize">{submission.experienceLevel}</span>
       </div>
 
-      <p className="text-sm text-white/65 leading-relaxed mb-5 pl-8">{submission.abstract}</p>
+      <p className="text-sm text-white/65 leading-relaxed mb-5 pl-8 whitespace-pre-wrap break-words">{submission.abstract}</p>
 
       {(submission.speakerBio ||
         submission.accessibilityNeeds ||
@@ -825,7 +825,7 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
               <span>&middot;</span>
               <span>{formatDate(submission.submittedAt)}</span>
             </div>
-            <p className="text-sm text-white/65 leading-relaxed">{submission.abstract}</p>
+            <p className="text-sm text-white/65 leading-relaxed whitespace-pre-wrap break-words">{submission.abstract}</p>
             {submission.speakerBio && (
               <p className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
                 <span className="font-bold text-white/85">Bio: </span>
