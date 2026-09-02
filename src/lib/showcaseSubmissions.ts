@@ -1,5 +1,5 @@
 import { adminDb } from '@/lib/firebase-admin';
-import type { ReviewerNote, ShowcaseSubmission } from '@/lib/types';
+import type { CoPresenter, ReviewerNote, ShowcaseSubmission } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
 
 export async function fetchShowcaseSubmissions(): Promise<ShowcaseSubmission[]> {
@@ -23,8 +23,10 @@ export async function fetchShowcaseSubmissions(): Promise<ShowcaseSubmission[]> 
       repoUrl: data.repoUrl ?? '',
       linkedinUrl: data.linkedinUrl ?? '',
       builtWith: data.builtWith ?? '',
-      coPresenterNames: data.coPresenterNames ?? '',
-      coPresenterEmails: data.coPresenterEmails ?? '',
+      coPresenters: ((data.coPresenters ?? []) as Array<{ name?: string; email?: string }>).map((coPresenter) => ({
+        name: coPresenter.name ?? '',
+        email: coPresenter.email ?? '',
+      })) satisfies CoPresenter[],
       demoRequirements: data.demoRequirements ?? '',
       isFirstTimePresenter: data.isFirstTimePresenter ?? false,
       tracking: {
