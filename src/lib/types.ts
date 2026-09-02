@@ -97,6 +97,11 @@ export interface VolunteerSubmission {
   reviewerNotes: ReviewerNote[];
 }
 
+export interface CoPresenter {
+  name: string;
+  email: string;
+}
+
 export interface ShowcaseSubmission {
   id: string;
   name: string;
@@ -109,8 +114,7 @@ export interface ShowcaseSubmission {
   repoUrl: string;
   linkedinUrl: string;
   builtWith: string;
-  coPresenterNames: string;
-  coPresenterEmails: string;
+  coPresenters: CoPresenter[];
   demoRequirements: string;
   isFirstTimePresenter: boolean;
   tracking: SubmissionTracking;
