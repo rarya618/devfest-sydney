@@ -43,7 +43,7 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 
 ### Builder Showcase Flow
 - `/builder-showcase` page with an entry form, open/closed state controlled by `SHOWCASE_OPEN` and an optional `SHOWCASE_CLOSE_DATE` deadline (`isShowcaseOpen()` in `src/lib/showcase.ts`, evaluated per request like `isCfsOpen()`)
-- Form fields: name, email, LinkedIn (optional), co-presenter names and emails (optional, mirroring the CfS `coSpeakerEmails` convention), project name, one-line pitch, what you'll demo, stage (idea / prototype / live), project link (optional), repository (optional), built with (optional), demo requirements (optional), first-time presenter
+- Form fields: name, email, LinkedIn (optional), co-presenters (optional, up to 4, each added as its own name + email block), project name, one-line pitch, what you'll demo, stage (idea / prototype / live), project link (optional), repository (optional), built with (optional), demo requirements (optional), first-time presenter
 - On submit: confirmation email to the entrant (via Resend), entry stored in Firestore (`showcase` collection)
 - Reviewed in `/admin/showcase`: accept, reject, restore, archive, plus reviewer notes. No promotion to a public collection, same as volunteers
 - Runs on its own timetable, separate from the CfS: demos can still be taken after the talk lineup is locked in
