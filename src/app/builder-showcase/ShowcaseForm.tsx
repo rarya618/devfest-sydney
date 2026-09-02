@@ -1,11 +1,17 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import Alert from '@/components/Alert';
 import { getTrackingParams } from '@/lib/tracking';
 import type { ShowcaseStage } from '@/lib/types';
 
 type SubmitState = 'idle' | 'submitting' | 'success';
+
+interface CoPresenterField {
+  id: number;
+  name: string;
+  email: string;
+}
 
 interface FormFields {
   name: string;
@@ -18,13 +24,13 @@ interface FormFields {
   repoUrl: string;
   linkedinUrl: string;
   builtWith: string;
-  coPresenterNames: string;
-  coPresenterEmails: string;
+  coPresenters: CoPresenterField[];
   demoRequirements: string;
   isFirstTimePresenter: boolean;
 }
 
 interface FormErrors {
+  coPresenters?: Record<number, string>;
   name?: string;
   email?: string;
   projectName?: string;
@@ -39,6 +45,7 @@ const STAGES: { value: ShowcaseStage; label: string; hint: string }[] = [
   { value: 'live', label: 'Live and in use', hint: 'Real people are using it today.' },
 ];
 
+const CO_PRESENTERS_MAX = 4;
 const PITCH_MAX = 140;
 const DESCRIPTION_MAX = 1000;
 
@@ -60,8 +67,7 @@ export default function ShowcaseForm() {
     repoUrl: '',
     linkedinUrl: '',
     builtWith: '',
-    coPresenterNames: '',
-    coPresenterEmails: '',
+    coPresenters: [],
     demoRequirements: '',
     isFirstTimePresenter: false,
   });
@@ -70,6 +76,7 @@ export default function ShowcaseForm() {
   const [submitState, setSubmitState] = useState<SubmitState>('idle');
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<string>(SECTIONS[0].id);
+  const nextCoPresenterIdRef = useRef(0);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -108,6 +115,21 @@ export default function ShowcaseForm() {
       errs.description = `Your description must be ${DESCRIPTION_MAX} characters or fewer.`;
     }
     if (!fields.stage) errs.stage = 'Please tell us what stage your project is at.';
+
+    const coPresenterErrors: Record<number, string> = {};
+    fields.coPresenters.forEach((coPresenter) => {
+      const hasName = coPresenter.name.trim().length > 0;
+      const hasEmail = coPresenter.email.trim().length > 0;
+      // A block left entirely blank is dropped on submit, so it is not an error.
+      if (!hasName && !hasEmail) return;
+      if (!hasName) {
+        coPresenterErrors[coPresenter.id] = 'Please enter this co-presenter\'s name.';
+      } else if (hasEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(coPresenter.email.trim())) {
+        coPresenterErrors[coPresenter.id] = 'Please enter a valid email address, or leave it blank.';
+      }
+    });
+    if (Object.keys(coPresenterErrors).length > 0) errs.coPresenters = coPresenterErrors;
+
     return errs;
   }
 
@@ -124,7 +146,13 @@ export default function ShowcaseForm() {
       const response = await fetch('/api/submit-showcase', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...fields, tracking }),
+        body: JSON.stringify({
+          ...fields,
+          coPresenters: fields.coPresenters
+            .filter((coPresenter) => coPresenter.name.trim() || coPresenter.email.trim())
+            .map(({ name, email }) => ({ name, email })),
+          tracking,
+        }),
       });
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
@@ -155,6 +183,46 @@ export default function ShowcaseForm() {
         }
       },
     };
+  }
+
+  function addCoPresenter() {
+    setFields((prev) =>
+      prev.coPresenters.length >= CO_PRESENTERS_MAX
+        ? prev
+        : {
+            ...prev,
+            coPresenters: [
+              ...prev.coPresenters,
+              { id: nextCoPresenterIdRef.current++, name: '', email: '' },
+            ],
+          }
+    );
+  }
+
+  function removeCoPresenter(id: number) {
+    setFields((prev) => ({
+      ...prev,
+      coPresenters: prev.coPresenters.filter((coPresenter) => coPresenter.id !== id),
+    }));
+    setErrors((prev) => {
+      if (!prev.coPresenters) return prev;
+      const { [id]: _removed, ...rest } = prev.coPresenters;
+      return { ...prev, coPresenters: rest };
+    });
+  }
+
+  function updateCoPresenter(id: number, key: 'name' | 'email', value: string) {
+    setFields((prev) => ({
+      ...prev,
+      coPresenters: prev.coPresenters.map((coPresenter) =>
+        coPresenter.id === id ? { ...coPresenter, [key]: value } : coPresenter
+      ),
+    }));
+    setErrors((prev) => {
+      if (!prev.coPresenters?.[id]) return prev;
+      const { [id]: _cleared, ...rest } = prev.coPresenters;
+      return { ...prev, coPresenters: rest };
+    });
   }
 
   function selectStage(stage: ShowcaseStage) {
@@ -302,40 +370,97 @@ export default function ShowcaseForm() {
             <p id="showcase-linkedin-hint" className="mt-1.5 text-xs text-white/50">Optional, so we can credit you if your demo is picked.</p>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-5 mt-5">
-            <div>
-              <label htmlFor="showcase-co-presenter-names" className="block text-sm font-bold text-white/85 mb-1.5">
-                Co-presenter name(s)
-              </label>
-              <input
-                id="showcase-co-presenter-names"
-                type="text"
-                placeholder="Grace Hopper, Alan Turing"
-                aria-describedby="showcase-co-presenter-names-hint"
-                className={inputNormal}
-                {...field('coPresenterNames')}
-              />
-              <p id="showcase-co-presenter-names-hint" className="mt-1.5 text-xs text-white/50">
-                Optional. Anyone joining you on stage, so we can introduce them too.
-              </p>
-            </div>
+          <div className="mt-5">
+            <p className="text-sm font-bold text-white/85 mb-1.5" id="showcase-co-presenters-label">
+              Co-presenters
+            </p>
+            <p className="text-xs text-white/50 mb-3">
+              Optional. Add anyone joining you on stage, so we can introduce them and keep them in the loop.
+            </p>
 
-            <div>
-              <label htmlFor="showcase-co-presenter-emails" className="block text-sm font-bold text-white/85 mb-1.5">
-                Co-presenter email(s)
-              </label>
-              <input
-                id="showcase-co-presenter-emails"
-                type="text"
-                placeholder="grace@example.com, alan@example.com"
-                aria-describedby="showcase-co-presenter-emails-hint"
-                className={inputNormal}
-                {...field('coPresenterEmails')}
-              />
-              <p id="showcase-co-presenter-emails-hint" className="mt-1.5 text-xs text-white/50">
-                Optional, so we can keep them in the loop about the lineup.
+            {fields.coPresenters.length > 0 && (
+              <ul className="space-y-3 mb-3" aria-labelledby="showcase-co-presenters-label">
+                {fields.coPresenters.map((coPresenter, index) => {
+                  const error = errors.coPresenters?.[coPresenter.id];
+                  return (
+                    <li key={coPresenter.id} className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-5">
+                      <div className="flex items-center justify-between gap-3 mb-3">
+                        <span className="text-base font-bold text-white/85">Co-presenter {index + 1}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeCoPresenter(coPresenter.id)}
+                          aria-label={`Remove co-presenter ${index + 1}`}
+                          title="Remove"
+                          className="inline-flex items-center justify-center w-7 h-7 -mr-1 rounded-full text-white/50 hover:text-google-red hover:bg-white/[0.06] transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-[18px] flex items-center justify-center" aria-hidden="true">
+                            close
+                          </span>
+                        </button>
+                      </div>
+
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label htmlFor={`showcase-co-presenter-name-${coPresenter.id}`} className="block text-xs font-bold text-white/70 mb-1.5">
+                            Name
+                          </label>
+                          <input
+                            id={`showcase-co-presenter-name-${coPresenter.id}`}
+                            type="text"
+                            placeholder="Grace Hopper"
+                            aria-invalid={!!error}
+                            aria-describedby={error ? `showcase-co-presenter-error-${coPresenter.id}` : undefined}
+                            className={error ? inputError : inputNormal}
+                            value={coPresenter.name}
+                            onChange={(e) => updateCoPresenter(coPresenter.id, 'name', e.target.value)}
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor={`showcase-co-presenter-email-${coPresenter.id}`} className="block text-xs font-bold text-white/70 mb-1.5">
+                            Email
+                          </label>
+                          <input
+                            id={`showcase-co-presenter-email-${coPresenter.id}`}
+                            type="email"
+                            placeholder="grace@example.com"
+                            aria-invalid={!!error}
+                            aria-describedby={error ? `showcase-co-presenter-error-${coPresenter.id}` : undefined}
+                            className={error ? inputError : inputNormal}
+                            value={coPresenter.email}
+                            onChange={(e) => updateCoPresenter(coPresenter.id, 'email', e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      {error && (
+                        <p id={`showcase-co-presenter-error-${coPresenter.id}`} role="alert" className="mt-2 text-xs text-google-red/80">
+                          {error}
+                        </p>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+
+            {fields.coPresenters.length < CO_PRESENTERS_MAX ? (
+              <button
+                type="button"
+                onClick={addCoPresenter}
+                aria-label="Add a co-presenter"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-dashed border-white/20 text-sm font-bold text-white/70 hover:text-white hover:border-white/40 transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px] flex items-center justify-center" aria-hidden="true">
+                  add
+                </span>
+                Add a co-presenter
+              </button>
+            ) : (
+              <p className="text-xs text-white/50">
+                That&apos;s the maximum of {CO_PRESENTERS_MAX} co-presenters.
               </p>
-            </div>
+            )}
           </div>
         </div>
 
