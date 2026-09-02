@@ -71,10 +71,10 @@ export default async function BuilderShowcase() {
       <Navbar accent="yellow" areTicketsOpen={areTicketsOpen()} />
 
       {/* Hero */}
-      <section className={`relative pb-30 px-6 overflow-hidden ${showcaseOpen ? 'pt-36' : 'pt-28'}`}>
+      <section className={`relative min-h-[72vh] flex items-center pb-30 px-6 overflow-hidden ${showcaseOpen ? 'pt-36' : 'pt-28'}`}>
         <div className="absolute inset-0 hero-atmosphere pointer-events-none" aria-hidden="true" />
 
-        <div className="relative max-w-4xl mx-auto text-center">
+        <div className="relative w-full max-w-4xl mx-auto text-center">
           {showcaseOpen && (
             <p className="mb-4 text-base font-bold text-white/80 animate-fade-in">
               Accepting demos{closeDate ? ` · closes ${formatCloseDateTime(closeDate)}` : ''}
