@@ -5,6 +5,7 @@ import { areTicketsOpen } from '@/lib/tickets';
 import { isShowcaseOpen } from '@/lib/showcase';
 import { formatCloseDateTime } from '@/lib/format';
 import ShowcaseForm from './ShowcaseForm';
+import ShowcaseFaq, { type ShowcaseFaqItem } from './ShowcaseFaq';
 
 // isShowcaseOpen() is evaluated per request against SHOWCASE_CLOSE_DATE, so this page
 // must never be prerendered: a build-time render would freeze the form open or shut.
@@ -50,6 +51,37 @@ const HOW_IT_WORKS = [
     title: 'The room votes',
     desc: 'Every attendee votes on their favourite demo, and we crown a winner before the day is out.',
     color: 'google-red',
+  },
+];
+
+const SHOWCASE_FAQS: ShowcaseFaqItem[] = [
+  {
+    q: 'Does my project need to be finished?',
+    a: 'No. We take entries at any stage: a rough idea, a working prototype, or something already live and in use. Tell us which on the entry form. Rough edges are expected, and half-finished projects often make the most interesting demos.',
+  },
+  {
+    q: 'Do I need to be a developer?',
+    a: 'Not at all. The Builder Showcase is open to everyone at DevFest: engineers, product managers, designers, founders, and students. No-code and low-code projects are just as welcome as ones with a repository behind them.',
+  },
+  {
+    q: 'How long do I get on stage?',
+    a: 'Five minutes, mid-afternoon, on the main stage. Slides are optional and most people skip them: the room would rather see the thing working than a deck about it.',
+  },
+  {
+    q: 'Can I present with someone else?',
+    a: 'Yes. Add up to four co-presenters to your entry, each with their name and email, and we will introduce them alongside you and keep them in the loop about the lineup.',
+  },
+  {
+    q: 'What if my demo needs sound or internet?',
+    a: 'Tell us in the "Anything you need to demo?" field on the entry form. A screen and a mic come as standard, so flag anything beyond that, such as audio, a stable connection, or a physical device on stage, and we will work it out with you before the day.',
+  },
+  {
+    q: 'How is the winner decided?',
+    a: 'The room votes. Every attendee picks their favourite demo once the presentations are done, and we announce the winner before the day is out.',
+  },
+  {
+    q: 'When will I hear back?',
+    a: 'We review every entry and email you either way once the lineup is set, whether or not your demo makes the cut.',
   },
 ];
 
@@ -168,6 +200,18 @@ export default async function BuilderShowcase() {
               </a>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="scroll-mt-28 pt-4 pb-20 px-6">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight text-center mb-12 animate-slide-up">
+            Common questions
+          </h2>
+          <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            <ShowcaseFaq faqs={SHOWCASE_FAQS} />
+          </div>
         </div>
       </section>
 
