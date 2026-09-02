@@ -6,6 +6,11 @@ import { FieldValue } from 'firebase-admin/firestore';
 
 type ShowcaseStage = 'idea' | 'prototype' | 'live';
 
+interface CoPresenter {
+  name: string;
+  email: string;
+}
+
 interface ShowcasePayload {
   name: string;
   email: string;
@@ -17,8 +22,7 @@ interface ShowcasePayload {
   repoUrl: string;
   linkedinUrl: string;
   builtWith: string;
-  coPresenterNames: string;
-  coPresenterEmails: string;
+  coPresenters: CoPresenter[];
   demoRequirements: string;
   isFirstTimePresenter: boolean;
   tracking: Record<string, string>;
@@ -45,8 +49,11 @@ const PROJECT_NAME_MAX = 120;
 const PITCH_MAX = 140;
 const DESCRIPTION_MAX = 1000;
 const BUILT_WITH_MAX = 300;
-const CO_PRESENTER_NAMES_MAX = 300;
-const CO_PRESENTER_EMAILS_MAX = 500;
+// Five minutes on stage does not fit a crowd, so the roster is capped rather than
+// unbounded. The form enforces the same cap.
+const CO_PRESENTERS_MAX = 4;
+const CO_PRESENTER_NAME_MAX = 100;
+const CO_PRESENTER_EMAIL_MAX = 200;
 const DEMO_REQUIREMENTS_MAX = 500;
 
 const STAGE_LABELS: Record<ShowcaseStage, string> = {
@@ -54,6 +61,46 @@ const STAGE_LABELS: Record<ShowcaseStage, string> = {
   prototype: 'Working prototype',
   live: 'Live and in use',
 };
+
+// Co-presenters arrive as a list of blocks the entrant added one at a time. Rows left
+// completely blank are dropped rather than rejected: an added-then-abandoned block is a
+// slip, not an error worth blocking the whole submission on.
+function validateCoPresenters(input: unknown): CoPresenter[] {
+  if (input === undefined || input === null) return [];
+  if (!Array.isArray(input)) throw new Error('Co-presenters must be a list.');
+
+  const coPresenters: CoPresenter[] = [];
+
+  for (const raw of input) {
+    if (!raw || typeof raw !== 'object') throw new Error('Each co-presenter must have a name and an email.');
+    const entry = raw as Record<string, unknown>;
+    const name = typeof entry.name === 'string' ? entry.name.trim() : '';
+    const email = typeof entry.email === 'string' ? entry.email.trim().toLowerCase() : '';
+
+    if (!name && !email) continue;
+
+    if (!name) throw new Error('Please give every co-presenter a name.');
+    if (name.length > CO_PRESENTER_NAME_MAX) {
+      throw new Error(`A co-presenter's name must be ${CO_PRESENTER_NAME_MAX} characters or fewer.`);
+    }
+    if (email) {
+      if (email.length > CO_PRESENTER_EMAIL_MAX) {
+        throw new Error(`A co-presenter's email must be ${CO_PRESENTER_EMAIL_MAX} characters or fewer.`);
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        throw new Error(`${name} needs a valid email address, or leave it blank.`);
+      }
+    }
+
+    coPresenters.push({ name, email });
+  }
+
+  if (coPresenters.length > CO_PRESENTERS_MAX) {
+    throw new Error(`You can add up to ${CO_PRESENTERS_MAX} co-presenters.`);
+  }
+
+  return coPresenters;
+}
 
 function validatePayload(body: unknown): ShowcasePayload {
   if (!body || typeof body !== 'object') throw new Error('Invalid request body.');
@@ -73,12 +120,7 @@ function validatePayload(body: unknown): ShowcasePayload {
   if (typeof b.builtWith === 'string' && b.builtWith.length > BUILT_WITH_MAX) {
     throw new Error(`What you built it with must be ${BUILT_WITH_MAX} characters or fewer.`);
   }
-  if (typeof b.coPresenterNames === 'string' && b.coPresenterNames.length > CO_PRESENTER_NAMES_MAX) {
-    throw new Error(`Your co-presenter names must be ${CO_PRESENTER_NAMES_MAX} characters or fewer.`);
-  }
-  if (typeof b.coPresenterEmails === 'string' && b.coPresenterEmails.length > CO_PRESENTER_EMAILS_MAX) {
-    throw new Error(`Your co-presenter emails must be ${CO_PRESENTER_EMAILS_MAX} characters or fewer.`);
-  }
+  const coPresenters = validateCoPresenters(b.coPresenters);
   if (typeof b.demoRequirements === 'string' && b.demoRequirements.length > DEMO_REQUIREMENTS_MAX) {
     throw new Error(`What you need on the day must be ${DEMO_REQUIREMENTS_MAX} characters or fewer.`);
   }
@@ -94,8 +136,7 @@ function validatePayload(body: unknown): ShowcasePayload {
     repoUrl: typeof b.repoUrl === 'string' ? b.repoUrl.trim() : '',
     linkedinUrl: typeof b.linkedinUrl === 'string' ? b.linkedinUrl.trim() : '',
     builtWith: typeof b.builtWith === 'string' ? b.builtWith.trim() : '',
-    coPresenterNames: typeof b.coPresenterNames === 'string' ? b.coPresenterNames.trim() : '',
-    coPresenterEmails: typeof b.coPresenterEmails === 'string' ? b.coPresenterEmails.trim() : '',
+    coPresenters,
     demoRequirements: typeof b.demoRequirements === 'string' ? b.demoRequirements.trim() : '',
     isFirstTimePresenter: b.isFirstTimePresenter === true,
     tracking: sanitizeTracking(b.tracking),
