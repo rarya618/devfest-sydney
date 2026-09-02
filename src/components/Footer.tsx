@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import VolunteerLink from './VolunteerLink';
+import ShowcaseLink from './ShowcaseLink';
 
 const COLUMNS: { heading: string; links: { label: string; href: string; external?: boolean }[] }[] = [
   {
@@ -16,6 +17,7 @@ const COLUMNS: { heading: string; links: { label: string; href: string; external
   {
     heading: 'Support',
     links: [
+      { label: 'Builder Showcase', href: '/builder-showcase' },
       { label: 'Volunteer', href: '/volunteer' },
       { label: 'FAQ', href: '/faq' },
       { label: 'Privacy Policy', href: '/privacy' },
@@ -76,6 +78,15 @@ export default function Footer() {
                 <p className="text-xl font-bold text-white mb-3">{column.heading}</p>
                 <ul className="space-y-3">
                   {column.links.map((link) => {
+                    if (link.label === 'Builder Showcase') {
+                      return (
+                        <li key={link.label}>
+                          <ShowcaseLink source="footer" className="text-sm text-white hover:text-white/70 transition-colors">
+                            {link.label}
+                          </ShowcaseLink>
+                        </li>
+                      );
+                    }
                     if (link.label === 'Volunteer') {
                       return (
                         <li key={link.label}>

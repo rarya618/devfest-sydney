@@ -76,6 +76,20 @@ env:
       - BUILD
       - RUNTIME
 
+  # Builder Showcase (call for demos)
+  # Master switch, plus an optional deadline the form and /api/submit-showcase close
+  # themselves at. Leave SHOWCASE_CLOSE_DATE empty for no deadline.
+  - variable: SHOWCASE_OPEN
+    value: "true"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: SHOWCASE_CLOSE_DATE
+    value: ""
+    availability:
+      - BUILD
+      - RUNTIME
+
   # Firebase Admin SDK — stored as secrets
   # BUILD availability is required: Next.js executes route modules (which
   # import firebase-admin) during the "Collecting page data" build step.

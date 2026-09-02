@@ -95,6 +95,31 @@ rules_version='2';
 //   - dietaryRequirements: string (optional, max 300 chars)
 //   - submittedAt: timestamp (required, must be recent)
 //
+// Collection: showcase
+// Document ID: auto-generated
+// Builder Showcase entries: five-minute attendee demos, reviewed like CfS submissions.
+// Written only by /api/submit-showcase through the Admin SDK, which bypasses these rules,
+// so unlike submissions and volunteers there is no public create path to validate.
+// Fields:
+//   - name: string (required, 1-100 chars)
+//   - email: string (required, valid email) - contact email (PII)
+//   - projectName: string (required, 1-120 chars)
+//   - pitch: string (required, 1-140 chars) - one-line pitch read out on stage
+//   - description: string (required, 1-1000 chars) - what they'll demo
+//   - stage: string (required) - 'idea' | 'prototype' | 'live'
+//   - demoUrl: string (optional, max 500 chars, may be empty)
+//   - repoUrl: string (optional, max 500 chars, may be empty)
+//   - linkedinUrl: string (optional, max 500 chars, may be empty)
+//   - builtWith: string (optional, max 300 chars)
+//   - coPresenters: list of maps (optional, max 4) - anyone demoing with them,
+//     each { name: string (1-100 chars), email: string (valid email or empty, max 200) }
+//   - demoRequirements: string (optional, max 500 chars) - what they need on the day
+//   - isFirstTimePresenter: boolean (required)
+//   - tracking: map (optional) - UTM attribution captured at submit time
+//   - submittedAt: timestamp (required)
+//   - status: string (required) - 'pending' | 'accepted' | 'rejected' | 'archived'
+//   - reviewerNotes: list of maps (optional) - admin-only notes
+//
 // ===============================================================
 
 service cloud.firestore {
@@ -286,6 +311,15 @@ service cloud.firestore {
       allow create: if isValidVolunteerSubmission(request.resource.data) &&
                        isRecent(request.resource.data.submittedAt);
       // Only admins may read, update (add notes/status), or delete
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // showcase — no client writes at all, admin-only read
+    // Entries reach Firestore through /api/submit-showcase on the server, so the
+    // client SDK never needs create access here.
+    // ===============================================================
+    match /showcase/{entryId} {
       allow read, update, delete: if isAdmin();
     }
 

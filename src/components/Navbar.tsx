@@ -4,22 +4,36 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import CfsLink from './CfsLink';
+import ShowcaseLink from './ShowcaseLink';
 import TicketsLink from './TicketsLink';
 
-type Accent = 'blue' | 'green' | 'red';
+type Accent = 'blue' | 'green' | 'red' | 'yellow';
 
 const ACCENT_CLASSES: Record<Accent, string> = {
-  blue: 'bg-google-blue border-google-blue',
-  green: 'bg-google-green border-google-green',
-  red: 'bg-google-red border-google-red',
+  blue: 'bg-google-blue border-google-blue text-white',
+  green: 'bg-google-green border-google-green text-white',
+  red: 'bg-google-red border-google-red text-white',
+  // Yellow is light enough that white on it fails WCAG AA, so this accent pairs with
+  // Black 02 text rather than the white the other three use.
+  yellow: 'bg-google-yellow border-google-yellow text-[#1e1e1e]',
 };
 
-// Deliberately short. /tickets is reached from the CTA button beside these links, from
-// the landing page's ticket section, and from the footer, so a nav item for it would only
+// Kept short. /tickets is reached from the CTA button beside these links, from the
+// landing page's ticket section, and from the footer, so a nav item for it would only
 // repeat the CTA sitting next to it.
+//
+// /builder-showcase is not gated on whether entries are open, for the same reason the
+// footer's /tickets link is permanent: the page has its own closed state, and Navbar is a
+// client component that cannot read the server-only SHOWCASE_OPEN anyway.
+
+// Matched against so the showcase item renders as a ShowcaseLink, which tags the click
+// with its own ref the way the tickets and CfS CTAs do.
+const SHOWCASE_HREF = '/builder-showcase';
+
 const NAV_LINKS = [
   { href: '/#about', label: 'About' },
   { href: '/#tracks', label: 'Tracks' },
+  { href: SHOWCASE_HREF, label: 'Builder Showcase' },
 ];
 
 export default function Navbar({
@@ -110,12 +124,18 @@ export default function Navbar({
 
           <div className="flex items-center gap-8">
             {/* Links */}
-            <div className="hidden md:flex items-center gap-8 text-sm font-bold text-white">
-              {NAV_LINKS.map((link) => (
-                <Link key={link.href} href={link.href} className="hover:text-white/80 transition-colors">
-                  {link.label}
-                </Link>
-              ))}
+            <div className="hidden md:flex items-center gap-8 text-sm font-bold text-white whitespace-nowrap">
+              {NAV_LINKS.map((link) =>
+                link.href === SHOWCASE_HREF ? (
+                  <ShowcaseLink key={link.href} source="navbar" className="hover:text-white/80 transition-colors">
+                    {link.label}
+                  </ShowcaseLink>
+                ) : (
+                  <Link key={link.href} href={link.href} className="hover:text-white/80 transition-colors">
+                    {link.label}
+                  </Link>
+                )
+              )}
             </div>
 
             {/* CTA: tickets are the primary conversion once they are on sale */}
@@ -123,14 +143,14 @@ export default function Navbar({
               <TicketsLink
                 source="navbar"
                 aria-label="Get tickets for DevFest Sydney 2026 on Humanitix"
-                className={`hidden md:inline-flex items-center px-5.5 py-1.75 text-white text-sm font-bold rounded-sm border transition-opacity hover:opacity-80 ${ACCENT_CLASSES[accent]}`}
+                className={`hidden md:inline-flex items-center px-5.5 py-1.75 text-sm font-bold rounded-sm border transition-opacity hover:opacity-80 ${ACCENT_CLASSES[accent]}`}
               >
                 Get tickets
               </TicketsLink>
             ) : (
               <CfsLink
                 source="navbar"
-                className={`hidden md:inline-flex items-center px-5.5 py-1.75 text-white text-sm font-bold rounded-sm border transition-opacity hover:opacity-80 ${ACCENT_CLASSES[accent]}`}
+                className={`hidden md:inline-flex items-center px-5.5 py-1.75 text-sm font-bold rounded-sm border transition-opacity hover:opacity-80 ${ACCENT_CLASSES[accent]}`}
               >
                 Apply to speak
               </CfsLink>
@@ -162,28 +182,39 @@ export default function Navbar({
           }`}
         >
           <div className="px-4 sm:px-6 py-6 flex flex-col gap-5">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-base font-bold text-white hover:text-white/80 transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {NAV_LINKS.map((link) =>
+              link.href === SHOWCASE_HREF ? (
+                <ShowcaseLink
+                  key={link.href}
+                  source="navbar-mobile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-base font-bold text-white hover:text-white/80 transition-colors"
+                >
+                  {link.label}
+                </ShowcaseLink>
+              ) : (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-base font-bold text-white hover:text-white/80 transition-colors"
+                >
+                  {link.label}
+                </Link>
+              )
+            )}
             {areTicketsOpen ? (
               <TicketsLink
                 source="navbar-mobile"
                 aria-label="Get tickets for DevFest Sydney 2026 on Humanitix"
-                className={`inline-flex items-center justify-center px-5.5 py-1.75 text-white text-sm font-bold rounded-sm border transition-opacity hover:opacity-80 ${ACCENT_CLASSES[accent]}`}
+                className={`inline-flex items-center justify-center px-5.5 py-1.75 text-sm font-bold rounded-sm border transition-opacity hover:opacity-80 ${ACCENT_CLASSES[accent]}`}
               >
                 Get tickets
               </TicketsLink>
             ) : (
               <CfsLink
                 source="navbar"
-                className={`inline-flex items-center justify-center px-5.5 py-1.75 text-white text-sm font-bold rounded-sm border transition-opacity hover:opacity-80 ${ACCENT_CLASSES[accent]}`}
+                className={`inline-flex items-center justify-center px-5.5 py-1.75 text-sm font-bold rounded-sm border transition-opacity hover:opacity-80 ${ACCENT_CLASSES[accent]}`}
               >
                 Apply to speak
               </CfsLink>

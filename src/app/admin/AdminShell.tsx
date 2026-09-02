@@ -14,6 +14,7 @@ import { MobileBarContext } from './MobileBarContext';
 const NAV_ITEMS: { href: string; label: string }[] = [
   { href: '/admin', label: 'Submissions' },
   { href: '/admin/volunteers', label: 'Volunteers' },
+  { href: '/admin/showcase', label: 'Showcase' },
   { href: '/admin/analytics', label: 'Analytics' },
   { href: '/admin/links', label: 'Links' },
   { href: '/admin/admins', label: 'Admins' },

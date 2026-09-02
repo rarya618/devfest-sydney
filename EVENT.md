@@ -36,6 +36,9 @@ Hands-on sessions where attendees build alongside the speaker. Open to any topic
 ### 4. Builder Showcase
 Mid-afternoon session where attendees present 5-minute demos, with audience voting.
 
+Entries come in through the call for demos at `/builder-showcase`, which runs on its own
+timetable separate from the Call for Speakers.
+
 ## Special Features
 
 ### Builder's Space

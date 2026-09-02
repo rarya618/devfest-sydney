@@ -14,6 +14,7 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 ### Pages
 - `/` — Hero, About, Speakers (accepted), Schedule, Venue, Sponsors, Team
 - `/call-for-speakers` — CfS form with open/closed state
+- `/builder-showcase` — Builder Showcase call for demos, with open/closed state
 - `/volunteer` — Volunteer signup form with open/closed state
 - `/conduct` — Code of Conduct, static page
 - `/tickets` — Ticket info page; links out to Humanitix, open/closed state controlled by `NEXT_PUBLIC_TICKETS_OPEN`
@@ -22,6 +23,7 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 - `/admin/login` — Google sign-in via Firebase Auth (restricted to authorised emails)
 - `/admin` — Review CfS submissions, promote accepted speakers to `speakers` collection
 - `/admin/volunteers` — Review volunteer signups (accept, reject, restore, archive)
+- `/admin/showcase` — Review Builder Showcase entries (accept, reject, restore, archive)
 - `/admin/admins` — Manage authorised admin emails
 - `/admin/analytics` — Submission stats and trends
 - `/admin/links` — Generate UTM-tagged tracking links
@@ -39,6 +41,14 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 - On submit: confirmation email to the volunteer (via Resend), signup stored in Firestore (`volunteers` collection)
 - Reviewed in `/admin/volunteers`: admins can accept, reject, restore, or archive a signup and add reviewer notes. No promotion to a separate public collection (unlike CfS → `speakers`) — volunteers aren't shown publicly.
 
+### Builder Showcase Flow
+- `/builder-showcase` page with an entry form, open/closed state controlled by `SHOWCASE_OPEN` and an optional `SHOWCASE_CLOSE_DATE` deadline (`isShowcaseOpen()` in `src/lib/showcase.ts`, evaluated per request like `isCfsOpen()`)
+- Form fields: name, email, LinkedIn (optional), co-presenters (optional, up to 4, each added as its own name + email block), project name, one-line pitch, what you'll demo, stage (idea / prototype / live), project link (optional), repository (optional), built with (optional), demo requirements (optional), first-time presenter
+- On submit: confirmation email to the entrant (via Resend), entry stored in Firestore (`showcase` collection)
+- Reviewed in `/admin/showcase`: accept, reject, restore, archive, plus reviewer notes. No promotion to a public collection, same as volunteers
+- Runs on its own timetable, separate from the CfS: demos can still be taken after the talk lineup is locked in
+- Firestore rules for `showcase` allow no client writes at all. Every entry arrives through `/api/submit-showcase` on the server, so unlike `submissions` and `volunteers` there is no public create path
+
 ### Admin Flow
 - Auth via Firebase Auth (Google sign-in), restricted to emails in the `admins` Firestore collection
 - `/admin/login` — sign-in page, redirects to `/admin` on success
@@ -53,6 +63,7 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 
 ### Dynamic Content (managed via Firestore)
 - Speakers — `speakers` collection (populated after CfS closes)
+- Builder Showcase entries — `showcase` collection (written by `/api/submit-showcase`, reviewed in `/admin/showcase`)
 - Admins — `admins` collection (each doc keyed by email, checked on login)
 - Schedule — `schedule` collection (built after speakers confirmed)
 - Sponsors — `sponsors` collection
@@ -109,6 +120,8 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 |----------|---------|
 | `CFS_OPEN` | Master switch: `true` to show the CfS form, `false` to show the closed message. The form is open only while this is `true` AND `CFS_CLOSE_DATE` has not passed, so it closes on its own at the deadline |
 | `CFS_CLOSE_DATE` | ISO datetime the CfS closes. Powers the countdown on `/` and `/call-for-speakers`, and auto-closes the form and the `submit-proposal` endpoint at that moment via `isCfsOpen()` in `src/lib/cfs.ts`. Unset means no deadline: `CFS_OPEN` alone decides, and the countdown is hidden |
+| `SHOWCASE_OPEN` | Master switch for the Builder Showcase call for demos: `true` to show the form on `/builder-showcase`, `false` to show the closed message |
+| `SHOWCASE_CLOSE_DATE` | Optional ISO datetime the Builder Showcase entries close, same shape as `CFS_CLOSE_DATE`. Unset means no deadline, and `SHOWCASE_OPEN` alone decides |
 | `VOLUNTEER_OPEN` | `true` to show volunteer signup form, `false` to show closed message |
 | `TICKETS_ON_SALE_DATE` | ISO datetime (e.g. `2026-09-05T09:00:00+10:00`) tickets go on sale, same shape as `CFS_CLOSE_DATE`. Ticket CTAs turn themselves on at that moment with no deploy. Unset means tickets stay closed |
 | `NEXT_PUBLIC_HUMANITIX_URL` | Humanitix event URL the ticket CTAs link out to. Tickets stay closed if this is unset, whatever the date or override say. Public because `TicketsLink` renders inside the client-side `Navbar` |
@@ -142,6 +155,10 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 Also removed: a dead `formatCloseDate` in `src/app/page.tsx` (defined, never called), and the module-level `isCfsOpen` in `/call-for-speakers` that froze at process start so the deadline could never pass.
 
 **Deferred:** `offers` on the `/` Event JSON-LD. Google wants `price` and `priceCurrency`, which aren't known until ticket tiers are set in Humanitix. Add once they are.
+**Builder Showcase call for demos shipped 2026-09-02:** `/builder-showcase` (hero, a "How it works" section, form or closed state, own metadata/canonical/OG image), `/api/submit-showcase` (validation, Firestore write to `showcase`, Resend confirmation), and `/admin/showcase` (accept / reject / restore / archive, reviewer notes, status filter, search). Wired into the admin sidebar, the footer's Support column (via a new `ShowcaseLink`, matching `VolunteerLink`'s localStorage attribution), and the sitemap. `Navbar` gained a `yellow` accent for it: yellow is the Builder Showcase brand colour, and white on `#f9ab00` fails WCAG AA, so that accent pairs with Black 02 text and the text colour moved into `ACCENT_CLASSES` (two competing `text-*` utilities in one class string is decided by stylesheet order, not source order). `formatCloseDateTime` moved from `src/lib/cfs.ts` to `src/lib/format.ts` so both deadlines share the Sydney-pinned rendering. `/api/submit-showcase` closes itself on `isShowcaseOpen()`, so it does NOT have the gap `/api/submit-volunteer` still has. Verified against a dev server in both states: form + 400 validation messages when open, closed-state page + 403 when `SHOWCASE_OPEN=false`.
+
+**Still outstanding:** `/api/submit-volunteer` accepts signups regardless of `VOLUNTEER_OPEN`. The fix is the same three lines `/api/submit-proposal` and `/api/submit-showcase` already have.
+
 **Next task:**
 1. Partners section — update the landing page's Partners section to include sponsors, plus a new dedicated sponsors page. Data-fetching plumbing (`fetchSponsors()`, `fetchSponsorshipProspectusUrl()` in `src/app/page.tsx`) already exists; the section itself is still hidden (`showSponsors = false`) pending the actual UI.
 
