@@ -30,32 +30,37 @@ export const metadata: Metadata = {
   },
 };
 
-const howItWorks: { step: string; title: string; description: string; dot: string }[] = [
+const HOW_IT_WORKS = [
   {
-    step: '01',
     title: 'Tell us what you built',
-    description: 'An app, an agent, an automation, a weekend hack. Code or no-code, finished or half-finished.',
-    dot: 'bg-google-blue',
+    desc: 'An app, an agent, an automation, a weekend hack. Code or no-code, finished or half-finished.',
+    color: 'google-blue',
   },
   {
-    step: '02',
     title: 'We pick the lineup',
-    description: 'We review every entry and email you either way, whether or not your demo makes the cut.',
-    dot: 'bg-google-green',
+    desc: 'We review every entry and email you either way, whether or not your demo makes the cut.',
+    color: 'google-green',
   },
   {
-    step: '03',
     title: 'You get five minutes',
-    description: 'Mid-afternoon, on the main stage, in front of the room. No slides required.',
-    dot: 'bg-google-yellow',
+    desc: 'Mid-afternoon, on the main stage, in front of the room. No slides required.',
+    color: 'google-yellow',
   },
   {
-    step: '04',
     title: 'The room votes',
-    description: 'Every attendee votes on their favourite demo, and we crown a winner before the day is out.',
-    dot: 'bg-google-red',
+    desc: 'Every attendee votes on their favourite demo, and we crown a winner before the day is out.',
+    color: 'google-red',
   },
 ];
+
+// Tailwind needs the full class name in the source to generate it, so the accent can't be
+// interpolated into `border-${color}`. Mirrors REASON_BORDER on /call-for-speakers.
+const STEP_BORDER: Record<string, string> = {
+  'google-blue': 'border-google-blue',
+  'google-green': 'border-google-green',
+  'google-yellow': 'border-google-yellow',
+  'google-red': 'border-google-red',
+};
 
 export default async function BuilderShowcase() {
   const showcaseOpen = isShowcaseOpen();
@@ -113,13 +118,14 @@ export default async function BuilderShowcase() {
             How it works
           </h2>
 
-          <ol className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {howItWorks.map((item) => (
-              <li key={item.step} className="bg-white/[0.035] rounded-2xl p-6 animate-slide-up">
-                <span className={`block w-2 h-2 rounded-full ${item.dot} mb-5`} aria-hidden="true" />
-                <span className="block font-mono text-xs text-white/50 mb-2">{item.step}</span>
-                <h3 className="text-lg font-bold text-white mb-2 leading-snug">{item.title}</h3>
-                <p className="text-sm text-white/65 leading-relaxed">{item.description}</p>
+          <ol className="grid sm:grid-cols-2 gap-8 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            {HOW_IT_WORKS.map((item) => (
+              <li
+                key={item.title}
+                className={`flex flex-col gap-3 bg-white/[0.035] border-l-6 ${STEP_BORDER[item.color]} rounded-lg pt-8 pb-10 px-6 md:px-8`}
+              >
+                <h3 className="text-xl md:text-2xl font-bold text-white">{item.title}</h3>
+                <p className="text-base text-white/80 leading-relaxed">{item.desc}</p>
               </li>
             ))}
           </ol>
