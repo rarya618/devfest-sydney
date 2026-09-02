@@ -5,6 +5,8 @@ export type SubmissionStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
 export type SponsorTier = 'platinum' | 'gold' | 'silver' | 'community';
 export type VolunteerArea = 'registration' | 'av-tech' | 'speaker-support' | 'workshop-facilitator' | 'general-floater' | 'setup-packdown' | 'photography' | 'social-media' | 'merch-table';
 export type VolunteerStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
+export type ShowcaseStage = 'idea' | 'prototype' | 'live';
+export type ShowcaseStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
 
 export interface Sponsor {
   id: string;
@@ -92,5 +94,27 @@ export interface VolunteerSubmission {
   tracking: SubmissionTracking;
   submittedAt: string; // ISO date string (serialized from Firestore Timestamp)
   status: VolunteerStatus;
+  reviewerNotes: ReviewerNote[];
+}
+
+export interface ShowcaseSubmission {
+  id: string;
+  name: string;
+  email: string;
+  projectName: string;
+  pitch: string;
+  description: string;
+  stage: ShowcaseStage;
+  demoUrl: string;
+  repoUrl: string;
+  linkedinUrl: string;
+  builtWith: string;
+  coPresenterNames: string;
+  coPresenterEmails: string;
+  demoRequirements: string;
+  isFirstTimePresenter: boolean;
+  tracking: SubmissionTracking;
+  submittedAt: string; // ISO date string (serialized from Firestore Timestamp)
+  status: ShowcaseStatus;
   reviewerNotes: ReviewerNote[];
 }
