@@ -125,7 +125,7 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 md:px-10 pt-8 pb-4">
-          <span className="text-sm font-bold text-white"><span className="font-mono">©</span> 2026 GDG Sydney. All rights reserved.</span>
+          <span className="font-mono text-sm font-bold text-white">© 2026 GDG Sydney. All rights reserved.</span>
           <div className="flex items-center gap-8">
             <a
               href="https://gdgsydney.com"
