@@ -77,15 +77,10 @@ env:
       - RUNTIME
 
   # Builder Showcase (call for demos)
-  # Master switch, plus an optional deadline the form and /api/submit-showcase close
-  # themselves at. Leave SHOWCASE_CLOSE_DATE empty for no deadline.
+  # Master switch. An optional SHOWCASE_CLOSE_DATE deadline can be added here later;
+  # App Hosting rejects empty values, so "no deadline" means omitting the variable.
   - variable: SHOWCASE_OPEN
     value: "true"
-    availability:
-      - BUILD
-      - RUNTIME
-  - variable: SHOWCASE_CLOSE_DATE
-    value: ""
     availability:
       - BUILD
       - RUNTIME
