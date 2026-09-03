@@ -104,6 +104,14 @@ env:
       - BUILD
       - RUNTIME
 
+  # Speaker acceptance confirmation links — stored as a secret
+  # Signs the token in the "Confirm participation" button of the acceptance email.
+  # Rotating it invalidates every confirmation link already emailed.
+  - variable: SPEAKER_CONFIRM_SECRET
+    secret: SPEAKER_CONFIRM_SECRET
+    availability:
+      - RUNTIME
+
   # Resend — stored as secrets
   - variable: RESEND_API_KEY
     secret: RESEND_API_KEY
