@@ -16,6 +16,7 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 - `/call-for-speakers` — CfS form with open/closed state
 - `/builder-showcase` — Builder Showcase call for demos, with open/closed state
 - `/volunteer` — Volunteer signup form with open/closed state
+- `/speaker/confirm` — accepted speakers confirm participation from a signed link in their acceptance email (no login, `noindex`)
 - `/conduct` — Code of Conduct, static page
 - `/tickets` — Ticket info page; links out to Humanitix, open/closed state controlled by `NEXT_PUBLIC_TICKETS_OPEN`
 - `/faq` — Dedicated FAQ page (moved off `/` so it can be linked to directly, e.g. from the footer)
@@ -33,6 +34,8 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 - Open/closed toggle controlled by an env var `CFS_OPEN=true|false`
 - On submit: confirmation email to speaker (via Resend), submission stored in Firestore (`submissions` collection)
 - Accepted speakers are promoted to the `speakers` Firestore collection after review
+- Accepting a proposal and telling the speaker are separate steps. An admin sends the acceptance email explicitly from the `/admin` actions menu (`sendAcceptanceEmail`), which records `acceptanceEmailSentAt`, `acceptanceEmailSentBy` and a `confirmByDate` 8 days out, and adds a reviewer note. Accepted cards show a Not emailed / Awaiting confirmation / Confirmed chip
+- The acceptance email carries a "Confirm participation" button pointing at `/speaker/confirm?token=...`. The token is an HMAC of the submission id signed with `SPEAKER_CONFIRM_SECRET`; confirming is behind a button on the page rather than the page load, so mail scanners can't confirm on the speaker's behalf. Confirming sets `speakerConfirmedAt` and emails hello@gdgsydney.com a "Speaker confirmed" notice, with `replyTo` set to the speaker so an organiser can answer them directly. Sent once, on the transition only, so a second click doesn't notify twice
 - **Multiple submissions per person are allowed by design** (e.g. someone submitting a talk and a workshop). Do not add dedupe/rate-limiting on email for `submit-proposal` without checking with the user first.
 
 ### Volunteer Signup Flow
@@ -134,6 +137,7 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 | `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` | Firebase client SDK |
 | `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | Firebase client SDK |
 | `NEXT_PUBLIC_FIREBASE_APP_ID` | Firebase client SDK |
+| `SPEAKER_CONFIRM_SECRET` | Signs the token in the acceptance email's "Confirm participation" link (`src/lib/speakerConfirm.ts`). Rotating it invalidates every confirmation link already sent |
 | `RESEND_API_KEY` | Resend email sending |
 | `RESEND_FROM_EMAIL` | Sender address for confirmation emails |
 | `NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY` | Firebase App Check (reCAPTCHA Enterprise site key) |
@@ -156,6 +160,8 @@ Also removed: a dead `formatCloseDate` in `src/app/page.tsx` (defined, never cal
 
 **Deferred:** `offers` on the `/` Event JSON-LD. Google wants `price` and `priceCurrency`, which aren't known until ticket tiers are set in Humanitix. Add once they are.
 **Builder Showcase call for demos shipped 2026-09-02:** `/builder-showcase` (hero, a "How it works" section, form or closed state, own metadata/canonical/OG image), `/api/submit-showcase` (validation, Firestore write to `showcase`, Resend confirmation), and `/admin/showcase` (accept / reject / restore / archive, reviewer notes, status filter, search). Wired into the admin sidebar, the footer's Support column (via a new `ShowcaseLink`, matching `VolunteerLink`'s localStorage attribution), and the sitemap. `Navbar` gained a `yellow` accent for it: yellow is the Builder Showcase brand colour, and white on `#f9ab00` fails WCAG AA, so that accent pairs with Black 02 text and the text colour moved into `ACCENT_CLASSES` (two competing `text-*` utilities in one class string is decided by stylesheet order, not source order). `formatCloseDateTime` moved from `src/lib/cfs.ts` to `src/lib/format.ts` so both deadlines share the Sydney-pinned rendering. `/api/submit-showcase` closes itself on `isShowcaseOpen()`, so it does NOT have the gap `/api/submit-volunteer` still has. Verified against a dev server in both states: form + 400 validation messages when open, closed-state page + 403 when `SHOWCASE_OPEN=false`.
+
+**Speaker acceptance emails shipped 2026-09-03:** built to the "Email template - Confirmed Speaker" frame in the DevFest Figma file. `src/lib/acceptanceEmail.ts` (table-based HTML, escaped speaker input, track/format/level pills, the Humanitix share line only when `NEXT_PUBLIC_HUMANITIX_URL` is set), `sendAcceptanceEmail` in `src/app/admin/actions.ts`, and `/speaker/confirm`. Unlike the public form endpoints, a send failure is surfaced to the admin rather than swallowed: they are standing right there and need to know the speaker was never told. Verified in dev against a temporary accepted submission (since deleted): the confirm page renders, confirms, persists as "already confirmed" on reload, and rejects a bogus token; the dashboard chip and menu item render. **The live Resend send itself has not been triggered yet** - the first real send will be the first proof that the from-domain and template land correctly, so send the first one to an organiser.
 
 **Still outstanding:** `/api/submit-volunteer` accepts signups regardless of `VOLUNTEER_OPEN`. The fix is the same three lines `/api/submit-proposal` and `/api/submit-showcase` already have.
 
