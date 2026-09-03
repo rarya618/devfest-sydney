@@ -1,3 +1,10 @@
+# Redeploy trigger. App Hosting resolves secrets and env vars at rollout time, not build
+# time, so a config change made in the console or Secret Manager needs a fresh rollout to
+# be picked up, with no code change to carry it. Bump this number, commit, and push: the
+# on-push rollout does the rest. (The alternative is
+# `firebase apphosting:rollouts:create devfest-sydney --git-branch main`.)
+# rollout: 1
+
 runConfig:
   cpu: 1
   memoryMiB: 512
