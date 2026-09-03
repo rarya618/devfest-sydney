@@ -78,6 +78,12 @@ export interface Submission {
   submittedAt: string; // ISO date string (serialized from Firestore Timestamp)
   status: SubmissionStatus;
   reviewerNotes: ReviewerNote[];
+  // All null until an admin sends the acceptance email from the dashboard. Accepting a
+  // proposal and telling the speaker about it are deliberately separate steps.
+  acceptanceEmailSentAt: string | null; // ISO date string
+  acceptanceEmailSentBy: string;
+  confirmByDate: string | null; // ISO date string; the speaker's deadline to confirm
+  speakerConfirmedAt: string | null; // ISO date string; set from /speaker/confirm
 }
 
 export interface VolunteerSubmission {
