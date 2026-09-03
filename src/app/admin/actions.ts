@@ -4,6 +4,9 @@ import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { Resend } from 'resend';
+import { acceptanceEmailSubject, buildAcceptanceEmail } from '@/lib/acceptanceEmail';
+import { confirmDeadlineFrom, confirmUrl } from '@/lib/speakerConfirm';
 import type { ExperienceLevel, TalkFormat, Track } from '@/lib/types';
 
 const SESSION_COOKIE_NAME = '__session';
@@ -478,4 +481,89 @@ export async function archiveSubmission(submissionId: string): Promise<{ error?:
   } catch {
     return { error: 'Could not archive this submission. Please try again.' };
   }
+}
+
+// Telling an accepted speaker is a separate, deliberate step from accepting them: bulk
+// accept would otherwise fire a batch of emails, and undoing an acceptance can't unsend
+// one. Records when it went and who sent it so a second organiser can see it's been done.
+export async function sendAcceptanceEmail(submissionId: string): Promise<{ error?: string }> {
+  let senderName: string;
+  let senderEmail: string;
+  try {
+    ({ name: senderName, email: senderEmail } = await verifyAdminSession());
+  } catch {
+    return { error: 'Your session has expired. Please sign in again.' };
+  }
+
+  const submissionRef = adminDb.collection('submissions').doc(submissionId);
+
+  let submission: FirebaseFirestore.DocumentData;
+  try {
+    const snap = await submissionRef.get();
+    if (!snap.exists) return { error: 'Submission not found.' };
+    submission = snap.data()!;
+  } catch {
+    return { error: 'Could not load this submission. Please try again.' };
+  }
+
+  if (submission.status !== 'accepted') {
+    return { error: 'Only accepted submissions can be sent an acceptance email. Accept this proposal first.' };
+  }
+
+  const sentAt = new Date();
+  const confirmBy = confirmDeadlineFrom(sentAt);
+
+  let confirmLink: string;
+  try {
+    confirmLink = confirmUrl(submissionId);
+  } catch {
+    // Thrown when SPEAKER_CONFIRM_SECRET is missing. Sending an acceptance email with a
+    // dead confirm button would be worse than not sending it at all.
+    return { error: 'The speaker confirmation link isn\'t configured on the server, so this email can\'t be sent yet.' };
+  }
+
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: `GDG Sydney <${process.env.RESEND_FROM_EMAIL}>`,
+      to: submission.email,
+      bcc: 'hello@gdgsydney.com',
+      replyTo: 'hello@gdgsydney.com',
+      subject: acceptanceEmailSubject(submission.talkTitle),
+      html: buildAcceptanceEmail({
+        name: submission.name,
+        talkTitle: submission.talkTitle,
+        format: submission.format,
+        track: submission.track,
+        experienceLevel: submission.experienceLevel,
+        confirmUrl: confirmLink,
+        confirmByIso: confirmBy.toISOString(),
+      }),
+    });
+  } catch (err) {
+    // Unlike the public form, this failure is surfaced: the admin is standing right there
+    // and needs to know the speaker was never told.
+    console.error('Acceptance email failed for submission:', submissionId, err);
+    return { error: 'We couldn\'t send the acceptance email. Please try again in a moment.' };
+  }
+
+  try {
+    await submissionRef.update({
+      acceptanceEmailSentAt: Timestamp.fromDate(sentAt),
+      acceptanceEmailSentBy: senderEmail,
+      confirmByDate: Timestamp.fromDate(confirmBy),
+      reviewerNotes: FieldValue.arrayUnion({
+        text: `Acceptance email sent by ${senderName}. Confirmation due ${confirmBy.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', timeZone: 'Australia/Sydney' })}.`,
+        authorName: senderName,
+        createdAt: Timestamp.now(),
+      }),
+    });
+  } catch {
+    // The email is already gone, so this is reported as a bookkeeping failure rather than
+    // a send failure: resending would email the speaker twice.
+    return { error: 'The email was sent, but we couldn\'t record it against this submission. Please refresh before sending again.' };
+  }
+
+  revalidatePath('/admin');
+  return {};
 }
