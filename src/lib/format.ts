@@ -31,3 +31,13 @@ export function formatCloseDateTime(iso: string): string {
     timeZone: EVENT_TIME_ZONE,
   });
 }
+
+// Date without a time, for deadlines that fall at the end of a day rather than at a
+// precise moment. Sydney-pinned for the same reason as formatCloseDateTime.
+export function formatDeadlineDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-AU', {
+    day: 'numeric',
+    month: 'long',
+    timeZone: EVENT_TIME_ZONE,
+  });
+}
