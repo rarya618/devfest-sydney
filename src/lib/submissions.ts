@@ -2,6 +2,10 @@ import { adminDb } from '@/lib/firebase-admin';
 import type { ReviewerNote, Submission } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
 
+function toIsoOrNull(timestamp: Timestamp | undefined): string | null {
+  return timestamp ? timestamp.toDate().toISOString() : null;
+}
+
 export async function fetchSubmissions(): Promise<Submission[]> {
   const snapshot = await adminDb
     .collection('submissions')
@@ -47,6 +51,10 @@ export async function fetchSubmissions(): Promise<Submission[]> {
       },
       submittedAt: timestamp ? timestamp.toDate().toISOString() : new Date().toISOString(),
       status: data.status ?? 'pending',
+      acceptanceEmailSentAt: toIsoOrNull(data.acceptanceEmailSentAt as Timestamp | undefined),
+      acceptanceEmailSentBy: data.acceptanceEmailSentBy ?? '',
+      confirmByDate: toIsoOrNull(data.confirmByDate as Timestamp | undefined),
+      speakerConfirmedAt: toIsoOrNull(data.speakerConfirmedAt as Timestamp | undefined),
       reviewerNotes: ((data.reviewerNotes ?? []) as Array<{
         text?: string;
         authorName?: string;
