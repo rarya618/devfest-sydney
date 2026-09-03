@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef, useTransition, type FormEvent, type ReactNode } from 'react';
-import { promoteSubmission, rejectSubmission, restoreSubmission, undoPromotion, archiveSubmission, addReviewerNote, deleteReviewerNote } from './actions';
+import { promoteSubmission, rejectSubmission, restoreSubmission, undoPromotion, archiveSubmission, addReviewerNote, deleteReviewerNote, sendAcceptanceEmail } from './actions';
 import EditSubmissionModal from './EditSubmissionModal';
 import Alert from '@/components/Alert';
 import { formatDate } from '@/lib/format';
@@ -67,6 +67,76 @@ function LinkChip({ label, value, icon, accent }: LinkChipProps) {
     </a>
   ) : (
     <span className={baseClasses}>{content}</span>
+  );
+}
+
+// Sending the acceptance email is the whole point of accepting a proposal, so it sits in
+// the action rail next to Undo rather than behind the overflow menu: an organiser
+// shouldn't have to go looking for the step that actually tells the speaker. It keeps the
+// green accent until it has been used, so an unsent acceptance reads as unfinished.
+function SendAcceptanceEmailButton({
+  submission,
+  onSend,
+  disabled,
+}: {
+  submission: Submission;
+  onSend: () => void;
+  disabled: boolean;
+}) {
+  const alreadySent = Boolean(submission.acceptanceEmailSentAt);
+
+  return (
+    <button
+      onClick={onSend}
+      disabled={disabled}
+      aria-label={`${alreadySent ? 'Resend' : 'Send'} acceptance email to ${submission.name} for: ${submission.talkTitle}`}
+      title={alreadySent ? 'Resend acceptance email' : 'Send acceptance email'}
+      className={`inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+        alreadySent
+          ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
+          : 'bg-google-green/15 text-google-green hover:bg-google-green hover:text-white'
+      }`}
+    >
+      <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+        <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
+      </svg>
+    </button>
+  );
+}
+
+// Accepting a proposal and telling the speaker are separate steps, so an accepted card
+// has to show which of the two has actually happened.
+function AcceptanceState({ submission }: { submission: Submission }) {
+  if (submission.speakerConfirmedAt) {
+    return (
+      <span
+        title={`Speaker confirmed ${formatDate(submission.speakerConfirmedAt)}`}
+        className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-green/15 text-google-green"
+      >
+        Confirmed
+      </span>
+    );
+  }
+
+  if (submission.acceptanceEmailSentAt) {
+    return (
+      <span
+        title={`Acceptance email sent ${formatDate(submission.acceptanceEmailSentAt)}${submission.acceptanceEmailSentBy ? ` by ${submission.acceptanceEmailSentBy}` : ''}`}
+        className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
+      >
+        Awaiting confirmation
+      </span>
+    );
+  }
+
+  return (
+    <span
+      title="This speaker hasn't been told yet. Send the acceptance email from the actions menu."
+      className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-yellow/15 text-google-yellow"
+    >
+      Not emailed
+    </span>
   );
 }
 
@@ -434,6 +504,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         </span>
         <span className="text-white/30 text-xs font-bold">&middot;</span>
         <span className="text-xs font-bold text-white/55">{formatDate(submission.submittedAt)}</span>
+        {submission.status === 'accepted' && <AcceptanceState submission={submission} />}
       </div>
       </div>
 
@@ -481,6 +552,13 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
                 </svg>
               </button>
             </div>
+          )}
+          {submission.status === 'accepted' && (
+            <SendAcceptanceEmailButton
+              submission={submission}
+              onSend={() => handleAction(sendAcceptanceEmail)}
+              disabled={isPending || bulkActionsPending}
+            />
           )}
           {submission.status === 'accepted' && (
             <button
@@ -680,6 +758,12 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
           {formatDate(submission.submittedAt)}
         </span>
 
+        {submission.status === 'accepted' && (
+          <span className="hidden sm:inline-flex shrink-0">
+            <AcceptanceState submission={submission} />
+          </span>
+        )}
+
         {submission.status === 'pending' && (
           <div className="hidden md:inline-flex shrink-0 rounded-full border border-white/15 overflow-hidden">
             <button
@@ -706,6 +790,13 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
               </svg>
             </button>
           </div>
+        )}
+        {submission.status === 'accepted' && (
+          <SendAcceptanceEmailButton
+            submission={submission}
+            onSend={() => handleAction(sendAcceptanceEmail)}
+            disabled={isPending || bulkActionsPending}
+          />
         )}
         {submission.status === 'accepted' && (
           <button
