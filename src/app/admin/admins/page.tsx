@@ -6,7 +6,7 @@ import type { AdminUser } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
 
 export const metadata = {
-  title: 'Admins — DevFest Sydney 2026',
+  title: 'Admins',
   openGraph: { title: 'Admins — DevFest Sydney 2026', images: ['/admin/opengraph-image'] },
   twitter: { card: 'summary_large_image', title: 'Admins — DevFest Sydney 2026', images: ['/admin/opengraph-image'] },
 };

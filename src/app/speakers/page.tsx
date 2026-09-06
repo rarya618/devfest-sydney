@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/metadata';
 import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
@@ -20,22 +21,7 @@ const title = 'Speakers';
 const description =
   'Meet the speakers of DevFest Sydney 2026. Talks and workshops across the Developer and Builder tracks, Saturday 10 October at Torrens University, Surry Hills.';
 
-export const metadata: Metadata = {
-  title,
-  description,
-  alternates: { canonical: '/speakers' },
-  openGraph: {
-    title: `${title} — DevFest Sydney 2026`,
-    description,
-    url: '/speakers',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `${title} — DevFest Sydney 2026`,
-    description,
-  },
-};
+export const metadata: Metadata = buildPageMetadata({ title, description, path: '/speakers' });
 
 // Display order for the track groups. Showcase is not a speaking track, so any speaker
 // filed under it is listed last.

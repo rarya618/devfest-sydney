@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     template: '%s — DevFest Sydney 2026',
   },
   description:
-    'DevFest Sydney is an annual community conference organised by GDG Sydney, presented by Google. Join developers, designers, and founders on Saturday, 10 October 2026 at Torrens University, Surry Hills, for a full day of talks, workshops, and challenges.',
+    'GDG Sydney\'s annual community conference, presented by Google. A full day of talks and workshops on Saturday 10 October 2026 at Torrens University, Surry Hills.',
   openGraph: {
     title: 'DevFest Sydney 2026',
     description: 'Build, Secure, Scale: Developers and Builders in the Agentic Era. Sat, 10 October 2026 · Torrens University, Surry Hills.',
@@ -45,8 +45,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:FILL@0..1&display=block"
           rel="stylesheet"

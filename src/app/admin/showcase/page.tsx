@@ -4,7 +4,7 @@ import AdminShell from '../AdminShell';
 import ShowcaseDashboard from '../ShowcaseDashboard';
 
 export const metadata = {
-  title: 'Builder Showcase — DevFest Sydney 2026',
+  title: 'Builder Showcase',
   openGraph: { title: 'Builder Showcase — DevFest Sydney 2026', images: ['/admin/opengraph-image'] },
   twitter: { card: 'summary_large_image', title: 'Builder Showcase — DevFest Sydney 2026', images: ['/admin/opengraph-image'] },
 };

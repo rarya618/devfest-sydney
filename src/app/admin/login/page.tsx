@@ -6,7 +6,7 @@ import { adminAuth } from '@/lib/firebase-admin';
 import LoginForm from './LoginForm';
 
 export const metadata = {
-  title: 'Admin Login — DevFest Sydney 2026',
+  title: { absolute: 'Admin Login — DevFest Sydney 2026' },
   openGraph: { title: 'Admin Login — DevFest Sydney 2026', images: ['/admin/opengraph-image'] },
   twitter: { card: 'summary_large_image', title: 'Admin Login — DevFest Sydney 2026', images: ['/admin/opengraph-image'] },
 };

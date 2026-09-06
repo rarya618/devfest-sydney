@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/metadata';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -32,26 +33,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return { title: 'Speaker not found', robots: { index: false } };
   }
 
-  const title = speaker.name;
-  const description = `${speaker.talkTitle}. ${FORMAT_LABELS[speaker.format]} in the ${TRACK_LABELS[speaker.track]} track at DevFest Sydney 2026, Saturday 10 October at Torrens University, Surry Hills.`;
-  const path = `/speakers/${speaker.slug}`;
-
-  return {
-    title,
-    description,
-    alternates: { canonical: path },
-    openGraph: {
-      title: `${title} — DevFest Sydney 2026`,
-      description,
-      url: path,
-      type: 'profile',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: `${title} — DevFest Sydney 2026`,
-      description,
-    },
-  };
+  return buildPageMetadata({
+    title: speaker.name,
+    description: `${speaker.talkTitle}. ${FORMAT_LABELS[speaker.format]} in the ${TRACK_LABELS[speaker.track]} track at DevFest Sydney 2026, Saturday 10 October at Torrens University, Surry Hills.`,
+    path: `/speakers/${speaker.slug}`,
+    ogType: 'profile',
+  });
 }
 
 function ProfileLink({ href, label, children }: { href: string; label: string; children: React.ReactNode }) {

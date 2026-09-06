@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/metadata';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { areTicketsOpen } from '@/lib/tickets';
@@ -14,24 +15,7 @@ export const dynamic = 'force-dynamic';
 const title = 'FAQ';
 const description = 'Common questions about DevFest Sydney 2026 — registration, tracks, sponsorship, volunteering, and more.';
 
-export const metadata: Metadata = {
-  title,
-  description,
-  alternates: { canonical: '/faq' },
-  openGraph: {
-    title: `${title} — DevFest Sydney 2026`,
-    description,
-    url: '/faq',
-    type: 'website',
-    images: ['/opengraph-image'],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `${title} — DevFest Sydney 2026`,
-    description,
-    images: ['/opengraph-image'],
-  },
-};
+export const metadata: Metadata = buildPageMetadata({ title, description, path: '/faq', images: ['/opengraph-image'] });
 
 export default async function FaqPage() {
   const cfsOpen = isCfsOpen();

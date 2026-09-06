@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/metadata';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -18,22 +19,7 @@ const title = 'Partners';
 const description =
   'Sponsor DevFest Sydney 2026 and reach the builders shaping what comes next: 200+ developers, designers and founders on Saturday 10 October.';
 
-export const metadata: Metadata = {
-  title,
-  description,
-  alternates: { canonical: '/partners' },
-  openGraph: {
-    title: `${title} — DevFest Sydney 2026`,
-    description,
-    url: '/partners',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `${title} — DevFest Sydney 2026`,
-    description,
-  },
-};
+export const metadata: Metadata = buildPageMetadata({ title, description, path: '/partners' });
 
 function ProspectusButton({ href, className }: { href: string; className: string }) {
   return (

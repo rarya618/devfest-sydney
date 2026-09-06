@@ -4,7 +4,7 @@ import AdminShell from '../AdminShell';
 import VolunteersDashboard from '../VolunteersDashboard';
 
 export const metadata = {
-  title: 'Volunteers — DevFest Sydney 2026',
+  title: 'Volunteers',
   openGraph: { title: 'Volunteers — DevFest Sydney 2026', images: ['/admin/opengraph-image'] },
   twitter: { card: 'summary_large_image', title: 'Volunteers — DevFest Sydney 2026', images: ['/admin/opengraph-image'] },
 };

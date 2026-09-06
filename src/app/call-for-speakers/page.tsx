@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/metadata';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -14,22 +15,7 @@ export const dynamic = 'force-dynamic';
 const title = 'Call for Speakers';
 const description = 'Submit a talk, workshop, or lightning talk for DevFest Sydney 2026. We are looking for passionate speakers across the Developer, Builder, and Workshops tracks.';
 
-export const metadata: Metadata = {
-  title,
-  description,
-  alternates: { canonical: '/call-for-speakers' },
-  openGraph: {
-    title: `${title} — DevFest Sydney 2026`,
-    description,
-    url: '/call-for-speakers',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `${title} — DevFest Sydney 2026`,
-    description,
-  },
-};
+export const metadata: Metadata = buildPageMetadata({ title, description, path: '/call-for-speakers' });
 
 const REASONS = [
   { title: 'Driven people in the room', desc: 'Part of a 2,000+ strong community.', color: 'google-blue' },

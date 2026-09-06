@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/metadata';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { areTicketsOpen } from '@/lib/tickets';
@@ -14,22 +15,7 @@ export const dynamic = 'force-dynamic';
 const title = 'Builder Showcase';
 const description = 'Enter the Builder Showcase at DevFest Sydney 2026. Five minutes on stage to demo what you built, with the room voting on the winner.';
 
-export const metadata: Metadata = {
-  title,
-  description,
-  alternates: { canonical: '/builder-showcase' },
-  openGraph: {
-    title: `${title} — DevFest Sydney 2026`,
-    description,
-    url: '/builder-showcase',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `${title} — DevFest Sydney 2026`,
-    description,
-  },
-};
+export const metadata: Metadata = buildPageMetadata({ title, description, path: '/builder-showcase' });
 
 const HOW_IT_WORKS = [
   {

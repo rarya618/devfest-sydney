@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/metadata';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -13,22 +14,7 @@ const title = 'Tickets';
 const description =
   'Get your ticket for DevFest Sydney 2026 on Saturday 10 October at Torrens University, Surry Hills. One ticket covers the Developer, Builder, and Workshops tracks.';
 
-export const metadata: Metadata = {
-  title,
-  description,
-  alternates: { canonical: '/tickets' },
-  openGraph: {
-    title: `${title} — DevFest Sydney 2026`,
-    description,
-    url: '/tickets',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `${title} — DevFest Sydney 2026`,
-    description,
-  },
-};
+export const metadata: Metadata = buildPageMetadata({ title, description, path: '/tickets' });
 
 const VENUE_ADDRESS = 'Shop 1/37 Foveaux St, Surry Hills NSW 2010';
 

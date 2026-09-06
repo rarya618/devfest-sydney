@@ -3,7 +3,7 @@ import { fetchSubmissions } from '@/lib/submissions';
 import AdminShell from './AdminShell';
 import SubmissionsDashboard from './SubmissionsDashboard';
 
-export const metadata = { title: 'Admin — DevFest Sydney 2026' };
+export const metadata = { title: 'Submissions' };
 
 export default async function AdminPage() {
   const admin = await getVerifiedSession();

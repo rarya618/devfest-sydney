@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/metadata';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -11,22 +12,7 @@ export const dynamic = 'force-dynamic';
 const title = 'Volunteer';
 const description = 'Sign up to volunteer at DevFest Sydney 2026. Help with registration, AV, speaker support, and more.';
 
-export const metadata: Metadata = {
-  title,
-  description,
-  alternates: { canonical: '/volunteer' },
-  openGraph: {
-    title: `${title} — DevFest Sydney 2026`,
-    description,
-    url: '/volunteer',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `${title} — DevFest Sydney 2026`,
-    description,
-  },
-};
+export const metadata: Metadata = buildPageMetadata({ title, description, path: '/volunteer' });
 
 const isVolunteerOpen = process.env.VOLUNTEER_OPEN === 'true';
 
