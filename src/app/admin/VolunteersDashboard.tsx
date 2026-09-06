@@ -44,7 +44,7 @@ function ReviewerNotesPanel({ volunteerId, notes, onError }: ReviewerNotesPanelP
           {notes.map((note, index) => (
             <li key={index} className="text-xs bg-white/[0.04] border border-white/10 rounded-lg px-3 py-2">
               <p className="text-white/70 leading-relaxed whitespace-pre-wrap">{note.text}</p>
-              <p className="mt-1 text-xs text-white/40">
+              <p className="mt-1 text-xs text-white/55">
                 <span className="font-medium text-white/50">{note.authorName}</span> &middot; {formatDate(note.createdAt)}
               </p>
             </li>
@@ -63,13 +63,13 @@ function ReviewerNotesPanel({ volunteerId, notes, onError }: ReviewerNotesPanelP
           rows={2}
           maxLength={2000}
           disabled={isPending}
-          className="flex-1 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30 resize-none disabled:opacity-50"
+          className="flex-1 rounded-lg border border-white/35 bg-white/[0.06] px-3 py-2 text-xs text-white placeholder:text-white/50 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30 resize-none disabled:opacity-50"
         />
         <button
           type="submit"
           disabled={isPending || !draft.trim()}
           aria-label="Save reviewer note"
-          className="shrink-0 text-xs font-semibold px-3 py-2 rounded-lg bg-google-blue text-white hover:bg-google-blue/90 transition-colors disabled:opacity-40"
+          className="shrink-0 text-xs font-semibold px-3 py-2 rounded-lg bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
         >
           {isPending ? 'Saving…' : 'Add'}
         </button>
@@ -215,7 +215,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
           <span className={`w-[5px] h-[5px] rounded-full ${VOLUNTEER_STATUS_DOT_STYLES[volunteer.status].dot}`} />
           {VOLUNTEER_STATUS_LABELS[volunteer.status]}
         </span>
-        <span className="text-white/30 text-xs font-bold">&middot;</span>
+        <span className="text-white/50 text-xs font-bold">&middot;</span>
         <span className="text-xs font-bold text-white/55">{formatDate(volunteer.submittedAt)}</span>
       </div>
       </div>
@@ -245,7 +245,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
                 disabled={isPending}
                 aria-label={`Reject volunteer signup: ${volunteer.name}`}
                 title="Reject"
-                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-red hover:text-white transition-colors disabled:opacity-60"
+                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-red-deep hover:text-white transition-colors disabled:opacity-60"
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" d="M2.5 2.5l7 7m0-7l-7 7" />
@@ -257,7 +257,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
                 disabled={isPending}
                 aria-label={`Accept volunteer signup: ${volunteer.name}`}
                 title="Accept"
-                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-green hover:text-white transition-colors disabled:opacity-60"
+                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-green-deep hover:text-white transition-colors disabled:opacity-60"
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.375l2.625 2.625L9.75 3.75" />
@@ -294,7 +294,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
                 <circle cx="13" cy="8" r="1.25" />
               </svg>
               {volunteer.reviewerNotes.length > 0 && (
-                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue text-white text-[10px] font-bold leading-none">
+                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-[10px] font-bold leading-none">
                   {volunteer.reviewerNotes.length}
                 </span>
               )}
@@ -445,7 +445,7 @@ export default function VolunteersDashboard({ volunteers }: Props) {
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <div className="min-w-0">
             <h1 className="text-xl font-bold text-white tracking-tight">Volunteers</h1>
-            <p className="mt-0.5 text-sm text-white/40">
+            <p className="mt-0.5 text-sm text-white/55">
               {counts.all} total &middot; {counts.pending} pending review
             </p>
           </div>
@@ -480,12 +480,12 @@ export default function VolunteersDashboard({ volunteers }: Props) {
                 tabIndex={searchOpen || search ? undefined : -1}
                 placeholder="Search by name or email…"
                 aria-label="Search by name or email"
-                className={`w-full h-10 rounded-full bg-transparent pl-9 pr-9 py-0 text-sm text-white placeholder:text-white/30 focus:outline-none transition-opacity duration-200 ${
+                className={`w-full h-10 rounded-full bg-transparent pl-9 pr-9 py-0 text-sm text-white placeholder:text-white/50 focus:outline-none transition-opacity duration-200 ${
                   searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}
               />
               <svg
-                className={`absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40 pointer-events-none transition-opacity duration-200 ${
+                className={`absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/55 pointer-events-none transition-opacity duration-200 ${
                   searchWidthOpen ? 'opacity-100' : 'opacity-0'
                 }`}
                 viewBox="0 0 16 16"
@@ -504,7 +504,7 @@ export default function VolunteersDashboard({ volunteers }: Props) {
                 }}
                 tabIndex={searchOpen || search ? undefined : -1}
                 aria-label="Close search"
-                className={`absolute right-2 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-opacity duration-200 ${
+                className={`absolute right-2 top-1/2 -translate-y-1/2 text-white/55 hover:text-white/70 transition-opacity duration-200 ${
                   searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}
               >
@@ -528,7 +528,7 @@ export default function VolunteersDashboard({ volunteers }: Props) {
               >
                 {filterTabs.find((tab) => tab.value === filter)?.label}
                 <span className="font-medium text-white/60">{counts[filter]}</span>
-                <svg className={`w-3 h-3 text-white/40 transition-transform ${statusMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                <svg className={`w-3 h-3 text-white/55 transition-transform ${statusMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
                 </svg>
               </button>
@@ -552,7 +552,7 @@ export default function VolunteersDashboard({ volunteers }: Props) {
                       }`}
                     >
                       {tab.label}
-                      <span className="text-white/40">{counts[tab.value]}</span>
+                      <span className="text-white/55">{counts[tab.value]}</span>
                     </button>
                   ))}
                 </div>

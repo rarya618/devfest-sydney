@@ -43,7 +43,7 @@ export function CodeOfConductMobileNav({ sections }: { sections: Section[] }) {
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-bold text-white whitespace-nowrap transition-colors
                   ${isActive ? 'bg-white/[0.06]' : 'hover:bg-white/5'}`}
               >
-                <span className="text-white/40" aria-hidden="true">0{i + 1}</span>
+                <span className="text-white/55" aria-hidden="true">0{i + 1}</span>
                 {section.title}
               </a>
             </li>
@@ -85,9 +85,9 @@ export function CodeOfConductSidebar({ sections }: { sections: Section[] }) {
                 href={`#${section.slug}`}
                 aria-current={isActive ? 'true' : undefined}
                 className={`flex items-center gap-6 px-6 py-3 rounded-lg border border-l-4 text-sm font-bold text-white transition-colors
-                  ${isActive ? 'bg-white/[0.06] border-[#555555]' : 'border-transparent hover:bg-white/5'}`}
+                  ${isActive ? 'bg-white/[0.06] border-white/40' : 'border-transparent hover:bg-white/5'}`}
               >
-                <span className="text-xs text-white/40 leading-none self-center tabular-nums" aria-hidden="true">0{i + 1}</span>
+                <span className="text-xs text-white/55 leading-none self-center tabular-nums" aria-hidden="true">0{i + 1}</span>
                 <span className="leading-none self-center">{section.title}</span>
               </a>
             </li>

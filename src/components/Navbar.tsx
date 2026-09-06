@@ -10,12 +10,12 @@ import TicketsLink from './TicketsLink';
 type Accent = 'blue' | 'green' | 'red' | 'yellow';
 
 const ACCENT_CLASSES: Record<Accent, string> = {
-  blue: 'bg-google-blue border-google-blue text-white',
-  green: 'bg-google-green border-google-green text-white',
-  red: 'bg-google-red border-google-red text-white',
+  blue: 'bg-google-blue-deep border-google-blue-deep text-white',
+  green: 'bg-google-green-deep border-google-green-deep text-white',
+  red: 'bg-google-red-deep border-google-red-deep text-white',
   // Yellow is light enough that white on it fails WCAG AA, so this accent pairs with
   // Black 02 text rather than the white the other three use.
-  yellow: 'bg-google-yellow border-google-yellow text-[#1e1e1e]',
+  yellow: 'bg-google-yellow border-google-yellow text-black-02',
 };
 
 // Kept short. /tickets is reached from the CTA button beside these links, from the
@@ -88,14 +88,14 @@ export default function Navbar({
           {areTicketsOpen ? (
             <TicketsLink
               source="banner"
-              className="block bg-google-blue text-white text-center py-2 text-sm font-semibold tracking-wide underline underline-offset-2 decoration-white/40 hover:decoration-white transition-colors"
+              className="block bg-google-blue-deep text-white text-center py-2 text-sm font-semibold tracking-wide underline underline-offset-2 decoration-white/40 hover:decoration-white transition-colors"
             >
               DevFest Sydney 2026 tickets are on sale now. Grab yours before they go
             </TicketsLink>
           ) : (
             <CfsLink
               source="banner"
-              className="block bg-google-red text-white text-center py-2 text-sm font-semibold tracking-wide underline underline-offset-2 decoration-white/40 hover:decoration-white transition-colors"
+              className="block bg-google-red-deep text-white text-center py-2 text-sm font-semibold tracking-wide underline underline-offset-2 decoration-white/40 hover:decoration-white transition-colors"
             >
               {cfsCloseDate
                 ? 'Last chance: the Call for Speakers closes at midnight tonight. Submit your session'

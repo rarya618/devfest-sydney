@@ -175,7 +175,7 @@ export default function VolunteerForm() {
 
   const inputBase =
     'w-full bg-white/[0.05] border rounded-lg px-5 py-2.5 text-white text-base placeholder-white/60 outline-none transition-colors focus:bg-white/[0.08]';
-  const inputNormal = `${inputBase} border-white/8 focus:border-google-green/40`;
+  const inputNormal = `${inputBase} border-white/35 focus:border-google-green/40`;
   const inputError = `${inputBase} border-google-red/40 bg-google-red/5`;
 
   return (
@@ -215,7 +215,7 @@ export default function VolunteerForm() {
                   href={`#${section.id}`}
                   aria-current={isActive ? 'true' : undefined}
                   className={`flex items-center gap-6 px-6 py-3 rounded border-l-4 text-base font-bold text-white transition-colors
-                    ${isActive ? 'bg-white/[0.06] border-[#555555]' : 'border-transparent hover:bg-white/5'}`}
+                    ${isActive ? 'bg-white/[0.06] border-white/40' : 'border-transparent hover:bg-white/5'}`}
                 >
                   <span className="text-xs text-white/65 leading-none self-center" aria-hidden="true">{index + 1}</span>
                   <span className="leading-none self-center">{section.label}</span>
@@ -237,7 +237,7 @@ export default function VolunteerForm() {
           <div className="grid sm:grid-cols-2 gap-5">
             <div>
               <label htmlFor="vol-name" className="block text-sm font-bold text-white/85 mb-1.5">
-                Full name <span className="text-google-red" aria-hidden="true">*</span>
+                Full name <span className="text-google-red-light" aria-hidden="true">*</span>
               </label>
               <input
                 id="vol-name"
@@ -251,13 +251,13 @@ export default function VolunteerForm() {
                 {...field('name')}
               />
               {errors.name && (
-                <p id="vol-name-error" role="alert" className="mt-1.5 text-xs text-google-red/80">{errors.name}</p>
+                <p id="vol-name-error" role="alert" className="mt-1.5 text-xs text-google-red-light">{errors.name}</p>
               )}
             </div>
 
             <div>
               <label htmlFor="vol-email" className="block text-sm font-bold text-white/85 mb-1.5">
-                Email address <span className="text-google-red" aria-hidden="true">*</span>
+                Email address <span className="text-google-red-light" aria-hidden="true">*</span>
               </label>
               <input
                 id="vol-email"
@@ -271,7 +271,7 @@ export default function VolunteerForm() {
                 {...field('email')}
               />
               {errors.email && (
-                <p id="vol-email-error" role="alert" className="mt-1.5 text-xs text-google-red/80">{errors.email}</p>
+                <p id="vol-email-error" role="alert" className="mt-1.5 text-xs text-google-red-light">{errors.email}</p>
               )}
             </div>
           </div>
@@ -303,11 +303,11 @@ export default function VolunteerForm() {
             <div>
               <div className="flex items-baseline justify-between mb-1.5">
                 <label htmlFor="vol-motivation" className="block text-sm font-bold text-white/85">
-                  Why would you like to volunteer? <span className="text-google-red" aria-hidden="true">*</span>
+                  Why would you like to volunteer? <span className="text-google-red-light" aria-hidden="true">*</span>
                 </label>
                 <span
                   aria-label={`${fields.motivation.length} of ${MOTIVATION_MAX} characters used`}
-                  className={`text-xs tabular-nums ${fields.motivation.length > MOTIVATION_MAX ? 'text-google-red' : 'text-white/50'}`}
+                  className={`text-xs tabular-nums ${fields.motivation.length > MOTIVATION_MAX ? 'text-google-red-light' : 'text-white/50'}`}
                 >
                   {fields.motivation.length}/{MOTIVATION_MAX}
                 </span>
@@ -323,13 +323,13 @@ export default function VolunteerForm() {
                 {...field('motivation')}
               />
               {errors.motivation && (
-                <p id="vol-motivation-error" role="alert" className="mt-1.5 text-xs text-google-red/80">{errors.motivation}</p>
+                <p id="vol-motivation-error" role="alert" className="mt-1.5 text-xs text-google-red-light">{errors.motivation}</p>
               )}
             </div>
 
             <div>
               <p className="text-sm font-bold text-white/85 mb-3" id="vol-areas-label">
-                Areas of interest <span className="text-google-red" aria-hidden="true">*</span>
+                Areas of interest <span className="text-google-red-light" aria-hidden="true">*</span>
               </p>
               <div
                 role="group"
@@ -371,7 +371,7 @@ export default function VolunteerForm() {
                 })}
               </div>
               {errors.areasOfInterest && (
-                <p id="vol-areas-error" role="alert" className="mt-2 text-xs text-google-red/80">{errors.areasOfInterest}</p>
+                <p id="vol-areas-error" role="alert" className="mt-2 text-xs text-google-red-light">{errors.areasOfInterest}</p>
               )}
             </div>
 
@@ -453,9 +453,9 @@ export default function VolunteerForm() {
             type="submit"
             disabled={submitState === 'submitting'}
             aria-label="Submit volunteer signup"
-            className="inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-red text-white text-base font-bold rounded
-              border border-google-red transition-opacity hover:opacity-80
-              disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-google-red disabled:hover:text-white"
+            className="inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-red-deep text-white text-base font-bold rounded
+              border border-google-red-deep transition-opacity hover:opacity-80
+              disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-google-red-deep disabled:hover:text-white"
           >
             {submitState === 'submitting' ? (
               <>

@@ -98,7 +98,7 @@ export default async function SpeakerConfirmPage({ searchParams }: ConfirmPagePr
             </h1>
 
             <div className="p-6 bg-black/20 border border-white/10 rounded-2xl mb-8">
-              <p className="text-xs font-mono text-white/45 mb-2">Your accepted talk</p>
+              <p className="text-xs font-mono text-white/55 mb-2">Your accepted talk</p>
               <p className="text-xl font-bold leading-snug">{talk.talkTitle}</p>
             </div>
 

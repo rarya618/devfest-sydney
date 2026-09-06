@@ -50,9 +50,9 @@ export default function ConfirmParticipation({ token, talkTitle, intro }: Confir
         onClick={handleConfirm}
         disabled={isPending}
         aria-label={`Confirm you will be speaking: ${talkTitle}`}
-        className="inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-green text-white text-base font-bold rounded
-          border border-google-green transition-opacity hover:opacity-80
-          disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-google-green disabled:hover:text-white"
+        className="inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-green-deep text-white text-base font-bold rounded
+          border border-google-green-deep transition-opacity hover:opacity-80
+          disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-google-green-deep disabled:hover:text-white"
       >
         {isPending ? 'Confirming…' : 'Confirm participation'}
       </button>

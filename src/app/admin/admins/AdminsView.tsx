@@ -45,13 +45,13 @@ export default function AdminsView({ admins, currentAdminEmail }: Props) {
                 key={admin.email}
                 className="flex flex-wrap md:flex-nowrap items-center gap-x-4 gap-y-2 bg-white/[0.06] border border-white/10 rounded-2xl px-5 py-4"
               >
-                <span className="order-1 flex items-center justify-center w-8 h-8 rounded-full bg-google-blue text-white text-xs font-bold shrink-0">
+                <span className="order-1 flex items-center justify-center w-8 h-8 rounded-full bg-google-blue-deep text-white text-xs font-bold shrink-0">
                   {getInitials(admin.name)}
                 </span>
                 <div className="order-2 min-w-0 flex-1">
                   <p className="text-sm font-semibold text-white truncate">
                     {admin.name}
-                    {isSelf && <span className="ml-2 text-xs font-medium text-white/40">(you)</span>}
+                    {isSelf && <span className="ml-2 text-xs font-medium text-white/55">(you)</span>}
                   </p>
                   <p className="text-xs text-white/50 truncate">{admin.email}</p>
                 </div>
@@ -59,19 +59,19 @@ export default function AdminsView({ admins, currentAdminEmail }: Props) {
                   onClick={() => handleRemove(admin.email)}
                   disabled={isSelf || isPending}
                   aria-label={`Remove admin access for ${admin.name}`}
-                  className="order-3 md:order-4 shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border border-google-red/30 text-google-red/85 hover:bg-google-red/[0.06] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="order-3 md:order-4 shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border border-google-red/30 text-google-red-light hover:bg-google-red/[0.06] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   {removing ? 'Removing…' : 'Remove'}
                 </button>
                 <div className="order-4 md:order-3 w-full md:w-auto pl-12 md:pl-0 text-left md:text-right md:shrink-0">
-                  <p className="text-xs text-white/40 truncate">
+                  <p className="text-xs text-white/55 truncate">
                     Added {formatDate(admin.addedAt)}
                     {admin.addedBy && (
                       <span className="md:hidden"> by {admin.addedBy === 'self' ? 'self' : admin.addedBy}</span>
                     )}
                   </p>
                   {admin.addedBy && (
-                    <p className="hidden md:block text-xs text-white/40">
+                    <p className="hidden md:block text-xs text-white/55">
                       by {admin.addedBy === 'self' ? 'self' : admin.addedBy}
                     </p>
                   )}

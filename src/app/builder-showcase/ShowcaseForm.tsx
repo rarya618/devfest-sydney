@@ -253,7 +253,7 @@ export default function ShowcaseForm() {
 
   const inputBase =
     'w-full bg-white/[0.05] border rounded-lg px-5 py-2.5 text-white text-base placeholder-white/60 outline-none transition-colors focus:bg-white/[0.08]';
-  const inputNormal = `${inputBase} border-white/8 focus:border-google-yellow/40`;
+  const inputNormal = `${inputBase} border-white/35 focus:border-google-yellow/40`;
   const inputError = `${inputBase} border-google-red/40 bg-google-red/5`;
 
   return (
@@ -293,7 +293,7 @@ export default function ShowcaseForm() {
                   href={`#${section.id}`}
                   aria-current={isActive ? 'true' : undefined}
                   className={`flex items-center gap-6 px-6 py-3 rounded border-l-4 text-base font-bold text-white transition-colors
-                    ${isActive ? 'bg-white/[0.06] border-[#555555]' : 'border-transparent hover:bg-white/5'}`}
+                    ${isActive ? 'bg-white/[0.06] border-white/40' : 'border-transparent hover:bg-white/5'}`}
                 >
                   <span className="text-xs text-white/65 leading-none self-center" aria-hidden="true">{index + 1}</span>
                   <span className="leading-none self-center">{section.label}</span>
@@ -315,7 +315,7 @@ export default function ShowcaseForm() {
           <div className="grid sm:grid-cols-2 gap-5">
             <div>
               <label htmlFor="showcase-name" className="block text-sm font-bold text-white/85 mb-1.5">
-                Full name <span className="text-google-red" aria-hidden="true">*</span>
+                Full name <span className="text-google-red-light" aria-hidden="true">*</span>
               </label>
               <input
                 id="showcase-name"
@@ -329,13 +329,13 @@ export default function ShowcaseForm() {
                 {...field('name')}
               />
               {errors.name && (
-                <p id="showcase-name-error" role="alert" className="mt-1.5 text-xs text-google-red/80">{errors.name}</p>
+                <p id="showcase-name-error" role="alert" className="mt-1.5 text-xs text-google-red-light">{errors.name}</p>
               )}
             </div>
 
             <div>
               <label htmlFor="showcase-email" className="block text-sm font-bold text-white/85 mb-1.5">
-                Email address <span className="text-google-red" aria-hidden="true">*</span>
+                Email address <span className="text-google-red-light" aria-hidden="true">*</span>
               </label>
               <input
                 id="showcase-email"
@@ -349,7 +349,7 @@ export default function ShowcaseForm() {
                 {...field('email')}
               />
               {errors.email && (
-                <p id="showcase-email-error" role="alert" className="mt-1.5 text-xs text-google-red/80">{errors.email}</p>
+                <p id="showcase-email-error" role="alert" className="mt-1.5 text-xs text-google-red-light">{errors.email}</p>
               )}
             </div>
           </div>
@@ -391,7 +391,7 @@ export default function ShowcaseForm() {
                           onClick={() => removeCoPresenter(coPresenter.id)}
                           aria-label={`Remove co-presenter ${index + 1}`}
                           title="Remove"
-                          className="inline-flex items-center justify-center w-7 h-7 -mr-1 rounded-full text-white/50 hover:text-google-red hover:bg-white/[0.06] transition-colors"
+                          className="inline-flex items-center justify-center w-7 h-7 -mr-1 rounded-full text-white/50 hover:text-google-red-light hover:bg-white/[0.06] transition-colors"
                         >
                           <span className="material-symbols-outlined text-[18px] flex items-center justify-center" aria-hidden="true">
                             close
@@ -434,7 +434,7 @@ export default function ShowcaseForm() {
                       </div>
 
                       {error && (
-                        <p id={`showcase-co-presenter-error-${coPresenter.id}`} role="alert" className="mt-2 text-xs text-google-red/80">
+                        <p id={`showcase-co-presenter-error-${coPresenter.id}`} role="alert" className="mt-2 text-xs text-google-red-light">
                           {error}
                         </p>
                       )}
@@ -473,7 +473,7 @@ export default function ShowcaseForm() {
           <div className="space-y-7">
             <div>
               <label htmlFor="showcase-project" className="block text-sm font-bold text-white/85 mb-1.5">
-                Project name <span className="text-google-red" aria-hidden="true">*</span>
+                Project name <span className="text-google-red-light" aria-hidden="true">*</span>
               </label>
               <input
                 id="showcase-project"
@@ -486,18 +486,18 @@ export default function ShowcaseForm() {
                 {...field('projectName')}
               />
               {errors.projectName && (
-                <p id="showcase-project-error" role="alert" className="mt-1.5 text-xs text-google-red/80">{errors.projectName}</p>
+                <p id="showcase-project-error" role="alert" className="mt-1.5 text-xs text-google-red-light">{errors.projectName}</p>
               )}
             </div>
 
             <div>
               <div className="flex items-baseline justify-between mb-1.5">
                 <label htmlFor="showcase-pitch" className="block text-sm font-bold text-white/85">
-                  One-line pitch <span className="text-google-red" aria-hidden="true">*</span>
+                  One-line pitch <span className="text-google-red-light" aria-hidden="true">*</span>
                 </label>
                 <span
                   aria-label={`${fields.pitch.length} of ${PITCH_MAX} characters used`}
-                  className={`text-xs tabular-nums ${fields.pitch.length > PITCH_MAX ? 'text-google-red' : 'text-white/50'}`}
+                  className={`text-xs tabular-nums ${fields.pitch.length > PITCH_MAX ? 'text-google-red-light' : 'text-white/50'}`}
                 >
                   {fields.pitch.length}/{PITCH_MAX}
                 </span>
@@ -513,7 +513,7 @@ export default function ShowcaseForm() {
                 {...field('pitch')}
               />
               {errors.pitch ? (
-                <p id="showcase-pitch-error" role="alert" className="mt-1.5 text-xs text-google-red/80">{errors.pitch}</p>
+                <p id="showcase-pitch-error" role="alert" className="mt-1.5 text-xs text-google-red-light">{errors.pitch}</p>
               ) : (
                 <p id="showcase-pitch-hint" className="mt-1.5 text-xs text-white/50">This is what we&apos;d read out when we introduce you.</p>
               )}
@@ -522,11 +522,11 @@ export default function ShowcaseForm() {
             <div>
               <div className="flex items-baseline justify-between mb-1.5">
                 <label htmlFor="showcase-description" className="block text-sm font-bold text-white/85">
-                  What will you demo? <span className="text-google-red" aria-hidden="true">*</span>
+                  What will you demo? <span className="text-google-red-light" aria-hidden="true">*</span>
                 </label>
                 <span
                   aria-label={`${fields.description.length} of ${DESCRIPTION_MAX} characters used`}
-                  className={`text-xs tabular-nums ${fields.description.length > DESCRIPTION_MAX ? 'text-google-red' : 'text-white/50'}`}
+                  className={`text-xs tabular-nums ${fields.description.length > DESCRIPTION_MAX ? 'text-google-red-light' : 'text-white/50'}`}
                 >
                   {fields.description.length}/{DESCRIPTION_MAX}
                 </span>
@@ -542,13 +542,13 @@ export default function ShowcaseForm() {
                 {...field('description')}
               />
               {errors.description && (
-                <p id="showcase-description-error" role="alert" className="mt-1.5 text-xs text-google-red/80">{errors.description}</p>
+                <p id="showcase-description-error" role="alert" className="mt-1.5 text-xs text-google-red-light">{errors.description}</p>
               )}
             </div>
 
             <div>
               <p className="text-sm font-bold text-white/85 mb-3" id="showcase-stage-label">
-                What stage is it at? <span className="text-google-red" aria-hidden="true">*</span>
+                What stage is it at? <span className="text-google-red-light" aria-hidden="true">*</span>
               </p>
               <div
                 role="radiogroup"
@@ -582,7 +582,7 @@ export default function ShowcaseForm() {
                 })}
               </div>
               {errors.stage && (
-                <p id="showcase-stage-error" role="alert" className="mt-2 text-xs text-google-red/80">{errors.stage}</p>
+                <p id="showcase-stage-error" role="alert" className="mt-2 text-xs text-google-red-light">{errors.stage}</p>
               )}
             </div>
 
@@ -676,7 +676,7 @@ export default function ShowcaseForm() {
                   <div className="w-5 h-5 rounded-md border border-white/20 bg-white/[0.05] peer-checked:bg-google-yellow peer-checked:border-google-yellow transition-colors duration-150 group-hover:border-white/35 flex items-center justify-center">
                     {fields.isFirstTimePresenter && (
                       <span
-                        className="material-symbols-outlined text-[#1e1e1e] text-[18px] flex items-center justify-center"
+                        className="material-symbols-outlined text-black-02 text-[18px] flex items-center justify-center"
                         style={{ fontVariationSettings: "'FILL' 1" }}
                         aria-hidden="true"
                       >
@@ -701,7 +701,7 @@ export default function ShowcaseForm() {
             type="submit"
             disabled={submitState === 'submitting'}
             aria-label="Submit Builder Showcase demo"
-            className="inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-yellow text-[#1e1e1e] text-base font-bold rounded
+            className="inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-yellow text-black-02 text-base font-bold rounded
               border border-google-yellow transition-opacity hover:opacity-80
               disabled:opacity-50 disabled:cursor-not-allowed"
           >

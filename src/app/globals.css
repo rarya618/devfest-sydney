@@ -58,6 +58,16 @@
   --color-google-yellow: #f9ab00;
   --color-google-green: #34A853;
 
+  /* Contrast variants. The core fills sit at 3.1-3.9:1 against white text, which fails
+     WCAG AA for the 16px button labels used across the site, so solid buttons with white
+     text use these deeper shades from the Google Material palette (Blue 600, Green 700,
+     Red 600), each at or above 4.5:1 with white. Red 300 is the light red for text on the
+     dark page and admin surfaces, where the core red drops as low as 3.3:1. */
+  --color-google-blue-deep: #1a73e8;
+  --color-google-green-deep: #188038;
+  --color-google-red-deep: #d93025;
+  --color-google-red-light: #f28b82;
+
   /* Halftone colours */
   --color-halftone-blue: #57caff;
   --color-halftone-green: #5cdb6d;

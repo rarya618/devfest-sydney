@@ -38,11 +38,11 @@ export default async function AdminLoginPage() {
               priority
             />
           </Link>
-          <p className="text-sm text-off-white/40">Admin</p>
+          <p className="text-sm text-off-white/60">Admin</p>
         </div>
 
         <div className="bg-white rounded-2xl p-8 py-10">
-          <p className="text-base text-black-02/55 text-center mb-6 leading-relaxed">
+          <p className="text-base text-black-02/70 text-center mb-6 leading-relaxed">
             Sign in with an authorised Google account to access the dashboard.
           </p>
           <LoginForm />

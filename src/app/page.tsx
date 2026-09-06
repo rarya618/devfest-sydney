@@ -232,7 +232,7 @@ export default async function Home() {
           <div className="flex flex-wrap items-center gap-5 mt-14 animate-slide-up" style={{ animationDelay: '0.3s' }}>
             <a
               href="#about"
-              className="inline-flex items-center px-7 py-2 bg-transparent text-white text-base font-bold rounded border border-[#555555] transition-colors hover:border-white"
+              className="inline-flex items-center px-7 py-2 bg-transparent text-white text-base font-bold rounded border border-white/40 transition-colors hover:border-white"
             >
               Learn more
             </a>
@@ -240,14 +240,14 @@ export default async function Home() {
               <TicketsLink
                 source="hero"
                 aria-label="Get tickets for DevFest Sydney 2026 on Humanitix"
-                className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-blue text-white text-base font-bold rounded border border-google-blue transition-opacity hover:opacity-80"
+                className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-blue-deep text-white text-base font-bold rounded border border-google-blue-deep transition-opacity hover:opacity-80"
               >
                 Get tickets
               </TicketsLink>
             ) : cfsOpen ? (
               <CfsLink
                 source="hero"
-                className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-blue text-white text-base font-bold rounded border border-google-blue transition-opacity hover:opacity-80"
+                className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-blue-deep text-white text-base font-bold rounded border border-google-blue-deep transition-opacity hover:opacity-80"
               >
                 Apply to speak
               </CfsLink>
@@ -256,7 +256,7 @@ export default async function Home() {
                 href="https://gdgsydney.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-blue text-white text-base font-bold rounded border border-google-blue transition-opacity hover:opacity-80"
+                className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-blue-deep text-white text-base font-bold rounded border border-google-blue-deep transition-opacity hover:opacity-80"
               >
                 Follow GDG Sydney
               </a>
@@ -312,7 +312,7 @@ export default async function Home() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Download the DevFest Sydney sponsorship prospectus (PDF)"
-              className="inline-flex items-center gap-2 mt-8 text-sm font-semibold text-google-blue hover:text-[#6ba3f8] transition-colors"
+              className="inline-flex items-center gap-2 mt-8 text-sm font-semibold text-google-blue hover:text-halftone-blue transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -342,18 +342,18 @@ export default async function Home() {
                       <TicketsLink
                         source="landing-section"
                         aria-label="Get tickets for DevFest Sydney 2026 on Humanitix"
-                        className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-blue text-white text-base font-bold rounded border border-google-blue transition-opacity hover:opacity-80"
+                        className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-blue-deep text-white text-base font-bold rounded border border-google-blue-deep transition-opacity hover:opacity-80"
                       >
                         Get tickets
                       </TicketsLink>
                       <Link
                         href="/tickets"
-                        className="inline-flex items-center px-7 py-2 bg-transparent text-white text-base font-bold rounded border border-[#555555] transition-colors hover:border-white"
+                        className="inline-flex items-center px-7 py-2 bg-transparent text-white text-base font-bold rounded border border-white/40 transition-colors hover:border-white"
                       >
                         What&apos;s included
                       </Link>
                     </div>
-                    <p className="mt-6 text-sm text-white/45">
+                    <p className="mt-6 text-sm text-white/55">
                       Ticketing is handled by <span className="font-mono">Humanitix</span>.
                     </p>
                   </div>
@@ -440,7 +440,7 @@ export default async function Home() {
                       href={VENUE_DIRECTIONS_URL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-blue text-white text-base font-bold rounded border border-google-blue transition-opacity hover:opacity-80"
+                      className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-blue-deep text-white text-base font-bold rounded border border-google-blue-deep transition-opacity hover:opacity-80"
                       aria-label="Get directions to Torrens University, Surry Hills on Google Maps"
                     >
                       Get directions
@@ -449,7 +449,7 @@ export default async function Home() {
                       href={VENUE_CALENDAR_URL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center px-7 py-2 bg-transparent text-white text-base font-bold rounded border border-[#555555] transition-colors hover:border-white"
+                      className="inline-flex items-center px-7 py-2 bg-transparent text-white text-base font-bold rounded border border-white/40 transition-colors hover:border-white"
                       aria-label="Add DevFest Sydney 2026 to your calendar"
                     >
                       Add to calendar
@@ -494,7 +494,7 @@ export default async function Home() {
       {/* ─── SUPPORTED BY ─── */}
       <section id="partners" className="py-16 px-6 border-t border-white/8">
         <div className="max-w-7xl mx-auto flex flex-col items-center gap-6">
-          <p className="text-lg font-medium text-white/40">Supported by</p>
+          <p className="text-lg font-medium text-white/55">Supported by</p>
           <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center gap-8 sm:gap-16">
             {googleLogoUrl && (
               <Image src={googleLogoUrl} alt="Google" width={160} height={48} className="h-16 w-auto object-contain opacity-70" />
@@ -514,7 +514,7 @@ export default async function Home() {
 
             {sponsors.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-white/45 text-sm mb-3">Sponsors will be announced soon.</p>
+                <p className="text-white/55 text-sm mb-3">Sponsors will be announced soon.</p>
                 <a
                   href="mailto:hello@gdgsydney.com"
                   className="text-sm text-google-yellow/80 hover:text-google-yellow transition-colors underline underline-offset-2"
@@ -526,7 +526,7 @@ export default async function Home() {
               <div className="space-y-12">
                 {TIER_ORDER.filter((tier) => sponsorsByTier[tier].length > 0).map((tier) => (
                   <div key={tier}>
-                    <p className="text-xs font-bold text-white/35 tracking-[0.15em] uppercase mb-6 text-center">
+                    <p className="text-xs font-bold text-white/50 tracking-[0.15em] uppercase mb-6 text-center">
                       {TIER_LABELS[tier]}
                     </p>
                     <div className="flex flex-wrap items-center justify-center gap-10">
@@ -561,7 +561,7 @@ export default async function Home() {
       {team.length > 0 && (
         <section id="team" className="py-24 px-6">
           <div className="max-w-7xl mx-auto">
-            <p className="text-xs font-bold text-white/40 tracking-[0.15em] uppercase mb-3 text-center">Team</p>
+            <p className="text-xs font-bold text-white/55 tracking-[0.15em] uppercase mb-3 text-center">Team</p>
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-14 text-center">The organisers</h2>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-10 gap-x-6">
               {team.map((member) => (
@@ -576,20 +576,20 @@ export default async function Home() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-white/30 text-xl font-bold">
+                      <div className="w-full h-full flex items-center justify-center text-white/50 text-xl font-bold">
                         {member.name.charAt(0)}
                       </div>
                     )}
                   </div>
                   <p className="font-semibold text-white/85 text-sm">{member.name}</p>
-                  <p className="text-xs text-white/45 mt-0.5">{member.role}</p>
+                  <p className="text-xs text-white/55 mt-0.5">{member.role}</p>
                   {member.linkedinUrl && (
                     <a
                       href={member.linkedinUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`${member.name} on LinkedIn`}
-                      className="inline-block mt-3 text-white/30 hover:text-white/70 transition-colors"
+                      className="inline-block mt-3 text-white/50 hover:text-white/70 transition-colors"
                     >
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />

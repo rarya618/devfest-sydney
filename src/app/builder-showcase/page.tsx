@@ -125,7 +125,7 @@ export default async function BuilderShowcase() {
           <div className="flex flex-wrap items-center justify-center gap-5">
             <a
               href="#how-it-works"
-              className="inline-flex items-center px-7 py-2 bg-transparent text-white text-base font-bold rounded border border-[#555555] transition-colors hover:border-white animate-slide-up"
+              className="inline-flex items-center px-7 py-2 bg-transparent text-white text-base font-bold rounded border border-white/40 transition-colors hover:border-white animate-slide-up"
               style={{ animationDelay: '0.25s' }}
             >
               How it works
@@ -133,7 +133,7 @@ export default async function BuilderShowcase() {
             {showcaseOpen && (
               <a
                 href="#enter"
-                className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-yellow text-[#1e1e1e] text-base font-bold rounded border border-google-yellow transition-opacity hover:opacity-80 animate-slide-up"
+                className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-yellow text-black-02 text-base font-bold rounded border border-google-yellow transition-opacity hover:opacity-80 animate-slide-up"
                 style={{ animationDelay: '0.3s' }}
               >
                 Enter your demo
@@ -183,12 +183,12 @@ export default async function BuilderShowcase() {
           ) : (
             <div className="bg-white/[0.025] border border-white/10 rounded-2xl p-12 text-center">
               <div className="w-14 h-14 rounded-full border border-white/15 flex items-center justify-center mx-auto mb-5">
-                <svg className="w-6 h-6 text-white/35" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                <svg className="w-6 h-6 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25z" />
                 </svg>
               </div>
               <h3 className="text-lg font-bold text-white/70 mb-3">Builder Showcase entries are not open</h3>
-              <p className="text-sm text-white/45 leading-relaxed max-w-sm mx-auto">
+              <p className="text-sm text-white/55 leading-relaxed max-w-sm mx-auto">
                 We&apos;re not taking demos for the DevFest Sydney 2026 Builder Showcase right now.
                 Check back closer to the event.
               </p>

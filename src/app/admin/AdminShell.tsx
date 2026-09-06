@@ -152,7 +152,7 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
             </nav>
 
             <div className="border-t border-white/10 flex items-center gap-3 px-4 py-3.5 bg-white/[0.04]">
-              <span className="flex items-center justify-center w-9 h-9 rounded-full bg-google-blue text-white text-sm font-bold shrink-0">
+              <span className="flex items-center justify-center w-9 h-9 rounded-full bg-google-blue-deep text-white text-sm font-bold shrink-0">
                 {getInitials(adminName)}
               </span>
               <div className="min-w-0">
@@ -170,7 +170,7 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
                 aria-label="Invite a new admin"
                 className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
               >
-                <svg className="w-4 h-4 text-white/40 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                <svg className="w-4 h-4 text-white/55 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                   <circle cx="6" cy="5.5" r="2.75" />
                   <path strokeLinecap="round" d="M1.5 14c0-2.76 2.24-4.5 4.5-4.5s4.5 1.74 4.5 4.5" />
                   <path strokeLinecap="round" d="M12.5 5.5v4M10.5 7.5h4" />
@@ -187,7 +187,7 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
                 }}
                 disabled={signingOut}
                 aria-label="Sign out of admin panel"
-                className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-google-red/85 hover:bg-google-red/[0.06] transition-colors disabled:opacity-50"
+                className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-google-red-light hover:bg-google-red/[0.06] transition-colors disabled:opacity-50"
               >
                 <svg className="w-4 h-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 14H3.5A1.5 1.5 0 012 12.5v-9A1.5 1.5 0 013.5 2H6" />
@@ -244,7 +244,7 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
               className="absolute left-0 bottom-full mb-2 w-full bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden"
             >
               <div className="flex items-center gap-3 px-4 py-3.5 bg-white/[0.04]">
-                <span className="flex items-center justify-center w-9 h-9 rounded-full bg-google-blue text-white text-sm font-bold shrink-0">
+                <span className="flex items-center justify-center w-9 h-9 rounded-full bg-google-blue-deep text-white text-sm font-bold shrink-0">
                   {getInitials(adminName)}
                 </span>
                 <div className="min-w-0">
@@ -263,7 +263,7 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
                   aria-label="Invite a new admin"
                   className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
                 >
-                  <svg className="w-4 h-4 text-white/40 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                  <svg className="w-4 h-4 text-white/55 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                     <circle cx="6" cy="5.5" r="2.75" />
                     <path strokeLinecap="round" d="M1.5 14c0-2.76 2.24-4.5 4.5-4.5s4.5 1.74 4.5 4.5" />
                     <path strokeLinecap="round" d="M12.5 5.5v4M10.5 7.5h4" />
@@ -281,7 +281,7 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
                   }}
                   disabled={signingOut}
                   aria-label="Sign out of admin panel"
-                  className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-google-red/85 hover:bg-google-red/[0.06] transition-colors disabled:opacity-50"
+                  className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-google-red-light hover:bg-google-red/[0.06] transition-colors disabled:opacity-50"
                 >
                   <svg className="w-4 h-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 14H3.5A1.5 1.5 0 012 12.5v-9A1.5 1.5 0 013.5 2H6" />
@@ -302,13 +302,13 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
               menuOpen ? 'border-white/15 bg-white/[0.05]' : 'border-transparent hover:border-white/10 hover:bg-white/[0.06]'
             }`}
           >
-            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-google-blue text-white text-xs font-bold shrink-0">
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-google-blue-deep text-white text-xs font-bold shrink-0">
               {getInitials(adminName)}
             </span>
             <span className="min-w-0 flex-1 text-left">
               <span className="block text-sm font-semibold text-white truncate" title={adminName}>{adminName}</span>
             </span>
-            <svg className={`w-3 h-3 text-white/40 shrink-0 transition-transform ${menuOpen ? '' : 'rotate-180'}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+            <svg className={`w-3 h-3 text-white/55 shrink-0 transition-transform ${menuOpen ? '' : 'rotate-180'}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
             </svg>
           </button>

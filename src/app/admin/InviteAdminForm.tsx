@@ -45,7 +45,7 @@ export default function InviteAdminForm({ onDone, onError }: Props) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Jane Smith"
-              className="w-full bg-white/[0.06] border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-white/30 outline-none focus:border-google-blue/50 transition-colors"
+              className="w-full bg-white/[0.06] border border-white/35 rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 outline-none focus:border-google-blue/50 transition-colors"
             />
           </div>
           <div>
@@ -59,7 +59,7 @@ export default function InviteAdminForm({ onDone, onError }: Props) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="jane@example.com"
-              className="w-full bg-white/[0.06] border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-white/30 outline-none focus:border-google-blue/50 transition-colors"
+              className="w-full bg-white/[0.06] border border-white/35 rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 outline-none focus:border-google-blue/50 transition-colors"
             />
           </div>
 
@@ -74,7 +74,7 @@ export default function InviteAdminForm({ onDone, onError }: Props) {
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 text-sm font-semibold px-4 py-2 rounded-lg bg-google-blue text-white hover:bg-[#3574db] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="flex-1 text-sm font-semibold px-4 py-2 rounded-lg bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {submitting ? 'Adding…' : 'Add admin'}
             </button>

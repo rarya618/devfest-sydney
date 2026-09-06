@@ -83,7 +83,7 @@ function toEditableFields(submission: Submission): SubmissionEditableFields {
 }
 
 const inputClasses =
-  'w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30';
+  'w-full rounded-lg border border-white/35 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30';
 const labelClasses = 'block text-xs font-semibold text-white/50 mb-1';
 
 export default function EditSubmissionModal({ submission, onClose, onError }: Props) {
@@ -131,7 +131,7 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
               onClick={onClose}
               disabled={isPending}
               aria-label={isCreating ? 'Close add submission form' : 'Close edit form'}
-              className="text-white/40 hover:text-white/70 transition-colors"
+              className="text-white/55 hover:text-white/70 transition-colors"
             >
               <svg className="w-5 h-5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                 <path d="M4.47 4.47a.75.75 0 0 1 1.06 0L8 6.94l2.47-2.47a.75.75 0 1 1 1.06 1.06L9.06 8l2.47 2.47a.75.75 0 1 1-1.06 1.06L8 9.06l-2.47 2.47a.75.75 0 0 1-1.06-1.06L6.94 8 4.47 5.53a.75.75 0 0 1 0-1.06z" />
@@ -474,7 +474,7 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
               type="submit"
               disabled={isPending}
               aria-label={isCreating ? 'Add this submission' : 'Save changes to submission'}
-              className="text-xs px-4 py-1.5 rounded-lg bg-google-blue text-white font-medium hover:bg-google-blue/90 transition-colors disabled:opacity-50"
+              className="text-xs px-4 py-1.5 rounded-lg bg-google-blue-deep text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50"
             >
               {isPending ? (isCreating ? 'Adding…' : 'Saving…') : isCreating ? 'Add submission' : 'Save changes'}
             </button>

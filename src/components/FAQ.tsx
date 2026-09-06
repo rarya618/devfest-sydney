@@ -73,7 +73,7 @@ export default function FAQ({
           >
             <span className="font-bold text-white/90 text-lg leading-relaxed">{faq.q}</span>
             <span
-              className={`text-white/35 text-3xl leading-none flex-shrink-0 self-center transition-transform duration-200 ${
+              className={`text-white/50 text-3xl leading-none flex-shrink-0 self-center transition-transform duration-200 ${
                 open === i ? 'rotate-45' : ''
               }`}
               aria-hidden="true"

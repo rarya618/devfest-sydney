@@ -22,7 +22,7 @@ const STAT_ACCENT_STYLES: Record<StatAccent, { border: string; bg: string; iconB
   blue: { border: 'border-google-blue/25', bg: 'bg-google-blue/[0.08]', iconBg: 'bg-google-blue/15', iconText: 'text-google-blue', countText: 'text-google-blue' },
   yellow: { border: 'border-google-yellow/25', bg: 'bg-google-yellow/[0.08]', iconBg: 'bg-google-yellow/15', iconText: 'text-google-yellow', countText: 'text-google-yellow' },
   green: { border: 'border-google-green/25', bg: 'bg-google-green/[0.08]', iconBg: 'bg-google-green/15', iconText: 'text-google-green', countText: 'text-google-green' },
-  muted: { border: 'border-white/10', bg: 'bg-white/[0.06]', iconBg: 'bg-white/10', iconText: 'text-white/40', countText: 'text-white/50' },
+  muted: { border: 'border-white/10', bg: 'bg-white/[0.06]', iconBg: 'bg-white/10', iconText: 'text-white/55', countText: 'text-white/50' },
 };
 
 const STAT_ICON_PATHS: Record<string, string> = {
@@ -80,7 +80,7 @@ function BarRow({ label, count, total, dotClass }: { label: string; count: numbe
           {dotClass && <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotClass}`} aria-hidden="true" />}
           {label}
         </span>
-        <span className="text-white/40 text-xs shrink-0">{count} &middot; {pct}%</span>
+        <span className="text-white/55 text-xs shrink-0">{count} &middot; {pct}%</span>
       </div>
       <div className="h-2 rounded-full bg-white/10 overflow-hidden">
         <div className="h-full rounded-full bg-google-blue" style={{ width: `${pct}%` }} />
@@ -181,7 +181,7 @@ export default function AnalyticsView({ submissions }: Props) {
       </div>
 
       {total === 0 ? (
-        <div className="text-center py-16 text-white/40 text-sm">No submissions yet.</div>
+        <div className="text-center py-16 text-white/55 text-sm">No submissions yet.</div>
       ) : (
         <>
           <SubmissionsOverTimeChart submissions={submissions} />

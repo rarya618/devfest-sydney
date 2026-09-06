@@ -257,7 +257,7 @@ export default function CfsForm() {
 
   const inputBase =
     'w-full bg-white/[0.05] border rounded-lg px-5 py-2.5 text-white text-base placeholder-white/60 outline-none transition-colors focus:bg-white/[0.08]';
-  const inputNormal = `${inputBase} border-white/8 focus:border-google-red/40`;
+  const inputNormal = `${inputBase} border-white/35 focus:border-google-red/40`;
   const inputError = `${inputBase} border-google-red/40 bg-google-red/5`;
 
   return (
@@ -297,7 +297,7 @@ export default function CfsForm() {
                   href={`#${section.id}`}
                   aria-current={isActive ? 'true' : undefined}
                   className={`flex items-center gap-6 px-6 py-3 rounded border-l-4 text-base font-bold text-white transition-colors
-                    ${isActive ? 'bg-white/[0.06] border-[#555555]' : 'border-transparent hover:bg-white/5'}`}
+                    ${isActive ? 'bg-white/[0.06] border-white/40' : 'border-transparent hover:bg-white/5'}`}
                 >
                   <span className="text-xs text-white/65 leading-none self-center" aria-hidden="true">{index + 1}</span>
                   <span className="leading-none self-center">{section.label}</span>
@@ -319,7 +319,7 @@ export default function CfsForm() {
           <div className="grid sm:grid-cols-2 gap-5">
           <div>
             <label htmlFor="cfs-name" className="block text-sm font-bold text-white/85 mb-1.5">
-              Full name <span className="text-google-red" aria-hidden="true">*</span>
+              Full name <span className="text-google-red-light" aria-hidden="true">*</span>
             </label>
             <input
               id="cfs-name"
@@ -333,13 +333,13 @@ export default function CfsForm() {
               {...field('name')}
             />
             {errors.name && (
-              <p id="cfs-name-error" role="alert" className="mt-1.5 text-xs text-google-red/80">{errors.name}</p>
+              <p id="cfs-name-error" role="alert" className="mt-1.5 text-xs text-google-red-light">{errors.name}</p>
             )}
           </div>
 
           <div>
             <label htmlFor="cfs-email" className="block text-sm font-bold text-white/85 mb-1.5">
-              Email address <span className="text-google-red" aria-hidden="true">*</span>
+              Email address <span className="text-google-red-light" aria-hidden="true">*</span>
             </label>
             <input
               id="cfs-email"
@@ -353,7 +353,7 @@ export default function CfsForm() {
               {...field('email')}
             />
             {errors.email && (
-              <p id="cfs-email-error" role="alert" className="mt-1.5 text-xs text-google-red/80">{errors.email}</p>
+              <p id="cfs-email-error" role="alert" className="mt-1.5 text-xs text-google-red-light">{errors.email}</p>
             )}
           </div>
           </div>
@@ -369,7 +369,7 @@ export default function CfsForm() {
         {/* Talk title */}
         <div>
           <label htmlFor="cfs-title" className="block text-sm font-bold text-white/85 mb-1.5">
-            Session title <span className="text-google-red" aria-hidden="true">*</span>
+            Session title <span className="text-google-red-light" aria-hidden="true">*</span>
           </label>
           <input
             id="cfs-title"
@@ -382,7 +382,7 @@ export default function CfsForm() {
             {...field('talkTitle')}
           />
           {errors.talkTitle && (
-            <p id="cfs-title-error" role="alert" className="mt-1.5 text-xs text-google-red/80">{errors.talkTitle}</p>
+            <p id="cfs-title-error" role="alert" className="mt-1.5 text-xs text-google-red-light">{errors.talkTitle}</p>
           )}
         </div>
 
@@ -390,11 +390,11 @@ export default function CfsForm() {
         <div>
           <div className="flex items-baseline justify-between mb-2">
             <label htmlFor="cfs-abstract" className="block text-sm font-bold text-white/85">
-              Abstract <span className="text-google-red" aria-hidden="true">*</span>
+              Abstract <span className="text-google-red-light" aria-hidden="true">*</span>
             </label>
             <span
               aria-label={`${fields.abstract.length} of ${ABSTRACT_MAX} characters used`}
-              className={`text-xs tabular-nums ${fields.abstract.length > ABSTRACT_MAX ? 'text-google-red' : 'text-white/50'}`}
+              className={`text-xs tabular-nums ${fields.abstract.length > ABSTRACT_MAX ? 'text-google-red-light' : 'text-white/50'}`}
             >
               {fields.abstract.length}/{ABSTRACT_MAX}
             </span>
@@ -410,7 +410,7 @@ export default function CfsForm() {
             {...field('abstract')}
           />
           {errors.abstract ? (
-            <p id="cfs-abstract-error" role="alert" className="mt-1.5 text-xs text-google-red/80">{errors.abstract}</p>
+            <p id="cfs-abstract-error" role="alert" className="mt-1.5 text-xs text-google-red-light">{errors.abstract}</p>
           ) : (
             <p id="cfs-abstract-hint" className="mt-1.5 text-xs text-white/50">
               Briefly describe your session: the topic, key points, and what attendees will learn.
@@ -421,7 +421,7 @@ export default function CfsForm() {
         {/* Track */}
         <div>
           <p className="text-sm font-bold text-white/85 mb-3" id="cfs-track-label">
-            Track <span className="text-google-red" aria-hidden="true">*</span>
+            Track <span className="text-google-red-light" aria-hidden="true">*</span>
           </p>
           <div
             role="radiogroup"
@@ -477,7 +477,7 @@ export default function CfsForm() {
             })}
           </div>
           {errors.track && (
-            <p id="cfs-track-error" role="alert" className="mt-2 text-xs text-google-red/80">{errors.track}</p>
+            <p id="cfs-track-error" role="alert" className="mt-2 text-xs text-google-red-light">{errors.track}</p>
           )}
         </div>
 
@@ -490,7 +490,7 @@ export default function CfsForm() {
           <div className="overflow-hidden">
             <div className={`pt-1 transition-opacity duration-200 ${showFormat ? 'opacity-100' : 'opacity-0'}`}>
             <p className="text-sm font-bold text-white/85 mb-3" id="cfs-format-label">
-              Session format <span className="text-google-red" aria-hidden="true">*</span>
+              Session format <span className="text-google-red-light" aria-hidden="true">*</span>
             </p>
             <div
               role="radiogroup"
@@ -547,7 +547,7 @@ export default function CfsForm() {
               })}
             </div>
             {errors.format && (
-              <p id="cfs-format-error" role="alert" className="mt-2 text-xs text-google-red/80">{errors.format}</p>
+              <p id="cfs-format-error" role="alert" className="mt-2 text-xs text-google-red-light">{errors.format}</p>
             )}
             </div>
           </div>
@@ -557,7 +557,7 @@ export default function CfsForm() {
 
         <div>
           <p className="text-sm font-bold text-white/85 mb-3" id="cfs-level-label">
-            Your experience level <span className="text-google-red" aria-hidden="true">*</span>
+            Your experience level <span className="text-google-red-light" aria-hidden="true">*</span>
           </p>
           <div
             role="radiogroup"
@@ -606,7 +606,7 @@ export default function CfsForm() {
             })}
           </div>
           {errors.experienceLevel && (
-            <p id="cfs-level-error" role="alert" className="mt-2 text-xs text-google-red/80">{errors.experienceLevel}</p>
+            <p id="cfs-level-error" role="alert" className="mt-2 text-xs text-google-red-light">{errors.experienceLevel}</p>
           )}
         </div>
           </div>
@@ -828,7 +828,7 @@ export default function CfsForm() {
             <div className="overflow-hidden">
               <div className={`pt-2 transition-opacity duration-200 ${fields.requiresTravelSupport ? 'opacity-100' : 'opacity-0'}`}>
                 <label htmlFor="cfs-travel-location" className="block text-sm font-bold text-white/85 mb-1.5">
-                  Which city would you be travelling from? <span className="text-google-red" aria-hidden="true">*</span>
+                  Which city would you be travelling from? <span className="text-google-red-light" aria-hidden="true">*</span>
                 </label>
                 <input
                   id="cfs-travel-location"
@@ -842,7 +842,7 @@ export default function CfsForm() {
                   {...field('travelSupportLocation')}
                 />
                 {errors.travelSupportLocation && (
-                  <p id="cfs-travel-location-error" role="alert" className="mt-1.5 text-xs text-google-red/80">
+                  <p id="cfs-travel-location-error" role="alert" className="mt-1.5 text-xs text-google-red-light">
                     {errors.travelSupportLocation}
                   </p>
                 )}
@@ -858,9 +858,9 @@ export default function CfsForm() {
             type="submit"
             disabled={submitState === 'submitting'}
             aria-label="Submit your session"
-            className="inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-green text-white text-base font-bold rounded
-              border border-google-green transition-opacity hover:opacity-80
-              disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-google-green disabled:hover:text-white"
+            className="inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-green-deep text-white text-base font-bold rounded
+              border border-google-green-deep transition-opacity hover:opacity-80
+              disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-google-green-deep disabled:hover:text-white"
           >
             {submitState === 'submitting' ? (
               <>

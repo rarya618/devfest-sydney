@@ -34,7 +34,7 @@ interface LinkChipProps {
 
 const LINK_CHIP_ACCENTS: Record<LinkChipProps['accent'], { iconBg: string; iconText: string; hoverBorder: string; hoverBg: string }> = {
   blue: { iconBg: 'bg-google-blue/15', iconText: 'text-google-blue', hoverBorder: 'group-hover:border-google-blue/30', hoverBg: 'group-hover:bg-google-blue/[0.08]' },
-  red: { iconBg: 'bg-google-red/15', iconText: 'text-google-red', hoverBorder: 'group-hover:border-google-red/30', hoverBg: 'group-hover:bg-google-red/[0.08]' },
+  red: { iconBg: 'bg-google-red/15', iconText: 'text-google-red-light', hoverBorder: 'group-hover:border-google-red/30', hoverBg: 'group-hover:bg-google-red/[0.08]' },
 };
 
 function LinkChip({ label, value, icon, accent }: LinkChipProps) {
@@ -48,7 +48,7 @@ function LinkChip({ label, value, icon, accent }: LinkChipProps) {
       </span>
       <span className="text-sm font-medium text-white/70 group-hover:text-white transition-colors">
         {label}
-        {!href && <span className="ml-1.5 font-normal text-white/40">{value.trim()}</span>}
+        {!href && <span className="ml-1.5 font-normal text-white/55">{value.trim()}</span>}
       </span>
     </>
   );
@@ -94,7 +94,7 @@ function SendAcceptanceEmailButton({
       className={`inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
         alreadySent
           ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
-          : 'bg-google-green/15 text-google-green hover:bg-google-green hover:text-white'
+          : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
       }`}
     >
       <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
@@ -188,7 +188,7 @@ function ReviewerNotesPanel({ submissionId, notes, onError }: ReviewerNotesPanel
                   onClick={() => handleDelete(index)}
                   disabled={isDeleting}
                   aria-label={`Delete reviewer note from ${note.authorName}`}
-                  className="shrink-0 text-white/40 hover:text-google-red/85 transition-colors disabled:opacity-40"
+                  className="shrink-0 text-white/55 hover:text-google-red-light transition-colors disabled:opacity-40"
                 >
                   {isDeleting && deletingIndex === index ? (
                     <span className="text-[10px]">Deleting…</span>
@@ -199,7 +199,7 @@ function ReviewerNotesPanel({ submissionId, notes, onError }: ReviewerNotesPanel
                   )}
                 </button>
               </div>
-              <p className="mt-1 text-xs text-white/40">
+              <p className="mt-1 text-xs text-white/55">
                 <span className="font-medium text-white/50">{note.authorName}</span> &middot; {formatDate(note.createdAt)}
               </p>
             </li>
@@ -218,13 +218,13 @@ function ReviewerNotesPanel({ submissionId, notes, onError }: ReviewerNotesPanel
           rows={2}
           maxLength={2000}
           disabled={isPending}
-          className="flex-1 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30 resize-none disabled:opacity-50"
+          className="flex-1 rounded-lg border border-white/35 bg-white/[0.06] px-3 py-2 text-xs text-white placeholder:text-white/50 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30 resize-none disabled:opacity-50"
         />
         <button
           type="submit"
           disabled={isPending || !draft.trim()}
           aria-label="Save reviewer note"
-          className="shrink-0 text-xs font-semibold px-3 py-2 rounded-lg bg-google-blue text-white hover:bg-google-blue/90 transition-colors disabled:opacity-40"
+          className="shrink-0 text-xs font-semibold px-3 py-2 rounded-lg bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
         >
           {isPending ? 'Saving…' : 'Add'}
         </button>
@@ -349,7 +349,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
               </span>
             )}
             {submission.optOutOfRecording && (
-              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-red/15 text-google-red border-google-red/25">
+              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-red/15 text-google-red-light border-google-red/25">
                 Don&apos;t record
               </span>
             )}
@@ -366,9 +366,9 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         <span className={`text-xs font-medium ${TRACK_COLORS[submission.track]}`}>
           {TRACK_LABELS[submission.track]}
         </span>
-        <span className="text-white/30 text-xs">/</span>
+        <span className="text-white/50 text-xs">/</span>
         <span className="text-xs text-white/55">{FORMAT_LABELS[submission.format]}</span>
-        <span className="text-white/30 text-xs">/</span>
+        <span className="text-white/50 text-xs">/</span>
         <span className="text-xs text-white/55 capitalize">{submission.experienceLevel}</span>
       </div>
 
@@ -502,7 +502,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
           <span className={`w-[5px] h-[5px] rounded-full ${STATUS_DOT_STYLES[submission.status].dot}`} />
           {STATUS_LABELS[submission.status]}
         </span>
-        <span className="text-white/30 text-xs font-bold">&middot;</span>
+        <span className="text-white/50 text-xs font-bold">&middot;</span>
         <span className="text-xs font-bold text-white/55">{formatDate(submission.submittedAt)}</span>
         {submission.status === 'accepted' && <AcceptanceState submission={submission} />}
       </div>
@@ -533,7 +533,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
                 disabled={isPending || bulkActionsPending}
                 aria-label={`Reject proposal: ${submission.talkTitle}`}
                 title="Reject"
-                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-red hover:text-white transition-colors disabled:opacity-60"
+                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-red-deep hover:text-white transition-colors disabled:opacity-60"
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" d="M2.5 2.5l7 7m0-7l-7 7" />
@@ -545,7 +545,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
                 disabled={isPending || bulkActionsPending}
                 aria-label={`Accept and promote proposal: ${submission.talkTitle}`}
                 title="Accept"
-                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-green hover:text-white transition-colors disabled:opacity-60"
+                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-green-deep hover:text-white transition-colors disabled:opacity-60"
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.375l2.625 2.625L9.75 3.75" />
@@ -589,7 +589,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
                 <circle cx="13" cy="8" r="1.25" />
               </svg>
               {submission.reviewerNotes.length > 0 && (
-                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue text-white text-[10px] font-bold leading-none">
+                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-[10px] font-bold leading-none">
                   {submission.reviewerNotes.length}
                 </span>
               )}
@@ -740,7 +740,7 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
           <div className="flex items-baseline gap-2.5">
             <h3 className="font-bold text-white text-sm truncate">{submission.talkTitle}</h3>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-white/45 truncate">
+          <div className="flex items-center gap-1.5 text-xs text-white/55 truncate">
             <span className="font-bold text-white/70">{submission.name}</span>
             <span>&middot;</span>
             <span className="truncate">{FORMAT_LABELS[submission.format]} &middot; {EXPERIENCE_LABELS[submission.experienceLevel]}</span>
@@ -753,7 +753,7 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
           </div>
         </div>
 
-        <span className="hidden sm:flex flex-col items-end shrink-0 text-[11px] text-white/45 leading-snug text-right">
+        <span className="hidden sm:flex flex-col items-end shrink-0 text-[11px] text-white/55 leading-snug text-right">
           <span className={`font-bold ${STATUS_DOT_STYLES[submission.status].text}`}>{STATUS_LABELS[submission.status]}</span>
           {formatDate(submission.submittedAt)}
         </span>
@@ -771,7 +771,7 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
               disabled={isPending || bulkActionsPending}
               aria-label={`Reject proposal: ${submission.talkTitle}`}
               title="Reject"
-              className="inline-flex items-center justify-center px-3 h-8 text-white/70 hover:bg-google-red hover:text-white transition-colors disabled:opacity-60"
+              className="inline-flex items-center justify-center px-3 h-8 text-white/70 hover:bg-google-red-deep hover:text-white transition-colors disabled:opacity-60"
             >
               <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                 <path strokeLinecap="round" d="M2.5 2.5l7 7m0-7l-7 7" />
@@ -783,7 +783,7 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
               disabled={isPending || bulkActionsPending}
               aria-label={`Accept and promote proposal: ${submission.talkTitle}`}
               title="Accept"
-              className="inline-flex items-center justify-center px-3 h-8 text-white/70 hover:bg-google-green hover:text-white transition-colors disabled:opacity-60"
+              className="inline-flex items-center justify-center px-3 h-8 text-white/70 hover:bg-google-green-deep hover:text-white transition-colors disabled:opacity-60"
             >
               <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.375l2.625 2.625L9.75 3.75" />
@@ -828,7 +828,7 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
               <circle cx="13" cy="8" r="1.25" />
             </svg>
             {submission.reviewerNotes.length > 0 && (
-              <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue text-white text-[10px] font-bold leading-none">
+              <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-[10px] font-bold leading-none">
                 {submission.reviewerNotes.length}
               </span>
             )}
@@ -911,7 +911,7 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
       >
         <div className="overflow-hidden">
           <div className="mt-2.5 pl-7 pr-1 pb-0.5 space-y-3">
-            <div className="flex flex-wrap items-center gap-2 text-xs text-white/45 sm:hidden">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-white/55 sm:hidden">
               <span className={`font-bold ${STATUS_DOT_STYLES[submission.status].text}`}>{STATUS_LABELS[submission.status]}</span>
               <span>&middot;</span>
               <span>{formatDate(submission.submittedAt)}</span>
@@ -1332,12 +1332,12 @@ export default function SubmissionsDashboard({ submissions }: Props) {
           <div className="min-w-0 min-h-[3.25rem] flex items-center">
             {selectedCount > 0 ? (
               <div key="bulk-actions" className="flex items-center gap-2 flex-wrap animate-fade-in-fast">
-                <span className="shrink-0 text-sm text-white/40 mr-2">{selectedCount} selected</span>
+                <span className="shrink-0 text-sm text-white/55 mr-2">{selectedCount} selected</span>
                 <button
                   onClick={handleBulkReject}
                   disabled={isBulkPending}
                   aria-label={`Reject ${selectedCount} selected submissions`}
-                  className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-red text-white hover:bg-google-red/90 transition-colors disabled:opacity-60"
+                  className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-red-deep text-white hover:opacity-90 transition-colors disabled:opacity-60"
                 >
                   Reject
                 </button>
@@ -1345,7 +1345,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                   onClick={handleBulkAccept}
                   disabled={isBulkPending}
                   aria-label={`Accept ${selectedCount} selected submissions`}
-                  className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-green text-white hover:bg-google-green/90 transition-colors disabled:opacity-60"
+                  className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-green-deep text-white hover:opacity-90 transition-colors disabled:opacity-60"
                 >
                   Accept
                 </button>
@@ -1360,7 +1360,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 <button
                   onClick={clearSelection}
                   disabled={isBulkPending}
-                  className="shrink-0 h-10 text-sm px-4 rounded-full text-white/40 hover:text-white/70 transition-colors"
+                  className="shrink-0 h-10 text-sm px-4 rounded-full text-white/55 hover:text-white/70 transition-colors"
                 >
                   Clear
                 </button>
@@ -1368,7 +1368,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
             ) : (
               <div key="title" className="animate-fade-in-fast">
                 <h1 className="text-xl font-bold text-white tracking-tight">Submissions</h1>
-                <p className="mt-0.5 text-sm text-white/40">
+                <p className="mt-0.5 text-sm text-white/55">
                   {counts.all} total &middot; {counts.pending} pending review
                 </p>
               </div>
@@ -1405,12 +1405,12 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 tabIndex={searchOpen || search ? undefined : -1}
                 placeholder="Search name, email, talk title, or abstract…"
                 aria-label="Search name, email, talk title, or abstract"
-                className={`w-full h-10 rounded-full bg-transparent pl-9 pr-9 py-0 text-sm text-white placeholder:text-white/30 focus:outline-none transition-opacity duration-200 ${
+                className={`w-full h-10 rounded-full bg-transparent pl-9 pr-9 py-0 text-sm text-white placeholder:text-white/50 focus:outline-none transition-opacity duration-200 ${
                   searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}
               />
               <svg
-                className={`absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40 pointer-events-none transition-opacity duration-200 ${
+                className={`absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/55 pointer-events-none transition-opacity duration-200 ${
                   searchWidthOpen ? 'opacity-100' : 'opacity-0'
                 }`}
                 viewBox="0 0 16 16"
@@ -1429,7 +1429,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 }}
                 tabIndex={searchOpen || search ? undefined : -1}
                 aria-label="Close search"
-                className={`absolute right-2 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-opacity duration-200 ${
+                className={`absolute right-2 top-1/2 -translate-y-1/2 text-white/55 hover:text-white/70 transition-opacity duration-200 ${
                   searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}
               >
@@ -1453,7 +1453,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               >
                 {filterTabs.find((tab) => tab.value === filter)?.label}
                 <span className="font-medium text-white/60">{counts[filter]}</span>
-                <svg className={`w-3 h-3 text-white/40 transition-transform ${statusMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                <svg className={`w-3 h-3 text-white/55 transition-transform ${statusMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
                 </svg>
               </button>
@@ -1477,7 +1477,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                       }`}
                     >
                       {tab.label}
-                      <span className="text-white/40">{counts[tab.value]}</span>
+                      <span className="text-white/55">{counts[tab.value]}</span>
                     </button>
                   ))}
                 </div>
@@ -1498,7 +1498,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               >
                 <span className="hidden sm:inline">By track</span>
                 <span className="sm:hidden">Tracks</span>
-                <svg className={`w-3 h-3 text-white/40 transition-transform ${trackStatsOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                <svg className={`w-3 h-3 text-white/55 transition-transform ${trackStatsOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
                 </svg>
               </button>
@@ -1544,7 +1544,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                   className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-56 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden px-4 py-5 space-y-4 z-30"
                 >
                   <div>
-                    <label htmlFor="track-filter-select" className="block text-sm font-semibold text-white/40 capitalize mb-1">
+                    <label htmlFor="track-filter-select" className="block text-sm font-semibold text-white/55 capitalize mb-1">
                       Track
                     </label>
                     <select
@@ -1562,7 +1562,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                   </div>
 
                   <div>
-                    <label htmlFor="sort-select" className="block text-sm font-semibold text-white/40 capitalize mb-1">
+                    <label htmlFor="sort-select" className="block text-sm font-semibold text-white/55 capitalize mb-1">
                       Sort
                     </label>
                     <select
@@ -1653,7 +1653,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                     aria-label="Add a submission that did not come through the form"
                     className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
                   >
-                    <svg className="w-4 h-4 text-white/40 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                    <svg className="w-4 h-4 text-white/55 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                       <path strokeLinecap="round" d="M8 3.5v9M3.5 8h9" />
                     </svg>
                     Add submission
@@ -1667,7 +1667,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                     aria-label="Export visible submissions as a summary CSV"
                     className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
                   >
-                    <svg className="w-4 h-4 text-white/40 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                    <svg className="w-4 h-4 text-white/55 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8 1.5v8m0 0L5 6.5m3 3l3-3M2.5 11v2A1.5 1.5 0 004 14.5h8a1.5 1.5 0 001.5-1.5v-2" />
                     </svg>
                     Export CSV
@@ -1681,7 +1681,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                     aria-label="Export visible submissions as a full CSV including abstracts and speaker bios"
                     className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
                   >
-                    <svg className="w-4 h-4 text-white/40 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                    <svg className="w-4 h-4 text-white/55 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8 1.5v8m0 0L5 6.5m3 3l3-3M2.5 11v2A1.5 1.5 0 004 14.5h8a1.5 1.5 0 001.5-1.5v-2" />
                       <path strokeLinecap="round" d="M4.5 3.5h7" />
                     </svg>
@@ -1697,7 +1697,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
       <div className="px-4 md:px-5">
         {/* Submissions list */}
         {sorted.length === 0 ? (
-          <div className="text-center py-16 text-white/40 text-sm">
+          <div className="text-center py-16 text-white/55 text-sm">
             No submissions match these filters.
           </div>
         ) : sort === 'submitter' ? (
@@ -1706,7 +1706,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               <div key={group.key}>
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-3 px-1">
                   <h2 className="text-base font-bold text-white">{group.name}</h2>
-                  <span className="text-sm text-white/40">{group.email}</span>
+                  <span className="text-sm text-white/55">{group.email}</span>
                   {group.submissions.length > 1 && (
                     <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-google-blue/15 text-google-blue border border-google-blue/25">
                       {group.submissions.length} submissions

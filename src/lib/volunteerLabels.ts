@@ -3,8 +3,8 @@ import type { VolunteerArea, VolunteerStatus } from '@/lib/types';
 export const VOLUNTEER_STATUS_DOT_STYLES: Record<VolunteerStatus, { text: string; dot: string }> = {
   pending: { text: 'text-google-yellow', dot: 'bg-google-yellow' },
   accepted: { text: 'text-google-green', dot: 'bg-google-green' },
-  rejected: { text: 'text-white/40', dot: 'bg-white/40' },
-  archived: { text: 'text-white/30', dot: 'bg-white/30' },
+  rejected: { text: 'text-white/55', dot: 'bg-white/55' },
+  archived: { text: 'text-white/50', dot: 'bg-white/50' },
 };
 
 export const VOLUNTEER_STATUS_LABELS: Record<VolunteerStatus, string> = {
