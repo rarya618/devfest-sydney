@@ -7,12 +7,12 @@ const COLUMNS: { heading: string; links: { label: string; href: string; external
   {
     heading: 'Event',
     links: [
-      // Agenda and Sponsors join this column once those pages exist.
+      // Agenda joins this column once that page exists.
       { label: 'Tickets', href: '/tickets' },
       { label: 'Speakers', href: '/speakers' },
       { label: 'Tracks', href: '/#tracks' },
       { label: 'Venue', href: '/#venue' },
-      { label: 'Partners', href: '/#partners' },
+      { label: 'Partners', href: '/partners' },
     ],
   },
   {

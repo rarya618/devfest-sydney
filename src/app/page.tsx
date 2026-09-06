@@ -10,10 +10,11 @@ import { isCfsOpen } from '@/lib/cfs';
 import Reveal from '@/components/Reveal';
 import Countdown from '@/components/Countdown';
 import { adminDb } from '@/lib/firebase-admin';
+import { fetchSponsors, fetchPartnerAssets, groupSponsorsByTier, TIER_LABELS } from '@/lib/sponsors';
 import { fetchPublicSpeakers } from '@/lib/speakers';
 import { getInitials } from '@/lib/format';
 import { TRACK_DOT_COLORS, TRACK_LABELS } from '@/lib/submissionLabels';
-import type { Sponsor, SponsorTier, TeamMember } from '@/lib/types';
+import type { TeamMember } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
 
 export const metadata: Metadata = {
@@ -90,23 +91,6 @@ const VENUE_DIRECTIONS_URL = `https://www.google.com/maps/dir/?api=1&destination
 const VENUE_MAP_EMBED_URL = `https://www.google.com/maps?q=${encodeURIComponent(VENUE_ADDRESS)}&output=embed`;
 const VENUE_CALENDAR_URL = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('DevFest Sydney 2026')}&dates=20261010T090000/20261010T170000&ctz=Australia/Sydney&details=${encodeURIComponent('A full day of talks, workshops, and building together at DevFest Sydney 2026.')}&location=${encodeURIComponent(VENUE_ADDRESS)}`;
 
-const TIER_ORDER: SponsorTier[] = ['platinum', 'gold', 'silver', 'community'];
-const TIER_LABELS: Record<SponsorTier, string> = {
-  platinum: 'Platinum',
-  gold: 'Gold',
-  silver: 'Silver',
-  community: 'Community',
-};
-
-async function fetchSponsors(): Promise<Sponsor[]> {
-  try {
-    const snap = await adminDb.collection('sponsors').orderBy('order').get();
-    return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Sponsor));
-  } catch {
-    return [];
-  }
-}
-
 async function fetchTeam(): Promise<TeamMember[]> {
   try {
     const snap = await adminDb.collection('team').orderBy('order').get();
@@ -116,37 +100,10 @@ async function fetchTeam(): Promise<TeamMember[]> {
   }
 }
 
-async function fetchSponsorshipProspectusUrl(): Promise<string | null> {
-  try {
-    const doc = await adminDb.collection('settings').doc('site').get();
-    return (doc.data()?.sponsorshipProspectusUrl as string | undefined) ?? null;
-  } catch {
-    return null;
-  }
-}
-
 async function fetchLandingHeroImageUrl(): Promise<string | null> {
   try {
     const doc = await adminDb.collection('settings').doc('site').get();
     return (doc.data()?.landingHeroImageUrl as string | undefined) ?? null;
-  } catch {
-    return null;
-  }
-}
-
-async function fetchGoogleLogoUrl(): Promise<string | null> {
-  try {
-    const doc = await adminDb.collection('settings').doc('site').get();
-    return (doc.data()?.googleLogoUrl as string | undefined) ?? null;
-  } catch {
-    return null;
-  }
-}
-
-async function fetchTorrensLogoUrl(): Promise<string | null> {
-  try {
-    const doc = await adminDb.collection('settings').doc('site').get();
-    return (doc.data()?.torrensLogoUrl as string | undefined) ?? null;
   } catch {
     return null;
   }
@@ -162,7 +119,6 @@ async function fetchLandingSlideImageUrls(): Promise<string[]> {
 }
 
 const showVenue = true;
-const showSponsors = false;
 // How many speakers the landing page teases before handing over to /speakers.
 const LANDING_SPEAKER_LIMIT = 8;
 
@@ -170,25 +126,17 @@ export default async function Home() {
   const cfsOpen = isCfsOpen();
   const ticketsOnSale = areTicketsOpen();
   const cfsCloseDate = process.env.CFS_CLOSE_DATE;
-  const [sponsors, team, sponsorshipProspectusUrl, landingHeroImageUrl, googleLogoUrl, torrensLogoUrl, landingSlideImageUrls, speakers] = await Promise.all([
+  const [sponsors, team, partnerAssets, landingHeroImageUrl, landingSlideImageUrls, speakers] = await Promise.all([
     fetchSponsors(),
     fetchTeam(),
-    fetchSponsorshipProspectusUrl(),
+    fetchPartnerAssets(),
     fetchLandingHeroImageUrl(),
-    fetchGoogleLogoUrl(),
-    fetchTorrensLogoUrl(),
     fetchLandingSlideImageUrls(),
     fetchPublicSpeakers(),
   ]);
+  const { sponsorshipProspectusUrl, googleLogoUrl, torrensLogoUrl } = partnerAssets;
+  const sponsorGroups = groupSponsorsByTier(sponsors);
   const featuredSpeakers = speakers.slice(0, LANDING_SPEAKER_LIMIT);
-
-  const sponsorsByTier = TIER_ORDER.reduce<Record<SponsorTier, Sponsor[]>>(
-    (acc, tier) => {
-      acc[tier] = sponsors.filter((s) => s.tier === tier);
-      return acc;
-    },
-    { platinum: [], gold: [], silver: [], community: [] }
-  );
 
   return (
     <div className="bg-[#17181a] text-white min-h-screen">
@@ -552,8 +500,8 @@ export default async function Home() {
         </section>
       )}
 
-      {/* ─── SUPPORTED BY ─── */}
-      <section id="partners" className="py-16 px-6 border-t border-white/8">
+      {/* ─── PARTNERS ─── (sponsor tiers appear as the sponsors collection fills) */}
+      <section id="partners" className="py-20 px-6 border-t border-white/8">
         <div className="max-w-7xl mx-auto flex flex-col items-center gap-6">
           <p className="text-lg font-medium text-white/55">Supported by</p>
           <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center gap-8 sm:gap-16">
@@ -564,59 +512,50 @@ export default async function Home() {
               <Image src={torrensLogoUrl} alt="Torrens University" width={120} height={36} className="h-14 w-auto object-contain opacity-70" />
             )}
           </div>
+
+          {sponsorGroups.length > 0 && (
+            <div className="w-full mt-8 space-y-10">
+              {sponsorGroups.map((group) => (
+                <div key={group.tier}>
+                  <p className="text-xs font-bold text-white/50 tracking-[0.15em] uppercase mb-6 text-center">
+                    {TIER_LABELS[group.tier]}
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-10">
+                    {group.sponsors.map((sponsor) => (
+                      <a
+                        key={sponsor.id}
+                        href={sponsor.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`${sponsor.name} website`}
+                        className="opacity-80 hover:opacity-100 transition-opacity"
+                      >
+                        <Image
+                          src={sponsor.logoUrl}
+                          alt={sponsor.name}
+                          width={160}
+                          height={48}
+                          className={group.tier === 'platinum' ? 'h-14 w-auto object-contain' : 'h-10 w-auto object-contain'}
+                        />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <Link
+            href="/partners"
+            className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-white/70 hover:text-white transition-colors"
+          >
+            {sponsorGroups.length > 0 ? 'All partners and how to join them' : 'Become a partner'}
+            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 8h10M9 4l4 4-4 4" />
+            </svg>
+          </Link>
         </div>
       </section>
-
-      {/* ─── SPONSORS ─── (hidden until there are sponsors to show) */}
-      {showSponsors && (
-        <section className="py-24 px-6 bg-white/[0.02] border-b border-white/8">
-          <div className="max-w-7xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-14 text-center">Our sponsors</h2>
-
-            {sponsors.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-white/55 text-sm mb-3">Sponsors will be announced soon.</p>
-                <a
-                  href="mailto:hello@gdgsydney.com"
-                  className="text-sm text-google-yellow/80 hover:text-google-yellow transition-colors underline underline-offset-2"
-                >
-                  Interested in sponsoring? Get in touch.
-                </a>
-              </div>
-            ) : (
-              <div className="space-y-12">
-                {TIER_ORDER.filter((tier) => sponsorsByTier[tier].length > 0).map((tier) => (
-                  <div key={tier}>
-                    <p className="text-xs font-bold text-white/50 tracking-[0.15em] uppercase mb-6 text-center">
-                      {TIER_LABELS[tier]}
-                    </p>
-                    <div className="flex flex-wrap items-center justify-center gap-10">
-                      {sponsorsByTier[tier].map((sponsor) => (
-                        <a
-                          key={sponsor.id}
-                          href={sponsor.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={`${sponsor.name} — sponsor website`}
-                          className="opacity-80 hover:opacity-100 transition-opacity"
-                        >
-                          <Image
-                            src={sponsor.logoUrl}
-                            alt={sponsor.name}
-                            width={160}
-                            height={48}
-                            className="h-10 w-auto object-contain"
-                          />
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-      )}
 
       {/* ─── TEAM ─── (only rendered when team members exist) */}
       {team.length > 0 && (

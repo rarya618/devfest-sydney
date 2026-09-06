@@ -5,7 +5,7 @@ import { areTicketsOpen } from '@/lib/tickets';
 import { isCfsOpen } from '@/lib/cfs';
 import FAQ from '@/components/FAQ';
 import Reveal from '@/components/Reveal';
-import { adminDb } from '@/lib/firebase-admin';
+import { fetchSponsorshipProspectusUrl } from '@/lib/sponsors';
 
 // The navbar ticket CTA follows the on-sale date, so this page is rendered per request
 // rather than prerendered: see the note in `src/app/page.tsx`.
@@ -32,15 +32,6 @@ export const metadata: Metadata = {
     images: ['/opengraph-image'],
   },
 };
-
-async function fetchSponsorshipProspectusUrl(): Promise<string | null> {
-  try {
-    const doc = await adminDb.collection('settings').doc('site').get();
-    return (doc.data()?.sponsorshipProspectusUrl as string | undefined) ?? null;
-  } catch {
-    return null;
-  }
-}
 
 export default async function FaqPage() {
   const cfsOpen = isCfsOpen();
