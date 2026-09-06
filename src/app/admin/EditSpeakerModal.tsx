@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useTransition, type FormEvent } from 'react';
+import { useRef, useState, useTransition, type ChangeEvent, type FormEvent } from 'react';
+import Image from 'next/image';
 import { createPortal } from 'react-dom';
-import { updateSpeaker, type SpeakerEditableFields } from './speakerActions';
+import { removeSpeakerPhoto, updateSpeaker, uploadSpeakerPhoto, type SpeakerEditableFields } from './speakerActions';
+import { getInitials } from '@/lib/format';
 import { TRACK_LABELS, FORMAT_LABELS, EXPERIENCE_LABELS } from '@/lib/submissionLabels';
 import type { Speaker } from '@/lib/types';
 
@@ -38,6 +40,39 @@ const sectionHeadingClasses = 'text-[11px] font-bold uppercase tracking-wider te
 export default function EditSpeakerModal({ speaker, onClose, onError }: Props) {
   const [fields, setFields] = useState<SpeakerEditableFields>(() => toEditableFields(speaker));
   const [isPending, startTransition] = useTransition();
+  const [isUploadingPhoto, startPhotoTransition] = useTransition();
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
+  // Photo changes are saved the moment they happen, independently of the Save button:
+  // the file is already in Storage by then, so leaving the doc pointing at the old one
+  // would only strand the upload.
+  function handlePhotoChosen(event: ChangeEvent<HTMLInputElement>) {
+    const chosen = event.target.files?.[0];
+    event.target.value = '';
+    if (!chosen) return;
+
+    const formData = new FormData();
+    formData.append('photo', chosen);
+    startPhotoTransition(async () => {
+      const result = await uploadSpeakerPhoto(speaker.id, formData);
+      if (result.error || !result.photoUrl) {
+        onError(result.error ?? 'Could not upload this photo. Please try again.');
+        return;
+      }
+      update('photoUrl', result.photoUrl);
+    });
+  }
+
+  function handlePhotoRemove() {
+    startPhotoTransition(async () => {
+      const result = await removeSpeakerPhoto(speaker.id);
+      if (result.error) {
+        onError(result.error);
+        return;
+      }
+      update('photoUrl', '');
+    });
+  }
 
   function update<Key extends keyof SpeakerEditableFields>(key: Key, value: SpeakerEditableFields[Key]) {
     setFields((previous) => ({ ...previous, [key]: value }));
@@ -136,18 +171,55 @@ export default function EditSpeakerModal({ speaker, onClose, onError }: Props) {
               </div>
 
               <div>
-                <label className={labelClasses} htmlFor="speaker-photo">Photo URL</label>
-                <input
-                  id="speaker-photo"
-                  type="url"
-                  className={inputClasses}
-                  value={fields.photoUrl}
-                  onChange={(event) => update('photoUrl', event.target.value)}
-                  placeholder="https://storage.googleapis.com/…"
-                  maxLength={500}
-                />
-                <p className="mt-1 text-xs text-white/50">
-                  Upload the photo to Firebase Storage first, then paste its download link here.
+                <p className={labelClasses}>Photo</p>
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-full overflow-hidden bg-white/[0.06] shrink-0">
+                    {fields.photoUrl ? (
+                      <Image src={fields.photoUrl} alt={fields.name || 'Speaker photo'} width={64} height={64} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-white/55 text-base font-bold" aria-hidden="true">
+                        {getInitials(fields.name)}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <input
+                      ref={photoInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={handlePhotoChosen}
+                      className="sr-only"
+                      aria-label="Choose a speaker photo to upload"
+                      tabIndex={-1}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => photoInputRef.current?.click()}
+                      disabled={isUploadingPhoto || isPending}
+                      aria-label={fields.photoUrl ? 'Replace speaker photo' : 'Upload speaker photo'}
+                      className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-google-blue-deep text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50"
+                    >
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 10.5v-8M4.5 6L8 2.5 11.5 6" />
+                        <path strokeLinecap="round" d="M2.5 11v1.5A1.5 1.5 0 004 14h8a1.5 1.5 0 001.5-1.5V11" />
+                      </svg>
+                      {isUploadingPhoto ? 'Uploading…' : fields.photoUrl ? 'Replace photo' : 'Upload photo'}
+                    </button>
+                    {fields.photoUrl && (
+                      <button
+                        type="button"
+                        onClick={handlePhotoRemove}
+                        disabled={isUploadingPhoto || isPending}
+                        aria-label="Remove speaker photo"
+                        className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors disabled:opacity-50"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-white/50">
+                  JPEG, PNG, or WebP up to 5 MB. Square crops look best. Uploads save straight away.
                 </p>
               </div>
 
