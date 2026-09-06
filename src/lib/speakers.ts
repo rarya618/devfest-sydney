@@ -61,13 +61,37 @@ export async function fetchSpeakers(): Promise<Speaker[]> {
   });
 }
 
+// "Brett Morgan" -> "brett-morgan". Names that collapse to nothing (all symbols) fall
+// back to "speaker" so the page still has a segment.
+export function toSpeakerSlug(name: string): string {
+  const slug = name
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return slug || 'speaker';
+}
+
+// Two confirmed speakers with the same name get "-2", "-3" and so on, in name order, so
+// every slug is unique for a given lineup.
+function assignUniqueSlugs(speakers: Omit<PublicSpeaker, 'slug'>[]): PublicSpeaker[] {
+  const seen = new Map<string, number>();
+  return speakers.map((speaker) => {
+    const base = toSpeakerSlug(speaker.name);
+    const count = (seen.get(base) ?? 0) + 1;
+    seen.set(base, count);
+    return { ...speaker, slug: count === 1 ? base : `${base}-${count}` };
+  });
+}
+
 // The public lineup. Only speakers who have confirmed through /speaker/confirm appear:
 // a promoted speaker who has not been emailed yet, or has not answered, is not announced.
 // Returns an empty list rather than throwing so the page can show its "coming soon" state.
 export async function fetchPublicSpeakers(): Promise<PublicSpeaker[]> {
   try {
     const speakers = await fetchSpeakers();
-    return speakers
+    const confirmed = speakers
       .filter((speaker) => speaker.confirmation === 'confirmed')
       .sort((first, second) => first.name.localeCompare(second.name))
       .map((speaker) => ({
@@ -83,8 +107,16 @@ export async function fetchPublicSpeakers(): Promise<PublicSpeaker[]> {
         bio: speaker.bio,
         tagline: speaker.tagline,
         photoUrl: speaker.photoUrl,
-      } satisfies PublicSpeaker));
+      }));
+    return assignUniqueSlugs(confirmed);
   } catch {
     return [];
   }
+}
+
+// Null for an unknown slug and for a speaker who exists but has not confirmed, so the
+// two cases are indistinguishable from outside: an unconfirmed speaker has no page yet.
+export async function fetchPublicSpeakerBySlug(slug: string): Promise<PublicSpeaker | null> {
+  const speakers = await fetchPublicSpeakers();
+  return speakers.find((speaker) => speaker.slug === slug) ?? null;
 }

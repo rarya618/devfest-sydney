@@ -157,6 +157,8 @@ export interface Speaker {
 // nothing that only an organiser should see.
 export interface PublicSpeaker {
   id: string;
+  // URL segment for /speakers/<slug>, derived from the name (see toSpeakerSlug).
+  slug: string;
   name: string;
   talkTitle: string;
   abstract: string;

@@ -10,6 +10,9 @@ import { isCfsOpen } from '@/lib/cfs';
 import Reveal from '@/components/Reveal';
 import Countdown from '@/components/Countdown';
 import { adminDb } from '@/lib/firebase-admin';
+import { fetchPublicSpeakers } from '@/lib/speakers';
+import { getInitials } from '@/lib/format';
+import { TRACK_DOT_COLORS, TRACK_LABELS } from '@/lib/submissionLabels';
 import type { Sponsor, SponsorTier, TeamMember } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
 
@@ -160,12 +163,14 @@ async function fetchLandingSlideImageUrls(): Promise<string[]> {
 
 const showVenue = true;
 const showSponsors = false;
+// How many speakers the landing page teases before handing over to /speakers.
+const LANDING_SPEAKER_LIMIT = 8;
 
 export default async function Home() {
   const cfsOpen = isCfsOpen();
   const ticketsOnSale = areTicketsOpen();
   const cfsCloseDate = process.env.CFS_CLOSE_DATE;
-  const [sponsors, team, sponsorshipProspectusUrl, landingHeroImageUrl, googleLogoUrl, torrensLogoUrl, landingSlideImageUrls] = await Promise.all([
+  const [sponsors, team, sponsorshipProspectusUrl, landingHeroImageUrl, googleLogoUrl, torrensLogoUrl, landingSlideImageUrls, speakers] = await Promise.all([
     fetchSponsors(),
     fetchTeam(),
     fetchSponsorshipProspectusUrl(),
@@ -173,7 +178,9 @@ export default async function Home() {
     fetchGoogleLogoUrl(),
     fetchTorrensLogoUrl(),
     fetchLandingSlideImageUrls(),
+    fetchPublicSpeakers(),
   ]);
+  const featuredSpeakers = speakers.slice(0, LANDING_SPEAKER_LIMIT);
 
   const sponsorsByTier = TIER_ORDER.reduce<Record<SponsorTier, Sponsor[]>>(
     (acc, tier) => {
@@ -413,6 +420,60 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* ─── SPEAKERS ─── (only rendered once at least one speaker has confirmed) */}
+      {featuredSpeakers.length > 0 && (
+        <section id="speakers" className="pt-12 pb-24 px-4 sm:px-6 lg:px-12">
+          <div className="max-w-5xl mx-auto">
+            <Reveal className="mb-14 text-center">
+              <p className="text-xs font-bold text-white/55 tracking-[0.15em] uppercase mb-3">Speakers</p>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight">Meet the people on stage</h2>
+            </Reveal>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
+              {featuredSpeakers.map((speaker, index) => (
+                <Reveal key={speaker.id} delay={Math.min(index, 7) * 0.06} className="text-center">
+                  <Link
+                    href={`/speakers/${speaker.slug}`}
+                    aria-label={`${speaker.name}: ${speaker.talkTitle}`}
+                    className="group block"
+                  >
+                    <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden bg-white/5 ring-2 ring-transparent group-hover:ring-white/30 transition-shadow">
+                      {speaker.photoUrl ? (
+                        <Image src={speaker.photoUrl} alt="" width={96} height={96} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-white/50 text-2xl font-bold" aria-hidden="true">
+                          {getInitials(speaker.name)}
+                        </div>
+                      )}
+                    </div>
+                    <p className="font-semibold text-white/85 text-sm leading-snug">{speaker.name}</p>
+                    {speaker.tagline && <p className="text-xs text-white/55 mt-1 leading-snug line-clamp-2">{speaker.tagline}</p>}
+                    <p className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.12em] text-white/55">
+                      <span className={`w-1.5 h-1.5 rounded-full ${TRACK_DOT_COLORS[speaker.track]}`} aria-hidden="true" />
+                      {TRACK_LABELS[speaker.track]}
+                    </p>
+                  </Link>
+                </Reveal>
+              ))}
+            </div>
+
+            <Reveal delay={0.2} className="mt-14 text-center">
+              <Link
+                href="/speakers"
+                className="inline-flex items-center gap-2.5 px-7 py-2 bg-transparent text-white text-base font-bold rounded border border-white/40 transition-colors hover:border-white"
+              >
+                {speakers.length > featuredSpeakers.length
+                  ? `See all ${speakers.length} speakers`
+                  : 'See the full lineup'}
+                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8h10M9 4l4 4-4 4" />
+                </svg>
+              </Link>
+            </Reveal>
+          </div>
+        </section>
+      )}
 
       {/* ─── VENUE ─── */}
       {showVenue && (

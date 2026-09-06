@@ -18,6 +18,8 @@ const ACCENT_CLASSES: Record<Accent, string> = {
   yellow: 'bg-google-yellow border-google-yellow text-black-02',
 };
 
+// Pages only, never anchors into the landing page: a nav item should take you somewhere,
+// not scroll the page you are on. About and Tracks stay reachable from the footer.
 // Kept short. /tickets is reached from the CTA button beside these links, from the
 // landing page's ticket section, and from the footer, so a nav item for it would only
 // repeat the CTA sitting next to it.
@@ -31,8 +33,6 @@ const ACCENT_CLASSES: Record<Accent, string> = {
 const SHOWCASE_HREF = '/builder-showcase';
 
 const NAV_LINKS = [
-  { href: '/#about', label: 'About' },
-  { href: '/#tracks', label: 'Tracks' },
   { href: '/speakers', label: 'Speakers' },
   { href: SHOWCASE_HREF, label: 'Builder Showcase' },
 ];

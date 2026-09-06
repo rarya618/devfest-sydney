@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { areTicketsOpen } from '@/lib/tickets';
 import { isCfsOpen } from '@/lib/cfs';
 import { isShowcaseOpen } from '@/lib/showcase';
+import { fetchPublicSpeakers } from '@/lib/speakers';
 
 // The /tickets priority follows areTicketsOpen(), so don't freeze this at build time.
 export const dynamic = 'force-dynamic';
@@ -9,7 +10,9 @@ export const dynamic = 'force-dynamic';
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://devfest.gdgsydney.com';
 const isVolunteerOpen = process.env.VOLUNTEER_OPEN === 'true';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const speakers = await fetchPublicSpeakers();
+
   return [
     {
       url: siteUrl,
@@ -29,6 +32,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 0.8,
     },
+    ...speakers.map((speaker) => ({
+      url: `${siteUrl}/speakers/${speaker.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    })),
     {
       url: `${siteUrl}/call-for-speakers`,
       lastModified: new Date(),
