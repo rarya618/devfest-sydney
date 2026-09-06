@@ -12,6 +12,7 @@ import Countdown from '@/components/Countdown';
 import { adminDb } from '@/lib/firebase-admin';
 import { fetchSponsors, fetchPartnerAssets, groupSponsorsByTier, TIER_LABELS } from '@/lib/sponsors';
 import { fetchPublicSpeakers } from '@/lib/speakers';
+import { buildEventJsonLd } from '@/lib/eventJsonLd';
 import { getInitials } from '@/lib/format';
 import { TRACK_DOT_COLORS, TRACK_LABELS } from '@/lib/submissionLabels';
 import type { TeamMember } from '@/lib/types';
@@ -29,33 +30,6 @@ export const dynamic = 'force-dynamic';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://devfest.gdgsydney.com';
 
-const eventJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'Event',
-  name: 'DevFest Sydney 2026',
-  description: 'Build, Secure, Scale: Developers and Builders in the Agentic Era.',
-  startDate: '2026-10-10',
-  eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-  eventStatus: 'https://schema.org/EventScheduled',
-  location: {
-    '@type': 'Place',
-    name: 'Torrens University, Surry Hills',
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: 'Shop 1/37 Foveaux St',
-      addressLocality: 'Surry Hills',
-      addressRegion: 'NSW',
-      postalCode: '2010',
-      addressCountry: 'AU',
-    },
-  },
-  organizer: {
-    '@type': 'Organization',
-    name: 'GDG Sydney',
-    url: 'https://gdgsydney.com',
-  },
-  url: siteUrl,
-};
 
 const tracks = ['Developer track', 'Builder track', 'Workshop track'];
 
@@ -142,7 +116,7 @@ export default async function Home() {
     <div className="bg-[#17181a] text-white min-h-screen">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildEventJsonLd(speakers)) }}
       />
       <Navbar accent="blue" isCfsOpen={cfsOpen} cfsCloseDate={cfsCloseDate} areTicketsOpen={ticketsOnSale} />
 

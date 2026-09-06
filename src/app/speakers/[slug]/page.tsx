@@ -10,6 +10,7 @@ import { areTicketsOpen } from '@/lib/tickets';
 import { isCfsOpen } from '@/lib/cfs';
 import { fetchPublicSpeakerBySlug, fetchPublicSpeakers } from '@/lib/speakers';
 import { getInitials } from '@/lib/format';
+import { buildEventReference } from '@/lib/eventJsonLd';
 import { LinkedInIcon, GitHubIcon, WebsiteIcon } from '@/components/SocialIcons';
 import { FORMAT_LABELS, TRACK_LABELS, TRACK_DOT_COLORS, TRACK_COLORS } from '@/lib/submissionLabels';
 import type { PublicSpeaker } from '@/lib/types';
@@ -68,7 +69,8 @@ function ProfileLink({ href, label, children }: { href: string; label: string; c
 }
 
 // Person + Event JSON-LD so a shared speaker link carries who they are and where they
-// are speaking. Mirrors the Event block on `/`.
+// are speaking. The nested Event is the same one `/` describes in full, and that page
+// lists this speaker back under `performer`.
 function buildJsonLd(speaker: PublicSpeaker) {
   return {
     '@context': 'https://schema.org',
@@ -79,17 +81,7 @@ function buildJsonLd(speaker: PublicSpeaker) {
     ...(speaker.bio ? { description: speaker.bio } : {}),
     ...(speaker.photoUrl ? { image: speaker.photoUrl } : {}),
     sameAs: [speaker.linkedinUrl, speaker.githubUrl, speaker.websiteUrl].filter(Boolean),
-    performerIn: {
-      '@type': 'Event',
-      name: 'DevFest Sydney 2026',
-      url: siteUrl,
-      startDate: '2026-10-10',
-      location: {
-        '@type': 'Place',
-        name: 'Torrens University, Surry Hills',
-        address: 'Shop 1/37 Foveaux St, Surry Hills NSW 2010',
-      },
-    },
+    performerIn: buildEventReference(),
   };
 }
 
