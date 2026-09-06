@@ -61,6 +61,19 @@ Used for short lines, speaker names, data labels, and anywhere a "code-style" fe
 | Off White | `#f0f0f0` |
 | Black 02 | `#1e1e1e` |
 
+### Contrast Variants (site-only, not in the GDG guide)
+
+The core fills reach only 3.1 to 3.9:1 against white, which fails WCAG AA for the 16px button labels used across the site. Solid buttons that carry white text therefore use deeper shades from the Google Material palette, and red text on the dark page uses a lighter one. Keep the core colours for accents, outlines, tints and large type.
+
+| Name | Hex | Tailwind | Usage |
+|------|-----|----------|-------|
+| Blue 600 | `#1a73e8` | `bg-google-blue-deep` | Solid blue button fills with white text |
+| Green 700 | `#188038` | `bg-google-green-deep` | Solid green button fills with white text |
+| Red 600 | `#d93025` | `bg-google-red-deep` | Solid red button fills with white text |
+| Red 300 | `#f28b82` | `text-google-red-light` | Red text on dark surfaces (errors, destructive actions) |
+
+Minimum text opacity on the dark page is `text-white/50` (5.3:1). Anything lower is decorative only.
+
 > CMYK values are for print only. Use RGB/hex for all digital work.
 
 ## Logo
