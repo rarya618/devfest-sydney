@@ -154,7 +154,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
             </p>
           )}
         </div>
-        {(volunteer.googleTechExperience || volunteer.isTorrensStudentOrStaff) && (
+        {(volunteer.googleTechExperience || volunteer.isTorrensStudentOrStaff || volunteer.hasBeenGdgOnCampusExec) && (
           <div className="flex flex-wrap items-center gap-1.5 gap-y-2 mt-3">
             {volunteer.googleTechExperience && (
               <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue border-google-blue/25">
@@ -164,6 +164,14 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
             {volunteer.isTorrensStudentOrStaff && (
               <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25">
                 Torrens
+              </span>
+            )}
+            {volunteer.hasBeenGdgOnCampusExec && (
+              <span
+                title="Has been on the exec team of a GDG on Campus chapter"
+                className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-green/15 text-google-green border-google-green/25"
+              >
+                GDG on Campus exec
               </span>
             )}
           </div>

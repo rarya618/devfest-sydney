@@ -15,6 +15,7 @@ interface VolunteerPayload {
   priorExperience: string;
   googleTechExperience: string;
   isTorrensStudentOrStaff: boolean;
+  hasBeenGdgOnCampusExec: boolean;
   dietaryRequirements: string;
   tracking: Record<string, string>;
 }
@@ -83,6 +84,7 @@ function validatePayload(body: unknown): VolunteerPayload {
     priorExperience: typeof b.priorExperience === 'string' ? b.priorExperience.trim() : '',
     googleTechExperience: typeof b.googleTechExperience === 'string' ? b.googleTechExperience.trim() : '',
     isTorrensStudentOrStaff: b.isTorrensStudentOrStaff === true,
+    hasBeenGdgOnCampusExec: b.hasBeenGdgOnCampusExec === true,
     dietaryRequirements: typeof b.dietaryRequirements === 'string' ? b.dietaryRequirements.trim() : '',
     tracking: sanitizeTracking(b.tracking),
   };

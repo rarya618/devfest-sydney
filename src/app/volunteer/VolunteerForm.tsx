@@ -16,6 +16,7 @@ interface FormFields {
   priorExperience: string;
   googleTechExperience: string;
   isTorrensStudentOrStaff: boolean;
+  hasBeenGdgOnCampusExec: boolean;
   dietaryRequirements: string;
 }
 
@@ -55,6 +56,7 @@ export default function VolunteerForm() {
     priorExperience: '',
     googleTechExperience: '',
     isTorrensStudentOrStaff: false,
+    hasBeenGdgOnCampusExec: false,
     dietaryRequirements: '',
   });
   const [tracking] = useState<Record<string, string>>(() => getTrackingParams());
@@ -429,6 +431,34 @@ export default function VolunteerForm() {
                 </div>
                 <span className="text-sm text-white/85 group-hover:text-white/90 transition-colors select-none">
                   Are you a student or staff member at Torrens University?
+                </span>
+              </label>
+            </div>
+
+            <div>
+              <label htmlFor="vol-gdg-campus-exec" className="flex items-center gap-3 cursor-pointer group">
+                <div className="relative shrink-0">
+                  <input
+                    id="vol-gdg-campus-exec"
+                    type="checkbox"
+                    checked={fields.hasBeenGdgOnCampusExec}
+                    onChange={(e) => setFields((prev) => ({ ...prev, hasBeenGdgOnCampusExec: e.target.checked }))}
+                    className="sr-only peer"
+                  />
+                  <div className="w-5 h-5 rounded-md border border-white/20 bg-white/[0.05] peer-checked:bg-google-green peer-checked:border-google-green transition-colors duration-150 group-hover:border-white/35 flex items-center justify-center">
+                    {fields.hasBeenGdgOnCampusExec && (
+                      <span
+                        className="material-symbols-outlined text-white text-[18px] flex items-center justify-center"
+                        style={{ fontVariationSettings: "'FILL' 1" }}
+                        aria-hidden="true"
+                      >
+                        check_small
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <span className="text-sm text-white/85 group-hover:text-white/90 transition-colors select-none">
+                  Have you been a part of the exec team at a GDG on Campus before?
                 </span>
               </label>
             </div>

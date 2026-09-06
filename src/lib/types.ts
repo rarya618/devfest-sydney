@@ -96,6 +96,7 @@ export interface VolunteerSubmission {
   priorExperience: string;
   googleTechExperience: string;
   isTorrensStudentOrStaff: boolean;
+  hasBeenGdgOnCampusExec: boolean;
   dietaryRequirements: string;
   tracking: SubmissionTracking;
   submittedAt: string; // ISO date string (serialized from Firestore Timestamp)
