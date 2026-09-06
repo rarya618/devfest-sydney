@@ -8,6 +8,7 @@ import {
   VOLUNTEER_STATUS_DOT_STYLES,
   VOLUNTEER_STATUS_LABELS,
   VOLUNTEER_AREA_LABELS,
+  GDG_ON_CAMPUS_CHAPTER_LABELS,
 } from '@/lib/volunteerLabels';
 import type { ReviewerNote, VolunteerStatus, VolunteerSubmission } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
@@ -171,7 +172,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
                 title="Has been on the exec team of a GDG on Campus chapter"
                 className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-green/15 text-google-green border-google-green/25"
               >
-                GDG on Campus exec
+                GDG on Campus exec{volunteer.gdgOnCampusChapter ? ` · ${GDG_ON_CAMPUS_CHAPTER_LABELS[volunteer.gdgOnCampusChapter]}` : ''}
               </span>
             )}
           </div>

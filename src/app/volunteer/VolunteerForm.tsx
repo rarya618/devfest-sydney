@@ -2,6 +2,8 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import Alert from '@/components/Alert';
+import { GDG_ON_CAMPUS_CHAPTERS } from '@/lib/volunteerLabels';
+import type { GdgOnCampusChapter } from '@/lib/types';
 import { getTrackingParams } from '@/lib/tracking';
 
 type VolunteerArea = 'registration' | 'av-tech' | 'speaker-support' | 'workshop-facilitator' | 'general-floater' | 'setup-packdown' | 'photography' | 'social-media' | 'merch-table';
@@ -17,6 +19,7 @@ interface FormFields {
   googleTechExperience: string;
   isTorrensStudentOrStaff: boolean;
   hasBeenGdgOnCampusExec: boolean;
+  gdgOnCampusChapter: GdgOnCampusChapter;
   dietaryRequirements: string;
 }
 
@@ -25,6 +28,7 @@ interface FormErrors {
   email?: string;
   motivation?: string;
   areasOfInterest?: string;
+  gdgOnCampusChapter?: string;
 }
 
 const AREAS: { value: VolunteerArea; label: string }[] = [
@@ -57,6 +61,7 @@ export default function VolunteerForm() {
     googleTechExperience: '',
     isTorrensStudentOrStaff: false,
     hasBeenGdgOnCampusExec: false,
+    gdgOnCampusChapter: '',
     dietaryRequirements: '',
   });
   const [tracking] = useState<Record<string, string>>(() => getTrackingParams());
@@ -96,6 +101,7 @@ export default function VolunteerForm() {
       errs.motivation = `Your answer must be ${MOTIVATION_MAX} characters or fewer.`;
     }
     if (fields.areasOfInterest.length === 0) errs.areasOfInterest = 'Please select at least one area of interest.';
+    if (fields.hasBeenGdgOnCampusExec && !fields.gdgOnCampusChapter) errs.gdgOnCampusChapter = 'Please tell us which chapter.';
     return errs;
   }
 
@@ -442,7 +448,12 @@ export default function VolunteerForm() {
                     id="vol-gdg-campus-exec"
                     type="checkbox"
                     checked={fields.hasBeenGdgOnCampusExec}
-                    onChange={(e) => setFields((prev) => ({ ...prev, hasBeenGdgOnCampusExec: e.target.checked }))}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      // Unticking clears the chapter so a stale answer is never submitted.
+                      setFields((prev) => ({ ...prev, hasBeenGdgOnCampusExec: checked, gdgOnCampusChapter: checked ? prev.gdgOnCampusChapter : '' }));
+                      if (!checked) setErrors((prev) => ({ ...prev, gdgOnCampusChapter: undefined }));
+                    }}
                     className="sr-only peer"
                   />
                   <div className="w-5 h-5 rounded-md border border-white/20 bg-white/[0.05] peer-checked:bg-google-green peer-checked:border-google-green transition-colors duration-150 group-hover:border-white/35 flex items-center justify-center">
@@ -461,6 +472,34 @@ export default function VolunteerForm() {
                   Have you been a part of the exec team at a GDG on Campus before?
                 </span>
               </label>
+              {fields.hasBeenGdgOnCampusExec && (
+                <div className="mt-3 pl-8">
+                  <label htmlFor="vol-gdg-chapter" className="block text-sm font-bold text-white/85 mb-1.5">
+                    Which chapter? <span className="text-google-red-light" aria-hidden="true">*</span>
+                  </label>
+                  <select
+                    id="vol-gdg-chapter"
+                    value={fields.gdgOnCampusChapter}
+                    onChange={(e) => {
+                      const value = e.target.value as GdgOnCampusChapter;
+                      setFields((prev) => ({ ...prev, gdgOnCampusChapter: value }));
+                      if (value) setErrors((prev) => ({ ...prev, gdgOnCampusChapter: undefined }));
+                    }}
+                    aria-required="true"
+                    aria-describedby={errors.gdgOnCampusChapter ? 'vol-gdg-chapter-error' : undefined}
+                    aria-invalid={!!errors.gdgOnCampusChapter}
+                    className={`${errors.gdgOnCampusChapter ? inputError : inputNormal} [color-scheme:dark]`}
+                  >
+                    <option value="">Select a chapter</option>
+                    {GDG_ON_CAMPUS_CHAPTERS.map((chapter) => (
+                      <option key={chapter.value} value={chapter.value}>{chapter.label}</option>
+                    ))}
+                  </select>
+                  {errors.gdgOnCampusChapter && (
+                    <p id="vol-gdg-chapter-error" role="alert" className="mt-1.5 text-xs text-google-red-light">{errors.gdgOnCampusChapter}</p>
+                  )}
+                </div>
+              )}
             </div>
 
             <div>

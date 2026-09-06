@@ -94,6 +94,7 @@ rules_version='2';
 //     student or staff member at Torrens University
 //   - hasBeenGdgOnCampusExec: boolean (required) — whether the volunteer has been on the
 //     exec team of a GDG on Campus chapter
+//   - gdgOnCampusChapter: string (required) — 'usyd' | 'uts' | 'other', or '' when the above is false
 //   - dietaryRequirements: string (optional, max 300 chars)
 //   - submittedAt: timestamp (required, must be recent)
 //
@@ -219,7 +220,8 @@ service cloud.firestore {
                           'setup-packdown', 'photography', 'social-media', 'merch-table'];
       return data.keys().hasOnly(['name', 'email', 'phone', 'motivation',
                                    'areasOfInterest', 'priorExperience', 'googleTechExperience',
-                                   'isTorrensStudentOrStaff', 'hasBeenGdgOnCampusExec', 'dietaryRequirements', 'submittedAt']) &&
+                                   'isTorrensStudentOrStaff', 'hasBeenGdgOnCampusExec', 'gdgOnCampusChapter',
+                                   'dietaryRequirements', 'submittedAt']) &&
         data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
         data.email is string && isValidEmail(data.email) &&
         isValidOptionalString('phone', 1, 30) &&
@@ -230,6 +232,7 @@ service cloud.firestore {
         isValidOptionalString('googleTechExperience', 1, 1000) &&
         data.isTorrensStudentOrStaff is bool &&
         data.hasBeenGdgOnCampusExec is bool &&
+        data.gdgOnCampusChapter in ['', 'usyd', 'uts', 'other'] &&
         isValidOptionalString('dietaryRequirements', 1, 300) &&
         data.submittedAt is timestamp;
     }

@@ -5,6 +5,8 @@ export type SubmissionStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
 export type SponsorTier = 'platinum' | 'gold' | 'silver' | 'community';
 export type VolunteerArea = 'registration' | 'av-tech' | 'speaker-support' | 'workshop-facilitator' | 'general-floater' | 'setup-packdown' | 'photography' | 'social-media' | 'merch-table';
 export type VolunteerStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
+// Empty string when the volunteer has not been on a GDG on Campus exec team.
+export type GdgOnCampusChapter = '' | 'usyd' | 'uts' | 'other';
 export type ShowcaseStage = 'idea' | 'prototype' | 'live';
 export type ShowcaseStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
 
@@ -97,6 +99,7 @@ export interface VolunteerSubmission {
   googleTechExperience: string;
   isTorrensStudentOrStaff: boolean;
   hasBeenGdgOnCampusExec: boolean;
+  gdgOnCampusChapter: GdgOnCampusChapter;
   dietaryRequirements: string;
   tracking: SubmissionTracking;
   submittedAt: string; // ISO date string (serialized from Firestore Timestamp)

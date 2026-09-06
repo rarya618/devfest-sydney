@@ -4,6 +4,9 @@ import { isVolunteerOpen } from '@/lib/volunteer';
 import { Resend } from 'resend';
 import { FieldValue } from 'firebase-admin/firestore';
 
+type GdgOnCampusChapter = '' | 'usyd' | 'uts' | 'other';
+const VALID_CHAPTERS: GdgOnCampusChapter[] = ['usyd', 'uts', 'other'];
+
 type VolunteerArea = 'registration' | 'av-tech' | 'speaker-support' | 'workshop-facilitator' | 'general-floater' | 'setup-packdown' | 'photography' | 'social-media' | 'merch-table';
 
 interface VolunteerPayload {
@@ -16,6 +19,7 @@ interface VolunteerPayload {
   googleTechExperience: string;
   isTorrensStudentOrStaff: boolean;
   hasBeenGdgOnCampusExec: boolean;
+  gdgOnCampusChapter: GdgOnCampusChapter;
   dietaryRequirements: string;
   tracking: Record<string, string>;
 }
@@ -71,6 +75,10 @@ function validatePayload(body: unknown): VolunteerPayload {
   if (typeof b.googleTechExperience === 'string' && b.googleTechExperience.length > GOOGLE_TECH_EXPERIENCE_MAX) {
     throw new Error(`Google tech experience must be ${GOOGLE_TECH_EXPERIENCE_MAX} characters or fewer.`);
   }
+  const hasBeenGdgOnCampusExec = b.hasBeenGdgOnCampusExec === true;
+  if (hasBeenGdgOnCampusExec && !VALID_CHAPTERS.includes(b.gdgOnCampusChapter as GdgOnCampusChapter)) {
+    throw new Error('Please tell us which GDG on Campus chapter you were part of.');
+  }
   if (typeof b.dietaryRequirements === 'string' && b.dietaryRequirements.length > DIETARY_MAX) {
     throw new Error(`Dietary requirements must be ${DIETARY_MAX} characters or fewer.`);
   }
@@ -84,7 +92,9 @@ function validatePayload(body: unknown): VolunteerPayload {
     priorExperience: typeof b.priorExperience === 'string' ? b.priorExperience.trim() : '',
     googleTechExperience: typeof b.googleTechExperience === 'string' ? b.googleTechExperience.trim() : '',
     isTorrensStudentOrStaff: b.isTorrensStudentOrStaff === true,
-    hasBeenGdgOnCampusExec: b.hasBeenGdgOnCampusExec === true,
+    hasBeenGdgOnCampusExec,
+    // Only meaningful alongside the flag; cleared otherwise so a toggled-off answer never lingers.
+    gdgOnCampusChapter: hasBeenGdgOnCampusExec ? (b.gdgOnCampusChapter as GdgOnCampusChapter) : '',
     dietaryRequirements: typeof b.dietaryRequirements === 'string' ? b.dietaryRequirements.trim() : '',
     tracking: sanitizeTracking(b.tracking),
   };

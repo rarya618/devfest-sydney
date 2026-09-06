@@ -22,6 +22,7 @@ export async function fetchVolunteers(): Promise<VolunteerSubmission[]> {
       googleTechExperience: data.googleTechExperience ?? '',
       isTorrensStudentOrStaff: data.isTorrensStudentOrStaff ?? false,
       hasBeenGdgOnCampusExec: data.hasBeenGdgOnCampusExec ?? false,
+      gdgOnCampusChapter: data.gdgOnCampusChapter ?? '',
       dietaryRequirements: data.dietaryRequirements ?? '',
       tracking: {
         utmSource: data.tracking?.utm_source ?? '',

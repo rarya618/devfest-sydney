@@ -1,4 +1,4 @@
-import type { VolunteerArea, VolunteerStatus } from '@/lib/types';
+import type { GdgOnCampusChapter, VolunteerArea, VolunteerStatus } from '@/lib/types';
 
 export const VOLUNTEER_STATUS_DOT_STYLES: Record<VolunteerStatus, { text: string; dot: string }> = {
   pending: { text: 'text-google-yellow', dot: 'bg-google-yellow' },
@@ -24,4 +24,16 @@ export const VOLUNTEER_AREA_LABELS: Record<VolunteerArea, string> = {
   photography: 'Photography',
   'social-media': 'Social media',
   'merch-table': 'Merch table',
+};
+
+export const GDG_ON_CAMPUS_CHAPTERS: { value: Exclude<GdgOnCampusChapter, ''>; label: string }[] = [
+  { value: 'usyd', label: 'USYD' },
+  { value: 'uts', label: 'UTS' },
+  { value: 'other', label: 'Other' },
+];
+
+export const GDG_ON_CAMPUS_CHAPTER_LABELS: Record<Exclude<GdgOnCampusChapter, ''>, string> = {
+  usyd: 'USYD',
+  uts: 'UTS',
+  other: 'Other chapter',
 };
