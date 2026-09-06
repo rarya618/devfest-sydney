@@ -95,7 +95,7 @@ export default async function Volunteer() {
 
       {/* Areas marquee */}
       <section id="areas" className="pt-0 pb-0 px-6">
-        <div className="relative -mx-6 overflow-hidden border-y border-[#CCCCCC] bg-white/[0.06] animate-slide-up">
+        <div className="relative -mx-6 overflow-hidden border-y border-white/20 bg-white/[0.06] animate-slide-up">
           <div className="absolute inset-y-0 left-0 w-12 sm:w-24 bg-gradient-to-r from-[#17181a] to-transparent z-10 pointer-events-none" aria-hidden="true" />
           <div className="absolute inset-y-0 right-0 w-12 sm:w-24 bg-gradient-to-l from-[#17181a] to-transparent z-10 pointer-events-none" aria-hidden="true" />
           <div className="flex w-max items-center gap-10 py-4 animate-marquee hover:[animation-play-state:paused]" aria-hidden="true">
