@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
+import { isVolunteerOpen } from '@/lib/volunteer';
 import { Resend } from 'resend';
 import { FieldValue } from 'firebase-admin/firestore';
 
@@ -160,6 +161,15 @@ function buildConfirmationEmail(volunteer: VolunteerPayload): string {
 }
 
 export async function POST(request: NextRequest) {
+  // Hiding the form is not the same as closing signups: without this the endpoint keeps
+  // accepting them after VOLUNTEER_OPEN is switched off, from a stale tab or a direct post.
+  if (!isVolunteerOpen()) {
+    return NextResponse.json(
+      { message: 'Volunteer signups have closed, so we can no longer accept applications. Thank you for your interest.' },
+      { status: 403 }
+    );
+  }
+
   let volunteer: VolunteerPayload;
 
   try {

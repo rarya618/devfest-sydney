@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { buildPageMetadata } from '@/lib/metadata';
+import { isVolunteerOpen } from '@/lib/volunteer';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -14,7 +15,6 @@ const description = 'Sign up to volunteer at DevFest Sydney 2026. Help with regi
 
 export const metadata: Metadata = buildPageMetadata({ title, description, path: '/volunteer' });
 
-const isVolunteerOpen = process.env.VOLUNTEER_OPEN === 'true';
 
 const areas: { label: string; desc: string }[] = [
   { label: 'Registration', desc: 'Welcome attendees and help check them in.' },
@@ -38,6 +38,7 @@ async function fetchVolunteerHeroImageUrl(): Promise<string | null> {
 }
 
 export default async function Volunteer() {
+  const volunteerOpen = isVolunteerOpen();
   const heroImageUrl = await fetchVolunteerHeroImageUrl();
 
   return (
@@ -45,7 +46,7 @@ export default async function Volunteer() {
       <Navbar accent="red" areTicketsOpen={areTicketsOpen()} />
 
       {/* Hero */}
-      <section className={`relative pb-30 px-6 overflow-hidden ${isVolunteerOpen ? 'pt-36' : 'pt-28'}`}>
+      <section className={`relative pb-30 px-6 overflow-hidden ${volunteerOpen ? 'pt-36' : 'pt-28'}`}>
         {heroImageUrl ? (
           <>
             <Image src={heroImageUrl} alt="" fill priority sizes="100vw" className="object-cover scale-125 sm:scale-100" />
@@ -56,7 +57,7 @@ export default async function Volunteer() {
         )}
 
         <div className="relative max-w-4xl mx-auto text-center">
-          {isVolunteerOpen && (
+          {volunteerOpen && (
             <p className="mb-4 text-base font-bold text-white/80 animate-fade-in">
               Accepting applications
             </p>
@@ -79,7 +80,7 @@ export default async function Volunteer() {
             >
               Learn more
             </a>
-            {isVolunteerOpen && (
+            {volunteerOpen && (
               <a
                 href="#signup"
                 className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-red-deep text-white text-base font-bold rounded border border-google-red-deep transition-opacity hover:opacity-80 animate-slide-up"
@@ -113,7 +114,7 @@ export default async function Volunteer() {
 
       {/* Form or Closed State */}
       <section id="signup" className="pt-16 pb-20 px-6 bg-[#17181a]">
-        <div className={isVolunteerOpen ? 'max-w-4xl mx-auto' : 'max-w-xl mx-auto'}>
+        <div className={volunteerOpen ? 'max-w-4xl mx-auto' : 'max-w-xl mx-auto'}>
           <div className="mb-10 text-center animate-slide-up">
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight">Help bring DevFest Sydney to life</h2>
             <p className="text-white/70 mt-4 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
@@ -125,7 +126,7 @@ export default async function Volunteer() {
             </p>
           </div>
 
-          {isVolunteerOpen ? (
+          {volunteerOpen ? (
             <VolunteerForm />
           ) : (
             <div className="bg-white/[0.025] border border-white/10 rounded-2xl p-12 text-center">
