@@ -1,5 +1,5 @@
 import { adminDb } from '@/lib/firebase-admin';
-import type { Speaker, SpeakerConfirmation } from '@/lib/types';
+import type { PublicSpeaker, Speaker, SpeakerConfirmation } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
 
 interface SubmissionConfirmationFields {
@@ -59,4 +59,32 @@ export async function fetchSpeakers(): Promise<Speaker[]> {
       confirmation: toConfirmation(submissionsById.get(submissionId)),
     } satisfies Speaker;
   });
+}
+
+// The public lineup. Only speakers who have confirmed through /speaker/confirm appear:
+// a promoted speaker who has not been emailed yet, or has not answered, is not announced.
+// Returns an empty list rather than throwing so the page can show its "coming soon" state.
+export async function fetchPublicSpeakers(): Promise<PublicSpeaker[]> {
+  try {
+    const speakers = await fetchSpeakers();
+    return speakers
+      .filter((speaker) => speaker.confirmation === 'confirmed')
+      .sort((first, second) => first.name.localeCompare(second.name))
+      .map((speaker) => ({
+        id: speaker.id,
+        name: speaker.name,
+        talkTitle: speaker.talkTitle,
+        abstract: speaker.abstract,
+        format: speaker.format,
+        track: speaker.track,
+        linkedinUrl: speaker.linkedinUrl,
+        githubUrl: speaker.githubUrl,
+        websiteUrl: speaker.websiteUrl,
+        bio: speaker.bio,
+        tagline: speaker.tagline,
+        photoUrl: speaker.photoUrl,
+      } satisfies PublicSpeaker));
+  } catch {
+    return [];
+  }
 }

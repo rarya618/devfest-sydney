@@ -33,6 +33,7 @@ const SHOWCASE_HREF = '/builder-showcase';
 const NAV_LINKS = [
   { href: '/#about', label: 'About' },
   { href: '/#tracks', label: 'Tracks' },
+  { href: '/speakers', label: 'Speakers' },
   { href: SHOWCASE_HREF, label: 'Builder Showcase' },
 ];
 

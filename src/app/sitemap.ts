@@ -24,6 +24,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: areTicketsOpen() ? 0.9 : 0.4,
     },
     {
+      url: `${siteUrl}/speakers`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
       url: `${siteUrl}/call-for-speakers`,
       lastModified: new Date(),
       changeFrequency: 'daily',

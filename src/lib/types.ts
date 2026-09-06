@@ -152,3 +152,20 @@ export interface Speaker {
   promotedAt: string; // ISO date string (serialized from Firestore Timestamp)
   confirmation: SpeakerConfirmation;
 }
+
+// What /speakers renders. Deliberately a subset of Speaker: no email, no submission id,
+// nothing that only an organiser should see.
+export interface PublicSpeaker {
+  id: string;
+  name: string;
+  talkTitle: string;
+  abstract: string;
+  format: TalkFormat;
+  track: Track;
+  linkedinUrl: string;
+  githubUrl: string;
+  websiteUrl: string;
+  bio: string;
+  tagline: string;
+  photoUrl: string;
+}
