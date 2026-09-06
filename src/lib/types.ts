@@ -128,3 +128,27 @@ export interface ShowcaseSubmission {
   status: ShowcaseStatus;
   reviewerNotes: ReviewerNote[];
 }
+
+// Whether the speaker behind a promoted talk has actually been told and has confirmed.
+// Derived from the source submission, since that is where the acceptance email is recorded.
+export type SpeakerConfirmation = 'not-emailed' | 'awaiting' | 'confirmed' | 'unknown';
+
+export interface Speaker {
+  id: string;
+  name: string;
+  email: string;
+  talkTitle: string;
+  abstract: string;
+  format: TalkFormat;
+  track: Track;
+  experienceLevel: ExperienceLevel;
+  linkedinUrl: string;
+  githubUrl: string;
+  websiteUrl: string;
+  bio: string;
+  tagline: string;
+  photoUrl: string;
+  submissionId: string;
+  promotedAt: string; // ISO date string (serialized from Firestore Timestamp)
+  confirmation: SpeakerConfirmation;
+}
