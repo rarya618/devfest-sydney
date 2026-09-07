@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { buildPageMetadata } from '@/lib/metadata';
+import { buildPageMetadata, SITE_OG_IMAGE } from '@/lib/metadata';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { areTicketsOpen } from '@/lib/tickets';
@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 const title = 'Privacy Policy';
 const description = 'How DevFest Sydney collects, uses, and protects your personal information.';
 
-export const metadata: Metadata = buildPageMetadata({ title, description, path: '/privacy', images: ['/opengraph-image'] });
+export const metadata: Metadata = buildPageMetadata({ title, description, path: '/privacy', images: [SITE_OG_IMAGE] });
 
 const sections = [
   {

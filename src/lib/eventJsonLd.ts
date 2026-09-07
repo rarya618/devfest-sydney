@@ -1,5 +1,6 @@
 import { TICKETS_URL, areTicketsOpen } from '@/lib/tickets';
 import type { PublicSpeaker } from '@/lib/types';
+import { SITE_OG_IMAGE } from '@/lib/metadata';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://devfest.gdgsydney.com';
 
@@ -22,8 +23,18 @@ export const EVENT_LOCATION = {
   },
 } as const;
 
-// Price and currency are left out until the Humanitix tiers are settled; Google treats
-// them as recommended rather than required, and a wrong price is worse than none.
+// Humanitix sells several tiers ($40 General Admission up to $300 Enterprise as of
+// 2026-09-07). Google's event rich result wants one price, and a $40 to $300 range would
+// misrepresent the general ticket, so this is the cheapest tier on sale, taken from
+// TICKET_LOWEST_PRICE so it can follow Humanitix (e.g. when Second Release opens) without a
+// code change. Booking fees are left out: schema.org price is the ticket price. Unset means
+// no price is published, which Google treats as recommended rather than required.
+function buildPriceFields() {
+  const lowestPrice = process.env.TICKET_LOWEST_PRICE?.trim();
+  if (!lowestPrice || Number.isNaN(Number(lowestPrice))) return {};
+  return { price: lowestPrice, priceCurrency: 'AUD' };
+}
+
 function buildOffers() {
   if (!TICKETS_URL) return undefined;
   const onSaleDate = process.env.TICKETS_ON_SALE_DATE;
@@ -32,6 +43,7 @@ function buildOffers() {
     url: TICKETS_URL,
     availability: areTicketsOpen() ? 'https://schema.org/InStock' : 'https://schema.org/PreOrder',
     ...(onSaleDate ? { validFrom: onSaleDate } : {}),
+    ...buildPriceFields(),
   };
 }
 
@@ -48,7 +60,7 @@ export function buildEventJsonLd(speakers: PublicSpeaker[]) {
     endDate: EVENT_END,
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     eventStatus: 'https://schema.org/EventScheduled',
-    image: [`${siteUrl}/opengraph-image`],
+    image: [`${siteUrl}${SITE_OG_IMAGE}`],
     location: EVENT_LOCATION,
     organizer: {
       '@type': 'Organization',

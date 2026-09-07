@@ -75,6 +75,12 @@ env:
     availability:
       - BUILD
       - RUNTIME
+  # Cheapest ticket tier on sale, AUD, excluding the booking fee. Feeds only the Event
+  # JSON-LD price on /. Update when Humanitix tiers change; empty publishes no price.
+  - variable: TICKET_LOWEST_PRICE
+    value: "40.00"
+    availability:
+      - RUNTIME
 
   # Volunteer signup toggle
   - variable: VOLUNTEER_OPEN
