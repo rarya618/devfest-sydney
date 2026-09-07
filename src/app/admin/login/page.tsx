@@ -17,7 +17,7 @@ export default async function AdminLoginPage() {
 
   if (sessionCookie) {
     try {
-      await adminAuth.verifySessionCookie(sessionCookie, true);
+      await adminAuth.verifySessionCookie(sessionCookie);
       redirect('/admin');
     } catch {
       // Cookie is invalid or expired — fall through to the login form

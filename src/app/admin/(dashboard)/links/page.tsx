@@ -1,5 +1,4 @@
 import { getVerifiedSession } from '@/lib/adminSession';
-import AdminShell from '../AdminShell';
 import LinksView from './LinksView';
 
 export const metadata = {
@@ -9,11 +8,7 @@ export const metadata = {
 };
 
 export default async function LinksPage() {
-  const admin = await getVerifiedSession();
+  await getVerifiedSession();
 
-  return (
-    <AdminShell adminEmail={admin.email} adminName={admin.name}>
-      <LinksView />
-    </AdminShell>
-  );
+  return <LinksView />;
 }

@@ -4,21 +4,46 @@ import { useState, useRef, useEffect, type ReactNode } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 import { getInitials } from '@/lib/format';
 import Alert from '@/components/Alert';
-import InviteAdminForm from './InviteAdminForm';
 import { MobileBarContext } from './MobileBarContext';
 
-const NAV_ITEMS: { href: string; label: string }[] = [
-  { href: '/admin', label: 'Submissions' },
-  { href: '/admin/speakers', label: 'Speakers' },
-  { href: '/admin/volunteers', label: 'Volunteers' },
-  { href: '/admin/showcase', label: 'Showcase' },
-  { href: '/admin/analytics', label: 'Analytics' },
-  { href: '/admin/links', label: 'Links' },
-  { href: '/admin/admins', label: 'Admins' },
+interface NavItem {
+  href: string;
+  label: string;
+}
+
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
+// Grouped by what an admin is doing: working through what people sent in, managing
+// what the public site shows, looking at how it is going, and running the panel itself.
+const NAV_GROUPS: NavGroup[] = [
+  {
+    label: 'Review',
+    items: [
+      { href: '/admin', label: 'Submissions' },
+      { href: '/admin/volunteers', label: 'Volunteers' },
+      { href: '/admin/showcase', label: 'Showcase' },
+    ],
+  },
+  {
+    label: 'Content',
+    items: [{ href: '/admin/speakers', label: 'Speakers' }],
+  },
+  {
+    label: 'Insights',
+    items: [
+      { href: '/admin/analytics', label: 'Analytics' },
+      { href: '/admin/links', label: 'Links' },
+    ],
+  },
+  {
+    label: 'Settings',
+    items: [{ href: '/admin/admins', label: 'Admins' }],
+  },
 ];
 
 interface Props {
@@ -27,16 +52,93 @@ interface Props {
   children: ReactNode;
 }
 
+function isActive(href: string, pathname: string): boolean {
+  return href === '/admin' ? pathname === '/admin' : pathname.startsWith(href);
+}
+
+interface NavLinksProps {
+  pathname: string;
+  onNavigate?: () => void;
+  rounded: boolean;
+}
+
+function NavLinks({ pathname, onNavigate, rounded }: NavLinksProps) {
+  return (
+    <nav aria-label="Admin sections" className={rounded ? 'space-y-5' : 'space-y-2'}>
+      {NAV_GROUPS.map((group) => (
+        <div key={group.label}>
+          <p className={`font-mono text-[11px] uppercase tracking-[0.12em] text-white/50 px-4 ${rounded ? 'mb-1.5' : 'pt-1 pb-1'}`}>
+            {group.label}
+          </p>
+          <ul className={rounded ? 'space-y-0.5' : undefined}>
+            {group.items.map((item) => {
+              const active = isActive(item.href, pathname);
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    onClick={onNavigate}
+                    aria-current={active ? 'page' : undefined}
+                    className={`block text-sm px-4 transition-colors ${rounded ? 'py-2 rounded-lg' : 'py-2.5'} ${
+                      active
+                        ? 'bg-white/10 text-white font-bold'
+                        : 'text-white/55 font-medium hover:text-white hover:bg-white/[0.08]'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+    </nav>
+  );
+}
+
+interface AccountRowProps {
+  adminName: string;
+  adminEmail: string;
+  signingOut: boolean;
+  onSignOut: () => void;
+}
+
+// Avatar, name and a sign-out button in one row. No popover: the only account action an
+// admin has here is leaving, so a menu was a click in the way of it.
+function AccountRow({ adminName, adminEmail, signingOut, onSignOut }: AccountRowProps) {
+  return (
+    <div className="flex items-center gap-3 px-3 py-2">
+      <span className="flex items-center justify-center w-8 h-8 rounded-full bg-google-blue-deep text-white text-xs font-bold shrink-0">
+        {getInitials(adminName)}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-white truncate" title={adminName}>{adminName}</p>
+        <p className="text-xs text-white/50 truncate" title={adminEmail}>{adminEmail}</p>
+      </div>
+      <button
+        onClick={onSignOut}
+        disabled={signingOut}
+        aria-label="Sign out of admin panel"
+        title="Sign out"
+        className="shrink-0 p-2 -mr-2 rounded-lg text-white/55 hover:text-google-red-light hover:bg-google-red/[0.08] transition-colors disabled:opacity-50"
+      >
+        <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 14H3.5A1.5 1.5 0 012 12.5v-9A1.5 1.5 0 013.5 2H6" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 11.5L14 8l-3.5-3.5M14 8H6" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
 export default function AdminShell({ adminEmail, adminName, children }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState(false);
-  const [inviting, setInviting] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileBarHidden, setMobileBarHidden] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
   const lastScrollYRef = useRef(0);
 
   useEffect(() => {
@@ -61,32 +163,26 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
   }, []);
 
   useEffect(() => {
-    if (!menuOpen) return;
-
-    function handlePointerDown(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setMenuOpen(false);
-      }
-    }
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setMenuOpen(false);
-    }
-
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [menuOpen]);
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
-    setSidebarOpen(false);
-  }, [pathname]);
+    if (!mobileMenuOpen) return;
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setMobileMenuOpen(false);
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [mobileMenuOpen]);
 
   async function handleSignOut() {
     setSigningOut(true);
+    setMobileMenuOpen(false);
     try {
+      // Loaded on demand: importing `@/lib/firebase` at the top would pull the whole
+      // client SDK (Auth, Firestore, Storage, App Check and its reCAPTCHA script) into
+      // every admin page for the sake of this one button.
+      const [{ signOut }, { auth }] = await Promise.all([import('firebase/auth'), import('@/lib/firebase')]);
       await signOut(auth);
       await fetch('/api/admin/session', { method: 'DELETE' });
       router.push('/admin/login');
@@ -97,6 +193,12 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
     }
   }
 
+  const wordmark = (
+    <Link href="/" className="inline-flex items-center hover:opacity-80 transition-opacity" aria-label="Back to DevFest Sydney home">
+      <Image src="/logo-wordmark.png" alt="DevFest Sydney" width={1331} height={240} className="h-8 w-auto object-contain" />
+    </Link>
+  );
+
   return (
     <div className="min-h-screen bg-[#010103] md:flex md:items-start">
       {/* Mobile top bar */}
@@ -105,230 +207,54 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
           mobileBarHidden ? '-translate-y-full' : 'translate-y-0'
         }`}
       >
-        <Link href="/" className="inline-flex items-center hover:opacity-80 transition-opacity" aria-label="Back to DevFest Sydney home">
-          <Image src="/logo-wordmark.png" alt="DevFest Sydney" width={1331} height={240} className="h-8 w-auto object-contain" />
-        </Link>
+        {wordmark}
         <button
-          onClick={() => setSidebarOpen(true)}
-          aria-label="Open admin menu"
+          onClick={() => setMobileMenuOpen((open) => !open)}
+          aria-label={mobileMenuOpen ? 'Close admin menu' : 'Open admin menu'}
+          aria-expanded={mobileMenuOpen}
           className="p-2 -mr-2 text-white/70 hover:text-white transition-colors"
         >
           <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-            <path strokeLinecap="round" d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17" />
+            {mobileMenuOpen ? (
+              <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+            ) : (
+              <path strokeLinecap="round" d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17" />
+            )}
           </svg>
         </button>
       </div>
 
-      {/* Mobile dropdown menu */}
-      {sidebarOpen && (
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
         <>
-          <div
-            className="fixed inset-0 z-40 md:hidden"
-            onClick={() => setSidebarOpen(false)}
-            aria-hidden="true"
-          />
+          <div className="fixed inset-0 z-40 md:hidden" onClick={() => setMobileMenuOpen(false)} aria-hidden="true" />
           <div className="md:hidden fixed top-[57px] right-3 mt-2 z-50 w-72 max-w-[calc(100vw-1.5rem)] bg-[#191a1d] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden">
-            <nav aria-label="Admin sections" className="py-1.5">
-              <ul>
-                {NAV_ITEMS.map((item) => {
-                  const active = item.href === '/admin' ? pathname === '/admin' : pathname.startsWith(item.href);
-                  return (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        onClick={() => setSidebarOpen(false)}
-                        aria-current={active ? 'page' : undefined}
-                        className={`block text-sm px-4 py-2.5 transition-colors ${
-                          active
-                            ? 'bg-white/10 text-white font-bold'
-                            : 'text-white/60 font-medium hover:text-white hover:bg-white/[0.08]'
-                        }`}
-                      >
-                        {item.label}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
-
-            <div className="border-t border-white/10 flex items-center gap-3 px-4 py-3.5 bg-white/[0.04]">
-              <span className="flex items-center justify-center w-9 h-9 rounded-full bg-google-blue-deep text-white text-sm font-bold shrink-0">
-                {getInitials(adminName)}
-              </span>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-white truncate" title={adminName}>{adminName}</p>
-                <p className="text-xs text-white/50 truncate" title={adminEmail}>{adminEmail}</p>
-              </div>
+            <div className="py-1.5">
+              <NavLinks pathname={pathname} onNavigate={() => setMobileMenuOpen(false)} rounded={false} />
             </div>
-
-            <div className="border-t border-white/10 py-1.5">
-              <button
-                onClick={() => {
-                  setSidebarOpen(false);
-                  setInviting(true);
-                }}
-                aria-label="Invite a new admin"
-                className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-              >
-                <svg className="w-4 h-4 text-white/55 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                  <circle cx="6" cy="5.5" r="2.75" />
-                  <path strokeLinecap="round" d="M1.5 14c0-2.76 2.24-4.5 4.5-4.5s4.5 1.74 4.5 4.5" />
-                  <path strokeLinecap="round" d="M12.5 5.5v4M10.5 7.5h4" />
-                </svg>
-                Invite admin
-              </button>
-            </div>
-
-            <div className="border-t border-white/10 py-1.5">
-              <button
-                onClick={() => {
-                  setSidebarOpen(false);
-                  handleSignOut();
-                }}
-                disabled={signingOut}
-                aria-label="Sign out of admin panel"
-                className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-google-red-light hover:bg-google-red/[0.06] transition-colors disabled:opacity-50"
-              >
-                <svg className="w-4 h-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 14H3.5A1.5 1.5 0 012 12.5v-9A1.5 1.5 0 013.5 2H6" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 11.5L14 8l-3.5-3.5M14 8H6" />
-                </svg>
-                {signingOut ? 'Signing out…' : 'Sign out'}
-              </button>
+            <div className="border-t border-white/10 px-1 py-1.5 bg-white/[0.04]">
+              <AccountRow adminName={adminName} adminEmail={adminEmail} signingOut={signingOut} onSignOut={handleSignOut} />
             </div>
           </div>
         </>
       )}
 
       {/* Sidebar (desktop only) */}
-      <div className="hidden md:sticky md:flex top-0 left-0 z-50 w-64 shrink-0 h-screen flex-col border-r border-white/10 px-3 pt-7 pb-5 bg-[#010103]">
-        <div className="flex items-center justify-between gap-2 pl-3 pr-2 mb-6">
-          <Link href="/" className="inline-flex items-center hover:opacity-80 transition-opacity" aria-label="Back to DevFest Sydney home">
-            <Image
-              src="/logo-wordmark.png"
-              alt="DevFest Sydney"
-              width={1331}
-              height={240}
-              className="h-8 w-auto object-contain"
-            />
-          </Link>
+      <aside className="hidden md:sticky md:flex top-0 left-0 z-50 w-64 shrink-0 h-screen flex-col border-r border-white/10 px-3 pt-7 pb-4 bg-[#010103]">
+        <div className="pl-3 mb-6">{wordmark}</div>
+
+        <div className="flex-1">
+          <NavLinks pathname={pathname} rounded />
         </div>
 
-        <nav aria-label="Admin sections" className="flex-1">
-          <ul className="space-y-1">
-            {NAV_ITEMS.map((item) => {
-              const active = item.href === '/admin' ? pathname === '/admin' : pathname.startsWith(item.href);
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    aria-current={active ? 'page' : undefined}
-                    className={`block text-sm px-4 py-2 rounded-lg transition-colors ${
-                      active
-                        ? 'bg-white/10 text-white font-bold'
-                        : 'text-white/50 font-medium hover:text-white hover:bg-white/[0.08]'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-
-        <div className="relative" ref={menuRef}>
-          {menuOpen && (
-            <div
-              role="menu"
-              className="absolute left-0 bottom-full mb-2 w-full bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden"
-            >
-              <div className="flex items-center gap-3 px-4 py-3.5 bg-white/[0.04]">
-                <span className="flex items-center justify-center w-9 h-9 rounded-full bg-google-blue-deep text-white text-sm font-bold shrink-0">
-                  {getInitials(adminName)}
-                </span>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-white truncate" title={adminName}>{adminName}</p>
-                  <p className="text-xs text-white/50 truncate" title={adminEmail}>{adminEmail}</p>
-                </div>
-              </div>
-
-              <div className="py-1.5">
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    setInviting(true);
-                  }}
-                  aria-label="Invite a new admin"
-                  className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                >
-                  <svg className="w-4 h-4 text-white/55 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                    <circle cx="6" cy="5.5" r="2.75" />
-                    <path strokeLinecap="round" d="M1.5 14c0-2.76 2.24-4.5 4.5-4.5s4.5 1.74 4.5 4.5" />
-                    <path strokeLinecap="round" d="M12.5 5.5v4M10.5 7.5h4" />
-                  </svg>
-                  Invite admin
-                </button>
-              </div>
-
-              <div className="border-t border-white/10 py-1.5">
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    handleSignOut();
-                  }}
-                  disabled={signingOut}
-                  aria-label="Sign out of admin panel"
-                  className="w-full flex items-center gap-2.5 text-left text-sm px-4 py-2.5 text-google-red-light hover:bg-google-red/[0.06] transition-colors disabled:opacity-50"
-                >
-                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 14H3.5A1.5 1.5 0 012 12.5v-9A1.5 1.5 0 013.5 2H6" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 11.5L14 8l-3.5-3.5M14 8H6" />
-                  </svg>
-                  {signingOut ? 'Signing out…' : 'Sign out'}
-                </button>
-              </div>
-            </div>
-          )}
-
-          <button
-            onClick={() => setMenuOpen((open) => !open)}
-            aria-label="Admin menu"
-            aria-haspopup="menu"
-            aria-expanded={menuOpen}
-            className={`w-full flex items-center gap-2.5 px-2 py-2 rounded-lg border transition-colors ${
-              menuOpen ? 'border-white/15 bg-white/[0.05]' : 'border-transparent hover:border-white/10 hover:bg-white/[0.06]'
-            }`}
-          >
-            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-google-blue-deep text-white text-xs font-bold shrink-0">
-              {getInitials(adminName)}
-            </span>
-            <span className="min-w-0 flex-1 text-left">
-              <span className="block text-sm font-semibold text-white truncate" title={adminName}>{adminName}</span>
-            </span>
-            <svg className={`w-3 h-3 text-white/55 shrink-0 transition-transform ${menuOpen ? '' : 'rotate-180'}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
-            </svg>
-          </button>
+        <div className="border-t border-white/10 pt-3 -mx-3 px-3">
+          <AccountRow adminName={adminName} adminEmail={adminEmail} signingOut={signingOut} onSignOut={handleSignOut} />
         </div>
-      </div>
+      </aside>
 
       <main className="flex-1 min-w-0 w-full pb-10">
         <MobileBarContext.Provider value={mobileBarHidden}>{children}</MobileBarContext.Provider>
       </main>
-
-      {inviting && (
-        <InviteAdminForm
-          onDone={() => setInviting(false)}
-          onError={(message) => {
-            setInviting(false);
-            setAlertMessage(message);
-          }}
-        />
-      )}
 
       {alertMessage && <Alert message={alertMessage} onDismiss={() => setAlertMessage(null)} />}
     </div>

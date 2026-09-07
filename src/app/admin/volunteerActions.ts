@@ -1,24 +1,9 @@
 'use server';
 
-import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
-import { adminAuth, adminDb } from '@/lib/firebase-admin';
+import { adminDb } from '@/lib/firebase-admin';
+import { verifyAdminSession } from '@/lib/adminSession';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
-
-const SESSION_COOKIE_NAME = '__session';
-
-async function verifyAdminSession(): Promise<{ email: string; name: string }> {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-  if (!sessionCookie) throw new Error('No session.');
-  const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
-  if (!decoded.email) throw new Error('No email on session.');
-
-  const adminDoc = await adminDb.collection('admins').doc(decoded.email).get();
-  if (!adminDoc.exists) throw new Error('Not an admin.');
-
-  return { email: decoded.email, name: adminDoc.data()?.name || decoded.email };
-}
 
 export async function acceptVolunteer(volunteerId: string): Promise<{ error?: string }> {
   try {

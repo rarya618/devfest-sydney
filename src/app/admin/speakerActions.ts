@@ -1,25 +1,10 @@
 'use server';
 
-import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { randomUUID } from 'node:crypto';
-import { adminAuth, adminDb, adminStorage } from '@/lib/firebase-admin';
+import { adminDb, adminStorage } from '@/lib/firebase-admin';
+import { verifyAdminSession } from '@/lib/adminSession';
 import type { ExperienceLevel, TalkFormat, Track } from '@/lib/types';
-
-const SESSION_COOKIE_NAME = '__session';
-
-async function verifyAdminSession(): Promise<{ email: string; name: string }> {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-  if (!sessionCookie) throw new Error('No session.');
-  const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
-  if (!decoded.email) throw new Error('No email on session.');
-
-  const adminDoc = await adminDb.collection('admins').doc(decoded.email).get();
-  if (!adminDoc.exists) throw new Error('Not an admin.');
-
-  return { email: decoded.email, name: adminDoc.data()?.name || decoded.email };
-}
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const TALK_FORMATS: TalkFormat[] = ['talk', 'lightning-talk', 'workshop'];

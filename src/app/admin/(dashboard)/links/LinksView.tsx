@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import Alert from '@/components/Alert';
-import { useMobileBarHidden } from '../MobileBarContext';
+import { useMobileBarHidden } from '../../MobileBarContext';
 
 const FIELDS: { key: 'source' | 'medium' | 'campaign' | 'ref'; label: string; placeholder: string }[] = [
   { key: 'source', label: 'Source', placeholder: 'e.g. twitter' },

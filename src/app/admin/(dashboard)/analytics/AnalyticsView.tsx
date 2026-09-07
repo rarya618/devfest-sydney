@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Submission, VolunteerSubmission, ShowcaseSubmission } from '@/lib/types';
-import StickyAdminHeader from '../StickyAdminHeader';
+import StickyAdminHeader from '../../StickyAdminHeader';
 import SpeakerAnalytics from './SpeakerAnalytics';
 import VolunteerAnalytics from './VolunteerAnalytics';
 import ShowcaseAnalytics from './ShowcaseAnalytics';
