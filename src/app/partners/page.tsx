@@ -92,7 +92,7 @@ export default async function PartnersPage() {
       <section id="presenting" className="pb-20 px-4 sm:px-6 lg:px-12">
         <div className="max-w-5xl mx-auto">
           <Reveal className="mb-10 text-center">
-            <p className="text-xs font-bold text-white/55 tracking-[0.15em] uppercase mb-3">Supported by</p>
+            <p className="text-xs font-bold text-white/55 mb-3">Supported by</p>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">The partners behind the day</h2>
           </Reveal>
           <div className="grid md:grid-cols-2 gap-6">
@@ -101,7 +101,7 @@ export default async function PartnersPage() {
                 <Image src={assets.googleLogoUrl} alt="Google" width={160} height={48} className="h-12 w-auto object-contain" />
               )}
               <div>
-                <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-white/55 mb-2">Presenting partner</p>
+                <p className="text-xs font-bold text-white/55 mb-2">Presenting partner</p>
                 <p className="text-white/70 leading-relaxed">
                   Google backs DevFest Sydney with an event grant and ecosystem support across Gemini, Google Cloud and Firebase.
                 </p>
@@ -112,7 +112,7 @@ export default async function PartnersPage() {
                 <Image src={assets.torrensLogoUrl} alt="Torrens University" width={120} height={36} className="h-12 w-auto object-contain" />
               )}
               <div>
-                <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-white/55 mb-2">Venue partner</p>
+                <p className="text-xs font-bold text-white/55 mb-2">Venue partner</p>
                 <p className="text-white/70 leading-relaxed">
                   Torrens University hosts the day at its Surry Hills campus, minutes from Central Station.
                 </p>
@@ -125,8 +125,8 @@ export default async function PartnersPage() {
       {/* Sponsors */}
       <section id="sponsors" className="py-20 px-4 sm:px-6 lg:px-12 bg-white/[0.02] border-y border-white/8">
         <div className="max-w-5xl mx-auto">
-          <Reveal className="mb-12 text-center">
-            <p className="text-xs font-bold text-white/55 tracking-[0.15em] uppercase mb-3">Sponsors</p>
+          <Reveal className={`text-center ${sponsorGroups.length > 0 ? 'mb-12' : 'mb-5'}`}>
+            <p className="text-xs font-bold text-white/55 mb-3">Sponsors</p>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
               {sponsorGroups.length > 0 ? 'The organisations making 2026 happen' : 'Sponsors are being confirmed'}
             </h2>
@@ -136,7 +136,7 @@ export default async function PartnersPage() {
             <div className="space-y-14">
               {sponsorGroups.map((group) => (
                 <div key={group.tier}>
-                  <p className="text-xs font-bold text-white/50 tracking-[0.15em] uppercase mb-6 text-center">{TIER_LABELS[group.tier]}</p>
+                  <p className="text-xs font-bold text-white/50 mb-6 text-center">{TIER_LABELS[group.tier]}</p>
                   <div className="flex flex-wrap items-center justify-center gap-10">
                     {group.sponsors.map((sponsor) => (
                       <a

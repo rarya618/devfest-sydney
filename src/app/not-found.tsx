@@ -20,7 +20,7 @@ export default function NotFound() {
       <section className="relative flex-1 flex items-center pt-36 pb-24 px-4 sm:px-6 lg:px-12 overflow-hidden">
         <div className="absolute inset-0 hero-atmosphere pointer-events-none" aria-hidden="true" />
         <div className="relative max-w-2xl mx-auto text-center">
-          <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-white/55 mb-4 animate-fade-in">404</p>
+          <p className="text-xs font-bold text-white/55 mb-4 animate-fade-in">404</p>
           <h1
             className="text-[clamp(2.5rem,9vw,4.5rem)] font-bold leading-[1] tracking-tight mb-6 animate-slide-up"
             style={{ animationDelay: '0.1s' }}

@@ -117,7 +117,7 @@ export default async function SpeakerPage({ params }: PageProps) {
 
             <div className="min-w-0">
               <p
-                className={`inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] mb-3 animate-slide-up ${TRACK_COLORS[speaker.track]}`}
+                className={`inline-flex items-center gap-2 text-xs font-bold mb-3 animate-slide-up ${TRACK_COLORS[speaker.track]}`}
                 style={{ animationDelay: '0.05s' }}
               >
                 <span className={`w-1.5 h-1.5 rounded-full ${TRACK_DOT_COLORS[speaker.track]}`} aria-hidden="true" />
@@ -164,7 +164,7 @@ export default async function SpeakerPage({ params }: PageProps) {
           <div className="space-y-8">
             <Reveal>
               <article className="rounded-xl border-l-[8px] border-google-red bg-white/[0.035] p-8 md:p-10">
-                <p className="text-xs font-bold uppercase tracking-[0.15em] text-white/55 mb-3">{FORMAT_LABELS[speaker.format]}</p>
+                <p className="text-xs font-bold text-white/55 mb-3">{FORMAT_LABELS[speaker.format]}</p>
                 <h2 className="text-2xl md:text-3xl font-bold tracking-tight leading-snug mb-6">{speaker.talkTitle}</h2>
                 <p className="text-white/70 leading-relaxed whitespace-pre-wrap">{speaker.abstract}</p>
               </article>
@@ -183,7 +183,7 @@ export default async function SpeakerPage({ params }: PageProps) {
           <Reveal delay={0.15} className="lg:sticky lg:top-28">
             <aside className="rounded-2xl bg-white/[0.045] p-6 space-y-5">
               <div>
-                <p className="text-xs font-bold text-white/55 tracking-[0.15em] uppercase mb-2">Catch this session</p>
+                <p className="text-xs font-bold text-white/55 mb-2">Catch this session</p>
                 <p className="font-bold text-white">Saturday, 10 October 2026</p>
                 <p className="text-sm text-white/60 mt-0.5">Torrens University, Surry Hills</p>
                 <p className="text-sm text-white/55 mt-3 leading-relaxed">

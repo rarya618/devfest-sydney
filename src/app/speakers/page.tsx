@@ -103,7 +103,7 @@ function SpeakerCard({ speaker, delay }: { speaker: PublicSpeaker; delay: number
         </div>
       </div>
 
-      <p className="text-xs font-bold uppercase tracking-[0.15em] text-white/55 mb-2">{FORMAT_LABELS[speaker.format]}</p>
+      <p className="text-xs font-bold text-white/55 mb-2">{FORMAT_LABELS[speaker.format]}</p>
       <p className="text-base font-bold text-white/90 leading-snug mb-4">
         <Link href={`/speakers/${speaker.slug}`} className="hover:text-white/80 transition-colors">
           {speaker.talkTitle}

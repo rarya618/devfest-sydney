@@ -348,7 +348,7 @@ export default async function Home() {
         <section id="speakers" className="pt-12 pb-24 px-4 sm:px-6 lg:px-12">
           <div className="max-w-5xl mx-auto">
             <Reveal className="mb-14 text-center">
-              <p className="text-xs font-bold text-white/55 tracking-[0.15em] uppercase mb-3">Speakers</p>
+              <p className="text-xs font-bold text-white/55 mb-3">Speakers</p>
               <h2 className="text-4xl md:text-5xl font-bold tracking-tight">Meet the people on stage</h2>
             </Reveal>
 
@@ -371,7 +371,7 @@ export default async function Home() {
                     </div>
                     <p className="font-semibold text-white/85 text-sm leading-snug">{speaker.name}</p>
                     {speaker.tagline && <p className="text-xs text-white/55 mt-1 leading-snug line-clamp-2">{speaker.tagline}</p>}
-                    <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.12em] text-white/55">
+                    <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-white/55">
                       <span className={`w-1.5 h-1.5 rounded-full ${TRACK_DOT_COLORS[speaker.track]}`} aria-hidden="true" />
                       {TRACK_LABELS[speaker.track]}
                     </p>
@@ -491,7 +491,7 @@ export default async function Home() {
             <div className="w-full mt-8 space-y-10">
               {sponsorGroups.map((group) => (
                 <div key={group.tier}>
-                  <p className="text-xs font-bold text-white/50 tracking-[0.15em] uppercase mb-6 text-center">
+                  <p className="text-xs font-bold text-white/50 mb-6 text-center">
                     {TIER_LABELS[group.tier]}
                   </p>
                   <div className="flex flex-wrap items-center justify-center gap-10">
@@ -535,7 +535,7 @@ export default async function Home() {
       {team.length > 0 && (
         <section id="team" className="py-24 px-6">
           <div className="max-w-7xl mx-auto">
-            <p className="text-xs font-bold text-white/55 tracking-[0.15em] uppercase mb-3 text-center">Team</p>
+            <p className="text-xs font-bold text-white/55 mb-3 text-center">Team</p>
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-14 text-center">The organisers</h2>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-10 gap-x-6">
               {team.map((member) => (

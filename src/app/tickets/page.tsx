@@ -187,22 +187,22 @@ export default function Tickets() {
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-6">Before you book</h2>
               <dl className="grid sm:grid-cols-2 gap-x-10 gap-y-7 mb-10">
                 <div>
-                  <dt className="font-mono text-sm uppercase tracking-wide text-white/55 mb-1.5">When</dt>
+                  <dt className="text-sm font-bold text-white/55 mb-1.5">When</dt>
                   <dd className="text-lg font-bold text-white">Saturday, 10 October 2026</dd>
                 </div>
                 <div>
-                  <dt className="font-mono text-sm uppercase tracking-wide text-white/55 mb-1.5">Where</dt>
+                  <dt className="text-sm font-bold text-white/55 mb-1.5">Where</dt>
                   <dd className="text-lg font-bold text-white">Torrens University, Surry Hills</dd>
                   <dd className="text-white/55 leading-relaxed">{VENUE_ADDRESS}</dd>
                 </div>
                 <div>
-                  <dt className="font-mono text-sm uppercase tracking-wide text-white/55 mb-1.5">Ticketing</dt>
+                  <dt className="text-sm font-bold text-white/55 mb-1.5">Ticketing</dt>
                   <dd className="text-white/70 leading-relaxed">
                     Handled by Humanitix. Your payment details go to them, never to us.
                   </dd>
                 </div>
                 <div>
-                  <dt className="font-mono text-sm uppercase tracking-wide text-white/55 mb-1.5">Conduct</dt>
+                  <dt className="text-sm font-bold text-white/55 mb-1.5">Conduct</dt>
                   <dd className="text-white/70 leading-relaxed">
                     Everyone attending agrees to our{' '}
                     <Link href="/conduct" className="text-white underline underline-offset-2 hover:text-white/70 transition-colors">
