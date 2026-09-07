@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useCallback, useTransition } from 'react';
-import { removeAdmin } from '../actions';
+import { removeAdmin } from '../../actions';
 import { getInitials, formatDate } from '@/lib/format';
 import Alert from '@/components/Alert';
-import { useMobileBarHidden } from '../MobileBarContext';
+import { useMobileBarHidden } from '../../MobileBarContext';
 import type { AdminUser } from '@/lib/types';
 
 interface Props {

@@ -1,7 +1,6 @@
 import { getVerifiedSession } from '@/lib/adminSession';
 import { fetchSpeakers } from '@/lib/speakers';
-import AdminShell from '../AdminShell';
-import SpeakersDashboard from '../SpeakersDashboard';
+import SpeakersDashboard from '../../SpeakersDashboard';
 
 export const metadata = {
   title: 'Speakers',
@@ -10,12 +9,7 @@ export const metadata = {
 };
 
 export default async function SpeakersPage() {
-  const admin = await getVerifiedSession();
-  const speakers = await fetchSpeakers();
+  const [, speakers] = await Promise.all([getVerifiedSession(), fetchSpeakers()]);
 
-  return (
-    <AdminShell adminEmail={admin.email} adminName={admin.name}>
-      <SpeakersDashboard speakers={speakers} />
-    </AdminShell>
-  );
+  return <SpeakersDashboard speakers={speakers} />;
 }

@@ -2,7 +2,6 @@ import { getVerifiedSession } from '@/lib/adminSession';
 import { fetchSubmissions } from '@/lib/submissions';
 import { fetchVolunteers } from '@/lib/volunteers';
 import { fetchShowcaseSubmissions } from '@/lib/showcaseSubmissions';
-import AdminShell from '../AdminShell';
 import AnalyticsView, { isAnalyticsTab } from './AnalyticsView';
 
 export const metadata = {
@@ -16,19 +15,14 @@ interface AnalyticsPageProps {
 }
 
 export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps) {
-  const admin = await getVerifiedSession();
-  const { tab } = await searchParams;
-  const activeTab = isAnalyticsTab(tab) ? tab : 'speakers';
-
-  const [submissions, volunteers, showcaseEntries] = await Promise.all([
+  const [, { tab }, submissions, volunteers, showcaseEntries] = await Promise.all([
+    getVerifiedSession(),
+    searchParams,
     fetchSubmissions(),
     fetchVolunteers(),
     fetchShowcaseSubmissions(),
   ]);
+  const activeTab = isAnalyticsTab(tab) ? tab : 'speakers';
 
-  return (
-    <AdminShell adminEmail={admin.email} adminName={admin.name}>
-      <AnalyticsView activeTab={activeTab} submissions={submissions} volunteers={volunteers} showcaseEntries={showcaseEntries} />
-    </AdminShell>
-  );
+  return <AnalyticsView activeTab={activeTab} submissions={submissions} volunteers={volunteers} showcaseEntries={showcaseEntries} />;
 }

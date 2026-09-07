@@ -1,7 +1,6 @@
 import { getVerifiedSession } from '@/lib/adminSession';
 import { fetchVolunteers } from '@/lib/volunteers';
-import AdminShell from '../AdminShell';
-import VolunteersDashboard from '../VolunteersDashboard';
+import VolunteersDashboard from '../../VolunteersDashboard';
 
 export const metadata = {
   title: 'Volunteers',
@@ -10,12 +9,7 @@ export const metadata = {
 };
 
 export default async function VolunteersPage() {
-  const admin = await getVerifiedSession();
-  const volunteers = await fetchVolunteers();
+  const [, volunteers] = await Promise.all([getVerifiedSession(), fetchVolunteers()]);
 
-  return (
-    <AdminShell adminEmail={admin.email} adminName={admin.name}>
-      <VolunteersDashboard volunteers={volunteers} />
-    </AdminShell>
-  );
+  return <VolunteersDashboard volunteers={volunteers} />;
 }

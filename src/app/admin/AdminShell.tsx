@@ -4,8 +4,6 @@ import { useState, useRef, useEffect, type ReactNode } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 import { getInitials } from '@/lib/format';
 import Alert from '@/components/Alert';
 import InviteAdminForm from './InviteAdminForm';
@@ -87,6 +85,10 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
   async function handleSignOut() {
     setSigningOut(true);
     try {
+      // Loaded on demand: importing `@/lib/firebase` at the top would pull the whole
+      // client SDK (Auth, Firestore, Storage, App Check and its reCAPTCHA script) into
+      // every admin page for the sake of this one button.
+      const [{ signOut }, { auth }] = await Promise.all([import('firebase/auth'), import('@/lib/firebase')]);
       await signOut(auth);
       await fetch('/api/admin/session', { method: 'DELETE' });
       router.push('/admin/login');

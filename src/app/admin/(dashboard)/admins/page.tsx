@@ -1,6 +1,5 @@
 import { adminDb } from '@/lib/firebase-admin';
 import { getVerifiedSession } from '@/lib/adminSession';
-import AdminShell from '../AdminShell';
 import AdminsView from './AdminsView';
 import type { AdminUser } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
@@ -27,12 +26,7 @@ async function fetchAdmins(): Promise<AdminUser[]> {
 }
 
 export default async function AdminsPage() {
-  const admin = await getVerifiedSession();
-  const admins = await fetchAdmins();
+  const [admin, admins] = await Promise.all([getVerifiedSession(), fetchAdmins()]);
 
-  return (
-    <AdminShell adminEmail={admin.email} adminName={admin.name}>
-      <AdminsView admins={admins} currentAdminEmail={admin.email} />
-    </AdminShell>
-  );
+  return <AdminsView admins={admins} currentAdminEmail={admin.email} />;
 }

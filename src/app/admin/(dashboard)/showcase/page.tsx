@@ -1,7 +1,6 @@
 import { getVerifiedSession } from '@/lib/adminSession';
 import { fetchShowcaseSubmissions } from '@/lib/showcaseSubmissions';
-import AdminShell from '../AdminShell';
-import ShowcaseDashboard from '../ShowcaseDashboard';
+import ShowcaseDashboard from '../../ShowcaseDashboard';
 
 export const metadata = {
   title: 'Builder Showcase',
@@ -10,12 +9,7 @@ export const metadata = {
 };
 
 export default async function ShowcasePage() {
-  const admin = await getVerifiedSession();
-  const entries = await fetchShowcaseSubmissions();
+  const [, entries] = await Promise.all([getVerifiedSession(), fetchShowcaseSubmissions()]);
 
-  return (
-    <AdminShell adminEmail={admin.email} adminName={admin.name}>
-      <ShowcaseDashboard entries={entries} />
-    </AdminShell>
-  );
+  return <ShowcaseDashboard entries={entries} />;
 }
