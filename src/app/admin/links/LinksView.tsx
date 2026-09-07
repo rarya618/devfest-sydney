@@ -15,6 +15,7 @@ const DESTINATIONS: { path: string; label: string }[] = [
   { path: '/', label: 'Homepage' },
   { path: '/call-for-speakers', label: 'Call for Speakers' },
   { path: '/builder-showcase', label: 'Builder Showcase' },
+  { path: '/volunteer', label: 'Volunteer' },
 ];
 
 export default function LinksView() {
@@ -62,9 +63,9 @@ export default function LinksView() {
           <h2 className="text-sm font-bold text-white/70 mb-1">Generate a tracking link</h2>
           <p className="text-xs text-white/50 mb-4">
             Add a source, medium, campaign, or ref to a link below. Call for Speakers submissions show up under
-            &quot;Traffic sources&quot; on the Analytics page; Builder Showcase entries show their link tracking on
-            each card. Tracking params carry over automatically if someone lands on the homepage and clicks
-            through to either form.
+            &quot;Traffic sources&quot; on the Analytics page; Builder Showcase entries and volunteer signups show
+            their link tracking on each card. Tracking params carry over automatically if someone lands on the
+            homepage and clicks through to any of the forms.
           </p>
 
           <div className="grid sm:grid-cols-4 gap-3 mb-4">

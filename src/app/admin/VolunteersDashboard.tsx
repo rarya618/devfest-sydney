@@ -125,6 +125,10 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
     setIsOpen((open) => !open);
   }
 
+  const hasTracking = Boolean(
+    volunteer.tracking.utmSource || volunteer.tracking.utmMedium || volunteer.tracking.utmCampaign || volunteer.tracking.ref,
+  );
+
   return (
     <div
       onClick={handleCardClick}
@@ -194,7 +198,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
 
       <p className="text-sm text-white/65 leading-relaxed mb-5">{volunteer.motivation}</p>
 
-      {(volunteer.priorExperience || volunteer.googleTechExperience || volunteer.dietaryRequirements) && (
+      {(volunteer.priorExperience || volunteer.googleTechExperience || volunteer.dietaryRequirements || hasTracking) && (
         <div className="space-y-3 mb-5">
           {volunteer.priorExperience && (
             <p className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
@@ -212,6 +216,19 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
             <p className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
               <span className="font-bold text-white/85">Dietary: </span>
               {volunteer.dietaryRequirements}
+            </p>
+          )}
+          {hasTracking && (
+            <p className="text-sm text-white/55">
+              <span className="font-medium text-white/70">Link tracking: </span>
+              {[
+                volunteer.tracking.ref && `ref=${volunteer.tracking.ref}`,
+                volunteer.tracking.utmSource && `source=${volunteer.tracking.utmSource}`,
+                volunteer.tracking.utmMedium && `medium=${volunteer.tracking.utmMedium}`,
+                volunteer.tracking.utmCampaign && `campaign=${volunteer.tracking.utmCampaign}`,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
             </p>
           )}
         </div>
