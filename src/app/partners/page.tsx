@@ -38,7 +38,7 @@ function ProspectusButton({ href, className }: { href: string; className: string
   );
 }
 
-const primaryButton = 'inline-flex items-center gap-2.5 px-7 py-2 bg-google-blue-deep text-white text-base font-bold rounded border border-google-blue-deep transition-opacity hover:opacity-80';
+const primaryButton = 'inline-flex items-center gap-2.5 px-7 py-2 bg-google-green-deep text-white text-base font-bold rounded border border-google-green-deep transition-opacity hover:opacity-80';
 const outlineButton = 'inline-flex items-center gap-2.5 px-7 py-2 bg-transparent text-white text-base font-bold rounded border border-white/40 transition-colors hover:border-white';
 
 export default async function PartnersPage() {
@@ -92,7 +92,7 @@ export default async function PartnersPage() {
       <section id="presenting" className="pb-20 px-4 sm:px-6 lg:px-12">
         <div className="max-w-5xl mx-auto">
           <Reveal className="mb-10 text-center">
-            <p className="text-xs font-bold text-white/55 mb-3">Supported by</p>
+            <p className="text-xs font-bold text-google-green mb-3">Supported by</p>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">The partners behind the day</h2>
           </Reveal>
           <div className="grid md:grid-cols-2 gap-6">
@@ -101,7 +101,7 @@ export default async function PartnersPage() {
                 <Image src={assets.googleLogoUrl} alt="Google" width={160} height={48} className="h-12 w-auto object-contain" />
               )}
               <div>
-                <p className="text-xs font-bold text-white/55 mb-2">Presenting partner</p>
+                <p className="text-xs font-bold text-google-green mb-2">Presenting partner</p>
                 <p className="text-white/70 leading-relaxed">
                   Google backs DevFest Sydney with an event grant and ecosystem support across Gemini, Google Cloud and Firebase.
                 </p>
@@ -112,7 +112,7 @@ export default async function PartnersPage() {
                 <Image src={assets.torrensLogoUrl} alt="Torrens University" width={120} height={36} className="h-12 w-auto object-contain" />
               )}
               <div>
-                <p className="text-xs font-bold text-white/55 mb-2">Venue partner</p>
+                <p className="text-xs font-bold text-google-green mb-2">Venue partner</p>
                 <p className="text-white/70 leading-relaxed">
                   Torrens University hosts the day at its Surry Hills campus, minutes from Central Station.
                 </p>
@@ -126,7 +126,7 @@ export default async function PartnersPage() {
       <section id="sponsors" className="py-20 px-4 sm:px-6 lg:px-12 bg-white/[0.02] border-y border-white/8">
         <div className="max-w-5xl mx-auto">
           <Reveal className={`text-center ${sponsorGroups.length > 0 ? 'mb-12' : 'mb-5'}`}>
-            <p className="text-xs font-bold text-white/55 mb-3">Sponsors</p>
+            <p className="text-xs font-bold text-google-green mb-3">Sponsors</p>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
               {sponsorGroups.length > 0 ? 'The organisations making 2026 happen' : 'Sponsors are being confirmed'}
             </h2>
@@ -172,10 +172,10 @@ export default async function PartnersPage() {
       </section>
 
       {/* Closing CTA */}
-      <section className="pb-24 px-4 sm:px-6 lg:px-12">
+      <section className="pt-20 pb-24 px-4 sm:px-6 lg:px-12">
         <div className="max-w-5xl mx-auto">
           <Reveal>
-            <div className="rounded-2xl bg-white/[0.045] p-8 md:p-12 text-center">
+            <div className="rounded-xl border-l-[8px] border-google-green bg-white/[0.035] p-8 md:p-12 text-center">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Tiers, benefits and how to get involved</h2>
               <p className="text-white/70 leading-relaxed max-w-2xl mx-auto mb-8">
                 Everything from Platinum through to in-kind community sponsorship is in the prospectus. Email the organising
