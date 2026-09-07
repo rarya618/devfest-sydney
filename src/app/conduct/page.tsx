@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { buildPageMetadata, SITE_OG_IMAGE } from '@/lib/metadata';
+import { buildPageMetadata } from '@/lib/metadata';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { areTicketsOpen } from '@/lib/tickets';
@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 const title = 'Code of Conduct';
 const description = 'DevFest Sydney is dedicated to providing a harassment-free and inclusive experience for everyone. Read our community standards.';
 
-export const metadata: Metadata = buildPageMetadata({ title, description, path: '/conduct', images: [SITE_OG_IMAGE] });
+export const metadata: Metadata = buildPageMetadata({ title, description, path: '/conduct' });
 
 const sections = [
   {

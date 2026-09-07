@@ -1,3 +1,4 @@
+import { SITE_OG_IMAGE } from '@/lib/metadata';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Image from 'next/image';
@@ -7,8 +8,8 @@ import LoginForm from './LoginForm';
 
 export const metadata = {
   title: { absolute: 'Admin Login — DevFest Sydney 2026' },
-  openGraph: { title: 'Admin Login — DevFest Sydney 2026', images: ['/admin/opengraph-image'] },
-  twitter: { card: 'summary_large_image', title: 'Admin Login — DevFest Sydney 2026', images: ['/admin/opengraph-image'] },
+  openGraph: { title: 'Admin Login — DevFest Sydney 2026', images: [SITE_OG_IMAGE] },
+  twitter: { card: 'summary_large_image', title: 'Admin Login — DevFest Sydney 2026', images: [SITE_OG_IMAGE] },
 };
 
 export default async function AdminLoginPage() {
