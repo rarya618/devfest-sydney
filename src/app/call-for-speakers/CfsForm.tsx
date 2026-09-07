@@ -257,7 +257,7 @@ export default function CfsForm() {
 
   const inputBase =
     'w-full bg-white/[0.05] border rounded-lg px-5 py-2.5 text-white text-base placeholder-white/60 outline-none transition-colors focus:bg-white/[0.08]';
-  const inputNormal = `${inputBase} border-white/35 focus:border-google-red/40`;
+  const inputNormal = `${inputBase} border-white/15 focus:border-google-red/60`;
   const inputError = `${inputBase} border-google-red/40 bg-google-red/5`;
 
   return (

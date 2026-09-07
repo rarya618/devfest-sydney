@@ -22,7 +22,7 @@ export default function NotFound() {
         <div className="relative max-w-2xl mx-auto text-center">
           <p className="text-xs font-bold text-white/55 mb-4 animate-fade-in">404</p>
           <h1
-            className="text-[clamp(2.5rem,9vw,4.5rem)] font-bold leading-[1] tracking-tight mb-6 animate-slide-up"
+            className="text-[clamp(2.5rem,9vw,4rem)] font-bold leading-[1] tracking-tight mb-6 animate-slide-up"
             style={{ animationDelay: '0.1s' }}
           >
             That page isn&apos;t here

@@ -29,7 +29,7 @@ export default async function FaqPage() {
       <section className="pt-36 pb-24 px-6">
         <div className="max-w-3xl mx-auto">
           <Reveal className="text-center">
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-14">Common questions</h1>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-14">Common questions</h1>
           </Reveal>
           <Reveal delay={0.1}>
             <FAQ isCfsOpen={cfsOpen} sponsorshipProspectusUrl={sponsorshipProspectusUrl} />

@@ -124,7 +124,7 @@ export default async function SpeakerPage({ params }: PageProps) {
                 {TRACK_LABELS[speaker.track]} track
               </p>
               <h1
-                className="text-4xl md:text-6xl font-bold leading-[1.05] tracking-tight text-white mb-3 animate-slide-up"
+                className="text-4xl md:text-5xl font-bold leading-[1.05] tracking-tight text-white mb-3 animate-slide-up"
                 style={{ animationDelay: '0.1s' }}
               >
                 {speaker.name}

@@ -94,7 +94,7 @@ export default async function CallForSpeakers() {
               </p>
             )}
 
-            <h1 className="text-[clamp(3.5rem,15vw,6rem)] md:text-[clamp(3rem,8vw,6rem)] font-bold leading-[0.95] tracking-tight text-white mb-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            <h1 className="text-[clamp(2.5rem,10vw,4rem)] md:text-[clamp(2.25rem,5.5vw,4rem)] font-bold leading-[0.95] tracking-tight text-white mb-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
               Call for
               <br />
               <span className="text-google-green">Speakers</span>

@@ -171,7 +171,7 @@ export default async function SpeakersPage() {
           </p>
 
           <h1
-            className="text-[clamp(3rem,13vw,5rem)] md:text-[clamp(2.5rem,7vw,5rem)] font-bold leading-[0.95] tracking-tight text-white mb-6 animate-slide-up"
+            className="text-[clamp(2.5rem,10vw,4rem)] md:text-[clamp(2.25rem,5.5vw,4rem)] font-bold leading-[0.95] tracking-tight text-white mb-6 animate-slide-up"
             style={{ animationDelay: '0.1s' }}
           >
             Speakers

@@ -31,8 +31,6 @@ export const dynamic = 'force-dynamic';
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://devfest.gdgsydney.com';
 
 
-const tracks = ['Developer track', 'Builder track', 'Workshop track'];
-
 const TRACK_DETAILS: { name: string; color: string; audience: string; topics: string[] }[] = [
   {
     name: 'Developer track',
@@ -110,7 +108,10 @@ export default async function Home() {
   ]);
   const { sponsorshipProspectusUrl, googleLogoUrl, torrensLogoUrl } = partnerAssets;
   const sponsorGroups = groupSponsorsByTier(sponsors);
-  const featuredSpeakers = speakers.slice(0, LANDING_SPEAKER_LIMIT);
+  // The grid is four across on desktop, so the tease is rounded down to whole rows:
+  // five confirmed speakers show as four plus "See all 5", not four and a straggler.
+  const wholeRowsOfSpeakers = Math.floor(Math.min(speakers.length, LANDING_SPEAKER_LIMIT) / 4) * 4;
+  const featuredSpeakers = speakers.slice(0, wholeRowsOfSpeakers || speakers.length);
 
   return (
     <div className="bg-[#17181a] text-white min-h-screen">
@@ -133,6 +134,9 @@ export default async function Home() {
               className="object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#17181a]/80 via-[#17181a]/50 to-[#17181a]/10" aria-hidden="true" />
+            {/* Second wash darkens the left third so the headline sits on a calm ground
+                whatever the photo is doing behind it. */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#17181a]/70 via-[#17181a]/25 to-transparent" aria-hidden="true" />
           </>
         ) : (
           <div className="absolute inset-0 hero-atmosphere pointer-events-none" aria-hidden="true" />
@@ -142,7 +146,7 @@ export default async function Home() {
           <p className="mb-6 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2.5 text-base font-bold text-white/80 animate-fade-in">
             <span className="flex items-center gap-2.5">
               <span>Saturday, 10 October 2026</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-white/80 shrink-0" aria-hidden="true" />
+              <span className="hidden sm:block w-1.5 h-1.5 rounded-full bg-white/80 shrink-0" aria-hidden="true" />
             </span>
             <span>Torrens University, Surry Hills</span>
           </p>
@@ -204,10 +208,10 @@ export default async function Home() {
       )}
 
       {/* ─── WHAT TO EXPECT ─── */}
-      <section id="about" className="py-24 px-4 sm:px-6 lg:px-12">
+      <section id="about" className="pt-24 pb-14 px-4 sm:px-6 lg:px-12">
         <div className="max-w-5xl mx-auto animate-slide-up">
-          <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-8">
-            What to Expect?
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-8">
+            What to expect
           </h2>
 
           <div className="flex flex-col gap-5 text-lg md:text-xl text-white/80 leading-relaxed mb-10">
@@ -224,13 +228,10 @@ export default async function Home() {
           </div>
 
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-            {tracks.map((track, i) => (
-              <span key={track} className="inline-flex items-center gap-3.5 text-base font-bold text-white">
-                <span
-                  className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: ['var(--google-blue)', 'var(--google-green)', 'var(--google-yellow)'][i] }}
-                />
-                {track}
+            {TRACK_DETAILS.map((track) => (
+              <span key={track.name} className="inline-flex items-center gap-3.5 text-base font-bold text-white">
+                <span className={`w-2 h-2 rounded-full ${TRACK_DOT[track.color]}`} aria-hidden="true" />
+                {track.name}
               </span>
             ))}
           </div>
@@ -254,7 +255,7 @@ export default async function Home() {
 
       {/* ─── TICKETS ─── (hidden until tickets are on sale on Humanitix) */}
       {ticketsOnSale && (
-        <section id="tickets" className="pb-24 px-4 sm:px-6 lg:px-12">
+        <section id="tickets" className="py-14 px-4 sm:px-6 lg:px-12">
           <div className="max-w-5xl mx-auto">
             <Reveal>
               <div className="rounded-xl border-l-[8px] border-google-blue bg-white/[0.035] p-8 md:p-10">
@@ -283,7 +284,7 @@ export default async function Home() {
                       </Link>
                     </div>
                     <p className="mt-6 text-sm text-white/55">
-                      Ticketing is handled by <span className="font-mono">Humanitix</span>.
+                      Ticketing is handled by Humanitix.
                     </p>
                   </div>
 
@@ -309,7 +310,7 @@ export default async function Home() {
       )}
 
       {/* ─── TRACKS ─── */}
-      <section id="tracks" className="pt-4 pb-12 px-4 sm:px-6 lg:px-12">
+      <section id="tracks" className="py-14 px-4 sm:px-6 lg:px-12">
         <div className="max-w-5xl mx-auto">
           <Reveal className="mb-14 text-center">
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight">However you build, there&apos;s a track for you</h2>
@@ -320,7 +321,7 @@ export default async function Home() {
               <Reveal
                 key={track.name}
                 delay={i * 0.1}
-                className="card-hover-lift bg-white/[0.045] rounded-2xl p-6 md:p-7"
+                className="bg-white/[0.045] rounded-2xl p-6 md:p-7"
               >
                 <span className="inline-flex items-center gap-3 text-lg font-bold text-white mb-3">
                   <span className={`w-2 h-2 rounded-full ${TRACK_DOT[track.color]}`} aria-hidden="true" />
@@ -331,7 +332,7 @@ export default async function Home() {
                   {track.topics.map((topic) => (
                     <span
                       key={topic}
-                      className="px-3 py-1 bg-white/[0.04] border border-white/10 rounded-full text-xs text-white/60 transition-colors duration-200 hover:border-white/25 hover:text-white/85"
+                      className="px-3 py-1 bg-white/[0.04] border border-white/10 rounded-full text-xs text-white/60"
                     >
                       {topic}
                     </span>
@@ -345,10 +346,9 @@ export default async function Home() {
 
       {/* ─── SPEAKERS ─── (only rendered once at least one speaker has confirmed) */}
       {featuredSpeakers.length > 0 && (
-        <section id="speakers" className="pt-12 pb-24 px-4 sm:px-6 lg:px-12">
+        <section id="speakers" className="py-14 px-4 sm:px-6 lg:px-12">
           <div className="max-w-5xl mx-auto">
             <Reveal className="mb-14 text-center">
-              <p className="text-xs font-bold text-white/55 mb-3">Speakers</p>
               <h2 className="text-4xl md:text-5xl font-bold tracking-tight">Meet the people on stage</h2>
             </Reveal>
 
@@ -360,17 +360,17 @@ export default async function Home() {
                     aria-label={`${speaker.name}: ${speaker.talkTitle}`}
                     className="group block"
                   >
-                    <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden bg-white/5 ring-2 ring-transparent group-hover:ring-white/30 transition-shadow">
+                    <div className="w-28 h-28 rounded-full mx-auto mb-4 overflow-hidden bg-white/[0.07] ring-2 ring-transparent group-hover:ring-white/30 transition-shadow">
                       {speaker.photoUrl ? (
-                        <Image src={speaker.photoUrl} alt="" width={96} height={96} className="w-full h-full object-cover" />
+                        <Image src={speaker.photoUrl} alt="" width={112} height={112} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white/50 text-2xl font-bold" aria-hidden="true">
+                        <div className="w-full h-full flex items-center justify-center text-white/60 text-2xl font-bold" aria-hidden="true">
                           {getInitials(speaker.name)}
                         </div>
                       )}
                     </div>
-                    <p className="font-semibold text-white/85 text-sm leading-snug">{speaker.name}</p>
-                    {speaker.tagline && <p className="text-xs text-white/55 mt-1 leading-snug line-clamp-2">{speaker.tagline}</p>}
+                    <p className="font-bold text-white text-base leading-snug">{speaker.name}</p>
+                    {speaker.tagline && <p className="text-sm text-white/55 mt-1 leading-snug line-clamp-2">{speaker.tagline}</p>}
                     <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-white/55">
                       <span className={`w-1.5 h-1.5 rounded-full ${TRACK_DOT_COLORS[speaker.track]}`} aria-hidden="true" />
                       {TRACK_LABELS[speaker.track]}
@@ -399,7 +399,7 @@ export default async function Home() {
 
       {/* ─── VENUE ─── */}
       {showVenue && (
-        <section id="venue" className="pt-12 pb-24 px-6">
+        <section id="venue" className="pt-14 pb-24 px-4 sm:px-6 lg:px-12">
           <div className="max-w-5xl mx-auto">
             <Reveal>
               <div className="flex flex-col md:flex-row md:items-center gap-10 md:gap-10 rounded-xl border-l-[8px] border-google-blue bg-white/[0.035] p-8 pt-8 pb-8 md:p-10 md:pt-10 md:pb-12">
@@ -409,7 +409,7 @@ export default async function Home() {
                       <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">Torrens University, Surry Hills</h2>
                       <div className="flex flex-col gap-1 text-lg font-bold leading-relaxed text-white">
                         <span>{VENUE_ADDRESS}</span>
-                        <span>Saturday, 10th October 2026</span>
+                        <span>Saturday, 10 October 2026</span>
                       </div>
                     </div>
                     <p className="text-lg leading-relaxed text-white/70 max-w-xl">
@@ -535,7 +535,6 @@ export default async function Home() {
       {team.length > 0 && (
         <section id="team" className="py-24 px-6">
           <div className="max-w-7xl mx-auto">
-            <p className="text-xs font-bold text-white/55 mb-3 text-center">Team</p>
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-14 text-center">The organisers</h2>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-10 gap-x-6">
               {team.map((member) => (
