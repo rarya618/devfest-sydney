@@ -8,14 +8,42 @@ import { getInitials } from '@/lib/format';
 import Alert from '@/components/Alert';
 import { MobileBarContext } from './MobileBarContext';
 
-const NAV_ITEMS: { href: string; label: string }[] = [
-  { href: '/admin', label: 'Submissions' },
-  { href: '/admin/speakers', label: 'Speakers' },
-  { href: '/admin/volunteers', label: 'Volunteers' },
-  { href: '/admin/showcase', label: 'Showcase' },
-  { href: '/admin/analytics', label: 'Analytics' },
-  { href: '/admin/links', label: 'Links' },
-  { href: '/admin/admins', label: 'Admins' },
+interface NavItem {
+  href: string;
+  label: string;
+}
+
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
+// Grouped by what an admin is doing: working through what people sent in, managing
+// what the public site shows, looking at how it is going, and running the panel itself.
+const NAV_GROUPS: NavGroup[] = [
+  {
+    label: 'Review',
+    items: [
+      { href: '/admin', label: 'Submissions' },
+      { href: '/admin/volunteers', label: 'Volunteers' },
+      { href: '/admin/showcase', label: 'Showcase' },
+    ],
+  },
+  {
+    label: 'Content',
+    items: [{ href: '/admin/speakers', label: 'Speakers' }],
+  },
+  {
+    label: 'Insights',
+    items: [
+      { href: '/admin/analytics', label: 'Analytics' },
+      { href: '/admin/links', label: 'Links' },
+    ],
+  },
+  {
+    label: 'Settings',
+    items: [{ href: '/admin/admins', label: 'Admins' }],
+  },
 ];
 
 interface Props {
@@ -36,28 +64,35 @@ interface NavLinksProps {
 
 function NavLinks({ pathname, onNavigate, rounded }: NavLinksProps) {
   return (
-    <nav aria-label="Admin sections">
-      <ul className={rounded ? 'space-y-1' : undefined}>
-        {NAV_ITEMS.map((item) => {
-          const active = isActive(item.href, pathname);
-          return (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                onClick={onNavigate}
-                aria-current={active ? 'page' : undefined}
-                className={`block text-sm px-4 transition-colors ${rounded ? 'py-2 rounded-lg' : 'py-2.5'} ${
-                  active
-                    ? 'bg-white/10 text-white font-bold'
-                    : 'text-white/55 font-medium hover:text-white hover:bg-white/[0.08]'
-                }`}
-              >
-                {item.label}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+    <nav aria-label="Admin sections" className={rounded ? 'space-y-5' : 'space-y-2'}>
+      {NAV_GROUPS.map((group) => (
+        <div key={group.label}>
+          <p className={`font-mono text-[11px] uppercase tracking-[0.12em] text-white/50 px-4 ${rounded ? 'mb-1.5' : 'pt-1 pb-1'}`}>
+            {group.label}
+          </p>
+          <ul className={rounded ? 'space-y-0.5' : undefined}>
+            {group.items.map((item) => {
+              const active = isActive(item.href, pathname);
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    onClick={onNavigate}
+                    aria-current={active ? 'page' : undefined}
+                    className={`block text-sm px-4 transition-colors ${rounded ? 'py-2 rounded-lg' : 'py-2.5'} ${
+                      active
+                        ? 'bg-white/10 text-white font-bold'
+                        : 'text-white/55 font-medium hover:text-white hover:bg-white/[0.08]'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
     </nav>
   );
 }
