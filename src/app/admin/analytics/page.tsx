@@ -1,7 +1,9 @@
 import { getVerifiedSession } from '@/lib/adminSession';
 import { fetchSubmissions } from '@/lib/submissions';
+import { fetchVolunteers } from '@/lib/volunteers';
+import { fetchShowcaseSubmissions } from '@/lib/showcaseSubmissions';
 import AdminShell from '../AdminShell';
-import AnalyticsView from './AnalyticsView';
+import AnalyticsView, { isAnalyticsTab } from './AnalyticsView';
 
 export const metadata = {
   title: 'Analytics',
@@ -9,13 +11,24 @@ export const metadata = {
   twitter: { card: 'summary_large_image', title: 'Analytics — DevFest Sydney 2026', images: ['/admin/opengraph-image'] },
 };
 
-export default async function AnalyticsPage() {
+interface AnalyticsPageProps {
+  searchParams: Promise<{ tab?: string }>;
+}
+
+export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps) {
   const admin = await getVerifiedSession();
-  const submissions = await fetchSubmissions();
+  const { tab } = await searchParams;
+  const activeTab = isAnalyticsTab(tab) ? tab : 'speakers';
+
+  const [submissions, volunteers, showcaseEntries] = await Promise.all([
+    fetchSubmissions(),
+    fetchVolunteers(),
+    fetchShowcaseSubmissions(),
+  ]);
 
   return (
     <AdminShell adminEmail={admin.email} adminName={admin.name}>
-      <AnalyticsView submissions={submissions} />
+      <AnalyticsView activeTab={activeTab} submissions={submissions} volunteers={volunteers} showcaseEntries={showcaseEntries} />
     </AdminShell>
   );
 }

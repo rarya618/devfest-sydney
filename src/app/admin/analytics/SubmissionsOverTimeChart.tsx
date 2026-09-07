@@ -2,10 +2,17 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PointerEvent } from 'react';
-import type { Submission } from '@/lib/types';
+import { ACCENT_CHART_CLASSES, type AnalyticsAccent } from './shared';
+
+interface DatedEntry {
+  submittedAt: string; // ISO date string
+}
 
 interface Props {
-  submissions: Submission[];
+  entries: DatedEntry[];
+  // What one entry is called, lower case (e.g. "submissions", "signups", "entries").
+  noun: string;
+  accent: AnalyticsAccent;
 }
 
 interface DayPoint {
@@ -32,12 +39,12 @@ function formatDayLabel(dateKey: string): string {
   return new Date(year, month - 1, day).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
 }
 
-function buildDayPoints(submissions: Submission[]): DayPoint[] {
-  if (submissions.length === 0) return [];
+function buildDayPoints(entries: DatedEntry[]): DayPoint[] {
+  if (entries.length === 0) return [];
 
   const countsByDay = new Map<string, number>();
-  for (const submission of submissions) {
-    const key = dateKeyOf(new Date(submission.submittedAt));
+  for (const entry of entries) {
+    const key = dateKeyOf(new Date(entry.submittedAt));
     countsByDay.set(key, (countsByDay.get(key) ?? 0) + 1);
   }
 
@@ -57,8 +64,9 @@ function buildDayPoints(submissions: Submission[]): DayPoint[] {
   return points;
 }
 
-export default function SubmissionsOverTimeChart({ submissions }: Props) {
-  const points = useMemo(() => buildDayPoints(submissions), [submissions]);
+export default function SubmissionsOverTimeChart({ entries, noun, accent }: Props) {
+  const points = useMemo(() => buildDayPoints(entries), [entries]);
+  const chartClasses = ACCENT_CHART_CLASSES[accent];
   const svgRef = useRef<SVGSVGElement>(null);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -113,7 +121,8 @@ export default function SubmissionsOverTimeChart({ submissions }: Props) {
   const handlePointerLeave = useCallback(() => setHoverIndex(null), []);
 
   const gridSteps = 4;
-  const gridValues = Array.from({ length: gridSteps + 1 }, (_, step) => Math.round((maxCumulative / gridSteps) * step));
+  // De-duplicated: with fewer entries than grid steps, rounding makes neighbouring steps collide.
+  const gridValues = Array.from(new Set(Array.from({ length: gridSteps + 1 }, (_, step) => Math.round((maxCumulative / gridSteps) * step))));
 
   const tickIndices =
     points.length <= 1 ? points.map((_, index) => index) : Array.from(new Set([0, Math.floor((points.length - 1) / 2), points.length - 1]));
@@ -127,14 +136,14 @@ export default function SubmissionsOverTimeChart({ submissions }: Props) {
 
   return (
     <div className="bg-surface border border-white/10 rounded-2xl px-5 py-5 mb-6">
-      <h2 className="text-sm font-bold text-white/70 mb-4">Cumulative submissions over time</h2>
+      <h2 className="text-sm font-bold text-white/70 mb-4">Cumulative {noun} over time</h2>
       <div className="relative">
         <svg
           ref={svgRef}
           viewBox={`0 0 ${CHART_WIDTH} ${chartHeight}`}
           className="w-full h-auto touch-none"
           role="img"
-          aria-label={`Cumulative submissions over time, reaching ${maxCumulative} total by ${lastPoint.label}`}
+          aria-label={`Cumulative ${noun} over time, reaching ${maxCumulative} total by ${lastPoint.label}`}
           onPointerMove={handlePointerMove}
           onPointerLeave={handlePointerLeave}
         >
@@ -167,15 +176,15 @@ export default function SubmissionsOverTimeChart({ submissions }: Props) {
             </text>
           ))}
 
-          <path d={areaPath} className="fill-google-blue" fillOpacity={0.1} />
-          <path d={linePath} className="stroke-google-blue" strokeWidth={2} fill="none" strokeLinejoin="round" strokeLinecap="round" />
+          <path d={areaPath} className={chartClasses.fill} fillOpacity={0.1} />
+          <path d={linePath} className={chartClasses.stroke} strokeWidth={2} fill="none" strokeLinejoin="round" strokeLinecap="round" />
 
-          <circle cx={xForIndex(points.length - 1)} cy={yForValue(lastPoint.cumulative)} r={4} className="fill-google-blue stroke-[#010103]" strokeWidth={2} />
+          <circle cx={xForIndex(points.length - 1)} cy={yForValue(lastPoint.cumulative)} r={4} className={`${chartClasses.fill} stroke-[#010103]`} strokeWidth={2} />
 
           {hovered && (
             <>
               <line x1={tooltipX} x2={tooltipX} y1={PADDING_TOP} y2={PADDING_TOP + plotHeight} className="stroke-white/20" strokeWidth={1} />
-              <circle cx={tooltipX} cy={yForValue(hovered.cumulative)} r={4} className="fill-google-blue stroke-[#010103]" strokeWidth={2} />
+              <circle cx={tooltipX} cy={yForValue(hovered.cumulative)} r={4} className={`${chartClasses.fill} stroke-[#010103]`} strokeWidth={2} />
             </>
           )}
         </svg>
@@ -204,7 +213,7 @@ export default function SubmissionsOverTimeChart({ submissions }: Props) {
             <thead>
               <tr className="text-left text-white/50 border-b border-white/10">
                 <th className="py-1.5 pr-4 font-medium">Date</th>
-                <th className="py-1.5 pr-4 font-medium">Submissions</th>
+                <th className="py-1.5 pr-4 font-medium capitalize">{noun}</th>
                 <th className="py-1.5 font-medium">Cumulative</th>
               </tr>
             </thead>
