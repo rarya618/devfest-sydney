@@ -209,7 +209,7 @@ export default async function Home() {
 
       {/* ─── WHAT TO EXPECT ─── */}
       <section id="about" className="pt-24 pb-14 px-4 sm:px-6 lg:px-12">
-        <div className="max-w-5xl mx-auto animate-slide-up">
+        <div className="max-w-4xl mx-auto text-center animate-slide-up">
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-8">
             What to expect
           </h2>
@@ -227,7 +227,7 @@ export default async function Home() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
             {TRACK_DETAILS.map((track) => (
               <span key={track.name} className="inline-flex items-center gap-3.5 text-base font-bold text-white">
                 <span className={`w-2 h-2 rounded-full ${TRACK_DOT[track.color]}`} aria-hidden="true" />
