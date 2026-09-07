@@ -152,6 +152,9 @@ export interface Speaker {
   bio: string;
   tagline: string;
   photoUrl: string;
+  // Slugs this speaker's page used to live at, recorded when an admin renames them so the
+  // old URL can redirect (see findCurrentSlugForPreviousSlug).
+  previousSlugs: string[];
   submissionId: string;
   promotedAt: string; // ISO date string (serialized from Firestore Timestamp)
   confirmation: SpeakerConfirmation;
@@ -174,4 +177,5 @@ export interface PublicSpeaker {
   bio: string;
   tagline: string;
   photoUrl: string;
+  previousSlugs: string[];
 }

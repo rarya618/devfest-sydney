@@ -37,6 +37,8 @@ rules_version='2';
 //   - bio: string (optional, max 1000 chars, may be empty)
 //   - tagline: string (optional, max 200 chars, may be empty)
 //   - photoUrl: string (optional, valid https URL or empty — starts blank until an admin adds one)
+//   - previousSlugs: list of strings (optional) — slugs the speaker's page used to live at,
+//     appended by updateSpeaker() on a rename so /speakers/<old-slug> can redirect
 //
 // Collection: admins
 // Document ID: user's email address
@@ -244,7 +246,7 @@ service cloud.firestore {
       return data.keys().hasOnly(['name', 'email', 'talkTitle', 'abstract', 'format',
                                    'track', 'experienceLevel', 'linkedinUrl', 'githubUrl',
                                    'websiteUrl', 'submissionId', 'promotedAt', 'bio',
-                                   'tagline', 'photoUrl']) &&
+                                   'tagline', 'photoUrl', 'previousSlugs']) &&
         data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
         data.email is string && isValidEmail(data.email) &&
         data.talkTitle is string && data.talkTitle.size() >= 1 && data.talkTitle.size() <= 150 &&
@@ -259,7 +261,8 @@ service cloud.firestore {
         data.promotedAt is timestamp &&
         isValidBlankableString('bio', 1000) &&
         isValidBlankableString('tagline', 200) &&
-        isValidBlankableHttpsUrl('photoUrl', 500);
+        isValidBlankableHttpsUrl('photoUrl', 500) &&
+        (!('previousSlugs' in data) || (data.previousSlugs is list && data.previousSlugs.size() <= 20));
     }
 
     function isValidScheduleItem(data) {

@@ -14,6 +14,23 @@ function toConfirmation(submission: SubmissionConfirmationFields | undefined): S
   return 'not-emailed';
 }
 
+// Profile links arrive through the CfS form, which never required a scheme, so
+// "linkedin.com/in/philnash" is a real value in the collection. Rendered as-is that becomes
+// a relative link under /speakers/, so the scheme is added here on the way out and by the
+// admin action on the way in. Anything that is not http(s) once normalised is dropped.
+export function normaliseProfileUrl(rawUrl: string): string {
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return '';
+  const withScheme = /^[a-z][a-z0-9+.-]*:/i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  try {
+    const parsed = new URL(withScheme);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return '';
+    return withScheme;
+  } catch {
+    return '';
+  }
+}
+
 // Speakers are the public lineup, but whether each one has actually confirmed lives on
 // the submission they were promoted from, so the two are joined here.
 export async function fetchSpeakers(): Promise<Speaker[]> {
@@ -48,12 +65,13 @@ export async function fetchSpeakers(): Promise<Speaker[]> {
       format: data.format ?? 'talk',
       track: data.track ?? 'developer',
       experienceLevel: data.experienceLevel ?? 'beginner',
-      linkedinUrl: data.linkedinUrl ?? '',
-      githubUrl: data.githubUrl ?? '',
-      websiteUrl: data.websiteUrl ?? '',
+      linkedinUrl: normaliseProfileUrl(data.linkedinUrl ?? ''),
+      githubUrl: normaliseProfileUrl(data.githubUrl ?? ''),
+      websiteUrl: normaliseProfileUrl(data.websiteUrl ?? ''),
       bio: data.bio ?? '',
       tagline: data.tagline ?? '',
       photoUrl: data.photoUrl ?? '',
+      previousSlugs: Array.isArray(data.previousSlugs) ? (data.previousSlugs as string[]) : [],
       submissionId,
       promotedAt: promotedAt ? promotedAt.toDate().toISOString() : new Date().toISOString(),
       confirmation: toConfirmation(submissionsById.get(submissionId)),
@@ -107,6 +125,7 @@ export async function fetchPublicSpeakers(): Promise<PublicSpeaker[]> {
         bio: speaker.bio,
         tagline: speaker.tagline,
         photoUrl: speaker.photoUrl,
+        previousSlugs: speaker.previousSlugs,
       }));
     return assignUniqueSlugs(confirmed);
   } catch {
@@ -119,4 +138,15 @@ export async function fetchPublicSpeakers(): Promise<PublicSpeaker[]> {
 export async function fetchPublicSpeakerBySlug(slug: string): Promise<PublicSpeaker | null> {
   const speakers = await fetchPublicSpeakers();
   return speakers.find((speaker) => speaker.slug === slug) ?? null;
+}
+
+// Where a slug that no longer matches anyone should send the visitor. Renaming a speaker in
+// /admin/speakers records their old slug in previousSlugs, so a link shared before the
+// rename still lands on their page. A live slug always wins over a remembered one, and only
+// confirmed speakers are considered: a redirect must not reveal a page that does not exist.
+export async function findCurrentSlugForPreviousSlug(previousSlug: string): Promise<string | null> {
+  const speakers = await fetchPublicSpeakers();
+  if (speakers.some((speaker) => speaker.slug === previousSlug)) return null;
+  const owner = speakers.find((speaker) => speaker.previousSlugs.includes(previousSlug));
+  return owner?.slug ?? null;
 }

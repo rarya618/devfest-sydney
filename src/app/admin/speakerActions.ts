@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { randomUUID } from 'node:crypto';
 import { adminDb, adminStorage } from '@/lib/firebase-admin';
+import { normaliseProfileUrl, toSpeakerSlug } from '@/lib/speakers';
 import { verifyAdminSession } from '@/lib/adminSession';
 import type { ExperienceLevel, TalkFormat, Track } from '@/lib/types';
 
@@ -56,6 +57,20 @@ function validateSpeakerFields(fields: SpeakerEditableFields): { error: string }
     return { error: 'Photo must be an https link, no longer than 500 characters.' };
   }
 
+  // A scheme-less "linkedin.com/in/..." is accepted and given https://; anything that still
+  // is not a web address is rejected rather than silently blanked, so the admin sees it.
+  const profileLinks = {
+    linkedinUrl: normaliseProfileUrl(fields.linkedinUrl),
+    githubUrl: normaliseProfileUrl(fields.githubUrl),
+    websiteUrl: normaliseProfileUrl(fields.websiteUrl),
+  };
+  if (fields.linkedinUrl.trim() && !profileLinks.linkedinUrl) return { error: 'The LinkedIn link isn\'t a valid web address.' };
+  if (fields.githubUrl.trim() && !profileLinks.githubUrl) return { error: 'The GitHub link isn\'t a valid web address.' };
+  if (fields.websiteUrl.trim() && !profileLinks.websiteUrl) return { error: 'The website link isn\'t a valid web address.' };
+  if (Object.values(profileLinks).some((url) => url.length > 500)) {
+    return { error: 'Profile links must be no longer than 500 characters.' };
+  }
+
   return {
     values: {
       name,
@@ -65,9 +80,7 @@ function validateSpeakerFields(fields: SpeakerEditableFields): { error: string }
       format: fields.format,
       track: fields.track,
       experienceLevel: fields.experienceLevel,
-      linkedinUrl: fields.linkedinUrl.trim(),
-      githubUrl: fields.githubUrl.trim(),
-      websiteUrl: fields.websiteUrl.trim(),
+      ...profileLinks,
       bio,
       tagline,
       photoUrl,
@@ -90,9 +103,22 @@ export async function updateSpeaker(speakerId: string, fields: SpeakerEditableFi
     const snapshot = await speakerRef.get();
     if (!snapshot.exists) return { error: 'Speaker not found.' };
 
-    await speakerRef.update(validated.values);
+    // Slugs are derived from the name, so a rename moves the public page. The slug the page
+    // was at is remembered so /speakers/<old> can redirect; if the name goes back, the slug
+    // is live again and comes out of the history so a live slug is never also a redirect.
+    const existing = snapshot.data() ?? {};
+    const previousSlug = toSpeakerSlug((existing.name as string | undefined) ?? '');
+    const nextSlug = toSpeakerSlug(validated.values.name);
+    const storedSlugs: string[] = Array.isArray(existing.previousSlugs) ? existing.previousSlugs : [];
+    const previousSlugs =
+      previousSlug === nextSlug
+        ? storedSlugs
+        : Array.from(new Set([...storedSlugs, previousSlug])).filter((slug) => slug !== nextSlug);
+
+    await speakerRef.update({ ...validated.values, previousSlugs });
     revalidatePath('/admin/speakers');
     revalidatePath('/');
+    revalidatePath('/speakers');
     return {};
   } catch {
     return { error: 'Could not save this speaker. Please try again.' };

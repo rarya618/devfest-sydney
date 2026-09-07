@@ -7,6 +7,7 @@ import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { Resend } from 'resend';
 import { acceptanceEmailSubject, buildAcceptanceEmail } from '@/lib/acceptanceEmail';
 import { confirmDeadlineFrom, confirmUrl } from '@/lib/speakerConfirm';
+import { normaliseProfileUrl } from '@/lib/speakers';
 import type { ExperienceLevel, TalkFormat, Track } from '@/lib/types';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -93,9 +94,9 @@ export async function promoteSubmission(submissionId: string): Promise<{ error?:
       format: data.format,
       track: data.track,
       experienceLevel: data.experienceLevel,
-      linkedinUrl: data.linkedinUrl ?? '',
-      githubUrl: data.githubUrl ?? '',
-      websiteUrl: data.websiteUrl ?? '',
+      linkedinUrl: normaliseProfileUrl(data.linkedinUrl ?? ''),
+      githubUrl: normaliseProfileUrl(data.githubUrl ?? ''),
+      websiteUrl: normaliseProfileUrl(data.websiteUrl ?? ''),
       submissionId,
       promotedAt: FieldValue.serverTimestamp(),
       bio: data.speakerBio ?? '',

@@ -2,14 +2,14 @@ import type { Metadata } from 'next';
 import { buildPageMetadata } from '@/lib/metadata';
 import Image from 'next/image';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Reveal from '@/components/Reveal';
 import TicketsLink from '@/components/TicketsLink';
 import { areTicketsOpen } from '@/lib/tickets';
 import { isCfsOpen } from '@/lib/cfs';
-import { fetchPublicSpeakerBySlug, fetchPublicSpeakers } from '@/lib/speakers';
+import { fetchPublicSpeakerBySlug, fetchPublicSpeakers, findCurrentSlugForPreviousSlug } from '@/lib/speakers';
 import { getInitials } from '@/lib/format';
 import { buildEventReference } from '@/lib/eventJsonLd';
 import { LinkedInIcon, GitHubIcon, WebsiteIcon } from '@/components/SocialIcons';
@@ -75,7 +75,12 @@ function buildJsonLd(speaker: PublicSpeaker) {
 export default async function SpeakerPage({ params }: PageProps) {
   const { slug } = await params;
   const [speaker, allSpeakers] = await Promise.all([fetchPublicSpeakerBySlug(slug), fetchPublicSpeakers()]);
-  if (!speaker) notFound();
+  if (!speaker) {
+    // A speaker who was renamed in /admin/speakers keeps their old URL working.
+    const currentSlug = await findCurrentSlugForPreviousSlug(slug);
+    if (currentSlug) permanentRedirect(`/speakers/${currentSlug}`);
+    notFound();
+  }
 
   const cfsOpen = isCfsOpen();
   const cfsCloseDate = process.env.CFS_CLOSE_DATE;
