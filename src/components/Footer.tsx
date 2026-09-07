@@ -40,7 +40,7 @@ const COLUMNS: { heading: string; links: { label: string; href: string; external
 export default function Footer() {
   return (
     <footer className="px-6 pb-8">
-      <div className="bg-white/[0.06] rounded-[40px] pb-8 overflow-hidden">
+      <div className="bg-surface rounded-[40px] pb-8 overflow-hidden">
         <div className="bg-white/10 py-3 px-6 flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 text-base text-center">
           <span className="flex items-center gap-2.5">
             <span className="font-bold text-white">Sat, 10 October 2026</span>

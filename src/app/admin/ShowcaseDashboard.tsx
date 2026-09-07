@@ -140,7 +140,7 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
   return (
     <div
       onClick={handleCardClick}
-      className={`relative cursor-pointer bg-white/[0.035] border-l-4 border-l-google-yellow rounded-lg pt-4 pb-4 pl-4 pr-4 sm:pt-5 sm:pb-6 sm:pl-5 sm:pr-5 transition-colors hover:bg-white/[0.07] ${
+      className={`relative cursor-pointer bg-surface border-l-4 border-l-google-yellow rounded-lg pt-4 pb-4 pl-4 pr-4 sm:pt-5 sm:pb-6 sm:pl-5 sm:pr-5 transition-colors hover:bg-white/[0.07] ${
         isPending ? 'opacity-50 pointer-events-none' : ''
       } ${moreOpen ? 'z-40' : ''}`}
       aria-label={`Builder Showcase entry: ${entry.projectName} by ${entry.name}`}
@@ -618,7 +618,7 @@ export default function ShowcaseDashboard({ entries }: Props) {
 
       <div className="px-4 md:px-5 pb-8 sm:pb-10">
         {filtered.length === 0 ? (
-          <div className="bg-white/[0.06] border border-white/10 rounded-2xl p-12 text-center">
+          <div className="bg-surface border border-white/10 rounded-2xl p-12 text-center">
             <p className="text-sm text-white/50">No Builder Showcase entries match this filter.</p>
           </div>
         ) : (

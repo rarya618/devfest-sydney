@@ -311,7 +311,7 @@ export default function CfsForm() {
       <form onSubmit={handleSubmit} noValidate className="space-y-10 flex-1 min-w-0">
 
         {/* Section: Your details */}
-        <div id="cfs-section-details" className="scroll-mt-28 bg-white/[0.035] rounded-2xl p-6 sm:p-8">
+        <div id="cfs-section-details" className="scroll-mt-28 bg-surface rounded-2xl p-6 sm:p-8">
           <div className="mb-6">
             <h3 className="text-2xl font-bold text-white">Your details</h3>
           </div>
@@ -360,7 +360,7 @@ export default function CfsForm() {
         </div>
 
         {/* Section: Your talk */}
-        <div id="cfs-section-talk" className="scroll-mt-28 bg-white/[0.035] rounded-2xl p-6 sm:p-8">
+        <div id="cfs-section-talk" className="scroll-mt-28 bg-surface rounded-2xl p-6 sm:p-8">
           <div className="mb-6">
             <h3 className="text-2xl font-bold text-white">Your session</h3>
           </div>
@@ -613,7 +613,7 @@ export default function CfsForm() {
         </div>
 
         {/* Section: About you */}
-        <div id="cfs-section-about" className="scroll-mt-28 bg-white/[0.035] rounded-2xl p-6 sm:p-8">
+        <div id="cfs-section-about" className="scroll-mt-28 bg-surface rounded-2xl p-6 sm:p-8">
           <div className="flex items-baseline gap-3 mb-6">
             <h3 className="text-2xl font-bold text-white">About you</h3>
             <span className="text-xs font-medium text-white/50">Optional</span>
@@ -754,7 +754,7 @@ export default function CfsForm() {
         </div>
 
         {/* Section: Logistics */}
-        <div id="cfs-section-logistics" className="scroll-mt-28 bg-white/[0.035] rounded-2xl p-6 sm:p-8">
+        <div id="cfs-section-logistics" className="scroll-mt-28 bg-surface rounded-2xl p-6 sm:p-8">
           <div className="flex items-baseline gap-3 mb-6">
             <h3 className="text-2xl font-bold text-white">Logistics</h3>
             <span className="text-xs font-medium text-white/50">Optional</span>

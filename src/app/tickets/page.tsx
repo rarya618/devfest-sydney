@@ -138,7 +138,7 @@ export default function Tickets() {
               <Reveal
                 key={inclusion.title}
                 delay={i * 0.1}
-                className="card-hover-lift bg-white/[0.045] rounded-2xl p-6 md:p-7"
+                className="card-hover-lift bg-surface rounded-2xl p-6 md:p-7"
               >
                 <span className="inline-flex items-center gap-3 text-lg font-bold text-white mb-3">
                   <span
@@ -166,7 +166,7 @@ export default function Tickets() {
               <Reveal
                 key={audience.title}
                 delay={i * 0.1}
-                className="card-hover-lift bg-white/[0.045] rounded-2xl p-6 md:p-7"
+                className="card-hover-lift bg-surface rounded-2xl p-6 md:p-7"
               >
                 <span className="inline-flex items-center gap-3 text-lg font-bold text-white mb-3">
                   <span className={`w-2 h-2 rounded-full shrink-0 ${DOT[audience.color]}`} aria-hidden="true" />
@@ -183,7 +183,7 @@ export default function Tickets() {
       <section className="pb-24 px-4 sm:px-6 lg:px-12">
         <div className="max-w-5xl mx-auto">
           <Reveal>
-            <div className="rounded-xl border-l-[8px] border-google-blue bg-white/[0.035] p-8 md:p-10">
+            <div className="rounded-xl border-l-[8px] border-google-blue bg-surface p-8 md:p-10">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-6">Before you book</h2>
               <dl className="grid sm:grid-cols-2 gap-x-10 gap-y-7 mb-10">
                 <div>

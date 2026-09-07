@@ -307,7 +307,7 @@ export default function ShowcaseForm() {
       <form onSubmit={handleSubmit} noValidate className="space-y-10 flex-1 min-w-0">
 
         {/* Section: Your details */}
-        <div id="showcase-section-details" className="scroll-mt-28 bg-white/[0.035] rounded-2xl p-6 sm:p-8">
+        <div id="showcase-section-details" className="scroll-mt-28 bg-surface rounded-2xl p-6 sm:p-8">
           <div className="mb-6">
             <h3 className="text-2xl font-bold text-white">Your details</h3>
           </div>
@@ -465,7 +465,7 @@ export default function ShowcaseForm() {
         </div>
 
         {/* Section: Your demo */}
-        <div id="showcase-section-demo" className="scroll-mt-28 bg-white/[0.035] rounded-2xl p-6 sm:p-8">
+        <div id="showcase-section-demo" className="scroll-mt-28 bg-surface rounded-2xl p-6 sm:p-8">
           <div className="mb-6">
             <h3 className="text-2xl font-bold text-white">Your demo</h3>
           </div>
@@ -640,7 +640,7 @@ export default function ShowcaseForm() {
         </div>
 
         {/* Section: On the day */}
-        <div id="showcase-section-day" className="scroll-mt-28 bg-white/[0.035] rounded-2xl p-6 sm:p-8">
+        <div id="showcase-section-day" className="scroll-mt-28 bg-surface rounded-2xl p-6 sm:p-8">
           <div className="mb-6">
             <h3 className="text-2xl font-bold text-white">On the day</h3>
           </div>

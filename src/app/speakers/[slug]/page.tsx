@@ -163,7 +163,7 @@ export default async function SpeakerPage({ params }: PageProps) {
         <div className="max-w-4xl mx-auto grid lg:grid-cols-[1fr_18rem] gap-8 items-start">
           <div className="space-y-8">
             <Reveal>
-              <article className="rounded-xl border-l-[8px] border-google-red bg-white/[0.035] p-8 md:p-10">
+              <article className="rounded-xl border-l-[8px] border-google-red bg-surface p-8 md:p-10">
                 <p className="text-xs font-bold text-white/55 mb-3">{FORMAT_LABELS[speaker.format]}</p>
                 <h2 className="text-2xl md:text-3xl font-bold tracking-tight leading-snug mb-6">{speaker.talkTitle}</h2>
                 <p className="text-white/70 leading-relaxed whitespace-pre-wrap">{speaker.abstract}</p>
@@ -181,7 +181,7 @@ export default async function SpeakerPage({ params }: PageProps) {
           </div>
 
           <Reveal delay={0.15} className="lg:sticky lg:top-28">
-            <aside className="rounded-2xl bg-white/[0.045] p-6 space-y-5">
+            <aside className="rounded-2xl bg-surface p-6 space-y-5">
               <div>
                 <p className="text-xs font-bold text-white/55 mb-2">Catch this session</p>
                 <p className="font-bold text-white">Saturday, 10 October 2026</p>

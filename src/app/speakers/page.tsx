@@ -45,7 +45,7 @@ function SpeakerCard({ speaker, delay }: { speaker: PublicSpeaker; delay: number
   const hasLinks = Boolean(speaker.linkedinUrl || speaker.githubUrl || speaker.websiteUrl);
 
   return (
-    <Reveal delay={delay} className="card-hover-lift bg-white/[0.045] rounded-2xl p-6 md:p-7 flex flex-col">
+    <Reveal delay={delay} className="card-hover-lift bg-surface rounded-2xl p-6 md:p-7 flex flex-col">
       <div className="flex items-start gap-4 mb-5">
         <div className="w-16 h-16 rounded-full overflow-hidden bg-white/5 shrink-0">
           {speaker.photoUrl ? (
@@ -212,7 +212,7 @@ export default async function SpeakersPage() {
       ) : (
         <section className="pb-24 px-4 sm:px-6 lg:px-12">
           <div className="max-w-2xl mx-auto text-center">
-            <Reveal className="bg-white/[0.045] rounded-2xl p-10">
+            <Reveal className="bg-surface rounded-2xl p-10">
               <p className="text-white/65 leading-relaxed mb-8">
                 In the meantime, have a look at the tracks to see what the day covers.
               </p>

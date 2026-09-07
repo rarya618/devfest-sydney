@@ -140,7 +140,7 @@ export default async function BuilderShowcase() {
             {HOW_IT_WORKS.map((item) => (
               <li
                 key={item.title}
-                className={`flex flex-col gap-3 bg-white/[0.035] border-l-6 ${STEP_BORDER[item.color]} rounded-lg pt-8 pb-10 px-6 md:px-8`}
+                className={`flex flex-col gap-3 bg-surface border-l-6 ${STEP_BORDER[item.color]} rounded-lg pt-8 pb-10 px-6 md:px-8`}
               >
                 <h3 className="text-xl md:text-2xl font-bold text-white">{item.title}</h3>
                 <p className="text-base text-white/80 leading-relaxed">{item.desc}</p>

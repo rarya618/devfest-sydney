@@ -126,7 +126,7 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
   return (
     <div
       onClick={handleCardClick}
-      className={`relative cursor-pointer bg-white/[0.035] border-l-4 ${TRACK_BORDER_COLORS[speaker.track]} rounded-lg p-4 sm:p-5 transition-colors hover:bg-white/[0.07] ${
+      className={`relative cursor-pointer bg-surface border-l-4 ${TRACK_BORDER_COLORS[speaker.track]} rounded-lg p-4 sm:p-5 transition-colors hover:bg-white/[0.07] ${
         isPending ? 'opacity-50 pointer-events-none' : ''
       }`}
       aria-label={`Speaker ${speaker.name}`}
@@ -484,11 +484,11 @@ export default function SpeakersDashboard({ speakers }: Props) {
 
       <div className="px-4 md:px-5 pb-8 sm:pb-10">
         {speakers.length === 0 ? (
-          <div className="bg-white/[0.06] border border-white/10 rounded-2xl p-12 text-center">
+          <div className="bg-surface border border-white/10 rounded-2xl p-12 text-center">
             <p className="text-sm text-white/50">No speakers yet. Accept a proposal on the Submissions page to add one to the lineup.</p>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="bg-white/[0.06] border border-white/10 rounded-2xl p-12 text-center">
+          <div className="bg-surface border border-white/10 rounded-2xl p-12 text-center">
             <p className="text-sm text-white/50">No speakers match this filter.</p>
           </div>
         ) : (

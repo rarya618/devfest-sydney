@@ -133,10 +133,10 @@ export default async function Home() {
               sizes="100vw"
               className="object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#010103]/80 via-[#010103]/50 to-[#010103]/10" aria-hidden="true" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#010103]/65 via-[#010103]/30 to-[#010103]/5" aria-hidden="true" />
             {/* Second wash darkens the left third so the headline sits on a calm ground
                 whatever the photo is doing behind it. */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#010103]/70 via-[#010103]/25 to-transparent" aria-hidden="true" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#010103]/45 via-[#010103]/15 to-transparent" aria-hidden="true" />
           </>
         ) : (
           <div className="absolute inset-0 hero-atmosphere pointer-events-none" aria-hidden="true" />
@@ -258,7 +258,7 @@ export default async function Home() {
         <section id="tickets" className="py-14 px-4 sm:px-6 lg:px-12">
           <div className="max-w-5xl mx-auto">
             <Reveal>
-              <div className="rounded-xl border-l-[8px] border-google-blue bg-white/[0.035] p-8 md:p-10">
+              <div className="rounded-xl border-l-[8px] border-google-blue bg-surface p-8 md:p-10">
                 <div className="flex flex-col lg:flex-row lg:items-start gap-10 lg:gap-14">
                   <div className="lg:w-[42%] lg:shrink-0">
                     <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
@@ -321,7 +321,7 @@ export default async function Home() {
               <Reveal
                 key={track.name}
                 delay={i * 0.1}
-                className="bg-white/[0.045] rounded-2xl p-6 md:p-7"
+                className="bg-surface rounded-2xl p-6 md:p-7"
               >
                 <span className="inline-flex items-center gap-3 text-lg font-bold text-white mb-3">
                   <span className={`w-2 h-2 rounded-full ${TRACK_DOT[track.color]}`} aria-hidden="true" />
@@ -402,7 +402,7 @@ export default async function Home() {
         <section id="venue" className="pt-14 pb-24 px-4 sm:px-6 lg:px-12">
           <div className="max-w-5xl mx-auto">
             <Reveal>
-              <div className="flex flex-col md:flex-row md:items-center gap-10 md:gap-10 rounded-xl border-l-[8px] border-google-blue bg-white/[0.035] p-8 pt-8 pb-8 md:p-10 md:pt-10 md:pb-12">
+              <div className="flex flex-col md:flex-row md:items-center gap-10 md:gap-10 rounded-xl border-l-[8px] border-google-blue bg-surface p-8 pt-8 pb-8 md:p-10 md:pt-10 md:pb-12">
                 <div className="flex-1 flex flex-col">
                   <div className="space-y-4 md:space-y-6">
                     <div className="space-y-4">

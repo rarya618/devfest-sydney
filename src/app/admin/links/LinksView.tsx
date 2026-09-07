@@ -57,7 +57,7 @@ export default function LinksView() {
       </div>
 
       <div className="px-4 md:px-5">
-        <div className="bg-white/[0.06] border border-white/10 rounded-2xl px-5 py-5">
+        <div className="bg-surface border border-white/10 rounded-2xl px-5 py-5">
           <h2 className="text-sm font-bold text-white/70 mb-1">Generate a tracking link</h2>
           <p className="text-xs text-white/50 mb-4">
             Add a source, medium, campaign, or ref to the homepage or Call for Speakers link so submissions show up

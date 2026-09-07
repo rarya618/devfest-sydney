@@ -96,7 +96,7 @@ export default async function PartnersPage() {
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">The partners behind the day</h2>
           </Reveal>
           <div className="grid md:grid-cols-2 gap-6">
-            <Reveal className="rounded-2xl bg-white/[0.045] p-8 flex flex-col items-start gap-5">
+            <Reveal className="rounded-2xl bg-surface p-8 flex flex-col items-start gap-5">
               {assets.googleLogoUrl && (
                 <Image src={assets.googleLogoUrl} alt="Google" width={160} height={48} className="h-12 w-auto object-contain" />
               )}
@@ -107,7 +107,7 @@ export default async function PartnersPage() {
                 </p>
               </div>
             </Reveal>
-            <Reveal delay={0.1} className="rounded-2xl bg-white/[0.045] p-8 flex flex-col items-start gap-5">
+            <Reveal delay={0.1} className="rounded-2xl bg-surface p-8 flex flex-col items-start gap-5">
               {assets.torrensLogoUrl && (
                 <Image src={assets.torrensLogoUrl} alt="Torrens University" width={120} height={36} className="h-12 w-auto object-contain" />
               )}
@@ -175,7 +175,7 @@ export default async function PartnersPage() {
       <section className="pt-20 pb-24 px-4 sm:px-6 lg:px-12">
         <div className="max-w-5xl mx-auto">
           <Reveal>
-            <div className="rounded-xl border-l-[8px] border-google-green bg-white/[0.035] p-8 md:p-12 text-center">
+            <div className="rounded-xl border-l-[8px] border-google-green bg-surface p-8 md:p-12 text-center">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Tiers, benefits and how to get involved</h2>
               <p className="text-white/70 leading-relaxed max-w-2xl mx-auto mb-8">
                 Everything from Platinum through to in-kind community sponsorship is in the prospectus. Email the organising

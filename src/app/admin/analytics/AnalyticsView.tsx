@@ -18,11 +18,11 @@ interface Props {
 type StatAccent = 'neutral' | 'blue' | 'yellow' | 'green' | 'muted';
 
 const STAT_ACCENT_STYLES: Record<StatAccent, { border: string; bg: string; iconBg: string; iconText: string; countText: string }> = {
-  neutral: { border: 'border-white/15', bg: 'bg-white/[0.06]', iconBg: 'bg-white/10', iconText: 'text-white/70', countText: 'text-white' },
+  neutral: { border: 'border-white/15', bg: 'bg-surface', iconBg: 'bg-white/10', iconText: 'text-white/70', countText: 'text-white' },
   blue: { border: 'border-google-blue/25', bg: 'bg-google-blue/[0.08]', iconBg: 'bg-google-blue/15', iconText: 'text-google-blue', countText: 'text-google-blue' },
   yellow: { border: 'border-google-yellow/25', bg: 'bg-google-yellow/[0.08]', iconBg: 'bg-google-yellow/15', iconText: 'text-google-yellow', countText: 'text-google-yellow' },
   green: { border: 'border-google-green/25', bg: 'bg-google-green/[0.08]', iconBg: 'bg-google-green/15', iconText: 'text-google-green', countText: 'text-google-green' },
-  muted: { border: 'border-white/10', bg: 'bg-white/[0.06]', iconBg: 'bg-white/10', iconText: 'text-white/55', countText: 'text-white/50' },
+  muted: { border: 'border-white/10', bg: 'bg-surface', iconBg: 'bg-white/10', iconText: 'text-white/55', countText: 'text-white/50' },
 };
 
 const STAT_ICON_PATHS: Record<string, string> = {
@@ -91,7 +91,7 @@ function BarRow({ label, count, total, dotClass }: { label: string; count: numbe
 
 function BreakdownCard({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="bg-white/[0.06] border border-white/10 rounded-2xl px-5 py-5">
+    <div className="bg-surface border border-white/10 rounded-2xl px-5 py-5">
       <h2 className="text-sm font-bold text-white/70 mb-4">{title}</h2>
       <div className="space-y-4">{children}</div>
     </div>

@@ -126,7 +126,7 @@ export default function SubmissionsOverTimeChart({ submissions }: Props) {
   const tooltipOnRight = tooltipX < CHART_WIDTH / 2;
 
   return (
-    <div className="bg-white/[0.06] border border-white/10 rounded-2xl px-5 py-5 mb-6">
+    <div className="bg-surface border border-white/10 rounded-2xl px-5 py-5 mb-6">
       <h2 className="text-sm font-bold text-white/70 mb-4">Cumulative submissions over time</h2>
       <div className="relative">
         <svg

@@ -286,7 +286,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
   return (
     <div
       onClick={handleCardClick}
-      className={`relative cursor-pointer bg-white/[0.035] border-l-4 rounded-lg pt-4 pb-4 pl-4 pr-4 sm:pt-5 sm:pb-6 sm:pl-5 sm:pr-5 transition-colors hover:bg-white/[0.07] ${
+      className={`relative cursor-pointer bg-surface border-l-4 rounded-lg pt-4 pb-4 pl-4 pr-4 sm:pt-5 sm:pb-6 sm:pl-5 sm:pr-5 transition-colors hover:bg-white/[0.07] ${
         isPending ? 'opacity-50 pointer-events-none' : selected ? 'ring-2 ring-google-blue/30' : ''
       } ${TRACK_BORDER_COLORS[submission.track]} ${moreOpen ? 'z-40' : ''}`}
       aria-label={`Submission from ${submission.name}: ${submission.talkTitle}`}
@@ -721,7 +721,7 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
   return (
     <div
       onClick={handleRowClick}
-      className={`relative cursor-pointer bg-white/[0.035] border-l-4 rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[0.07] ${
+      className={`relative cursor-pointer bg-surface border-l-4 rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[0.07] ${
         isPending ? 'opacity-50 pointer-events-none' : selected ? 'ring-2 ring-google-blue/30' : ''
       } ${TRACK_BORDER_COLORS[submission.track]} ${moreOpen ? 'z-40' : ''}`}
       aria-label={`Submission from ${submission.name}: ${submission.talkTitle}`}
