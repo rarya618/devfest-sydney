@@ -371,7 +371,7 @@ export default async function Home() {
                     </div>
                     <p className="font-semibold text-white/85 text-sm leading-snug">{speaker.name}</p>
                     {speaker.tagline && <p className="text-xs text-white/55 mt-1 leading-snug line-clamp-2">{speaker.tagline}</p>}
-                    <p className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.12em] text-white/55">
+                    <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.12em] text-white/55">
                       <span className={`w-1.5 h-1.5 rounded-full ${TRACK_DOT_COLORS[speaker.track]}`} aria-hidden="true" />
                       {TRACK_LABELS[speaker.track]}
                     </p>
