@@ -49,7 +49,7 @@ export default async function PartnersPage() {
   const sponsorGroups = groupSponsorsByTier(sponsors);
 
   return (
-    <div className="bg-[#17181a] text-white min-h-screen">
+    <div className="bg-[#010103] text-white min-h-screen">
       <Navbar accent="green" isCfsOpen={cfsOpen} cfsCloseDate={cfsCloseDate} areTicketsOpen={ticketsOnSale} />
 
       {/* Hero */}

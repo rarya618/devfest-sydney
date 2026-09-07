@@ -155,7 +155,7 @@ export default async function SpeakersPage() {
   const groups = groupByTrack(speakers);
 
   return (
-    <div className="bg-[#17181a] text-white min-h-screen">
+    <div className="bg-[#010103] text-white min-h-screen">
       <Navbar accent="red" isCfsOpen={cfsOpen} cfsCloseDate={cfsCloseDate} areTicketsOpen={ticketsOnSale} />
 
       <section className={`relative pb-16 px-4 sm:px-6 lg:px-12 overflow-hidden ${ticketsOnSale ? 'pt-40' : 'pt-36'}`}>

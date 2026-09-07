@@ -62,7 +62,7 @@ This may include your name, email address, phone number, talk or session details
 
 export default function PrivacyPolicy() {
   return (
-    <div className="bg-[#17181a] text-white min-h-screen">
+    <div className="bg-[#010103] text-white min-h-screen">
       <Navbar accent="blue" areTicketsOpen={areTicketsOpen()} />
 
       <section className="relative pt-36 pb-10 px-6 overflow-hidden">

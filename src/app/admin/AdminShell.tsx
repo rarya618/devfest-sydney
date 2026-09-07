@@ -98,10 +98,10 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-[#17181a] md:flex md:items-start">
+    <div className="min-h-screen bg-[#010103] md:flex md:items-start">
       {/* Mobile top bar */}
       <div
-        className={`md:hidden sticky top-0 z-30 flex items-center justify-between pl-3 pr-4 pt-4 pb-3 bg-[#17181a] transition-transform duration-300 ease-in-out ${
+        className={`md:hidden sticky top-0 z-30 flex items-center justify-between pl-3 pr-4 pt-4 pb-3 bg-[#010103] transition-transform duration-300 ease-in-out ${
           mobileBarHidden ? '-translate-y-full' : 'translate-y-0'
         }`}
       >
@@ -202,7 +202,7 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
       )}
 
       {/* Sidebar (desktop only) */}
-      <div className="hidden md:sticky md:flex top-0 left-0 z-50 w-64 shrink-0 h-screen flex-col border-r border-white/10 px-3 pt-7 pb-5 bg-[#17181a]">
+      <div className="hidden md:sticky md:flex top-0 left-0 z-50 w-64 shrink-0 h-screen flex-col border-r border-white/10 px-3 pt-7 pb-5 bg-[#010103]">
         <div className="flex items-center justify-between gap-2 pl-3 pr-2 mb-6">
           <Link href="/" className="inline-flex items-center hover:opacity-80 transition-opacity" aria-label="Back to DevFest Sydney home">
             <Image

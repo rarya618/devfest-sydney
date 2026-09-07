@@ -260,7 +260,7 @@ export default function ShowcaseForm() {
     <>
       <nav
         aria-label="Form progress"
-        className="md:hidden sticky top-[88px] z-40 -mt-2 mb-6 bg-[#17181a] border-b border-white/8 px-1 py-2 -mx-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        className="md:hidden sticky top-[88px] z-40 -mt-2 mb-6 bg-[#010103] border-b border-white/8 px-1 py-2 -mx-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
         <ul className="flex items-center gap-1.5 w-max">
           {SECTIONS.map((section, index) => {

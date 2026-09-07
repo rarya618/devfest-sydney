@@ -65,7 +65,7 @@ export default async function SpeakerConfirmPage({ searchParams }: ConfirmPagePr
   return (
     // No navbar and no footer: this page asks one question, and every link out of it is a
     // way to leave without answering.
-    <main className="bg-[#17181a] text-white min-h-screen flex items-center justify-center px-6 py-16">
+    <main className="bg-[#010103] text-white min-h-screen flex items-center justify-center px-6 py-16">
       <div className="w-full max-w-xl bg-white/[0.04] border border-white/10 rounded-3xl px-8 py-12 sm:px-12 text-center">
         <Image
           src="/logo-wordmark.png"

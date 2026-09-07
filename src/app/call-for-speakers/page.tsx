@@ -79,7 +79,7 @@ export default async function CallForSpeakers() {
   const heroImageUrls = await fetchCfsHeroImageUrls();
 
   return (
-    <div className="bg-[#17181a] text-white min-h-screen">
+    <div className="bg-[#010103] text-white min-h-screen">
       <Navbar accent="green" isCfsOpen={cfsOpen} cfsCloseDate={cfsCloseDate} areTicketsOpen={areTicketsOpen()} />
 
       {/* Hero */}
@@ -191,8 +191,8 @@ export default async function CallForSpeakers() {
         </div>
 
         <div className="relative -mx-6 overflow-hidden border-y border-white/20 bg-white/[0.06] animate-slide-up" style={{ animationDelay: '0.2s' }}>
-          <div className="absolute inset-y-0 left-0 w-12 sm:w-24 bg-gradient-to-r from-[#17181a] to-transparent z-10 pointer-events-none" aria-hidden="true" />
-          <div className="absolute inset-y-0 right-0 w-12 sm:w-24 bg-gradient-to-l from-[#17181a] to-transparent z-10 pointer-events-none" aria-hidden="true" />
+          <div className="absolute inset-y-0 left-0 w-12 sm:w-24 bg-gradient-to-r from-[#010103] to-transparent z-10 pointer-events-none" aria-hidden="true" />
+          <div className="absolute inset-y-0 right-0 w-12 sm:w-24 bg-gradient-to-l from-[#010103] to-transparent z-10 pointer-events-none" aria-hidden="true" />
           <div className="flex w-max items-center gap-10 py-4 animate-marquee hover:[animation-play-state:paused]" aria-hidden="true">
             {[...topics, ...topics].map(({ label }, i) => (
               <span key={i} className="flex items-center gap-2.5 text-base font-normal text-white whitespace-nowrap">
@@ -208,7 +208,7 @@ export default async function CallForSpeakers() {
       </section>
 
       {/* Form or Closed State */}
-      <section id="apply" className="pt-16 pb-20 px-6 bg-[#17181a]">
+      <section id="apply" className="pt-16 pb-20 px-6 bg-[#010103]">
         <div className={cfsOpen ? 'max-w-4xl mx-auto' : 'max-w-xl mx-auto'}>
           <div className="mb-10 text-center animate-slide-up">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight">Apply to speak</h2>

@@ -108,7 +108,7 @@ export default function Navbar({
       )}
       <nav
         className={`relative z-50 transition-all duration-300 ${
-          scrolled ? 'bg-[#17181a]/90 backdrop-blur-lg shadow-sm shadow-black/20' : 'bg-transparent'
+          scrolled ? 'bg-[#010103]/90 backdrop-blur-lg shadow-sm shadow-black/20' : 'bg-transparent'
         }`}
       >
         <div className="px-4 sm:px-6 lg:px-12 py-6 flex items-center justify-between">
@@ -179,7 +179,7 @@ export default function Navbar({
 
         {/* Mobile menu panel */}
         <div
-          className={`md:hidden overflow-hidden transition-[max-height] duration-300 bg-[#17181a]/95 backdrop-blur-lg ${
+          className={`md:hidden overflow-hidden transition-[max-height] duration-300 bg-[#010103]/95 backdrop-blur-lg ${
             mobileMenuOpen ? 'max-h-96' : 'max-h-0'
           }`}
         >

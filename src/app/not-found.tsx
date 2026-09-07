@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 // off the lineup, so the page points back at the speakers list as well as home.
 export default function NotFound() {
   return (
-    <div className="bg-[#17181a] text-white min-h-screen flex flex-col">
+    <div className="bg-[#010103] text-white min-h-screen flex flex-col">
       <Navbar accent="blue" isCfsOpen={isCfsOpen()} cfsCloseDate={process.env.CFS_CLOSE_DATE} areTicketsOpen={areTicketsOpen()} />
 
       <section className="relative flex-1 flex items-center pt-36 pb-24 px-4 sm:px-6 lg:px-12 overflow-hidden">

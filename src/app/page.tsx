@@ -114,7 +114,7 @@ export default async function Home() {
   const featuredSpeakers = speakers.slice(0, wholeRowsOfSpeakers || speakers.length);
 
   return (
-    <div className="bg-[#17181a] text-white min-h-screen">
+    <div className="bg-[#010103] text-white min-h-screen">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(buildEventJsonLd(speakers)) }}
@@ -133,10 +133,10 @@ export default async function Home() {
               sizes="100vw"
               className="object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#17181a]/80 via-[#17181a]/50 to-[#17181a]/10" aria-hidden="true" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#010103]/80 via-[#010103]/50 to-[#010103]/10" aria-hidden="true" />
             {/* Second wash darkens the left third so the headline sits on a calm ground
                 whatever the photo is doing behind it. */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#17181a]/70 via-[#17181a]/25 to-transparent" aria-hidden="true" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#010103]/70 via-[#010103]/25 to-transparent" aria-hidden="true" />
           </>
         ) : (
           <div className="absolute inset-0 hero-atmosphere pointer-events-none" aria-hidden="true" />

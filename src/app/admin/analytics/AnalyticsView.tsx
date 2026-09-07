@@ -143,7 +143,7 @@ export default function AnalyticsView({ submissions }: Props) {
 
   return (
     <>
-      <StickyAdminHeader className="z-20 w-full px-4 md:px-5 pt-4 pb-4 md:pt-8 md:pb-5 bg-[#17181a]/95 backdrop-blur-sm">
+      <StickyAdminHeader className="z-20 w-full px-4 md:px-5 pt-4 pb-4 md:pt-8 md:pb-5 bg-[#010103]/95 backdrop-blur-sm">
         <h1 className="text-xl font-bold text-white tracking-tight">Analytics</h1>
       </StickyAdminHeader>
 

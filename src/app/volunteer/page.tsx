@@ -42,7 +42,7 @@ export default async function Volunteer() {
   const heroImageUrl = await fetchVolunteerHeroImageUrl();
 
   return (
-    <div className="bg-[#17181a] text-white min-h-screen">
+    <div className="bg-[#010103] text-white min-h-screen">
       <Navbar accent="red" areTicketsOpen={areTicketsOpen()} />
 
       {/* Hero */}
@@ -50,7 +50,7 @@ export default async function Volunteer() {
         {heroImageUrl ? (
           <>
             <Image src={heroImageUrl} alt="" fill priority sizes="100vw" className="object-cover scale-125 sm:scale-100" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#17181a]/95 via-[#17181a]/75 to-[#17181a]/40" aria-hidden="true" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#010103]/95 via-[#010103]/75 to-[#010103]/40" aria-hidden="true" />
           </>
         ) : (
           <div className="absolute inset-0 hero-atmosphere pointer-events-none" aria-hidden="true" />
@@ -96,8 +96,8 @@ export default async function Volunteer() {
       {/* Areas marquee */}
       <section id="areas" className="pt-0 pb-0 px-6">
         <div className="relative -mx-6 overflow-hidden border-y border-white/20 bg-white/[0.06] animate-slide-up">
-          <div className="absolute inset-y-0 left-0 w-12 sm:w-24 bg-gradient-to-r from-[#17181a] to-transparent z-10 pointer-events-none" aria-hidden="true" />
-          <div className="absolute inset-y-0 right-0 w-12 sm:w-24 bg-gradient-to-l from-[#17181a] to-transparent z-10 pointer-events-none" aria-hidden="true" />
+          <div className="absolute inset-y-0 left-0 w-12 sm:w-24 bg-gradient-to-r from-[#010103] to-transparent z-10 pointer-events-none" aria-hidden="true" />
+          <div className="absolute inset-y-0 right-0 w-12 sm:w-24 bg-gradient-to-l from-[#010103] to-transparent z-10 pointer-events-none" aria-hidden="true" />
           <div className="flex w-max items-center gap-10 py-4 animate-marquee hover:[animation-play-state:paused]" aria-hidden="true">
             {[...areas, ...areas].map(({ label }, i) => (
               <span key={i} className="flex items-center gap-2.5 text-base font-normal text-white whitespace-nowrap">
@@ -113,7 +113,7 @@ export default async function Volunteer() {
       </section>
 
       {/* Form or Closed State */}
-      <section id="signup" className="pt-16 pb-20 px-6 bg-[#17181a]">
+      <section id="signup" className="pt-16 pb-20 px-6 bg-[#010103]">
         <div className={volunteerOpen ? 'max-w-4xl mx-auto' : 'max-w-xl mx-auto'}>
           <div className="mb-10 text-center animate-slide-up">
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight">Help bring DevFest Sydney to life</h2>

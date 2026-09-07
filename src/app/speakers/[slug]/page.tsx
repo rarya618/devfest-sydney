@@ -85,7 +85,7 @@ export default async function SpeakerPage({ params }: PageProps) {
   const firstName = speaker.name.split(' ')[0];
 
   return (
-    <div className="bg-[#17181a] text-white min-h-screen">
+    <div className="bg-[#010103] text-white min-h-screen">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(buildJsonLd(speaker)) }} />
       <Navbar accent="red" isCfsOpen={cfsOpen} cfsCloseDate={cfsCloseDate} areTicketsOpen={ticketsOnSale} />
 

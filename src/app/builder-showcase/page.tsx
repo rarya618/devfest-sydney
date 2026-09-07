@@ -85,7 +85,7 @@ export default async function BuilderShowcase() {
   const closeDate = process.env.SHOWCASE_CLOSE_DATE;
 
   return (
-    <div className="bg-[#17181a] text-white min-h-screen">
+    <div className="bg-[#010103] text-white min-h-screen">
       <Navbar accent="yellow" areTicketsOpen={areTicketsOpen()} />
 
       {/* Hero */}
@@ -151,7 +151,7 @@ export default async function BuilderShowcase() {
       </section>
 
       {/* Form or Closed State */}
-      <section id="enter" className="pt-4 pb-20 px-6 bg-[#17181a]">
+      <section id="enter" className="pt-4 pb-20 px-6 bg-[#010103]">
         <div className={showcaseOpen ? 'max-w-4xl mx-auto' : 'max-w-xl mx-auto'}>
           <div className="mb-10 text-center animate-slide-up">
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight">Show us what you built</h2>
