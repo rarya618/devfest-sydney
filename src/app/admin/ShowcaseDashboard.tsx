@@ -131,6 +131,9 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
     setIsOpen((open) => !open);
   }
 
+  const hasTracking = Boolean(
+    entry.tracking.utmSource || entry.tracking.utmMedium || entry.tracking.utmCampaign || entry.tracking.ref,
+  );
   const links: { label: string; href: string }[] = [
     ...(entry.demoUrl ? [{ label: 'Project', href: entry.demoUrl }] : []),
     ...(entry.repoUrl ? [{ label: 'Repository', href: entry.repoUrl }] : []),
@@ -197,7 +200,7 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
 
       <p className="text-sm text-white/65 leading-relaxed mb-5">{entry.description}</p>
 
-      {(entry.builtWith || entry.coPresenters.length > 0 || entry.demoRequirements) && (
+      {(entry.builtWith || entry.coPresenters.length > 0 || entry.demoRequirements || hasTracking) && (
         <div className="space-y-3 mb-5">
           {entry.builtWith && (
             <p className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
@@ -230,6 +233,19 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
             <p className="text-sm text-white/65 bg-google-red/10 border border-google-red/20 rounded-lg px-4 py-3 leading-relaxed">
               <span className="font-bold text-google-red-light">Needs on the day: </span>
               {entry.demoRequirements}
+            </p>
+          )}
+          {hasTracking && (
+            <p className="text-sm text-white/55">
+              <span className="font-medium text-white/70">Link tracking: </span>
+              {[
+                entry.tracking.ref && `ref=${entry.tracking.ref}`,
+                entry.tracking.utmSource && `source=${entry.tracking.utmSource}`,
+                entry.tracking.utmMedium && `medium=${entry.tracking.utmMedium}`,
+                entry.tracking.utmCampaign && `campaign=${entry.tracking.utmCampaign}`,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
             </p>
           )}
         </div>
