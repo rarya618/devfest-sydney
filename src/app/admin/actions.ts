@@ -37,7 +37,7 @@ export async function addAdmin(email: string, name: string): Promise<{ error?: s
       addedBy: currentAdminEmail,
     });
 
-    revalidatePath('/admin');
+    revalidatePath('/admin/admins');
     return {};
   } catch {
     return { error: 'Could not add this admin. Please try again.' };

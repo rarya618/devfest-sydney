@@ -4,6 +4,7 @@ import { useState, useCallback, useTransition } from 'react';
 import { removeAdmin } from '../../actions';
 import { getInitials, formatDate } from '@/lib/format';
 import Alert from '@/components/Alert';
+import InviteAdminForm from '../../InviteAdminForm';
 import { useMobileBarHidden } from '../../MobileBarContext';
 import type { AdminUser } from '@/lib/types';
 
@@ -16,6 +17,7 @@ export default function AdminsView({ admins, currentAdminEmail }: Props) {
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [removingEmail, setRemovingEmail] = useState<string | null>(null);
+  const [inviting, setInviting] = useState(false);
   const mobileBarHidden = useMobileBarHidden();
 
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
@@ -32,7 +34,16 @@ export default function AdminsView({ admins, currentAdminEmail }: Props) {
   return (
     <>
       <div className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-4 pb-4 md:pt-8 md:pb-5 bg-[#010103]/95 backdrop-blur-sm`}>
-        <h1 className="text-xl font-bold text-white tracking-tight">Admins</h1>
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="text-xl font-bold text-white tracking-tight">Admins</h1>
+          <button
+            onClick={() => setInviting(true)}
+            aria-label="Invite a new admin"
+            className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-opacity"
+          >
+            Invite admin
+          </button>
+        </div>
       </div>
 
       <div className="px-4 md:px-5">
@@ -81,6 +92,16 @@ export default function AdminsView({ admins, currentAdminEmail }: Props) {
           })}
         </div>
       </div>
+
+      {inviting && (
+        <InviteAdminForm
+          onDone={() => setInviting(false)}
+          onError={(message) => {
+            setInviting(false);
+            setAlertMessage(message);
+          }}
+        />
+      )}
 
       {alertMessage && <Alert message={alertMessage} onDismiss={dismissAlert} />}
     </>
