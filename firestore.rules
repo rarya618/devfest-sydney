@@ -62,6 +62,7 @@ rules_version='2';
 //   - tier: string (required) — 'platinum' | 'gold' | 'silver' | 'community'
 //   - logoUrl: string (required, valid https URL, max 500 chars)
 //   - websiteUrl: string (optional, valid https URL, max 500 chars)
+//   - description: string (optional, max 600 chars), short blurb shown on /partners
 //
 // Collection: team
 // Document ID: auto-generated
@@ -279,11 +280,12 @@ service cloud.firestore {
 
     function isValidSponsor(data) {
       let allowedTiers = ['platinum', 'gold', 'silver', 'community'];
-      return data.keys().hasOnly(['name', 'tier', 'logoUrl', 'websiteUrl']) &&
+      return data.keys().hasOnly(['name', 'tier', 'logoUrl', 'websiteUrl', 'description']) &&
         data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
         data.tier in allowedTiers &&
         data.logoUrl is string && isValidHttpsUrl(data.logoUrl) &&
-        isValidOptionalHttpsUrl('websiteUrl');
+        isValidOptionalHttpsUrl('websiteUrl') &&
+        (!('description' in data) || (data.description is string && data.description.size() <= 600));
     }
 
     function isValidTeamMember(data) {

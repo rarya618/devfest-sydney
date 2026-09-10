@@ -17,6 +17,8 @@ export interface Sponsor {
   website: string;
   tier: SponsorTier;
   order: number;
+  // Optional short blurb shown on /partners under the logo grid
+  description?: string;
 }
 
 export interface AdminUser {

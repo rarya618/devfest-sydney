@@ -134,31 +134,69 @@ export default async function PartnersPage() {
 
           {sponsorGroups.length > 0 ? (
             <div className="space-y-14">
-              {sponsorGroups.map((group) => (
-                <div key={group.tier}>
-                  <p className="text-xs font-bold text-white/50 mb-6 text-center">{TIER_LABELS[group.tier]}</p>
-                  <div className="flex flex-wrap items-center justify-center gap-10">
-                    {group.sponsors.map((sponsor) => (
-                      <a
-                        key={sponsor.id}
-                        href={sponsor.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`${sponsor.name} website`}
-                        className="opacity-80 hover:opacity-100 transition-opacity"
-                      >
-                        <Image
-                          src={sponsor.logoUrl}
-                          alt={sponsor.name}
-                          width={200}
-                          height={64}
-                          className={group.tier === 'platinum' ? 'h-16 w-auto object-contain' : 'h-11 w-auto object-contain'}
-                        />
-                      </a>
-                    ))}
+              {sponsorGroups.map((group) => {
+                // A sponsor with a blurb gets a card; the rest of the tier sits in a logo row underneath.
+                const sponsorsWithBlurb = group.sponsors.filter((sponsor) => sponsor.description);
+                const logoOnlySponsors = group.sponsors.filter((sponsor) => !sponsor.description);
+                return (
+                  <div key={group.tier}>
+                    <p className="text-xs font-bold text-white/50 mb-6 text-center">{TIER_LABELS[group.tier]}</p>
+                    {sponsorsWithBlurb.length > 0 && (
+                      <div className={`flex flex-wrap justify-center gap-6 ${logoOnlySponsors.length > 0 ? 'mb-10' : ''}`}>
+                        {sponsorsWithBlurb.map((sponsor, index) => (
+                          <Reveal key={sponsor.id} delay={index * 0.1} className="w-full md:w-[calc(50%-0.75rem)] rounded-2xl bg-surface p-8 flex flex-col items-start gap-5">
+                            <Image
+                              src={sponsor.logoUrl}
+                              alt={sponsor.name}
+                              width={288}
+                              height={96}
+                              className={group.tier === 'platinum' ? 'h-24 w-56 max-w-full object-contain object-left' : 'h-20 w-48 max-w-full object-contain object-left'}
+                            />
+                            <div>
+                              <p className="text-xs font-bold text-google-green mb-2">{TIER_LABELS[group.tier]} sponsor</p>
+                              <p className="text-white/70 leading-relaxed">{sponsor.description}</p>
+                              <a
+                                href={sponsor.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label={`Visit the ${sponsor.name} website`}
+                                className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-white/70 hover:text-white transition-colors"
+                              >
+                                Visit {sponsor.name}
+                                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8h10M9 4l4 4-4 4" />
+                                </svg>
+                              </a>
+                            </div>
+                          </Reveal>
+                        ))}
+                      </div>
+                    )}
+                    {logoOnlySponsors.length > 0 && (
+                      <div className="flex flex-wrap items-center justify-center gap-10">
+                        {logoOnlySponsors.map((sponsor) => (
+                          <a
+                            key={sponsor.id}
+                            href={sponsor.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={`${sponsor.name} website`}
+                            className="opacity-80 hover:opacity-100 transition-opacity"
+                          >
+                            <Image
+                              src={sponsor.logoUrl}
+                              alt={sponsor.name}
+                              width={288}
+                              height={96}
+                              className={group.tier === 'platinum' ? 'h-16 w-44 max-w-full object-contain' : 'h-14 w-36 max-w-full object-contain'}
+                            />
+                          </a>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <Reveal delay={0.1} className="max-w-2xl mx-auto text-center">
