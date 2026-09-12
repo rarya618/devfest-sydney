@@ -158,6 +158,12 @@ export interface Speaker {
   submissionId: string;
   promotedAt: string; // ISO date string (serialized from Firestore Timestamp)
   confirmation: SpeakerConfirmation;
+  // Read off the source submission, so the speakers page can show when the acceptance
+  // email went, who sent it, and the deadline, without a trip to /admin.
+  acceptanceEmailSentAt: string | null; // ISO date string
+  acceptanceEmailSentBy: string | null;
+  confirmByDate: string | null; // ISO date string
+  speakerConfirmedAt: string | null; // ISO date string
 }
 
 // What /speakers renders. Deliberately a subset of Speaker: no email, no submission id,

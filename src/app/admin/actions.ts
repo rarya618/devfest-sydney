@@ -550,6 +550,8 @@ export async function sendAcceptanceEmail(submissionId: string): Promise<{ error
     return { error: 'The email was sent, but we couldn\'t record it against this submission. Please refresh before sending again.' };
   }
 
+  // The speakers page shows the same chip, joined from the submission.
   revalidatePath('/admin');
+  revalidatePath('/admin/speakers');
   return {};
 }

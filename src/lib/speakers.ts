@@ -4,7 +4,13 @@ import type { Timestamp } from 'firebase-admin/firestore';
 
 interface SubmissionConfirmationFields {
   acceptanceEmailSentAt?: Timestamp;
+  acceptanceEmailSentBy?: string;
+  confirmByDate?: Timestamp;
   speakerConfirmedAt?: Timestamp;
+}
+
+function toIsoOrNull(timestamp: Timestamp | undefined): string | null {
+  return timestamp ? timestamp.toDate().toISOString() : null;
 }
 
 function toConfirmation(submission: SubmissionConfirmationFields | undefined): SpeakerConfirmation {
@@ -56,6 +62,7 @@ export async function fetchSpeakers(): Promise<Speaker[]> {
     const data = doc.data();
     const promotedAt = data.promotedAt as Timestamp | undefined;
     const submissionId: string = data.submissionId ?? '';
+    const sourceSubmission = submissionsById.get(submissionId);
     return {
       id: doc.id,
       name: data.name ?? '',
@@ -74,7 +81,11 @@ export async function fetchSpeakers(): Promise<Speaker[]> {
       previousSlugs: Array.isArray(data.previousSlugs) ? (data.previousSlugs as string[]) : [],
       submissionId,
       promotedAt: promotedAt ? promotedAt.toDate().toISOString() : new Date().toISOString(),
-      confirmation: toConfirmation(submissionsById.get(submissionId)),
+      confirmation: toConfirmation(sourceSubmission),
+      acceptanceEmailSentAt: toIsoOrNull(sourceSubmission?.acceptanceEmailSentAt),
+      acceptanceEmailSentBy: sourceSubmission?.acceptanceEmailSentBy ?? null,
+      confirmByDate: toIsoOrNull(sourceSubmission?.confirmByDate),
+      speakerConfirmedAt: toIsoOrNull(sourceSubmission?.speakerConfirmedAt),
     } satisfies Speaker;
   });
 }

@@ -3,6 +3,7 @@
 import { useState, useTransition, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { removeSpeaker } from './speakerActions';
+import { sendAcceptanceEmail } from './actions';
 import EditSpeakerModal from './EditSpeakerModal';
 import Alert from '@/components/Alert';
 import { formatDate, getInitials } from '@/lib/format';
@@ -18,6 +19,7 @@ import type { Speaker, SpeakerConfirmation, Track } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
 
 type FilterTrack = 'all' | Track;
+type FilterConfirmation = 'all' | SpeakerConfirmation;
 
 const CONFIRMATION_CHIP: Record<SpeakerConfirmation, { label: string; className: string; title: string }> = {
   confirmed: {
@@ -33,7 +35,7 @@ const CONFIRMATION_CHIP: Record<SpeakerConfirmation, { label: string; className:
   'not-emailed': {
     label: 'Not emailed',
     className: 'bg-google-yellow/15 text-google-yellow',
-    title: 'This speaker has not been told yet. Send the acceptance email from the Submissions page.',
+    title: 'This speaker has not been told yet. Send the acceptance email with the envelope button.',
   },
   unknown: {
     label: 'No proposal',
@@ -116,6 +118,18 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
     });
   }
 
+  // The email is sent against the proposal, not the speaker doc: that is where the sent /
+  // confirmed bookkeeping lives, and where /speaker/confirm looks it up.
+  function handleSendAcceptanceEmail() {
+    startTransition(async () => {
+      const result = await sendAcceptanceEmail(speaker.submissionId);
+      if (result.error) onError(result.error);
+    });
+  }
+
+  const alreadyEmailed = Boolean(speaker.acceptanceEmailSentAt);
+  const canEmail = speaker.confirmation !== 'unknown';
+
   function handleCardClick(event: React.MouseEvent<HTMLDivElement>) {
     const target = event.target as HTMLElement;
     if (target.closest('button, a, input, textarea, select, [role="menu"], [role="dialog"]')) return;
@@ -195,7 +209,20 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
                 </div>
               )}
 
-              <p className="mt-4 text-xs text-white/50">Added to the lineup {formatDate(speaker.promotedAt)}</p>
+              <p className="mt-4 text-xs text-white/50">
+                Added to the lineup {formatDate(speaker.promotedAt)}
+                {speaker.acceptanceEmailSentAt && (
+                  <>
+                    {' '}&middot; Acceptance email sent {formatDate(speaker.acceptanceEmailSentAt)}
+                    {speaker.acceptanceEmailSentBy && <> by {speaker.acceptanceEmailSentBy}</>}
+                  </>
+                )}
+                {speaker.speakerConfirmedAt ? (
+                  <> &middot; Confirmed {formatDate(speaker.speakerConfirmedAt)}</>
+                ) : speaker.confirmByDate ? (
+                  <> &middot; Confirmation due {formatDate(speaker.confirmByDate)}</>
+                ) : null}
+              </p>
             </div>
           </div>
         </div>
@@ -211,6 +238,25 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" />
             </svg>
           </button>
+
+          {canEmail && (
+            <button
+              onClick={handleSendAcceptanceEmail}
+              disabled={isPending}
+              aria-label={`${alreadyEmailed ? 'Resend' : 'Send'} acceptance email to ${speaker.name} for: ${speaker.talkTitle}`}
+              title={alreadyEmailed ? 'Resend acceptance email' : 'Send acceptance email'}
+              className={`inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                alreadyEmailed
+                  ? 'text-white/55 hover:text-white hover:bg-white/[0.08]'
+                  : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
+              }`}
+            >
+              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
+              </svg>
+            </button>
+          )}
 
           {confirmingRemove ? (
             <div role="group" aria-label={`Confirm removing ${speaker.name}`} className="flex flex-col items-end gap-1.5 bg-[#2d2e31] border border-white/10 rounded-xl px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.45)] w-52">
@@ -271,12 +317,15 @@ export default function SpeakersDashboard({ speakers }: Props) {
   const mobileBarHidden = useMobileBarHidden();
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterTrack>('all');
+  const [confirmationFilter, setConfirmationFilter] = useState<FilterConfirmation>('all');
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [trackMenuOpen, setTrackMenuOpen] = useState(false);
+  const [confirmationMenuOpen, setConfirmationMenuOpen] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const trackMenuRef = useRef<HTMLDivElement>(null);
+  const confirmationMenuRef = useRef<HTMLDivElement>(null);
   const searchWidthOpen = searchOpen || Boolean(search);
 
   useEffect(() => {
@@ -302,6 +351,26 @@ export default function SpeakersDashboard({ speakers }: Props) {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [trackMenuOpen]);
+
+  useEffect(() => {
+    if (!confirmationMenuOpen) return;
+
+    function handlePointerDown(event: MouseEvent) {
+      if (confirmationMenuRef.current && !confirmationMenuRef.current.contains(event.target as Node)) {
+        setConfirmationMenuOpen(false);
+      }
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setConfirmationMenuOpen(false);
+    }
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [confirmationMenuOpen]);
 
   useEffect(() => {
     if (!searchOpen) return;
@@ -336,12 +405,21 @@ export default function SpeakersDashboard({ speakers }: Props) {
     workshop: speakers.filter((speaker) => speaker.track === 'workshop').length,
     showcase: speakers.filter((speaker) => speaker.track === 'showcase').length,
   };
-  const confirmedCount = speakers.filter((speaker) => speaker.confirmation === 'confirmed').length;
+  const confirmationCounts: Record<FilterConfirmation, number> = {
+    all: speakers.length,
+    'not-emailed': speakers.filter((speaker) => speaker.confirmation === 'not-emailed').length,
+    awaiting: speakers.filter((speaker) => speaker.confirmation === 'awaiting').length,
+    confirmed: speakers.filter((speaker) => speaker.confirmation === 'confirmed').length,
+    unknown: speakers.filter((speaker) => speaker.confirmation === 'unknown').length,
+  };
+  const confirmedCount = confirmationCounts.confirmed;
+  const notEmailedCount = confirmationCounts['not-emailed'];
   const incompleteCount = speakers.filter((speaker) => missingProfileParts(speaker).length > 0).length;
 
   const query = search.trim().toLowerCase();
   const filtered = speakers
     .filter((speaker) => filter === 'all' || speaker.track === filter)
+    .filter((speaker) => confirmationFilter === 'all' || speaker.confirmation === confirmationFilter)
     .filter(
       (speaker) =>
         !query ||
@@ -358,6 +436,15 @@ export default function SpeakersDashboard({ speakers }: Props) {
     { value: 'showcase', label: TRACK_LABELS.showcase },
   ];
 
+  // "No proposal" is only offered when it applies; it is a data problem, not a stage.
+  const confirmationTabs: { value: FilterConfirmation; label: string }[] = [
+    { value: 'all', label: 'Any status' },
+    { value: 'not-emailed', label: CONFIRMATION_CHIP['not-emailed'].label },
+    { value: 'awaiting', label: CONFIRMATION_CHIP.awaiting.label },
+    { value: 'confirmed', label: CONFIRMATION_CHIP.confirmed.label },
+    ...(confirmationCounts.unknown > 0 ? [{ value: 'unknown' as const, label: CONFIRMATION_CHIP.unknown.label }] : []),
+  ];
+
   return (
     <>
       <div className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-[#010103]/95 backdrop-blur-sm`}>
@@ -366,6 +453,7 @@ export default function SpeakersDashboard({ speakers }: Props) {
             <h1 className="text-xl font-bold text-white tracking-tight">Speakers</h1>
             <p className="mt-0.5 text-sm text-white/55">
               {counts.all} in the lineup &middot; {confirmedCount} confirmed
+              {notEmailedCount > 0 && <> &middot; {notEmailedCount} not emailed</>}
               {incompleteCount > 0 && <> &middot; {incompleteCount} with profile gaps</>}
             </p>
           </div>
@@ -435,6 +523,49 @@ export default function SpeakersDashboard({ speakers }: Props) {
             </div>
 
             {(searchOpen || search) && <div className="basis-full h-0 sm:hidden" aria-hidden="true" />}
+
+            <div className="relative shrink-0" ref={confirmationMenuRef}>
+              <button
+                onClick={() => setConfirmationMenuOpen((open) => !open)}
+                aria-haspopup="menu"
+                aria-expanded={confirmationMenuOpen}
+                aria-label="Filter speakers by confirmation status"
+                className={`inline-flex items-center gap-2 h-10 text-sm px-4 rounded-full transition-colors font-bold ${
+                  confirmationMenuOpen ? 'bg-white/[0.12] text-white' : 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
+                }`}
+              >
+                {confirmationTabs.find((tab) => tab.value === confirmationFilter)?.label}
+                <span className="font-medium text-white/60">{confirmationCounts[confirmationFilter]}</span>
+                <svg className={`w-3 h-3 text-white/55 transition-transform ${confirmationMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
+                </svg>
+              </button>
+
+              {confirmationMenuOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full mt-2 w-56 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
+                >
+                  {confirmationTabs.map((tab) => (
+                    <button
+                      key={tab.value}
+                      role="menuitem"
+                      onClick={() => {
+                        setConfirmationFilter(tab.value);
+                        setConfirmationMenuOpen(false);
+                      }}
+                      aria-pressed={confirmationFilter === tab.value}
+                      className={`w-full flex items-center justify-between gap-3 text-left text-sm px-4 py-2.5 transition-colors ${
+                        confirmationFilter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
+                      }`}
+                    >
+                      {tab.label}
+                      <span className="text-white/55">{confirmationCounts[tab.value]}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <div className="relative shrink-0" ref={trackMenuRef}>
               <button
