@@ -3,7 +3,7 @@
 import { useState, useTransition, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { removeSpeaker } from './speakerActions';
-import { sendAcceptanceEmail } from './actions';
+import { sendAcceptanceEmail, sendSpeakerTicketEmail } from './actions';
 import EditSpeakerModal from './EditSpeakerModal';
 import Alert from '@/components/Alert';
 import { formatDate, getInitials } from '@/lib/format';
@@ -127,8 +127,19 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
     });
   }
 
+  // The ticket link unlocks a free ticket, so it is only offered once the speaker has
+  // confirmed: the same rule the action enforces on the server.
+  function handleSendSpeakerTicket() {
+    startTransition(async () => {
+      const result = await sendSpeakerTicketEmail(speaker.submissionId);
+      if (result.error) onError(result.error);
+    });
+  }
+
   const alreadyEmailed = Boolean(speaker.acceptanceEmailSentAt);
   const canEmail = speaker.confirmation !== 'unknown';
+  const canSendTicket = speaker.confirmation === 'confirmed';
+  const ticketSent = Boolean(speaker.speakerTicketEmailSentAt);
 
   function handleCardClick(event: React.MouseEvent<HTMLDivElement>) {
     const target = event.target as HTMLElement;
@@ -188,6 +199,14 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
                 Missing {missing.join(', ')}
               </span>
             )}
+            {canSendTicket && !ticketSent && (
+              <span
+                title="This speaker has confirmed but hasn't been sent their complimentary ticket yet. Send it with the ticket button."
+                className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25"
+              >
+                No ticket sent
+              </span>
+            )}
           </div>
 
           <p className="mt-4 font-semibold text-white/90 text-base leading-snug">{speaker.talkTitle}</p>
@@ -222,6 +241,12 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
                 ) : speaker.confirmByDate ? (
                   <> &middot; Confirmation due {formatDate(speaker.confirmByDate)}</>
                 ) : null}
+                {speaker.speakerTicketEmailSentAt && (
+                  <>
+                    {' '}&middot; Ticket sent {formatDate(speaker.speakerTicketEmailSentAt)}
+                    {speaker.speakerTicketEmailSentBy && <> by {speaker.speakerTicketEmailSentBy}</>}
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -254,6 +279,25 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
               <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                 <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
+              </svg>
+            </button>
+          )}
+
+          {canSendTicket && (
+            <button
+              onClick={handleSendSpeakerTicket}
+              disabled={isPending}
+              aria-label={`${ticketSent ? 'Resend' : 'Send'} the complimentary speaker ticket to ${speaker.name}`}
+              title={ticketSent ? 'Resend speaker ticket' : 'Send speaker ticket'}
+              className={`inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                ticketSent
+                  ? 'text-white/55 hover:text-white hover:bg-white/[0.08]'
+                  : 'bg-google-blue/15 text-google-blue hover:bg-google-blue-deep hover:text-white'
+              }`}
+            >
+              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 6.25V4.5a1 1 0 011-1h11a1 1 0 011 1v1.75a1.75 1.75 0 000 3.5V11.5a1 1 0 01-1 1h-11a1 1 0 01-1-1V9.75a1.75 1.75 0 000-3.5z" />
+                <path strokeLinecap="round" strokeDasharray="1.5 1.5" d="M10 4v8" />
               </svg>
             </button>
           )}
@@ -415,6 +459,9 @@ export default function SpeakersDashboard({ speakers }: Props) {
   const confirmedCount = confirmationCounts.confirmed;
   const notEmailedCount = confirmationCounts['not-emailed'];
   const incompleteCount = speakers.filter((speaker) => missingProfileParts(speaker).length > 0).length;
+  const awaitingTicketCount = speakers.filter(
+    (speaker) => speaker.confirmation === 'confirmed' && !speaker.speakerTicketEmailSentAt
+  ).length;
 
   const query = search.trim().toLowerCase();
   const filtered = speakers
@@ -454,6 +501,7 @@ export default function SpeakersDashboard({ speakers }: Props) {
             <p className="mt-0.5 text-sm text-white/55">
               {counts.all} in the lineup &middot; {confirmedCount} confirmed
               {notEmailedCount > 0 && <> &middot; {notEmailedCount} not emailed</>}
+              {awaitingTicketCount > 0 && <> &middot; {awaitingTicketCount} without a ticket</>}
               {incompleteCount > 0 && <> &middot; {incompleteCount} with profile gaps</>}
             </p>
           </div>

@@ -7,6 +7,8 @@ interface SubmissionConfirmationFields {
   acceptanceEmailSentBy?: string;
   confirmByDate?: Timestamp;
   speakerConfirmedAt?: Timestamp;
+  speakerTicketEmailSentAt?: Timestamp;
+  speakerTicketEmailSentBy?: string;
 }
 
 function toIsoOrNull(timestamp: Timestamp | undefined): string | null {
@@ -86,6 +88,8 @@ export async function fetchSpeakers(): Promise<Speaker[]> {
       acceptanceEmailSentBy: sourceSubmission?.acceptanceEmailSentBy ?? null,
       confirmByDate: toIsoOrNull(sourceSubmission?.confirmByDate),
       speakerConfirmedAt: toIsoOrNull(sourceSubmission?.speakerConfirmedAt),
+      speakerTicketEmailSentAt: toIsoOrNull(sourceSubmission?.speakerTicketEmailSentAt),
+      speakerTicketEmailSentBy: sourceSubmission?.speakerTicketEmailSentBy ?? null,
     } satisfies Speaker;
   });
 }
