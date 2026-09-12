@@ -86,6 +86,11 @@ export interface Submission {
   acceptanceEmailSentBy: string;
   confirmByDate: string | null; // ISO date string; the speaker's deadline to confirm
   speakerConfirmedAt: string | null; // ISO date string; set from /speaker/confirm
+  // The complimentary speaker ticket, sent from the admin after the speaker confirms.
+  // Null until an admin sends it; a separate step again, so a confirmed speaker can be
+  // held back while their slot is still being worked out.
+  speakerTicketEmailSentAt: string | null; // ISO date string
+  speakerTicketEmailSentBy: string;
 }
 
 export interface VolunteerSubmission {
@@ -158,6 +163,14 @@ export interface Speaker {
   submissionId: string;
   promotedAt: string; // ISO date string (serialized from Firestore Timestamp)
   confirmation: SpeakerConfirmation;
+  // Read off the source submission, so the speakers page can show when the acceptance
+  // email went, who sent it, and the deadline, without a trip to /admin.
+  acceptanceEmailSentAt: string | null; // ISO date string
+  acceptanceEmailSentBy: string | null;
+  confirmByDate: string | null; // ISO date string
+  speakerConfirmedAt: string | null; // ISO date string
+  speakerTicketEmailSentAt: string | null; // ISO date string
+  speakerTicketEmailSentBy: string | null;
 }
 
 // What /speakers renders. Deliberately a subset of Speaker: no email, no submission id,

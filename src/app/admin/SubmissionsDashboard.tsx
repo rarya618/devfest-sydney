@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef, useTransition, type FormEvent, type ReactNode } from 'react';
-import { promoteSubmission, rejectSubmission, restoreSubmission, undoPromotion, archiveSubmission, addReviewerNote, deleteReviewerNote, sendAcceptanceEmail } from './actions';
+import { promoteSubmission, rejectSubmission, restoreSubmission, undoPromotion, archiveSubmission, addReviewerNote, deleteReviewerNote, sendAcceptanceEmail, sendSpeakerTicketEmail } from './actions';
 import EditSubmissionModal from './EditSubmissionModal';
 import Alert from '@/components/Alert';
 import { formatDate } from '@/lib/format';
@@ -100,6 +100,44 @@ function SendAcceptanceEmailButton({
       <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
         <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
         <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
+      </svg>
+    </button>
+  );
+}
+
+// Offered only once the speaker has confirmed, since the link behind it unlocks a free
+// ticket. Blue rather than green so it reads as a different step from the acceptance
+// envelope beside it, and keeps the accent until the ticket has actually gone out.
+function SendSpeakerTicketButton({
+  submission,
+  onSend,
+  disabled,
+}: {
+  submission: Submission;
+  onSend: () => void;
+  disabled: boolean;
+}) {
+  const alreadySent = Boolean(submission.speakerTicketEmailSentAt);
+
+  return (
+    <button
+      onClick={onSend}
+      disabled={disabled}
+      aria-label={`${alreadySent ? 'Resend' : 'Send'} the complimentary speaker ticket to ${submission.name}`}
+      title={
+        alreadySent
+          ? `Resend speaker ticket (sent ${formatDate(submission.speakerTicketEmailSentAt!)}${submission.speakerTicketEmailSentBy ? ` by ${submission.speakerTicketEmailSentBy}` : ''})`
+          : 'Send speaker ticket'
+      }
+      className={`inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+        alreadySent
+          ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
+          : 'bg-google-blue/15 text-google-blue hover:bg-google-blue-deep hover:text-white'
+      }`}
+    >
+      <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 6.25V4.5a1 1 0 011-1h11a1 1 0 011 1v1.75a1.75 1.75 0 000 3.5V11.5a1 1 0 01-1 1h-11a1 1 0 01-1-1V9.75a1.75 1.75 0 000-3.5z" />
+        <path strokeLinecap="round" strokeDasharray="1.5 1.5" d="M10 4v8" />
       </svg>
     </button>
   );
@@ -560,6 +598,13 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
               disabled={isPending || bulkActionsPending}
             />
           )}
+          {submission.status === 'accepted' && submission.speakerConfirmedAt && (
+            <SendSpeakerTicketButton
+              submission={submission}
+              onSend={() => handleAction(sendSpeakerTicketEmail)}
+              disabled={isPending || bulkActionsPending}
+            />
+          )}
           {submission.status === 'accepted' && (
             <button
               onClick={() => handleAction(undoPromotion)}
@@ -795,6 +840,13 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
           <SendAcceptanceEmailButton
             submission={submission}
             onSend={() => handleAction(sendAcceptanceEmail)}
+            disabled={isPending || bulkActionsPending}
+          />
+        )}
+        {submission.status === 'accepted' && submission.speakerConfirmedAt && (
+          <SendSpeakerTicketButton
+            submission={submission}
+            onSend={() => handleAction(sendSpeakerTicketEmail)}
             disabled={isPending || bulkActionsPending}
           />
         )}

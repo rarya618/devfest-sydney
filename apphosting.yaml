@@ -125,6 +125,15 @@ env:
     availability:
       - RUNTIME
 
+  # Speaker complimentary ticket link — stored as a secret
+  # The Humanitix URL carrying the speaker access code, emailed to a speaker once they
+  # confirm. A secret rather than a plain value: the code unlocks free tickets, so it does
+  # not belong in the repo. Unset means the admin cannot send the ticket email at all.
+  - variable: SPEAKER_TICKET_URL
+    secret: SPEAKER_TICKET_URL
+    availability:
+      - RUNTIME
+
   # Resend — stored as secrets
   - variable: RESEND_API_KEY
     secret: RESEND_API_KEY
