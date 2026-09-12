@@ -606,9 +606,6 @@ export async function sendSpeakerTicketEmail(submissionId: string): Promise<{ er
       subject: speakerTicketEmailSubject(),
       html: buildSpeakerTicketEmail({
         name: submission.name,
-        talkTitle: submission.talkTitle,
-        format: submission.format,
-        track: submission.track,
         ticketUrl,
       }),
     });
