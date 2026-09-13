@@ -1,6 +1,6 @@
 import { SITE_OG_IMAGE } from '@/lib/metadata';
 import { getVerifiedSession } from '@/lib/adminSession';
-import { fetchVolunteers } from '@/lib/volunteers';
+import { fetchVolunteerSignups } from '@/lib/volunteers';
 import VolunteersDashboard from '../../VolunteersDashboard';
 
 export const metadata = {
@@ -10,7 +10,7 @@ export const metadata = {
 };
 
 export default async function VolunteersPage() {
-  const [, volunteers] = await Promise.all([getVerifiedSession(), fetchVolunteers()]);
+  const [, volunteers] = await Promise.all([getVerifiedSession(), fetchVolunteerSignups()]);
 
   return <VolunteersDashboard volunteers={volunteers} />;
 }

@@ -1,5 +1,6 @@
 import { adminDb } from '@/lib/firebase-admin';
 import type {
+  PublicCrew,
   PublicCrewMember,
   ReviewerNote,
   VolunteerConfirmation,
@@ -71,8 +72,20 @@ export async function fetchVolunteers(): Promise<VolunteerSubmission[]> {
       confirmByDate: toIsoOrNull(data.confirmByDate as Timestamp | undefined),
       volunteerConfirmedAt: toIsoOrNull(data.volunteerConfirmedAt as Timestamp | undefined),
       confirmation: toConfirmation(data),
+      isOrganiser: data.isOrganiser ?? false,
+      organiserRole: data.organiserRole ?? '',
+      linkedinUrl: data.linkedinUrl ?? '',
     } satisfies VolunteerSubmission;
   });
+}
+
+// The signups: everyone who came through the volunteer form. Organisers are added
+// straight onto the crew by an admin and never filled the form in, so they are left out
+// of the review dashboard and the analytics, where they would be counted as signups that
+// never happened.
+export async function fetchVolunteerSignups(): Promise<VolunteerSubmission[]> {
+  const volunteers = await fetchVolunteers();
+  return volunteers.filter((volunteer) => !volunteer.isOrganiser);
 }
 
 // The crew: volunteers who have been accepted, which is what /admin/crew manages. They
@@ -85,23 +98,50 @@ export async function fetchCrew(): Promise<VolunteerSubmission[]> {
   return volunteers.filter((volunteer) => volunteer.status === 'accepted');
 }
 
-// The public crew list. Two gates, both required: the volunteer has confirmed through
-// /volunteer/confirm, and an admin has ticked "show on the public crew page". Confirming
-// says they are coming; it does not say they want their name on the website.
-// Returns an empty list rather than throwing so the page can show its "coming soon" state.
-export async function fetchPublicCrew(): Promise<PublicCrewMember[]> {
+// Whether a crew member may be named on the site. For a volunteer: two gates, both
+// required. They have confirmed through /volunteer/confirm, and an admin has ticked
+// "show on the public crew page" - confirming says they are coming, it does not say they
+// want their name on the website. An organiser has no confirmation step to pass: they
+// were added by an admin who knows them, so the one tick is the whole gate.
+function isPubliclyListable(member: VolunteerSubmission): boolean {
+  if (!member.showOnCrewPage) return false;
+  return member.isOrganiser || member.confirmation === 'confirmed';
+}
+
+function toPublicCrewMember(member: VolunteerSubmission): PublicCrewMember {
+  return {
+    id: member.id,
+    name: member.name,
+    assignedArea: member.assignedArea,
+    photoUrl: member.photoUrl,
+    isOrganiser: member.isOrganiser,
+    organiserRole: member.organiserRole,
+    linkedinUrl: member.linkedinUrl,
+  };
+}
+
+// The public crew, split into the two groups /crew renders under their own headings.
+// Returns empty lists rather than throwing so the page can show its "coming soon" state.
+export async function fetchPublicCrew(): Promise<PublicCrew> {
   try {
     const crew = await fetchCrew();
-    return crew
-      .filter((member) => member.confirmation === 'confirmed' && member.showOnCrewPage)
+    const listable = crew
+      .filter(isPubliclyListable)
       .sort((first, second) => first.name.localeCompare(second.name))
-      .map((member) => ({
-        id: member.id,
-        name: member.name,
-        assignedArea: member.assignedArea,
-        photoUrl: member.photoUrl,
-      }));
+      .map(toPublicCrewMember);
+
+    return {
+      organisers: listable.filter((member) => member.isOrganiser),
+      volunteers: listable.filter((member) => !member.isOrganiser),
+    };
   } catch {
-    return [];
+    return { organisers: [], volunteers: [] };
   }
+}
+
+// The organisers alone, for the landing page's "The organisers" section. Same gate as
+// /crew, so an organiser appears in both places or neither.
+export async function fetchPublicOrganisers(): Promise<PublicCrewMember[]> {
+  const { organisers } = await fetchPublicCrew();
+  return organisers;
 }

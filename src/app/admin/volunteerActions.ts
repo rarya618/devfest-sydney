@@ -140,6 +140,11 @@ export async function sendVolunteerAcceptanceEmail(volunteerId: string): Promise
   if (volunteer.status !== 'accepted') {
     return { error: 'Only accepted volunteers can be sent an acceptance email. Accept this signup first.' };
   }
+  // Organisers were added straight onto the crew rather than applying, so there is
+  // nothing to accept them into and no confirmation link that would mean anything.
+  if (volunteer.isOrganiser) {
+    return { error: 'Organisers are added to the crew directly, so there is no acceptance email to send them.' };
+  }
 
   const sentAt = new Date();
   const confirmBy = volunteerConfirmDeadlineFrom(sentAt);

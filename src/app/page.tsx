@@ -12,10 +12,10 @@ import Countdown from '@/components/Countdown';
 import { adminDb } from '@/lib/firebase-admin';
 import { fetchSponsors, fetchPartnerAssets, groupSponsorsByTier, TIER_LABELS } from '@/lib/sponsors';
 import { fetchPublicSpeakers } from '@/lib/speakers';
+import { fetchPublicOrganisers } from '@/lib/volunteers';
 import { buildEventJsonLd } from '@/lib/eventJsonLd';
 import { getInitials } from '@/lib/format';
 import { TRACK_DOT_COLORS, TRACK_LABELS } from '@/lib/submissionLabels';
-import type { TeamMember } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
 
 export const metadata: Metadata = {
@@ -63,15 +63,6 @@ const VENUE_DIRECTIONS_URL = `https://www.google.com/maps/dir/?api=1&destination
 const VENUE_MAP_EMBED_URL = `https://www.google.com/maps?q=${encodeURIComponent(VENUE_ADDRESS)}&output=embed`;
 const VENUE_CALENDAR_URL = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('DevFest Sydney 2026')}&dates=20261010T090000/20261010T170000&ctz=Australia/Sydney&details=${encodeURIComponent('A full day of talks, workshops, and building together at DevFest Sydney 2026.')}&location=${encodeURIComponent(VENUE_ADDRESS)}`;
 
-async function fetchTeam(): Promise<TeamMember[]> {
-  try {
-    const snap = await adminDb.collection('team').orderBy('order').get();
-    return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as TeamMember));
-  } catch {
-    return [];
-  }
-}
-
 async function fetchLandingHeroImageUrl(): Promise<string | null> {
   try {
     const doc = await adminDb.collection('settings').doc('site').get();
@@ -98,9 +89,9 @@ export default async function Home() {
   const cfsOpen = isCfsOpen();
   const ticketsOnSale = areTicketsOpen();
   const cfsCloseDate = process.env.CFS_CLOSE_DATE;
-  const [sponsors, team, partnerAssets, landingHeroImageUrl, landingSlideImageUrls, speakers] = await Promise.all([
+  const [sponsors, organisers, partnerAssets, landingHeroImageUrl, landingSlideImageUrls, speakers] = await Promise.all([
     fetchSponsors(),
-    fetchTeam(),
+    fetchPublicOrganisers(),
     fetchPartnerAssets(),
     fetchLandingHeroImageUrl(),
     fetchLandingSlideImageUrls(),
@@ -531,13 +522,13 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ─── TEAM ─── (only rendered when team members exist) */}
-      {team.length > 0 && (
-        <section id="team" className="py-24 px-6">
+      {/* ─── ORGANISERS ─── (only rendered once an organiser is listed publicly) */}
+      {organisers.length > 0 && (
+        <section id="organisers" className="py-24 px-6">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-14 text-center">The organisers</h2>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-10 gap-x-6">
-              {team.map((member) => (
+              {organisers.map((member) => (
                 <div key={member.id} className="text-center">
                   <div className="w-20 h-20 rounded-full mx-auto mb-4 overflow-hidden bg-white/5">
                     {member.photoUrl ? (
@@ -550,12 +541,12 @@ export default async function Home() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-white/50 text-xl font-bold">
-                        {member.name.charAt(0)}
+                        {getInitials(member.name)}
                       </div>
                     )}
                   </div>
                   <p className="font-semibold text-white/85 text-sm">{member.name}</p>
-                  <p className="text-xs text-white/55 mt-0.5">{member.role}</p>
+                  <p className="text-xs text-white/55 mt-0.5">{member.organiserRole}</p>
                   {member.linkedinUrl && (
                     <a
                       href={member.linkedinUrl}

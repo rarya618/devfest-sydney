@@ -20,6 +20,8 @@ function toEditableFields(member: VolunteerSubmission): CrewEditableFields {
     assignedShift: member.assignedShift,
     showOnCrewPage: member.showOnCrewPage,
     photoUrl: member.photoUrl,
+    organiserRole: member.organiserRole,
+    linkedinUrl: member.linkedinUrl,
   };
 }
 
@@ -86,17 +88,17 @@ export default function EditCrewMemberModal({ member, onClose, onError }: Props)
       className="fixed inset-0 z-40 flex items-start sm:items-center justify-center bg-black/70 p-4 overflow-y-auto"
       role="dialog"
       aria-modal="true"
-      aria-label={`Edit crew member: ${member.name}`}
+      aria-label={`Edit ${member.isOrganiser ? 'organiser' : 'crew member'}: ${member.name}`}
     >
       <div className="w-full max-w-xl bg-[#2d2e31] rounded-2xl shadow-xl my-8">
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-            <h2 className="text-lg font-bold text-white">Edit crew member</h2>
+            <h2 className="text-lg font-bold text-white">{member.isOrganiser ? 'Edit organiser' : 'Edit crew member'}</h2>
             <button
               type="button"
               onClick={onClose}
               disabled={isPending}
-              aria-label="Close edit crew member form"
+              aria-label={`Close edit ${member.isOrganiser ? 'organiser' : 'crew member'} form`}
               className="text-white/55 hover:text-white/70 transition-colors"
             >
               <svg className="w-5 h-5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
@@ -107,27 +109,45 @@ export default function EditCrewMemberModal({ member, onClose, onError }: Props)
 
           <div className="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
             <p className="text-xs text-white/50">
-              The roster and what the public crew page shows. What {member.name.split(/\s+/)[0] || 'this volunteer'} wrote
-              on the signup form is left as they wrote it.
+              {member.isOrganiser
+                ? 'What this organiser does, and what the public crew and landing pages show.'
+                : `The roster and what the public crew page shows. What ${member.name.split(/\s+/)[0] || 'this volunteer'} wrote on the signup form is left as they wrote it.`}
             </p>
 
             <div className="space-y-4">
-              <h3 className={sectionHeadingClasses}>Roster</h3>
+              <h3 className={sectionHeadingClasses}>{member.isOrganiser ? 'Role' : 'Roster'}</h3>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className={labelClasses} htmlFor="crew-area">Assigned area</label>
-                  <select
-                    id="crew-area"
-                    className={inputClasses}
-                    value={fields.assignedArea}
-                    onChange={(event) => update('assignedArea', event.target.value as CrewEditableFields['assignedArea'])}
-                  >
-                    <option value="">Not assigned yet</option>
-                    {Object.entries(VOLUNTEER_AREA_LABELS).map(([value, label]) => (
-                      <option key={value} value={value}>{label}</option>
-                    ))}
-                  </select>
+                  {member.isOrganiser ? (
+                    <>
+                      <label className={labelClasses} htmlFor="crew-role">Role</label>
+                      <input
+                        id="crew-role"
+                        type="text"
+                        maxLength={80}
+                        className={inputClasses}
+                        value={fields.organiserRole}
+                        placeholder="Lead organiser"
+                        onChange={(event) => update('organiserRole', event.target.value)}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <label className={labelClasses} htmlFor="crew-area">Assigned area</label>
+                      <select
+                        id="crew-area"
+                        className={inputClasses}
+                        value={fields.assignedArea}
+                        onChange={(event) => update('assignedArea', event.target.value as CrewEditableFields['assignedArea'])}
+                      >
+                        <option value="">Not assigned yet</option>
+                        {Object.entries(VOLUNTEER_AREA_LABELS).map(([value, label]) => (
+                          <option key={value} value={value}>{label}</option>
+                        ))}
+                      </select>
+                    </>
+                  )}
                 </div>
                 <div>
                   <label className={labelClasses} htmlFor="crew-shift">Shift</label>
@@ -144,15 +164,31 @@ export default function EditCrewMemberModal({ member, onClose, onError }: Props)
                 </div>
               </div>
 
-              {member.areasOfInterest.length > 0 && (
-                <p className="text-xs text-white/50 leading-relaxed">
-                  They asked for: {member.areasOfInterest.map((area) => VOLUNTEER_AREA_LABELS[area]).join(', ')}.
-                </p>
+              {member.isOrganiser ? (
+                <div>
+                  <label className={labelClasses} htmlFor="crew-linkedin">LinkedIn (optional)</label>
+                  <input
+                    id="crew-linkedin"
+                    type="url"
+                    maxLength={500}
+                    className={inputClasses}
+                    value={fields.linkedinUrl}
+                    placeholder="https://www.linkedin.com/in/…"
+                    onChange={(event) => update('linkedinUrl', event.target.value)}
+                  />
+                  <p className="mt-1 text-xs text-white/50">Shown beside them in the organisers section on the landing page.</p>
+                </div>
+              ) : (
+                member.areasOfInterest.length > 0 && (
+                  <p className="text-xs text-white/50 leading-relaxed">
+                    They asked for: {member.areasOfInterest.map((area) => VOLUNTEER_AREA_LABELS[area]).join(', ')}.
+                  </p>
+                )
               )}
             </div>
 
             <div className="space-y-4 pt-4 border-t border-white/10">
-              <h3 className={sectionHeadingClasses}>Public crew page</h3>
+              <h3 className={sectionHeadingClasses}>{member.isOrganiser ? 'Public pages' : 'Public crew page'}</h3>
 
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
@@ -163,11 +199,11 @@ export default function EditCrewMemberModal({ member, onClose, onError }: Props)
                   className="mt-0.5 w-4 h-4 shrink-0 accent-google-green"
                 />
                 <span className="text-sm text-white/85 leading-snug">
-                  Show on the public crew page
+                  {member.isOrganiser ? 'Show on the crew and landing pages' : 'Show on the public crew page'}
                   <span className="block mt-0.5 text-xs text-white/50 leading-relaxed">
-                    Off by default. The signup form never asked whether they wanted their name on the
-                    site, so tick this only once they&apos;ve said yes. They also have to have
-                    confirmed before anything appears.
+                    {member.isOrganiser
+                      ? 'Off by default. Ticking this lists them under Organisers on /crew and in the organisers section on the landing page.'
+                      : 'Off by default. The signup form never asked whether they wanted their name on the site, so tick this only once they\u2019ve said yes. They also have to have confirmed before anything appears.'}
                   </span>
                 </span>
               </label>
@@ -239,7 +275,7 @@ export default function EditCrewMemberModal({ member, onClose, onError }: Props)
             <button
               type="submit"
               disabled={isPending}
-              aria-label="Save changes to crew member"
+              aria-label={`Save changes to ${member.isOrganiser ? 'organiser' : 'crew member'}`}
               className="text-xs px-4 py-1.5 rounded-lg bg-google-blue-deep text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50"
             >
               {isPending ? 'Saving…' : 'Save changes'}

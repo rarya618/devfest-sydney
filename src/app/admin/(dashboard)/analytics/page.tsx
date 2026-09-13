@@ -1,7 +1,7 @@
 import { SITE_OG_IMAGE } from '@/lib/metadata';
 import { getVerifiedSession } from '@/lib/adminSession';
 import { fetchSubmissions } from '@/lib/submissions';
-import { fetchVolunteers } from '@/lib/volunteers';
+import { fetchVolunteerSignups } from '@/lib/volunteers';
 import { fetchShowcaseSubmissions } from '@/lib/showcaseSubmissions';
 import AnalyticsView, { isAnalyticsTab } from './AnalyticsView';
 
@@ -20,7 +20,7 @@ export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps
     getVerifiedSession(),
     searchParams,
     fetchSubmissions(),
-    fetchVolunteers(),
+    fetchVolunteerSignups(),
     fetchShowcaseSubmissions(),
   ]);
   const activeTab = isAnalyticsTab(tab) ? tab : 'speakers';

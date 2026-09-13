@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { removeFromCrew } from './crewActions';
 import { sendVolunteerAcceptanceEmail } from './volunteerActions';
 import EditCrewMemberModal from './EditCrewMemberModal';
+import AddOrganiserModal from './AddOrganiserModal';
 import Alert from '@/components/Alert';
 import { formatDate, getInitials } from '@/lib/format';
 import {
@@ -16,9 +17,10 @@ import {
 import type { VolunteerArea, VolunteerConfirmation, VolunteerSubmission } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
 
-// 'unassigned' is not a VolunteerArea: it is the absence of one, and it is the filter an
-// organiser reaches for most while the roster is still being built.
-type FilterArea = 'all' | 'unassigned' | VolunteerArea;
+// Neither 'unassigned' nor 'organisers' is a VolunteerArea. 'unassigned' is the absence
+// of one, and the filter reached for most while the roster is still being built;
+// 'organisers' is the group that has a role instead of an area.
+type FilterArea = 'all' | 'unassigned' | 'organisers' | VolunteerArea;
 type FilterConfirmation = 'all' | VolunteerConfirmation;
 
 function CrewAvatar({ member }: { member: VolunteerSubmission }) {
@@ -46,6 +48,7 @@ function CrewCard({ member, onError }: CrewCardProps) {
   const [editing, setEditing] = useState(false);
   const [confirmingRemove, setConfirmingRemove] = useState(false);
   const confirmation = VOLUNTEER_CONFIRMATION_CHIPS[member.confirmation];
+  const isOrganiser = member.isOrganiser;
 
   useEffect(() => {
     if (!confirmingRemove) return;
@@ -72,9 +75,10 @@ function CrewCard({ member, onError }: CrewCardProps) {
   }
 
   const alreadyEmailed = Boolean(member.acceptanceEmailSentAt);
-  // Someone confirmed but not yet on the public page is the state an organiser wants to
-  // see: it is the only step left before they appear on /crew.
-  const awaitingPublish = member.confirmation === 'confirmed' && !member.showOnCrewPage;
+  // Someone who could be on the public page but isn't is the state an admin wants to see:
+  // it is the only step left before they appear on /crew. An organiser has no
+  // confirmation to wait on, so for them it is simply the unticked box.
+  const awaitingPublish = !member.showOnCrewPage && (isOrganiser || member.confirmation === 'confirmed');
 
   function handleCardClick(event: React.MouseEvent<HTMLDivElement>) {
     const target = event.target as HTMLElement;
@@ -86,10 +90,10 @@ function CrewCard({ member, onError }: CrewCardProps) {
   return (
     <div
       onClick={handleCardClick}
-      className={`relative cursor-pointer bg-surface border-l-4 border-l-google-green rounded-lg p-4 sm:p-5 transition-colors hover:bg-white/[0.07] ${
+      className={`relative cursor-pointer bg-surface border-l-4 ${isOrganiser ? 'border-l-google-blue' : 'border-l-google-green'} rounded-lg p-4 sm:p-5 transition-colors hover:bg-white/[0.07] ${
         isPending ? 'opacity-50 pointer-events-none' : ''
       }`}
-      aria-label={`Crew member ${member.name}`}
+      aria-label={`${isOrganiser ? 'Organiser' : 'Crew member'} ${member.name}`}
     >
       <div className="flex items-start gap-4">
         <CrewAvatar member={member} />
@@ -97,9 +101,18 @@ function CrewCard({ member, onError }: CrewCardProps) {
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <h3 className="font-bold text-white text-xl leading-snug tracking-tight">{member.name}</h3>
-            <span title={confirmation.title} className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${confirmation.className}`}>
-              {confirmation.label}
-            </span>
+            {isOrganiser ? (
+              <span
+                title="Added to the crew by an admin rather than through the volunteer signup form."
+                className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-blue/15 text-google-blue"
+              >
+                Organiser
+              </span>
+            ) : (
+              <span title={confirmation.title} className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${confirmation.className}`}>
+                {confirmation.label}
+              </span>
+            )}
           </div>
 
           <p className="mt-1.5 flex items-center gap-1.5 text-sm text-white/55 truncate">
@@ -119,7 +132,12 @@ function CrewCard({ member, onError }: CrewCardProps) {
           )}
 
           <div className="flex flex-wrap items-center gap-1.5 gap-y-2 mt-3">
-            {member.assignedArea ? (
+            {isOrganiser ? (
+              <span className="inline-flex items-center gap-1.5 text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] font-bold text-google-blue">
+                <span className="w-1.5 h-1.5 rounded-full bg-google-blue" aria-hidden="true" />
+                {member.organiserRole || 'No role set'}
+              </span>
+            ) : member.assignedArea ? (
               <span className="inline-flex items-center gap-1.5 text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] font-bold text-google-green">
                 <span className="w-1.5 h-1.5 rounded-full bg-google-green" aria-hidden="true" />
                 {VOLUNTEER_AREA_LABELS[member.assignedArea]}
@@ -150,7 +168,7 @@ function CrewCard({ member, onError }: CrewCardProps) {
             )}
             {member.showOnCrewPage ? (
               <span
-                title="Listed on the public crew page, once they have confirmed."
+                title={isOrganiser ? 'Listed on the public crew page and on the landing page.' : 'Listed on the public crew page, once they have confirmed.'}
                 className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue border-google-blue/25"
               >
                 On the crew page
@@ -158,7 +176,7 @@ function CrewCard({ member, onError }: CrewCardProps) {
             ) : (
               awaitingPublish && (
                 <span
-                  title="Confirmed, but not listed publicly. Tick 'Show on the public crew page' in Edit once they've said they're happy to be named."
+                  title={isOrganiser ? "Not listed publicly. Tick 'Show on the crew and landing pages' in Edit to name them on the site." : "Confirmed, but not listed publicly. Tick 'Show on the public crew page' in Edit once they've said they're happy to be named."}
                   className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-white/[0.06] text-white/60 border-white/10"
                 >
                   Not on the crew page
@@ -177,17 +195,36 @@ function CrewCard({ member, onError }: CrewCardProps) {
 
           <div className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
             <div className="overflow-hidden">
-              {member.areasOfInterest.length > 0 && (
-                <p className="mt-4 text-sm text-white/65 leading-relaxed">
-                  <span className="font-bold text-white/85">Asked for: </span>
-                  {member.areasOfInterest.map((area) => VOLUNTEER_AREA_LABELS[area]).join(', ')}
-                </p>
-              )}
+              {isOrganiser ? (
+                member.linkedinUrl && (
+                  <p className="mt-4 text-sm text-white/65 leading-relaxed truncate">
+                    <span className="font-bold text-white/85">LinkedIn: </span>
+                    <a
+                      href={member.linkedinUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${member.name} on LinkedIn`}
+                      className="text-google-blue hover:underline"
+                    >
+                      {member.linkedinUrl}
+                    </a>
+                  </p>
+                )
+              ) : (
+                <>
+                  {member.areasOfInterest.length > 0 && (
+                    <p className="mt-4 text-sm text-white/65 leading-relaxed">
+                      <span className="font-bold text-white/85">Asked for: </span>
+                      {member.areasOfInterest.map((area) => VOLUNTEER_AREA_LABELS[area]).join(', ')}
+                    </p>
+                  )}
 
-              <div className="mt-3 text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
-                <span className="font-bold text-white/85">Why they signed up: </span>
-                <span className="whitespace-pre-wrap">{member.motivation}</span>
-              </div>
+                  <div className="mt-3 text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
+                    <span className="font-bold text-white/85">Why they signed up: </span>
+                    <span className="whitespace-pre-wrap">{member.motivation}</span>
+                  </div>
+                </>
+              )}
 
               {member.dietaryRequirements && (
                 <p className="mt-3 text-sm text-white/65 leading-relaxed">
@@ -197,7 +234,7 @@ function CrewCard({ member, onError }: CrewCardProps) {
               )}
 
               <p className="mt-4 text-xs text-white/50">
-                Signed up {formatDate(member.submittedAt)}
+                {isOrganiser ? 'Added' : 'Signed up'} {formatDate(member.submittedAt)}
                 {member.acceptanceEmailSentAt && (
                   <>
                     {' '}&middot; Acceptance email sent {formatDate(member.acceptanceEmailSentAt)}
@@ -226,6 +263,7 @@ function CrewCard({ member, onError }: CrewCardProps) {
             </svg>
           </button>
 
+          {!isOrganiser && (
           <button
             onClick={handleSendAcceptanceEmail}
             disabled={isPending}
@@ -242,16 +280,19 @@ function CrewCard({ member, onError }: CrewCardProps) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
             </svg>
           </button>
+          )}
 
           {confirmingRemove ? (
             <div role="group" aria-label={`Confirm removing ${member.name}`} className="flex flex-col items-end gap-1.5 bg-[#2d2e31] border border-white/10 rounded-xl px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.45)] w-52">
               <p className="text-xs text-white/70 leading-snug text-left w-full">
-                Remove from the crew and put the signup back to pending?
+                {isOrganiser
+                  ? 'Remove this organiser? Their record is deleted, not returned to the signup queue.'
+                  : 'Remove from the crew and put the signup back to pending?'}
               </p>
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => setConfirmingRemove(false)}
-                  aria-label="Keep this crew member"
+                  aria-label={`Keep ${isOrganiser ? 'this organiser' : 'this crew member'}`}
                   className="text-xs px-2.5 py-1 rounded-lg border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
                 >
                   Keep
@@ -301,6 +342,7 @@ interface Props {
 export default function CrewDashboard({ crew }: Props) {
   const mobileBarHidden = useMobileBarHidden();
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [addingOrganiser, setAddingOrganiser] = useState(false);
   const [areaFilter, setAreaFilter] = useState<FilterArea>('all');
   const [confirmationFilter, setConfirmationFilter] = useState<FilterConfirmation>('all');
   const [search, setSearch] = useState('');
@@ -383,8 +425,12 @@ export default function CrewDashboard({ crew }: Props) {
 
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
 
+  // Organisers have a role rather than an area, so they sit in their own bucket: they are
+  // not "unassigned", and they belong to none of the nine areas.
   const matchesArea = (member: VolunteerSubmission, filter: FilterArea) => {
     if (filter === 'all') return true;
+    if (filter === 'organisers') return member.isOrganiser;
+    if (member.isOrganiser) return false;
     if (filter === 'unassigned') return member.assignedArea === '';
     return member.assignedArea === filter;
   };
@@ -393,9 +439,12 @@ export default function CrewDashboard({ crew }: Props) {
   // eight zeroes in it is a list of things that haven't happened.
   const areaTabs: { value: FilterArea; label: string }[] = [
     { value: 'all', label: 'All areas' },
-    ...(crew.some((member) => member.assignedArea === '') ? [{ value: 'unassigned' as const, label: 'No area assigned' }] : []),
+    ...(crew.some((member) => member.isOrganiser) ? [{ value: 'organisers' as const, label: 'Organisers' }] : []),
+    ...(crew.some((member) => !member.isOrganiser && member.assignedArea === '')
+      ? [{ value: 'unassigned' as const, label: 'No area assigned' }]
+      : []),
     ...(Object.keys(VOLUNTEER_AREA_LABELS) as VolunteerArea[])
-      .filter((area) => crew.some((member) => member.assignedArea === area))
+      .filter((area) => crew.some((member) => !member.isOrganiser && member.assignedArea === area))
       .map((area) => ({ value: area as FilterArea, label: VOLUNTEER_AREA_LABELS[area] })),
   ];
 
@@ -409,21 +458,25 @@ export default function CrewDashboard({ crew }: Props) {
   const areaCounts = new Map<FilterArea, number>(
     areaTabs.map((tab) => [tab.value, crew.filter((member) => matchesArea(member, tab.value)).length])
   );
+  // Confirmation is a volunteer's journey: an organiser was never emailed and has nothing
+  // to confirm, so they count only under "Any status" and never as "Not emailed".
+  const volunteers = crew.filter((member) => !member.isOrganiser);
   const confirmationCounts: Record<FilterConfirmation, number> = {
     all: crew.length,
-    'not-emailed': crew.filter((member) => member.confirmation === 'not-emailed').length,
-    awaiting: crew.filter((member) => member.confirmation === 'awaiting').length,
-    confirmed: crew.filter((member) => member.confirmation === 'confirmed').length,
+    'not-emailed': volunteers.filter((member) => member.confirmation === 'not-emailed').length,
+    awaiting: volunteers.filter((member) => member.confirmation === 'awaiting').length,
+    confirmed: volunteers.filter((member) => member.confirmation === 'confirmed').length,
   };
 
   const notEmailedCount = confirmationCounts['not-emailed'];
   const confirmedCount = confirmationCounts.confirmed;
-  const unassignedCount = crew.filter((member) => member.assignedArea === '').length;
+  const unassignedCount = volunteers.filter((member) => member.assignedArea === '').length;
+  const organiserCount = crew.length - volunteers.length;
 
   const query = search.trim().toLowerCase();
   const filtered = crew
     .filter((member) => matchesArea(member, areaFilter))
-    .filter((member) => confirmationFilter === 'all' || member.confirmation === confirmationFilter)
+    .filter((member) => confirmationFilter === 'all' || (!member.isOrganiser && member.confirmation === confirmationFilter))
     .filter(
       (member) =>
         !query ||
@@ -439,13 +492,25 @@ export default function CrewDashboard({ crew }: Props) {
           <div className="min-w-0">
             <h1 className="text-xl font-bold text-white tracking-tight">Crew</h1>
             <p className="mt-0.5 text-sm text-white/55">
-              {crew.length} on the crew &middot; {confirmedCount} confirmed
+              {crew.length} on the crew
+              {organiserCount > 0 && <> &middot; {organiserCount} organiser{organiserCount === 1 ? '' : 's'}</>} &middot; {confirmedCount} confirmed
               {notEmailedCount > 0 && <> &middot; {notEmailedCount} not emailed</>}
               {unassignedCount > 0 && <> &middot; {unassignedCount} without an area</>}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 min-w-0">
+            <button
+              onClick={() => setAddingOrganiser(true)}
+              aria-label="Add an organiser to the crew"
+              className="inline-flex items-center gap-1.5 h-10 text-sm px-4 rounded-full bg-google-blue-deep text-white font-bold transition-opacity hover:opacity-90 shrink-0"
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                <path strokeLinecap="round" d="M8 3.5v9M3.5 8h9" />
+              </svg>
+              Add organiser
+            </button>
+
             <div
               ref={searchContainerRef}
               className={`relative shrink-0 h-10 rounded-full transition-all duration-300 ease-in-out ${
@@ -603,7 +668,9 @@ export default function CrewDashboard({ crew }: Props) {
       <div className="px-4 md:px-5 pb-8 sm:pb-10">
         {crew.length === 0 ? (
           <div className="bg-surface border border-white/10 rounded-2xl p-12 text-center">
-            <p className="text-sm text-white/50">No crew yet. Accept a signup on the Volunteers page to add someone to the crew.</p>
+            <p className="text-sm text-white/50">
+              No crew yet. Accept a signup on the Volunteers page, or add an organiser with the button above.
+            </p>
           </div>
         ) : filtered.length === 0 ? (
           <div className="bg-surface border border-white/10 rounded-2xl p-12 text-center">
@@ -617,6 +684,16 @@ export default function CrewDashboard({ crew }: Props) {
           </div>
         )}
       </div>
+
+      {addingOrganiser && (
+        <AddOrganiserModal
+          onClose={() => setAddingOrganiser(false)}
+          onError={(message) => {
+            setAddingOrganiser(false);
+            setAlertMessage(message);
+          }}
+        />
+      )}
 
       {alertMessage && <Alert message={alertMessage} onDismiss={dismissAlert} />}
     </>

@@ -129,6 +129,13 @@ rules_version='2';
 //   - confirmByDate: timestamp - the volunteer's deadline to confirm
 //   - volunteerConfirmedAt: timestamp - set from /volunteer/confirm
 //
+//   Organisers. Added straight onto the crew from /admin/crew rather than arriving
+//   through the signup form, so they share this collection but skip the review and
+//   confirmation flow. Admin SDK only, for the same reason as the roster fields above.
+//   - isOrganiser: boolean - true for an organiser, absent or false for a signup
+//   - organiserRole: string (max 80 chars) - free text, e.g. 'Lead organiser'
+//   - linkedinUrl: string (optional, max 500 chars) - shown on / and /crew
+//
 // Collection: showcase
 // Document ID: auto-generated
 // Builder Showcase entries: five-minute attendee demos, reviewed like CfS submissions.

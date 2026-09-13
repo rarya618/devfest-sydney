@@ -12,6 +12,7 @@ import { isVolunteerOpen } from '@/lib/volunteer';
 import { fetchPublicCrew } from '@/lib/volunteers';
 import { getInitials } from '@/lib/format';
 import { VOLUNTEER_AREA_LABELS } from '@/lib/volunteerLabels';
+import { LinkedInIcon } from '@/components/SocialIcons';
 import type { PublicCrewMember } from '@/lib/types';
 
 // The crew list changes as volunteers confirm, and the navbar ticket CTA follows the
@@ -37,10 +38,45 @@ function CrewCard({ member, delay }: { member: PublicCrewMember; delay: number }
         )}
       </div>
       <h2 className="text-base font-bold text-white leading-snug">{member.name}</h2>
-      {member.assignedArea && (
-        <p className="mt-1 font-mono text-xs text-google-green">{VOLUNTEER_AREA_LABELS[member.assignedArea]}</p>
+      {member.isOrganiser ? (
+        <>
+          {member.organiserRole && <p className="mt-1 font-mono text-xs text-google-blue">{member.organiserRole}</p>}
+          {member.linkedinUrl && (
+            <a
+              href={member.linkedinUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${member.name} on LinkedIn`}
+              className="mt-3 text-white/55 hover:text-white transition-colors"
+            >
+              <LinkedInIcon />
+            </a>
+          )}
+        </>
+      ) : (
+        member.assignedArea && (
+          <p className="mt-1 font-mono text-xs text-google-green">{VOLUNTEER_AREA_LABELS[member.assignedArea]}</p>
+        )
       )}
     </Reveal>
+  );
+}
+
+// One grid under its own heading. Organisers and volunteers are kept apart rather than
+// mixed alphabetically: the organisers have been at this all year, the volunteers run
+// the day, and the two are different things to have said yes to.
+function CrewGroup({ heading, members }: { heading: string; members: PublicCrewMember[] }) {
+  return (
+    <section className="pb-16 px-4 sm:px-6 lg:px-12" aria-label={heading}>
+      <div className="max-w-6xl mx-auto">
+        <h2 className="text-2xl font-bold tracking-tight mb-8 text-center">{heading}</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 items-start">
+          {members.map((member, index) => (
+            <CrewCard key={member.id} member={member} delay={Math.min(index, 7) * 0.06} />
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -49,7 +85,8 @@ export default async function CrewPage() {
   const cfsCloseDate = process.env.CFS_CLOSE_DATE;
   const ticketsOnSale = areTicketsOpen();
   const volunteerOpen = isVolunteerOpen();
-  const crew = await fetchPublicCrew();
+  const { organisers, volunteers } = await fetchPublicCrew();
+  const crewCount = organisers.length + volunteers.length;
 
   return (
     <div className="bg-[#010103] text-white min-h-screen">
@@ -78,22 +115,15 @@ export default async function CrewPage() {
             className="text-white/70 text-lg max-w-2xl mx-auto leading-relaxed animate-slide-up"
             style={{ animationDelay: '0.2s' }}
           >
-            {crew.length > 0
+            {crewCount > 0
               ? 'DevFest Sydney is run by volunteers. These are the people on registration, on AV, looking after speakers, and keeping the day moving.'
               : 'DevFest Sydney is run by volunteers: on registration, on AV, looking after speakers, and keeping the day moving. The crew is being confirmed, and we’ll introduce them here soon.'}
           </p>
         </div>
       </section>
 
-      {crew.length > 0 && (
-        <section className="pb-20 px-4 sm:px-6 lg:px-12" aria-label="Volunteer crew">
-          <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 items-start">
-            {crew.map((member, index) => (
-              <CrewCard key={member.id} member={member} delay={Math.min(index, 7) * 0.06} />
-            ))}
-          </div>
-        </section>
-      )}
+      {organisers.length > 0 && <CrewGroup heading="Organisers" members={organisers} />}
+      {volunteers.length > 0 && <CrewGroup heading="Volunteers" members={volunteers} />}
 
       <section className="pb-24 px-4 sm:px-6 lg:px-12">
         <div className="max-w-2xl mx-auto text-center">

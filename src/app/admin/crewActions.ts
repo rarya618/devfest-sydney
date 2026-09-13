@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { randomUUID } from 'node:crypto';
+import { FieldValue } from 'firebase-admin/firestore';
 import { adminDb, adminStorage } from '@/lib/firebase-admin';
 import { verifyAdminSession } from '@/lib/adminSession';
 import type { VolunteerArea, VolunteerShift } from '@/lib/types';
@@ -27,6 +28,35 @@ export interface CrewEditableFields {
   assignedShift: VolunteerShift;
   showOnCrewPage: boolean;
   photoUrl: string;
+  // Organisers only, and ignored for anyone who came through the signup form: a
+  // volunteer's job on the day is an assignedArea, and their LinkedIn was never asked for.
+  organiserRole: string;
+  linkedinUrl: string;
+}
+
+// What an admin types to put an organiser on the crew. Organisers never filled the
+// signup form in, so this is the whole record: there is no motivation, no availability
+// and no areas of interest to carry across.
+export interface NewOrganiserFields {
+  name: string;
+  email: string;
+  phone: string;
+  organiserRole: string;
+  linkedinUrl: string;
+  assignedShift: VolunteerShift;
+  showOnCrewPage: boolean;
+}
+
+const ORGANISER_ROLE_MAX = 80;
+const LINK_MAX = 500;
+
+function validateLink(value: string, label: string): { error: string } | { value: string } {
+  const link = value.trim();
+  if (!link) return { value: '' };
+  if (!link.startsWith('https://') || link.length > LINK_MAX) {
+    return { error: `${label} must be an https link, no longer than ${LINK_MAX} characters.` };
+  }
+  return { value: link };
 }
 
 function validateCrewFields(fields: CrewEditableFields): { error: string } | { values: CrewEditableFields } {
@@ -37,9 +67,15 @@ function validateCrewFields(fields: CrewEditableFields): { error: string } | { v
     return { error: 'Please choose a valid shift for this volunteer.' };
   }
 
-  const photoUrl = fields.photoUrl.trim();
-  if (photoUrl && (!photoUrl.startsWith('https://') || photoUrl.length > 500)) {
-    return { error: 'Photo must be an https link, no longer than 500 characters.' };
+  const photo = validateLink(fields.photoUrl, 'Photo');
+  if ('error' in photo) return { error: photo.error };
+
+  const linkedin = validateLink(fields.linkedinUrl, 'LinkedIn');
+  if ('error' in linkedin) return { error: linkedin.error };
+
+  const organiserRole = fields.organiserRole.trim();
+  if (organiserRole.length > ORGANISER_ROLE_MAX) {
+    return { error: `Role is too long. Please keep it to ${ORGANISER_ROLE_MAX} characters or fewer.` };
   }
 
   return {
@@ -47,7 +83,9 @@ function validateCrewFields(fields: CrewEditableFields): { error: string } | { v
       assignedArea: fields.assignedArea,
       assignedShift: fields.assignedShift,
       showOnCrewPage: Boolean(fields.showOnCrewPage),
-      photoUrl,
+      photoUrl: photo.value,
+      organiserRole,
+      linkedinUrl: linkedin.value,
     },
   };
 }
@@ -72,7 +110,16 @@ export async function updateCrewMember(volunteerId: string, fields: CrewEditable
       return { error: 'This volunteer is no longer on the crew. Refresh the page to see their current status.' };
     }
 
-    await volunteerRef.update({ ...validated.values });
+    // The two kinds of crew member own different halves of the form: an organiser has a
+    // role and a LinkedIn, a volunteer has an assigned area. Writing the other half would
+    // store a value nothing renders and the modal never offered.
+    const isOrganiser = Boolean(snapshot.data()?.isOrganiser);
+    const { assignedArea, organiserRole, linkedinUrl, ...shared } = validated.values;
+    await volunteerRef.update(
+      isOrganiser
+        ? { ...shared, organiserRole, linkedinUrl }
+        : { ...shared, assignedArea }
+    );
     revalidateCrewPages();
     return {};
   } catch {
@@ -96,16 +143,97 @@ export async function removeFromCrew(volunteerId: string): Promise<{ error?: str
     const snapshot = await volunteerRef.get();
     if (!snapshot.exists) return { error: 'Volunteer signup not found.' };
 
-    await volunteerRef.update({
-      status: 'pending',
+    // An organiser has no signup behind them to go back to, so removing one deletes the
+    // record outright. Leaving it as a pending volunteer would put a person who never
+    // applied at the top of the review queue.
+    if (snapshot.data()?.isOrganiser) {
+      await volunteerRef.delete();
+      await deleteManagedPhoto(snapshot.data()?.photoUrl as string | undefined);
+    } else {
+      await volunteerRef.update({
+        status: 'pending',
+        assignedArea: '',
+        assignedShift: '',
+        showOnCrewPage: false,
+      });
+    }
+    revalidateCrewPages();
+    return {};
+  } catch {
+    return { error: 'Could not remove this crew member. Please try again.' };
+  }
+}
+
+// Puts an organiser straight onto the crew. They are stored in `volunteers` alongside
+// the signups because the crew is one roster and everything that manages it (the roster
+// fields, the photo upload, the public page) already reads that collection; the
+// isOrganiser flag is what keeps them out of the signup review queue and the analytics.
+export async function addOrganiser(fields: NewOrganiserFields): Promise<{ error?: string }> {
+  try {
+    await verifyAdminSession();
+  } catch {
+    return { error: 'Your session has expired. Please sign in again.' };
+  }
+
+  const name = fields.name.trim();
+  if (!name || name.length > 100) {
+    return { error: 'Please give this organiser a name, no longer than 100 characters.' };
+  }
+
+  const email = fields.email.trim();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || email.length > 200) {
+    return { error: 'Please enter a valid email address for this organiser.' };
+  }
+
+  const phone = fields.phone.trim();
+  if (phone.length > 30) {
+    return { error: 'That phone number is too long. Please keep it to 30 characters or fewer.' };
+  }
+
+  const organiserRole = fields.organiserRole.trim();
+  if (!organiserRole || organiserRole.length > ORGANISER_ROLE_MAX) {
+    return { error: `Please give this organiser a role, no longer than ${ORGANISER_ROLE_MAX} characters.` };
+  }
+
+  const linkedin = validateLink(fields.linkedinUrl, 'LinkedIn');
+  if ('error' in linkedin) return { error: linkedin.error };
+
+  if (!VOLUNTEER_SHIFTS.includes(fields.assignedShift)) {
+    return { error: 'Please choose a valid shift for this organiser.' };
+  }
+
+  try {
+    await adminDb.collection('volunteers').add({
+      name,
+      email,
+      phone,
+      organiserRole,
+      linkedinUrl: linkedin.value,
+      isOrganiser: true,
+      // Accepted on creation: an organiser is on the crew the moment they are added,
+      // which is the state every crew query filters on.
+      status: 'accepted',
+      submittedAt: FieldValue.serverTimestamp(),
       assignedArea: '',
-      assignedShift: '',
-      showOnCrewPage: false,
+      assignedShift: fields.assignedShift,
+      showOnCrewPage: Boolean(fields.showOnCrewPage),
+      photoUrl: '',
+      // The signup form's answers, empty because there was no form. Written rather than
+      // left absent so every document in the collection has the same shape.
+      motivation: '',
+      areasOfInterest: [],
+      priorExperience: '',
+      googleTechExperience: '',
+      isTorrensStudentOrStaff: false,
+      hasBeenGdgOnCampusExec: false,
+      gdgOnCampusChapter: '',
+      dietaryRequirements: '',
+      reviewerNotes: [],
     });
     revalidateCrewPages();
     return {};
   } catch {
-    return { error: 'Could not remove this volunteer from the crew. Please try again.' };
+    return { error: 'Could not add this organiser. Please try again.' };
   }
 }
 
@@ -189,6 +317,8 @@ function revalidateCrewPages() {
   revalidatePath('/admin/crew');
   revalidatePath('/admin/volunteers');
   revalidatePath('/crew');
+  // The landing page's organisers section reads the same records.
+  revalidatePath('/');
 }
 
 // Only deletes objects this page uploaded (under crew-photos/). Deletion failures are

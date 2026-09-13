@@ -44,15 +44,6 @@ export interface AdminUser {
   addedAt: string;
 }
 
-export interface TeamMember {
-  id: string;
-  name: string;
-  role: string;
-  photoUrl: string;
-  linkedinUrl: string;
-  order: number;
-}
-
 export interface SubmissionTracking {
   utmSource: string;
   utmMedium: string;
@@ -145,6 +136,18 @@ export interface VolunteerSubmission {
   volunteerConfirmedAt: string | null; // ISO date string; set from /volunteer/confirm
   // Derived from the three fields above rather than stored, so it can never disagree.
   confirmation: VolunteerConfirmation;
+  // Organisers are added by an admin from /admin/crew rather than arriving through the
+  // signup form. They live in the same collection because the crew is one roster, but
+  // they never went near the form, so every field above that the form fills is empty and
+  // the acceptance/confirmation flow does not apply to them.
+  isOrganiser: boolean;
+  // Free text ("Lead organiser", "Sponsorship", "Marketing"): an organiser's job is not
+  // one of the nine VolunteerAreas, and squeezing it into one would misname it. Empty
+  // for volunteers.
+  organiserRole: string;
+  // Shown beside an organiser on the landing page, which is where the old `team`
+  // collection used to put it. Empty for volunteers.
+  linkedinUrl: string;
 }
 
 // What /crew renders. A deliberate subset of VolunteerSubmission: no email, no phone, no
@@ -154,6 +157,17 @@ export interface PublicCrewMember {
   name: string;
   assignedArea: VolunteerArea | '';
   photoUrl: string;
+  isOrganiser: boolean;
+  organiserRole: string;
+  linkedinUrl: string;
+}
+
+// The two groups /crew renders, and the split the landing page's organisers section
+// reads the first half of. Kept apart at the source rather than filtered in the page, so
+// the gate each half passes through is decided in one place.
+export interface PublicCrew {
+  organisers: PublicCrewMember[];
+  volunteers: PublicCrewMember[];
 }
 
 export interface CoPresenter {

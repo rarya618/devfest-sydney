@@ -12,12 +12,12 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 ## Scope
 
 ### Pages
-- `/` — Hero, About, Speakers (accepted), Schedule, Venue, Sponsors, Team
+- `/` — Hero, About, Speakers (accepted), Schedule, Venue, Sponsors, Organisers
 - `/call-for-speakers` — CfS form with open/closed state
 - `/builder-showcase` — Builder Showcase call for demos, with open/closed state
 - `/volunteer` — Volunteer signup form with open/closed state
 - `/volunteer/confirm` — accepted volunteers confirm from a signed link in their acceptance email (no login, `noindex`)
-- `/crew` — Public volunteer crew page; only volunteers who have confirmed AND whom an admin has opted in are shown
+- `/crew` — Public crew page; Organisers and Volunteers in separate groups. Volunteers are shown only once they have confirmed AND an admin has opted them in; organisers need only the opt-in
 - `/speaker/confirm` — accepted speakers confirm participation from a signed link in their acceptance email (no login, `noindex`)
 - `/speakers` — Public lineup, grouped by track; only speakers who have confirmed via `/speaker/confirm` are shown
 - `/speakers/[slug]` — One page per confirmed speaker (profile, session, bio, ticket CTA, other speakers), slug derived from the name
@@ -30,7 +30,7 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 - `/admin` — Review CfS submissions, promote accepted speakers to `speakers` collection
 - `/admin/speakers` — Manage the promoted `speakers` collection (edit public profile and session details, remove from lineup)
 - `/admin/volunteers` — Review volunteer signups (accept, reject, restore, archive)
-- `/admin/crew` — Manage accepted volunteers (assign area and shift, upload photo, opt in to `/crew`, remove from crew)
+- `/admin/crew` — Manage accepted volunteers (assign area and shift, upload photo, opt in to `/crew`, remove from crew) and add organisers directly
 - `/admin/showcase` — Review Builder Showcase entries (accept, reject, restore, archive)
 - `/admin/admins` — Manage authorised admin emails
 - `/admin/analytics` — Submission stats and trends
@@ -83,7 +83,7 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 - Schedule — `schedule` collection (built after speakers confirmed)
 - Sponsors — `sponsors` collection
 - Community partners — `partners` collection (shown on `/partners` only)
-- Team — `team` collection
+- Organisers — the `volunteers` collection, `isOrganiser: true` (the `team` collection is no longer read by anything)
 - FAQ — `faq` collection
 
 ## Milestones
@@ -237,6 +237,15 @@ Verified in dev against the 23 live signups (5 accepted): the dashboard, filters
 Two follow-ups worth deciding on:
 1. **A consent checkbox on `/volunteer`** ("happy to be listed on the site") would be better than an admin ticking `showOnCrewPage` on someone's behalf. Not added here because it changes the public form and `/api/submit-volunteer` validation. The 23 existing signups would stay opt-out either way.
 2. **The acceptance email promises no perks.** Free entry, food and merch are not settled anywhere in the repo, so the email says nothing about them. Add it to `buildVolunteerAcceptanceEmail` once the organisers have decided.
+
+**Organisers on the crew shipped 2026-09-13:** `/admin/crew` has an "Add organiser" button, for the people running the event who never filled the volunteer form in. Design:
+- **Same `volunteers` collection, flagged `isOrganiser: true`**, rather than a second collection. The crew is one roster, and everything that manages it (the roster fields, the photo upload, `/crew`) already reads `volunteers`; a separate collection would have meant branching every one of those. What the flag buys instead is three filters: `fetchVolunteerSignups()` (new, `!isOrganiser`) feeds `/admin/volunteers` and `/admin/analytics`, so an organiser is never counted as a signup that never happened; `fetchCrew()` keeps everyone; `fetchPublicCrew()` splits the two groups.
+- **A free-text `organiserRole`, not a `VolunteerArea`.** "Lead organiser" and "Sponsorship" are not "AV / Tech", and squeezing them into the nine areas would have misnamed them. Organisers also carry `linkedinUrl`; volunteers carry neither, and `updateCrewMember` writes only the half that belongs to the record it is editing.
+- **One public gate, not two.** A volunteer needs `volunteerConfirmedAt` plus `showOnCrewPage`; an organiser needs only the tick, since there is no acceptance email to confirm and the admin ticking it knows them. Still off by default.
+- **Remove deletes an organiser** rather than returning them to pending: there is no signup behind them, and a person who never applied should not land at the top of the review queue. `sendVolunteerAcceptanceEmail` refuses organisers for the same reason, server-side as well as in the UI (the envelope button does not render on their card).
+- **The landing page's "The organisers" section now reads these records** (`fetchPublicOrganisers()`, same gate as `/crew`) instead of the `team` collection, which was empty and is now read by nothing; `TeamMember` was deleted from `src/lib/types.ts` and the section's anchor is `#organisers`. Nothing links to either anchor.
+
+`firestore.rules` gained a documentation block for the three new fields; no rule logic changed, and the public create rule's `hasOnly` list already rejected them, so a client cannot forge an organiser. Verified in dev against the 5 real accepted volunteers: added an organiser through the modal, edited it (role, LinkedIn, opt-in), saw it under Organisers on `/crew` and in the landing section, confirmed `/admin/volunteers` still reads 23 signups, then removed it and confirmed the document was deleted. Both throwaway records are gone.
 
 **Next task:**
 1. Create `VOLUNTEER_CONFIRM_SECRET` in Secret Manager and grant the backend access, before the next rollout: `firebase apphosting:secrets:set VOLUNTEER_CONFIRM_SECRET --project devfest-sydney-2026 --data-file -` then `firebase apphosting:secrets:grantaccess VOLUNTEER_CONFIRM_SECRET --backend devfest-sydney`. The block is already in `apphosting.yaml`, and adding the block does not create the secret: `SPEAKER_CONFIRM_SECRET` and `SPEAKER_TICKET_URL` both failed a deploy this way first.
