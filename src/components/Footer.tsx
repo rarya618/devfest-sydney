@@ -20,6 +20,7 @@ const COLUMNS: { heading: string; links: { label: string; href: string; external
     links: [
       { label: 'Builder Showcase', href: '/builder-showcase' },
       { label: 'Volunteer', href: '/volunteer' },
+      { label: 'Crew', href: '/crew' },
       { label: 'FAQ', href: '/faq' },
       { label: 'Privacy Policy', href: '/privacy' },
       { label: 'Code of Conduct', href: '/conduct' },

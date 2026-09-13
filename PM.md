@@ -16,6 +16,8 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 - `/call-for-speakers` — CfS form with open/closed state
 - `/builder-showcase` — Builder Showcase call for demos, with open/closed state
 - `/volunteer` — Volunteer signup form with open/closed state
+- `/volunteer/confirm` — accepted volunteers confirm from a signed link in their acceptance email (no login, `noindex`)
+- `/crew` — Public volunteer crew page; only volunteers who have confirmed AND whom an admin has opted in are shown
 - `/speaker/confirm` — accepted speakers confirm participation from a signed link in their acceptance email (no login, `noindex`)
 - `/speakers` — Public lineup, grouped by track; only speakers who have confirmed via `/speaker/confirm` are shown
 - `/speakers/[slug]` — One page per confirmed speaker (profile, session, bio, ticket CTA, other speakers), slug derived from the name
@@ -28,6 +30,7 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 - `/admin` — Review CfS submissions, promote accepted speakers to `speakers` collection
 - `/admin/speakers` — Manage the promoted `speakers` collection (edit public profile and session details, remove from lineup)
 - `/admin/volunteers` — Review volunteer signups (accept, reject, restore, archive)
+- `/admin/crew` — Manage accepted volunteers (assign area and shift, upload photo, opt in to `/crew`, remove from crew)
 - `/admin/showcase` — Review Builder Showcase entries (accept, reject, restore, archive)
 - `/admin/admins` — Manage authorised admin emails
 - `/admin/analytics` — Submission stats and trends
@@ -47,13 +50,17 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 - `/volunteer` page with a signup form, open/closed state controlled by `VOLUNTEER_OPEN`
 - Form fields: name, email, phone (optional), motivation, availability (full day / morning / afternoon), areas of interest (registration, AV/tech, speaker support, Builder's Space, general floater), prior volunteering experience (optional), Google technologies experience (optional), Torrens student or staff (yes/no), GDG on Campus exec team before (yes/no, `hasBeenGdgOnCampusExec`, added 2026-09-06) which when ticked reveals a required "Which chapter?" select (`gdgOnCampusChapter`: `usyd` | `uts` | `other`, `''` when unticked; validated on both the form and `/api/submit-volunteer`, cleared server-side if the flag is false). Shown as a green "GDG on Campus exec · USYD" chip in `/admin/volunteers`. Labels in `src/lib/volunteerLabels.ts`, dietary requirements (optional)
 - On submit: confirmation email to the volunteer (via Resend), signup stored in Firestore (`volunteers` collection)
-- Reviewed in `/admin/volunteers`: admins can accept, reject, restore, or archive a signup and add reviewer notes. No promotion to a separate public collection (unlike CfS → `speakers`) — volunteers aren't shown publicly.
+- Reviewed in `/admin/volunteers`: admins can accept, reject, restore, or archive a signup and add reviewer notes
+- Accepted volunteers are managed in `/admin/crew`. No promotion to a separate collection (unlike CfS → `speakers`): the crew is just `volunteers` filtered to `status === 'accepted'`, with the roster fields (`assignedArea`, `assignedShift`, `photoUrl`, `showOnCrewPage`) written onto the same document. A speaker document exists because the public profile is edited away from the proposal; a crew member's roster is a few more fields on the signup, and a copy would only be something to keep in sync
+- Accepting a signup and telling the volunteer are separate steps, as with speakers. An admin sends the acceptance email explicitly (`sendVolunteerAcceptanceEmail`), from the action rail on either `/admin/volunteers` or `/admin/crew`, which records `acceptanceEmailSentAt`, `acceptanceEmailSentBy` and a `confirmByDate` 7 days out, and adds a reviewer note. Accepted cards show a Not emailed / Awaiting confirmation / Confirmed chip
+- The acceptance email carries a "Confirm you're coming" button pointing at `/volunteer/confirm?token=...`. The token is an HMAC of the volunteer id signed with `VOLUNTEER_CONFIRM_SECRET` (separate from `SPEAKER_CONFIRM_SECRET`, so rotating one doesn't invalidate the other's links); confirming is behind a button rather than the page load, so mail scanners can't confirm on someone's behalf. Confirming sets `volunteerConfirmedAt` and emails hello@gdgsydney.com a "Volunteer confirmed" notice with `replyTo` set to the volunteer. Sent once, on the transition only
+- Volunteers ARE shown publicly, but only behind two gates: they have confirmed, and an admin has ticked `showOnCrewPage` for them. Off by default, because unlike a speaker, a volunteer never agreed to being named on the site when they signed up
 
 ### Builder Showcase Flow
 - `/builder-showcase` page with an entry form, open/closed state controlled by `SHOWCASE_OPEN` and an optional `SHOWCASE_CLOSE_DATE` deadline (`isShowcaseOpen()` in `src/lib/showcase.ts`, evaluated per request like `isCfsOpen()`)
 - Form fields: name, email, LinkedIn (optional), co-presenters (optional, up to 4, each added as its own name + email block), project name, one-line pitch, what you'll demo, stage (idea / prototype / live), project link (optional), repository (optional), built with (optional), demo requirements (optional), first-time presenter
 - On submit: confirmation email to the entrant (via Resend), entry stored in Firestore (`showcase` collection)
-- Reviewed in `/admin/showcase`: accept, reject, restore, archive, plus reviewer notes. No promotion to a public collection, same as volunteers
+- Reviewed in `/admin/showcase`: accept, reject, restore, archive, plus reviewer notes. No promotion to a public collection, and no public page: unlike volunteers, showcase entrants are announced on the day rather than on the site
 - Runs on its own timetable, separate from the CfS: demos can still be taken after the talk lineup is locked in
 - Firestore rules for `showcase` allow no client writes at all. Every entry arrives through `/api/submit-showcase` on the server, so unlike `submissions` and `volunteers` there is no public create path
 
@@ -143,6 +150,7 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 | `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` | Firebase client SDK |
 | `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | Firebase client SDK |
 | `NEXT_PUBLIC_FIREBASE_APP_ID` | Firebase client SDK |
+| `VOLUNTEER_CONFIRM_SECRET` | Signs the token in the volunteer acceptance email's "Confirm you're coming" link (`src/lib/volunteerConfirm.ts`). Separate from `SPEAKER_CONFIRM_SECRET` on purpose. Rotating it invalidates every volunteer confirmation link already sent. **A Secret Manager secret that does not exist yet:** create it and grant the backend access before the next rollout, or App Hosting fails with "Misconfigured secret" |
 | `SPEAKER_CONFIRM_SECRET` | Signs the token in the acceptance email's "Confirm participation" link (`src/lib/speakerConfirm.ts`). Rotating it invalidates every confirmation link already sent |
 | `SPEAKER_TICKET_URL` | Humanitix URL carrying the speaker access code (`...?accesscode=...`), emailed from the admin once a speaker confirms. Unset means the ticket email can't be sent at all. A Secret Manager secret rather than a plain value in `apphosting.yaml`: the code unlocks free tickets. Created and granted to the backend 2026-09-13 |
 | `RESEND_API_KEY` | Resend email sending |
@@ -211,7 +219,20 @@ Verified in dev against temporary accepted submissions (both since deleted): the
 
 **Speaker links and slug redirects 2026-09-07:** profile links come from the CfS form, which never required a scheme, so three speakers (one confirmed) had `linkedin.com/in/...` values that rendered as relative links under `/speakers/`. `normaliseProfileUrl()` in `src/lib/speakers.ts` now adds `https://` on the way out (`fetchSpeakers`) and on the way in (`promoteSubmission`, `updateSpeaker`, which rejects anything still not a web address with a plain message). The four affected documents were corrected in Firestore the same day; every other link was HEAD-checked and resolves (LinkedIn answers 405 to HEAD, which only proves the host, not the profile). Renaming a speaker in `/admin/speakers` now records the old slug in `previousSlugs` on the speaker doc, and `/speakers/[slug]` issues a 308 to the current slug for any remembered one (`findCurrentSlugForPreviousSlug`); a live slug always wins, only confirmed speakers redirect, and a name changed back drops the slug from the history. `firestore.rules` allows the new optional `previousSlugs` list and needs a rules deploy. Verified in dev: redirect, no-hijack of a live slug, 404 for unknown.
 
+**Volunteer crew shipped 2026-09-13:** volunteers now have the second layer speakers have had since 2026-09-06. Three pieces:
+- `/admin/crew` (`CrewDashboard`, `EditCrewMemberModal`, `crewActions.ts`) lists `volunteers` filtered to accepted. Each card carries the assigned area, shift, a No area assigned / On the crew page / Dietary needs chip row, and an action rail of Edit, Email, Remove, mirroring `/admin/speakers`. Search covers name, email and phone; filters are by confirmation status and by assigned area, and the area menu only offers areas someone is actually rostered to. Remove puts the signup back to pending and clears the roster fields, so a re-acceptance doesn't inherit a stale shift. Photos upload to `crew-photos/<volunteerId>/` (the same 5 MB JPEG/PNG/WebP rules as speaker photos, reusing the 6 MB `bodySizeLimit` already in `next.config.ts`). Under Content in the sidebar, beside Speakers. **No `crew` collection:** the roster is four more fields on the signup document, so a promoted copy would only be something to keep in sync.
+- The acceptance and confirmation flow: `src/lib/volunteerAcceptanceEmail.ts` (green, table-based and escaped like `acceptanceEmail.ts`; the roster pills are replaced by a "we're still working out the roster" line when no area or shift is set yet, since an empty card reads as a mistake), `sendVolunteerAcceptanceEmail` in `volunteerActions.ts` (admin-only, accepted-only, surfaces send failures rather than swallowing them), `src/lib/volunteerConfirm.ts` (`VOLUNTEER_CONFIRM_SECRET`, 7-day window) and `/volunteer/confirm` (standalone card, no navbar or footer, same shape as `/speaker/confirm`). The envelope button and the Not emailed / Awaiting confirmation / Confirmed chip appear on `/admin/volunteers` as well, on accepted rows only.
+- `/crew`, the public page: confirmed volunteers whom an admin has explicitly opted in, as avatar tiles with their assigned area. **Two gates, both required.** Confirming says someone is coming; it does not say they want their name on the website, and the signup form never asked, so `showOnCrewPage` is admin-controlled and off by default. In the footer's Support column and the sitemap at 0.4; deliberately NOT in the navbar, which is kept to Speakers / Partners / Builder Showcase.
+
+Verified in dev against the 23 live signups (5 accepted): the dashboard, filters and edit modal render and save; the confirm flow was exercised end to end on a throwaway document (token round-trip, tampered token rejected, confirm idempotent on a second click, both public gates), with `RESEND_API_KEY` deliberately broken so no mail reached the real organiser inbox. The throwaway document has been deleted. **Not yet exercised: an actual send.** `sendVolunteerAcceptanceEmail` has never been clicked in dev or production, since every accepted volunteer is a real person. Send one to an organiser inbox first.
+
+Two follow-ups worth deciding on:
+1. **A consent checkbox on `/volunteer`** ("happy to be listed on the site") would be better than an admin ticking `showOnCrewPage` on someone's behalf. Not added here because it changes the public form and `/api/submit-volunteer` validation. The 23 existing signups would stay opt-out either way.
+2. **The acceptance email promises no perks.** Free entry, food and merch are not settled anywhere in the repo, so the email says nothing about them. Add it to `buildVolunteerAcceptanceEmail` once the organisers have decided.
+
 **Next task:**
-1. Milestone 8 — the schedule page, once the `schedule` collection is populated.
+1. Create `VOLUNTEER_CONFIRM_SECRET` in Secret Manager and grant the backend access, before the next rollout: `firebase apphosting:secrets:set VOLUNTEER_CONFIRM_SECRET --project devfest-sydney-2026 --data-file -` then `firebase apphosting:secrets:grantaccess VOLUNTEER_CONFIRM_SECRET --backend devfest-sydney`. The block is already in `apphosting.yaml`, and adding the block does not create the secret: `SPEAKER_CONFIRM_SECRET` and `SPEAKER_TICKET_URL` both failed a deploy this way first.
+2. Deploy the Firestore rules: the `volunteers` documentation block changed (no rule logic did).
+3. Milestone 8 — the schedule page, once the `schedule` collection is populated.
 
 Otherwise: Milestone 9 — Polish & launch.

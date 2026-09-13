@@ -99,6 +99,21 @@ rules_version='2';
 //   - gdgOnCampusChapter: string (required) — 'usyd' | 'uts' | 'other', or '' when the above is false
 //   - dietaryRequirements: string (optional, max 300 chars)
 //   - submittedAt: timestamp (required, must be recent)
+//   - status: string (required) - 'pending' | 'accepted' | 'rejected' | 'archived'
+//   - reviewerNotes: list of maps (optional) - admin-only notes
+//
+//   Set by an admin on /admin/crew once the signup is accepted. None of these can be
+//   written from the client: the create rule below rejects any document carrying an
+//   unlisted field, and update is admin-only, so they only ever arrive through the
+//   Admin SDK, which bypasses these rules. isValidVolunteerSubmission therefore does
+//   not list them.
+//   - assignedArea: string - a VolunteerArea, or '' when not rostered yet
+//   - assignedShift: string - 'full-day' | 'morning' | 'afternoon', or '' when unset
+//   - photoUrl: string (optional, max 500 chars) - crew-photos/ object in the default bucket
+//   - showOnCrewPage: boolean - opt-in to being named on the public /crew page
+//   - acceptanceEmailSentAt: timestamp, acceptanceEmailSentBy: string
+//   - confirmByDate: timestamp - the volunteer's deadline to confirm
+//   - volunteerConfirmedAt: timestamp - set from /volunteer/confirm
 //
 // Collection: showcase
 // Document ID: auto-generated
