@@ -1,13 +1,21 @@
 'use client';
 
 import { useState, useTransition, useEffect, useRef, useCallback, type FormEvent } from 'react';
-import { acceptVolunteer, rejectVolunteer, restoreVolunteer, archiveVolunteer, addVolunteerReviewerNote } from './volunteerActions';
+import {
+  acceptVolunteer,
+  rejectVolunteer,
+  restoreVolunteer,
+  archiveVolunteer,
+  addVolunteerReviewerNote,
+  sendVolunteerAcceptanceEmail,
+} from './volunteerActions';
 import Alert from '@/components/Alert';
 import { formatDate } from '@/lib/format';
 import {
   VOLUNTEER_STATUS_DOT_STYLES,
   VOLUNTEER_STATUS_LABELS,
   VOLUNTEER_AREA_LABELS,
+  VOLUNTEER_CONFIRMATION_CHIPS,
   GDG_ON_CAMPUS_CHAPTER_LABELS,
 } from '@/lib/volunteerLabels';
 import type { ReviewerNote, VolunteerStatus, VolunteerSubmission } from '@/lib/types';
@@ -139,7 +147,19 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
     >
       <div className="flex items-stretch gap-4">
       <div className="flex-1 min-w-0 flex flex-col">
-      <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight mb-2">{volunteer.name}</h3>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
+        <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{volunteer.name}</h3>
+        {/* Only on accepted signups: "Not emailed" against a pending one would read as a
+            task, when the thing to do first is decide. */}
+        {volunteer.status === 'accepted' && (
+          <span
+            title={VOLUNTEER_CONFIRMATION_CHIPS[volunteer.confirmation].title}
+            className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${VOLUNTEER_CONFIRMATION_CHIPS[volunteer.confirmation].className}`}
+          >
+            {VOLUNTEER_CONFIRMATION_CHIPS[volunteer.confirmation].label}
+          </span>
+        )}
+      </div>
 
       <div className="mb-3">
         <div className="min-w-0">
@@ -290,6 +310,26 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
                 </svg>
               </button>
             </div>
+          )}
+          {/* The same send this volunteer's card offers on /admin/crew, so an organiser
+              working through the review queue doesn't have to change pages to tell someone. */}
+          {volunteer.status === 'accepted' && (
+            <button
+              onClick={() => handleAction(sendVolunteerAcceptanceEmail)}
+              disabled={isPending}
+              aria-label={`${volunteer.acceptanceEmailSentAt ? 'Resend' : 'Send'} the volunteer acceptance email to ${volunteer.name}`}
+              title={volunteer.acceptanceEmailSentAt ? 'Resend acceptance email' : 'Send acceptance email'}
+              className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-60 ${
+                volunteer.acceptanceEmailSentAt
+                  ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
+                  : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
+              }`}
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
+              </svg>
+            </button>
           )}
           {(volunteer.status === 'rejected' || volunteer.status === 'archived' || volunteer.status === 'accepted') && (
             <button
@@ -451,6 +491,10 @@ export default function VolunteersDashboard({ volunteers }: Props) {
     rejected: volunteers.filter((v) => v.status === 'rejected').length,
     archived: volunteers.filter((v) => v.status === 'archived').length,
   };
+  // Accepted but never told: the gap that leaves someone waiting to hear from us.
+  const notEmailedCount = volunteers.filter(
+    (volunteer) => volunteer.status === 'accepted' && volunteer.confirmation === 'not-emailed'
+  ).length;
 
   const query = search.trim().toLowerCase();
   const filtered = volunteers
@@ -473,6 +517,7 @@ export default function VolunteersDashboard({ volunteers }: Props) {
             <h1 className="text-xl font-bold text-white tracking-tight">Volunteers</h1>
             <p className="mt-0.5 text-sm text-white/55">
               {counts.all} total &middot; {counts.pending} pending review
+              {notEmailedCount > 0 && <> &middot; {notEmailedCount} accepted, not emailed</>}
             </p>
           </div>
 

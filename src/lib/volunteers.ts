@@ -1,6 +1,23 @@
 import { adminDb } from '@/lib/firebase-admin';
-import type { ReviewerNote, VolunteerSubmission } from '@/lib/types';
+import type {
+  PublicCrewMember,
+  ReviewerNote,
+  VolunteerConfirmation,
+  VolunteerSubmission,
+} from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
+
+function toIsoOrNull(timestamp: Timestamp | undefined): string | null {
+  return timestamp ? timestamp.toDate().toISOString() : null;
+}
+
+// Derived rather than stored, so the chip can never disagree with the two timestamps it
+// is describing. Mirrors toConfirmation() in speakers.ts.
+function toConfirmation(data: FirebaseFirestore.DocumentData): VolunteerConfirmation {
+  if (data.volunteerConfirmedAt) return 'confirmed';
+  if (data.acceptanceEmailSentAt) return 'awaiting';
+  return 'not-emailed';
+}
 
 export async function fetchVolunteers(): Promise<VolunteerSubmission[]> {
   const snapshot = await adminDb
@@ -43,6 +60,48 @@ export async function fetchVolunteers(): Promise<VolunteerSubmission[]> {
         authorName: note.authorName ?? '',
         createdAt: note.createdAt ? note.createdAt.toDate().toISOString() : new Date().toISOString(),
       })) satisfies ReviewerNote[],
+      // Roster and announcement fields. Every one of these is absent on a freshly
+      // submitted signup, so each falls back to its "not set yet" value.
+      assignedArea: data.assignedArea ?? '',
+      assignedShift: data.assignedShift ?? '',
+      photoUrl: data.photoUrl ?? '',
+      showOnCrewPage: data.showOnCrewPage ?? false,
+      acceptanceEmailSentAt: toIsoOrNull(data.acceptanceEmailSentAt as Timestamp | undefined),
+      acceptanceEmailSentBy: data.acceptanceEmailSentBy ?? '',
+      confirmByDate: toIsoOrNull(data.confirmByDate as Timestamp | undefined),
+      volunteerConfirmedAt: toIsoOrNull(data.volunteerConfirmedAt as Timestamp | undefined),
+      confirmation: toConfirmation(data),
     } satisfies VolunteerSubmission;
   });
+}
+
+// The crew: volunteers who have been accepted, which is what /admin/crew manages. They
+// stay in the `volunteers` collection rather than being promoted into a second one the
+// way accepted speakers are. A speaker document exists because the public profile is
+// edited away from the proposal that produced it; a crew member's roster is just a few
+// more fields on the signup, and a copy would only be something to keep in sync.
+export async function fetchCrew(): Promise<VolunteerSubmission[]> {
+  const volunteers = await fetchVolunteers();
+  return volunteers.filter((volunteer) => volunteer.status === 'accepted');
+}
+
+// The public crew list. Two gates, both required: the volunteer has confirmed through
+// /volunteer/confirm, and an admin has ticked "show on the public crew page". Confirming
+// says they are coming; it does not say they want their name on the website.
+// Returns an empty list rather than throwing so the page can show its "coming soon" state.
+export async function fetchPublicCrew(): Promise<PublicCrewMember[]> {
+  try {
+    const crew = await fetchCrew();
+    return crew
+      .filter((member) => member.confirmation === 'confirmed' && member.showOnCrewPage)
+      .sort((first, second) => first.name.localeCompare(second.name))
+      .map((member) => ({
+        id: member.id,
+        name: member.name,
+        assignedArea: member.assignedArea,
+        photoUrl: member.photoUrl,
+      }));
+  } catch {
+    return [];
+  }
 }

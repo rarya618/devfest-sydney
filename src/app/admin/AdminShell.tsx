@@ -31,7 +31,10 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: 'Content',
-    items: [{ href: '/admin/speakers', label: 'Speakers' }],
+    items: [
+      { href: '/admin/speakers', label: 'Speakers' },
+      { href: '/admin/crew', label: 'Crew' },
+    ],
   },
   {
     label: 'Insights',

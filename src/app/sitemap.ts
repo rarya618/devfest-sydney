@@ -57,6 +57,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: isVolunteerOpen() ? 0.7 : 0.3,
     },
     {
+      url: `${siteUrl}/crew`,
+      changeFrequency: 'weekly',
+      priority: 0.4,
+    },
+    {
       url: `${siteUrl}/conduct`,
       changeFrequency: 'yearly',
       priority: 0.3,

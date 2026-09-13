@@ -5,6 +5,13 @@ export type SubmissionStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
 export type SponsorTier = 'platinum' | 'gold' | 'silver' | 'community';
 export type VolunteerArea = 'registration' | 'av-tech' | 'speaker-support' | 'workshop-facilitator' | 'general-floater' | 'setup-packdown' | 'photography' | 'social-media' | 'merch-table';
 export type VolunteerStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
+// The part of the day a crew member is rostered for. Empty until an admin assigns one:
+// the signup form never asked, so an unset shift is the normal starting state.
+export type VolunteerShift = '' | 'full-day' | 'morning' | 'afternoon';
+// Whether an accepted volunteer has been told and has answered. The volunteer document
+// holds the whole flow, so unlike SpeakerConfirmation there is no 'unknown': there is no
+// second document that could be missing.
+export type VolunteerConfirmation = 'not-emailed' | 'awaiting' | 'confirmed';
 // Empty string when the volunteer has not been on a GDG on Campus exec team.
 export type GdgOnCampusChapter = '' | 'usyd' | 'uts' | 'other';
 export type ShowcaseStage = 'idea' | 'prototype' | 'live';
@@ -97,6 +104,11 @@ export interface Submission {
   acceptanceEmailSentBy: string;
   confirmByDate: string | null; // ISO date string; the speaker's deadline to confirm
   speakerConfirmedAt: string | null; // ISO date string; set from /speaker/confirm
+  // The complimentary speaker ticket, sent from the admin after the speaker confirms.
+  // Null until an admin sends it; a separate step again, so a confirmed speaker can be
+  // held back while their slot is still being worked out.
+  speakerTicketEmailSentAt: string | null; // ISO date string
+  speakerTicketEmailSentBy: string;
 }
 
 export interface VolunteerSubmission {
@@ -116,6 +128,32 @@ export interface VolunteerSubmission {
   submittedAt: string; // ISO date string (serialized from Firestore Timestamp)
   status: VolunteerStatus;
   reviewerNotes: ReviewerNote[];
+  // Everything below is set by an admin after the signup is accepted, on /admin/crew.
+  // The roster: what they are actually doing on the day, as opposed to areasOfInterest,
+  // which is what they asked for.
+  assignedArea: VolunteerArea | '';
+  assignedShift: VolunteerShift;
+  photoUrl: string;
+  // Opt-in, admin-controlled, and false by default. Volunteers never agreed to being
+  // listed publicly the way speakers did, so nobody reaches /crew without this flipped.
+  showOnCrewPage: boolean;
+  // Null until an admin sends the acceptance email from the dashboard. Accepting a signup
+  // and telling the volunteer about it are deliberately separate steps, as with speakers.
+  acceptanceEmailSentAt: string | null; // ISO date string
+  acceptanceEmailSentBy: string;
+  confirmByDate: string | null; // ISO date string; the volunteer's deadline to confirm
+  volunteerConfirmedAt: string | null; // ISO date string; set from /volunteer/confirm
+  // Derived from the three fields above rather than stored, so it can never disagree.
+  confirmation: VolunteerConfirmation;
+}
+
+// What /crew renders. A deliberate subset of VolunteerSubmission: no email, no phone, no
+// motivation, no dietary requirements, nothing that only an organiser should see.
+export interface PublicCrewMember {
+  id: string;
+  name: string;
+  assignedArea: VolunteerArea | '';
+  photoUrl: string;
 }
 
 export interface CoPresenter {
@@ -169,6 +207,14 @@ export interface Speaker {
   submissionId: string;
   promotedAt: string; // ISO date string (serialized from Firestore Timestamp)
   confirmation: SpeakerConfirmation;
+  // Read off the source submission, so the speakers page can show when the acceptance
+  // email went, who sent it, and the deadline, without a trip to /admin.
+  acceptanceEmailSentAt: string | null; // ISO date string
+  acceptanceEmailSentBy: string | null;
+  confirmByDate: string | null; // ISO date string
+  speakerConfirmedAt: string | null; // ISO date string
+  speakerTicketEmailSentAt: string | null; // ISO date string
+  speakerTicketEmailSentBy: string | null;
 }
 
 // What /speakers renders. Deliberately a subset of Speaker: no email, no submission id,

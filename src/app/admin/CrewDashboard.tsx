@@ -2,104 +2,50 @@
 
 import { useState, useTransition, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
-import { removeSpeaker } from './speakerActions';
-import { sendAcceptanceEmail, sendSpeakerTicketEmail } from './actions';
-import EditSpeakerModal from './EditSpeakerModal';
+import { removeFromCrew } from './crewActions';
+import { sendVolunteerAcceptanceEmail } from './volunteerActions';
+import EditCrewMemberModal from './EditCrewMemberModal';
 import Alert from '@/components/Alert';
 import { formatDate, getInitials } from '@/lib/format';
 import {
-  TRACK_LABELS,
-  TRACK_COLORS,
-  TRACK_BORDER_COLORS,
-  TRACK_DOT_COLORS,
-  FORMAT_LABELS,
-  EXPERIENCE_LABELS,
-} from '@/lib/submissionLabels';
-import type { Speaker, SpeakerConfirmation, Track } from '@/lib/types';
+  VOLUNTEER_AREA_LABELS,
+  VOLUNTEER_SHIFT_LABELS,
+  VOLUNTEER_CONFIRMATION_CHIPS,
+  GDG_ON_CAMPUS_CHAPTER_LABELS,
+} from '@/lib/volunteerLabels';
+import type { VolunteerArea, VolunteerConfirmation, VolunteerSubmission } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
 
-type FilterTrack = 'all' | Track;
-type FilterConfirmation = 'all' | SpeakerConfirmation;
+// 'unassigned' is not a VolunteerArea: it is the absence of one, and it is the filter an
+// organiser reaches for most while the roster is still being built.
+type FilterArea = 'all' | 'unassigned' | VolunteerArea;
+type FilterConfirmation = 'all' | VolunteerConfirmation;
 
-const CONFIRMATION_CHIP: Record<SpeakerConfirmation, { label: string; className: string; title: string }> = {
-  confirmed: {
-    label: 'Confirmed',
-    className: 'bg-google-green/15 text-google-green',
-    title: 'The speaker has confirmed their participation.',
-  },
-  awaiting: {
-    label: 'Awaiting confirmation',
-    className: 'bg-white/10 text-white/60',
-    title: 'The acceptance email has been sent but the speaker has not confirmed yet.',
-  },
-  'not-emailed': {
-    label: 'Not emailed',
-    className: 'bg-google-yellow/15 text-google-yellow',
-    title: 'This speaker has not been told yet. Send the acceptance email with the envelope button.',
-  },
-  unknown: {
-    label: 'No proposal',
-    className: 'bg-white/10 text-white/60',
-    title: 'The proposal this speaker was promoted from no longer exists.',
-  },
-};
-
-function missingProfileParts(speaker: Speaker): string[] {
-  const missing: string[] = [];
-  if (!speaker.photoUrl) missing.push('photo');
-  if (!speaker.tagline) missing.push('tagline');
-  if (!speaker.bio) missing.push('bio');
-  return missing;
-}
-
-function SpeakerAvatar({ speaker }: { speaker: Speaker }) {
+function CrewAvatar({ member }: { member: VolunteerSubmission }) {
   return (
-    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden bg-white/[0.06] shrink-0">
-      {speaker.photoUrl ? (
-        <Image src={speaker.photoUrl} alt={speaker.name} width={64} height={64} className="w-full h-full object-cover" />
+    <div className="w-14 h-14 rounded-full overflow-hidden bg-white/[0.06] shrink-0">
+      {member.photoUrl ? (
+        <Image src={member.photoUrl} alt={member.name} width={56} height={56} className="w-full h-full object-cover" />
       ) : (
         <div className="w-full h-full flex items-center justify-center text-white/55 text-base font-bold" aria-hidden="true">
-          {getInitials(speaker.name)}
+          {getInitials(member.name)}
         </div>
       )}
     </div>
   );
 }
 
-interface ProfileLinkProps {
-  href: string;
-  label: string;
-}
-
-function ProfileLink({ href, label }: ProfileLinkProps) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={`Open ${label} profile in a new tab`}
-      className="inline-flex items-center gap-1 text-xs font-medium text-google-blue hover:underline"
-    >
-      {label}
-      <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 2.5h5v5M9.5 2.5l-6 6" />
-      </svg>
-    </a>
-  );
-}
-
-interface SpeakerCardProps {
-  speaker: Speaker;
+interface CrewCardProps {
+  member: VolunteerSubmission;
   onError: (message: string) => void;
 }
 
-function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
+function CrewCard({ member, onError }: CrewCardProps) {
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [confirmingRemove, setConfirmingRemove] = useState(false);
-  const confirmation = CONFIRMATION_CHIP[speaker.confirmation];
-  const missing = missingProfileParts(speaker);
+  const confirmation = VOLUNTEER_CONFIRMATION_CHIPS[member.confirmation];
 
   useEffect(() => {
     if (!confirmingRemove) return;
@@ -113,33 +59,22 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
   function handleRemove() {
     setConfirmingRemove(false);
     startTransition(async () => {
-      const result = await removeSpeaker(speaker.id);
+      const result = await removeFromCrew(member.id);
       if (result.error) onError(result.error);
     });
   }
 
-  // The email is sent against the proposal, not the speaker doc: that is where the sent /
-  // confirmed bookkeeping lives, and where /speaker/confirm looks it up.
   function handleSendAcceptanceEmail() {
     startTransition(async () => {
-      const result = await sendAcceptanceEmail(speaker.submissionId);
+      const result = await sendVolunteerAcceptanceEmail(member.id);
       if (result.error) onError(result.error);
     });
   }
 
-  // The ticket link unlocks a free ticket, so it is only offered once the speaker has
-  // confirmed: the same rule the action enforces on the server.
-  function handleSendSpeakerTicket() {
-    startTransition(async () => {
-      const result = await sendSpeakerTicketEmail(speaker.submissionId);
-      if (result.error) onError(result.error);
-    });
-  }
-
-  const alreadyEmailed = Boolean(speaker.acceptanceEmailSentAt);
-  const canEmail = speaker.confirmation !== 'unknown';
-  const canSendTicket = speaker.confirmation === 'confirmed';
-  const ticketSent = Boolean(speaker.speakerTicketEmailSentAt);
+  const alreadyEmailed = Boolean(member.acceptanceEmailSentAt);
+  // Someone confirmed but not yet on the public page is the state an organiser wants to
+  // see: it is the only step left before they appear on /crew.
+  const awaitingPublish = member.confirmation === 'confirmed' && !member.showOnCrewPage;
 
   function handleCardClick(event: React.MouseEvent<HTMLDivElement>) {
     const target = event.target as HTMLElement;
@@ -151,102 +86,129 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
   return (
     <div
       onClick={handleCardClick}
-      className={`relative cursor-pointer bg-surface border-l-4 ${TRACK_BORDER_COLORS[speaker.track]} rounded-lg p-4 sm:p-5 transition-colors hover:bg-white/[0.07] ${
+      className={`relative cursor-pointer bg-surface border-l-4 border-l-google-green rounded-lg p-4 sm:p-5 transition-colors hover:bg-white/[0.07] ${
         isPending ? 'opacity-50 pointer-events-none' : ''
       }`}
-      aria-label={`Speaker ${speaker.name}`}
+      aria-label={`Crew member ${member.name}`}
     >
       <div className="flex items-start gap-4">
-        <SpeakerAvatar speaker={speaker} />
+        <CrewAvatar member={member} />
 
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <h3 className="font-bold text-white text-xl leading-snug tracking-tight">{speaker.name}</h3>
+            <h3 className="font-bold text-white text-xl leading-snug tracking-tight">{member.name}</h3>
             <span title={confirmation.title} className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${confirmation.className}`}>
               {confirmation.label}
             </span>
           </div>
-          {speaker.tagline ? (
-            <p className="mt-0.5 text-sm text-white/65">{speaker.tagline}</p>
-          ) : (
-            <p className="mt-0.5 text-sm text-white/50 italic">No tagline yet</p>
-          )}
 
-          <p className="mt-2 flex items-center gap-1.5 text-sm text-white/55 truncate">
+          <p className="mt-1.5 flex items-center gap-1.5 text-sm text-white/55 truncate">
             <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
               <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 5 6-5" />
             </svg>
-            <span className="truncate">{speaker.email}</span>
+            <span className="truncate">{member.email}</span>
           </p>
+          {member.phone && (
+            <p className="mt-1 flex items-center gap-1.5 text-sm text-white/55 truncate">
+              <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.5 2h2l1 3-1.5 1a8 8 0 004.5 4.5l1-1.5 3 1v2a1.5 1.5 0 01-1.5 1.5A10.5 10.5 0 012 3.5 1.5 1.5 0 013.5 2z" />
+              </svg>
+              <span className="truncate">{member.phone}</span>
+            </p>
+          )}
 
           <div className="flex flex-wrap items-center gap-1.5 gap-y-2 mt-3">
-            <span className={`inline-flex items-center gap-1.5 text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] font-bold ${TRACK_COLORS[speaker.track]}`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${TRACK_DOT_COLORS[speaker.track]}`} aria-hidden="true" />
-              {TRACK_LABELS[speaker.track]}
-            </span>
-            <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-medium">
-              {FORMAT_LABELS[speaker.format]}
-            </span>
-            <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-medium">
-              {EXPERIENCE_LABELS[speaker.experienceLevel]}
-            </span>
-            {missing.length > 0 && (
+            {member.assignedArea ? (
+              <span className="inline-flex items-center gap-1.5 text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] font-bold text-google-green">
+                <span className="w-1.5 h-1.5 rounded-full bg-google-green" aria-hidden="true" />
+                {VOLUNTEER_AREA_LABELS[member.assignedArea]}
+              </span>
+            ) : (
               <span
-                title="These fields are blank and will show as gaps on the public speakers section."
+                title="This volunteer has no area yet. Assign one from Edit so they know what they're doing on the day."
                 className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25"
               >
-                Missing {missing.join(', ')}
+                No area assigned
               </span>
             )}
-            {canSendTicket && !ticketSent && (
+            <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-medium">
+              {VOLUNTEER_SHIFT_LABELS[member.assignedShift]}
+            </span>
+            {member.isTorrensStudentOrStaff && (
+              <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-medium">
+                Torrens
+              </span>
+            )}
+            {member.hasBeenGdgOnCampusExec && (
               <span
-                title="This speaker has confirmed but hasn't been sent their complimentary ticket yet. Send it with the ticket button."
+                title="Has been on the exec team of a GDG on Campus chapter"
+                className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-medium"
+              >
+                GDG on Campus exec{member.gdgOnCampusChapter ? ` · ${GDG_ON_CAMPUS_CHAPTER_LABELS[member.gdgOnCampusChapter]}` : ''}
+              </span>
+            )}
+            {member.showOnCrewPage ? (
+              <span
+                title="Listed on the public crew page, once they have confirmed."
+                className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue border-google-blue/25"
+              >
+                On the crew page
+              </span>
+            ) : (
+              awaitingPublish && (
+                <span
+                  title="Confirmed, but not listed publicly. Tick 'Show on the public crew page' in Edit once they've said they're happy to be named."
+                  className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-white/[0.06] text-white/60 border-white/10"
+                >
+                  Not on the crew page
+                </span>
+              )
+            )}
+            {member.dietaryRequirements && (
+              <span
+                title={member.dietaryRequirements}
                 className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25"
               >
-                No ticket sent
+                Dietary needs
               </span>
             )}
           </div>
 
-          <p className="mt-4 font-semibold text-white/90 text-base leading-snug">{speaker.talkTitle}</p>
-
           <div className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
             <div className="overflow-hidden">
-              <p className="mt-3 text-sm text-white/65 leading-relaxed whitespace-pre-wrap">{speaker.abstract}</p>
+              {member.areasOfInterest.length > 0 && (
+                <p className="mt-4 text-sm text-white/65 leading-relaxed">
+                  <span className="font-bold text-white/85">Asked for: </span>
+                  {member.areasOfInterest.map((area) => VOLUNTEER_AREA_LABELS[area]).join(', ')}
+                </p>
+              )}
 
-              <div className="mt-4 text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
-                <span className="font-bold text-white/85">Bio: </span>
-                {speaker.bio ? <span className="whitespace-pre-wrap">{speaker.bio}</span> : <span className="italic text-white/50">not written yet</span>}
+              <div className="mt-3 text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
+                <span className="font-bold text-white/85">Why they signed up: </span>
+                <span className="whitespace-pre-wrap">{member.motivation}</span>
               </div>
 
-              {(speaker.linkedinUrl || speaker.githubUrl || speaker.websiteUrl) && (
-                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1">
-                  {speaker.linkedinUrl && <ProfileLink href={speaker.linkedinUrl} label="LinkedIn" />}
-                  {speaker.githubUrl && <ProfileLink href={speaker.githubUrl} label="GitHub" />}
-                  {speaker.websiteUrl && <ProfileLink href={speaker.websiteUrl} label="Website" />}
-                </div>
+              {member.dietaryRequirements && (
+                <p className="mt-3 text-sm text-white/65 leading-relaxed">
+                  <span className="font-bold text-white/85">Dietary requirements: </span>
+                  {member.dietaryRequirements}
+                </p>
               )}
 
               <p className="mt-4 text-xs text-white/50">
-                Added to the lineup {formatDate(speaker.promotedAt)}
-                {speaker.acceptanceEmailSentAt && (
+                Signed up {formatDate(member.submittedAt)}
+                {member.acceptanceEmailSentAt && (
                   <>
-                    {' '}&middot; Acceptance email sent {formatDate(speaker.acceptanceEmailSentAt)}
-                    {speaker.acceptanceEmailSentBy && <> by {speaker.acceptanceEmailSentBy}</>}
+                    {' '}&middot; Acceptance email sent {formatDate(member.acceptanceEmailSentAt)}
+                    {member.acceptanceEmailSentBy && <> by {member.acceptanceEmailSentBy}</>}
                   </>
                 )}
-                {speaker.speakerConfirmedAt ? (
-                  <> &middot; Confirmed {formatDate(speaker.speakerConfirmedAt)}</>
-                ) : speaker.confirmByDate ? (
-                  <> &middot; Confirmation due {formatDate(speaker.confirmByDate)}</>
+                {member.volunteerConfirmedAt ? (
+                  <> &middot; Confirmed {formatDate(member.volunteerConfirmedAt)}</>
+                ) : member.confirmByDate ? (
+                  <> &middot; Confirmation due {formatDate(member.confirmByDate)}</>
                 ) : null}
-                {speaker.speakerTicketEmailSentAt && (
-                  <>
-                    {' '}&middot; Ticket sent {formatDate(speaker.speakerTicketEmailSentAt)}
-                    {speaker.speakerTicketEmailSentBy && <> by {speaker.speakerTicketEmailSentBy}</>}
-                  </>
-                )}
               </p>
             </div>
           </div>
@@ -255,8 +217,8 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
         <div className="flex flex-col items-end gap-1.5 shrink-0">
           <button
             onClick={() => setEditing(true)}
-            aria-label={`Edit ${speaker.name}`}
-            title="Edit speaker"
+            aria-label={`Edit ${member.name}`}
+            title="Edit crew member"
             className="inline-flex items-center justify-center w-9 h-9 rounded-full text-white/70 hover:text-white hover:bg-white/[0.08] transition-colors"
           >
             <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
@@ -264,60 +226,39 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
             </svg>
           </button>
 
-          {canEmail && (
-            <button
-              onClick={handleSendAcceptanceEmail}
-              disabled={isPending}
-              aria-label={`${alreadyEmailed ? 'Resend' : 'Send'} acceptance email to ${speaker.name} for: ${speaker.talkTitle}`}
-              title={alreadyEmailed ? 'Resend acceptance email' : 'Send acceptance email'}
-              className={`inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                alreadyEmailed
-                  ? 'text-white/55 hover:text-white hover:bg-white/[0.08]'
-                  : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
-              }`}
-            >
-              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
-              </svg>
-            </button>
-          )}
-
-          {canSendTicket && (
-            <button
-              onClick={handleSendSpeakerTicket}
-              disabled={isPending}
-              aria-label={`${ticketSent ? 'Resend' : 'Send'} the complimentary speaker ticket to ${speaker.name}`}
-              title={ticketSent ? 'Resend speaker ticket' : 'Send speaker ticket'}
-              className={`inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                ticketSent
-                  ? 'text-white/55 hover:text-white hover:bg-white/[0.08]'
-                  : 'bg-google-blue/15 text-google-blue hover:bg-google-blue-deep hover:text-white'
-              }`}
-            >
-              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 6.25V4.5a1 1 0 011-1h11a1 1 0 011 1v1.75a1.75 1.75 0 000 3.5V11.5a1 1 0 01-1 1h-11a1 1 0 01-1-1V9.75a1.75 1.75 0 000-3.5z" />
-                <path strokeLinecap="round" strokeDasharray="1.5 1.5" d="M10 4v8" />
-              </svg>
-            </button>
-          )}
+          <button
+            onClick={handleSendAcceptanceEmail}
+            disabled={isPending}
+            aria-label={`${alreadyEmailed ? 'Resend' : 'Send'} the volunteer acceptance email to ${member.name}`}
+            title={alreadyEmailed ? 'Resend acceptance email' : 'Send acceptance email'}
+            className={`inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              alreadyEmailed
+                ? 'text-white/55 hover:text-white hover:bg-white/[0.08]'
+                : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
+            }`}
+          >
+            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+              <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
+            </svg>
+          </button>
 
           {confirmingRemove ? (
-            <div role="group" aria-label={`Confirm removing ${speaker.name}`} className="flex flex-col items-end gap-1.5 bg-[#2d2e31] border border-white/10 rounded-xl px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.45)] w-52">
+            <div role="group" aria-label={`Confirm removing ${member.name}`} className="flex flex-col items-end gap-1.5 bg-[#2d2e31] border border-white/10 rounded-xl px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.45)] w-52">
               <p className="text-xs text-white/70 leading-snug text-left w-full">
-                Remove from the lineup and return the proposal to pending?
+                Remove from the crew and put the signup back to pending?
               </p>
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => setConfirmingRemove(false)}
-                  aria-label="Keep this speaker"
+                  aria-label="Keep this crew member"
                   className="text-xs px-2.5 py-1 rounded-lg border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
                 >
                   Keep
                 </button>
                 <button
                   onClick={handleRemove}
-                  aria-label={`Remove ${speaker.name} from the lineup`}
+                  aria-label={`Remove ${member.name} from the crew`}
                   className="text-xs px-2.5 py-1 rounded-lg bg-google-red-deep text-white font-medium hover:opacity-90 transition-colors"
                 >
                   Remove
@@ -327,8 +268,8 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
           ) : (
             <button
               onClick={() => setConfirmingRemove(true)}
-              aria-label={`Remove ${speaker.name} from the lineup`}
-              title="Remove from lineup"
+              aria-label={`Remove ${member.name} from the crew`}
+              title="Remove from crew"
               className="inline-flex items-center justify-center w-9 h-9 rounded-full text-white/55 hover:text-google-red-light hover:bg-google-red/[0.08] transition-colors"
             >
               <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
@@ -340,8 +281,8 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
       </div>
 
       {editing && (
-        <EditSpeakerModal
-          speaker={speaker}
+        <EditCrewMemberModal
+          member={member}
           onClose={() => setEditing(false)}
           onError={(message) => {
             setEditing(false);
@@ -354,21 +295,21 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
 }
 
 interface Props {
-  speakers: Speaker[];
+  crew: VolunteerSubmission[];
 }
 
-export default function SpeakersDashboard({ speakers }: Props) {
+export default function CrewDashboard({ crew }: Props) {
   const mobileBarHidden = useMobileBarHidden();
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [filter, setFilter] = useState<FilterTrack>('all');
+  const [areaFilter, setAreaFilter] = useState<FilterArea>('all');
   const [confirmationFilter, setConfirmationFilter] = useState<FilterConfirmation>('all');
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
-  const [trackMenuOpen, setTrackMenuOpen] = useState(false);
+  const [areaMenuOpen, setAreaMenuOpen] = useState(false);
   const [confirmationMenuOpen, setConfirmationMenuOpen] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const trackMenuRef = useRef<HTMLDivElement>(null);
+  const areaMenuRef = useRef<HTMLDivElement>(null);
   const confirmationMenuRef = useRef<HTMLDivElement>(null);
   const searchWidthOpen = searchOpen || Boolean(search);
 
@@ -377,15 +318,15 @@ export default function SpeakersDashboard({ speakers }: Props) {
   }, [searchOpen]);
 
   useEffect(() => {
-    if (!trackMenuOpen) return;
+    if (!areaMenuOpen) return;
 
     function handlePointerDown(event: MouseEvent) {
-      if (trackMenuRef.current && !trackMenuRef.current.contains(event.target as Node)) {
-        setTrackMenuOpen(false);
+      if (areaMenuRef.current && !areaMenuRef.current.contains(event.target as Node)) {
+        setAreaMenuOpen(false);
       }
     }
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setTrackMenuOpen(false);
+      if (event.key === 'Escape') setAreaMenuOpen(false);
     }
 
     document.addEventListener('mousedown', handlePointerDown);
@@ -394,7 +335,7 @@ export default function SpeakersDashboard({ speakers }: Props) {
       document.removeEventListener('mousedown', handlePointerDown);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [trackMenuOpen]);
+  }, [areaMenuOpen]);
 
   useEffect(() => {
     if (!confirmationMenuOpen) return;
@@ -442,67 +383,65 @@ export default function SpeakersDashboard({ speakers }: Props) {
 
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
 
-  const counts: Record<FilterTrack, number> = {
-    all: speakers.length,
-    developer: speakers.filter((speaker) => speaker.track === 'developer').length,
-    builder: speakers.filter((speaker) => speaker.track === 'builder').length,
-    workshop: speakers.filter((speaker) => speaker.track === 'workshop').length,
-    showcase: speakers.filter((speaker) => speaker.track === 'showcase').length,
+  const matchesArea = (member: VolunteerSubmission, filter: FilterArea) => {
+    if (filter === 'all') return true;
+    if (filter === 'unassigned') return member.assignedArea === '';
+    return member.assignedArea === filter;
   };
-  const confirmationCounts: Record<FilterConfirmation, number> = {
-    all: speakers.length,
-    'not-emailed': speakers.filter((speaker) => speaker.confirmation === 'not-emailed').length,
-    awaiting: speakers.filter((speaker) => speaker.confirmation === 'awaiting').length,
-    confirmed: speakers.filter((speaker) => speaker.confirmation === 'confirmed').length,
-    unknown: speakers.filter((speaker) => speaker.confirmation === 'unknown').length,
-  };
-  const confirmedCount = confirmationCounts.confirmed;
-  const notEmailedCount = confirmationCounts['not-emailed'];
-  const incompleteCount = speakers.filter((speaker) => missingProfileParts(speaker).length > 0).length;
-  const awaitingTicketCount = speakers.filter(
-    (speaker) => speaker.confirmation === 'confirmed' && !speaker.speakerTicketEmailSentAt
-  ).length;
 
-  const query = search.trim().toLowerCase();
-  const filtered = speakers
-    .filter((speaker) => filter === 'all' || speaker.track === filter)
-    .filter((speaker) => confirmationFilter === 'all' || speaker.confirmation === confirmationFilter)
-    .filter(
-      (speaker) =>
-        !query ||
-        speaker.name.toLowerCase().includes(query) ||
-        speaker.email.toLowerCase().includes(query) ||
-        speaker.talkTitle.toLowerCase().includes(query)
-    );
-
-  const filterTabs: { value: FilterTrack; label: string }[] = [
-    { value: 'all', label: 'All tracks' },
-    { value: 'developer', label: TRACK_LABELS.developer },
-    { value: 'builder', label: TRACK_LABELS.builder },
-    { value: 'workshop', label: TRACK_LABELS.workshop },
-    { value: 'showcase', label: TRACK_LABELS.showcase },
+  // Only areas somebody is actually rostered to are offered: a menu of nine areas with
+  // eight zeroes in it is a list of things that haven't happened.
+  const areaTabs: { value: FilterArea; label: string }[] = [
+    { value: 'all', label: 'All areas' },
+    ...(crew.some((member) => member.assignedArea === '') ? [{ value: 'unassigned' as const, label: 'No area assigned' }] : []),
+    ...(Object.keys(VOLUNTEER_AREA_LABELS) as VolunteerArea[])
+      .filter((area) => crew.some((member) => member.assignedArea === area))
+      .map((area) => ({ value: area as FilterArea, label: VOLUNTEER_AREA_LABELS[area] })),
   ];
 
-  // "No proposal" is only offered when it applies; it is a data problem, not a stage.
   const confirmationTabs: { value: FilterConfirmation; label: string }[] = [
     { value: 'all', label: 'Any status' },
-    { value: 'not-emailed', label: CONFIRMATION_CHIP['not-emailed'].label },
-    { value: 'awaiting', label: CONFIRMATION_CHIP.awaiting.label },
-    { value: 'confirmed', label: CONFIRMATION_CHIP.confirmed.label },
-    ...(confirmationCounts.unknown > 0 ? [{ value: 'unknown' as const, label: CONFIRMATION_CHIP.unknown.label }] : []),
+    { value: 'not-emailed', label: VOLUNTEER_CONFIRMATION_CHIPS['not-emailed'].label },
+    { value: 'awaiting', label: VOLUNTEER_CONFIRMATION_CHIPS.awaiting.label },
+    { value: 'confirmed', label: VOLUNTEER_CONFIRMATION_CHIPS.confirmed.label },
   ];
+
+  const areaCounts = new Map<FilterArea, number>(
+    areaTabs.map((tab) => [tab.value, crew.filter((member) => matchesArea(member, tab.value)).length])
+  );
+  const confirmationCounts: Record<FilterConfirmation, number> = {
+    all: crew.length,
+    'not-emailed': crew.filter((member) => member.confirmation === 'not-emailed').length,
+    awaiting: crew.filter((member) => member.confirmation === 'awaiting').length,
+    confirmed: crew.filter((member) => member.confirmation === 'confirmed').length,
+  };
+
+  const notEmailedCount = confirmationCounts['not-emailed'];
+  const confirmedCount = confirmationCounts.confirmed;
+  const unassignedCount = crew.filter((member) => member.assignedArea === '').length;
+
+  const query = search.trim().toLowerCase();
+  const filtered = crew
+    .filter((member) => matchesArea(member, areaFilter))
+    .filter((member) => confirmationFilter === 'all' || member.confirmation === confirmationFilter)
+    .filter(
+      (member) =>
+        !query ||
+        member.name.toLowerCase().includes(query) ||
+        member.email.toLowerCase().includes(query) ||
+        member.phone.toLowerCase().includes(query)
+    );
 
   return (
     <>
       <div className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-[#010103]/95 backdrop-blur-sm`}>
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <div className="min-w-0">
-            <h1 className="text-xl font-bold text-white tracking-tight">Speakers</h1>
+            <h1 className="text-xl font-bold text-white tracking-tight">Crew</h1>
             <p className="mt-0.5 text-sm text-white/55">
-              {counts.all} in the lineup &middot; {confirmedCount} confirmed
+              {crew.length} on the crew &middot; {confirmedCount} confirmed
               {notEmailedCount > 0 && <> &middot; {notEmailedCount} not emailed</>}
-              {awaitingTicketCount > 0 && <> &middot; {awaitingTicketCount} without a ticket</>}
-              {incompleteCount > 0 && <> &middot; {incompleteCount} with profile gaps</>}
+              {unassignedCount > 0 && <> &middot; {unassignedCount} without an area</>}
             </p>
           </div>
 
@@ -516,7 +455,7 @@ export default function SpeakersDashboard({ speakers }: Props) {
               <button
                 onClick={() => setSearchOpen(true)}
                 tabIndex={searchOpen || search ? -1 : undefined}
-                aria-label="Search speakers by name, email, or talk title"
+                aria-label="Search crew by name, email, or phone"
                 title="Search"
                 className={`absolute left-0 top-0 inline-flex items-center justify-center w-10 h-10 rounded-full text-white/70 hover:text-white transition-opacity duration-200 ${
                   searchWidthOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
@@ -534,8 +473,8 @@ export default function SpeakersDashboard({ speakers }: Props) {
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 tabIndex={searchOpen || search ? undefined : -1}
-                placeholder="Search by name, email, or talk…"
-                aria-label="Search speakers by name, email, or talk title"
+                placeholder="Search by name, email, or phone…"
+                aria-label="Search crew by name, email, or phone"
                 className={`w-full h-10 rounded-full bg-transparent pl-9 pr-9 py-0 text-sm text-white placeholder:text-white/50 focus:outline-none transition-opacity duration-200 ${
                   searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}
@@ -577,7 +516,7 @@ export default function SpeakersDashboard({ speakers }: Props) {
                 onClick={() => setConfirmationMenuOpen((open) => !open)}
                 aria-haspopup="menu"
                 aria-expanded={confirmationMenuOpen}
-                aria-label="Filter speakers by confirmation status"
+                aria-label="Filter crew by confirmation status"
                 className={`inline-flex items-center gap-2 h-10 text-sm px-4 rounded-full transition-colors font-bold ${
                   confirmationMenuOpen ? 'bg-white/[0.12] text-white' : 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
                 }`}
@@ -615,43 +554,43 @@ export default function SpeakersDashboard({ speakers }: Props) {
               )}
             </div>
 
-            <div className="relative shrink-0" ref={trackMenuRef}>
+            <div className="relative shrink-0" ref={areaMenuRef}>
               <button
-                onClick={() => setTrackMenuOpen((open) => !open)}
+                onClick={() => setAreaMenuOpen((open) => !open)}
                 aria-haspopup="menu"
-                aria-expanded={trackMenuOpen}
-                aria-label="Filter speakers by track"
+                aria-expanded={areaMenuOpen}
+                aria-label="Filter crew by assigned area"
                 className={`inline-flex items-center gap-2 h-10 text-sm px-4 rounded-full transition-colors font-bold ${
-                  trackMenuOpen ? 'bg-white/[0.12] text-white' : 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
+                  areaMenuOpen ? 'bg-white/[0.12] text-white' : 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
                 }`}
               >
-                {filterTabs.find((tab) => tab.value === filter)?.label}
-                <span className="font-medium text-white/60">{counts[filter]}</span>
-                <svg className={`w-3 h-3 text-white/55 transition-transform ${trackMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                {areaTabs.find((tab) => tab.value === areaFilter)?.label ?? 'All areas'}
+                <span className="font-medium text-white/60">{areaCounts.get(areaFilter) ?? 0}</span>
+                <svg className={`w-3 h-3 text-white/55 transition-transform ${areaMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
                 </svg>
               </button>
 
-              {trackMenuOpen && (
+              {areaMenuOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 top-full mt-2 w-48 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
+                  className="absolute right-0 top-full mt-2 w-56 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
                 >
-                  {filterTabs.map((tab) => (
+                  {areaTabs.map((tab) => (
                     <button
                       key={tab.value}
                       role="menuitem"
                       onClick={() => {
-                        setFilter(tab.value);
-                        setTrackMenuOpen(false);
+                        setAreaFilter(tab.value);
+                        setAreaMenuOpen(false);
                       }}
-                      aria-pressed={filter === tab.value}
+                      aria-pressed={areaFilter === tab.value}
                       className={`w-full flex items-center justify-between gap-3 text-left text-sm px-4 py-2.5 transition-colors ${
-                        filter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
+                        areaFilter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
                       }`}
                     >
                       {tab.label}
-                      <span className="text-white/55">{counts[tab.value]}</span>
+                      <span className="text-white/55">{areaCounts.get(tab.value) ?? 0}</span>
                     </button>
                   ))}
                 </div>
@@ -662,18 +601,18 @@ export default function SpeakersDashboard({ speakers }: Props) {
       </div>
 
       <div className="px-4 md:px-5 pb-8 sm:pb-10">
-        {speakers.length === 0 ? (
+        {crew.length === 0 ? (
           <div className="bg-surface border border-white/10 rounded-2xl p-12 text-center">
-            <p className="text-sm text-white/50">No speakers yet. Accept a proposal on the Submissions page to add one to the lineup.</p>
+            <p className="text-sm text-white/50">No crew yet. Accept a signup on the Volunteers page to add someone to the crew.</p>
           </div>
         ) : filtered.length === 0 ? (
           <div className="bg-surface border border-white/10 rounded-2xl p-12 text-center">
-            <p className="text-sm text-white/50">No speakers match this filter.</p>
+            <p className="text-sm text-white/50">No crew members match this filter.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-5 items-start">
-            {filtered.map((speaker) => (
-              <SpeakerCard key={speaker.id} speaker={speaker} onError={setAlertMessage} />
+            {filtered.map((member) => (
+              <CrewCard key={member.id} member={member} onError={setAlertMessage} />
             ))}
           </div>
         )}

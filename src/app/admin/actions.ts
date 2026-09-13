@@ -6,6 +6,7 @@ import { verifyAdminSession } from '@/lib/adminSession';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { Resend } from 'resend';
 import { acceptanceEmailSubject, buildAcceptanceEmail } from '@/lib/acceptanceEmail';
+import { buildSpeakerTicketEmail, speakerTicketEmailSubject } from '@/lib/speakerTicketEmail';
 import { confirmDeadlineFrom, confirmUrl } from '@/lib/speakerConfirm';
 import { normaliseProfileUrl } from '@/lib/speakers';
 import type { ExperienceLevel, TalkFormat, Track } from '@/lib/types';
@@ -550,6 +551,86 @@ export async function sendAcceptanceEmail(submissionId: string): Promise<{ error
     return { error: 'The email was sent, but we couldn\'t record it against this submission. Please refresh before sending again.' };
   }
 
+  // The speakers page shows the same chip, joined from the submission.
   revalidatePath('/admin');
+  revalidatePath('/admin/speakers');
+  return {};
+}
+
+// The complimentary speaker ticket, sent once the speaker has confirmed. Gated on the
+// confirmation rather than on the acceptance: the ticket link unlocks a free ticket, so it
+// only goes to people who have actually said they are coming. Like the acceptance email
+// this is an explicit admin action, not a side effect of confirming, so an organiser can
+// hold it back while a slot is still in question.
+export async function sendSpeakerTicketEmail(submissionId: string): Promise<{ error?: string }> {
+  let senderName: string;
+  let senderEmail: string;
+  try {
+    ({ name: senderName, email: senderEmail } = await verifyAdminSession());
+  } catch {
+    return { error: 'Your session has expired. Please sign in again.' };
+  }
+
+  const ticketUrl = process.env.SPEAKER_TICKET_URL?.trim();
+  if (!ticketUrl) {
+    return { error: 'The speaker ticket link isn\'t configured on the server, so this email can\'t be sent yet.' };
+  }
+
+  const submissionRef = adminDb.collection('submissions').doc(submissionId);
+
+  let submission: FirebaseFirestore.DocumentData;
+  try {
+    const snap = await submissionRef.get();
+    if (!snap.exists) return { error: 'Submission not found.' };
+    submission = snap.data()!;
+  } catch {
+    return { error: 'Could not load this submission. Please try again.' };
+  }
+
+  if (submission.status !== 'accepted') {
+    return { error: 'Only accepted submissions can be sent a speaker ticket. Accept this proposal first.' };
+  }
+  if (!submission.speakerConfirmedAt) {
+    return { error: 'This speaker hasn\'t confirmed their participation yet, so the ticket can\'t be sent.' };
+  }
+
+  const sentAt = new Date();
+
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: `GDG Sydney <${process.env.RESEND_FROM_EMAIL}>`,
+      to: submission.email,
+      bcc: 'hello@gdgsydney.com',
+      replyTo: 'hello@gdgsydney.com',
+      subject: speakerTicketEmailSubject(),
+      html: buildSpeakerTicketEmail({
+        name: submission.name,
+        ticketUrl,
+      }),
+    });
+  } catch (err) {
+    // Surfaced to the admin for the same reason as the acceptance email: they are the only
+    // one who can tell that the speaker never got their ticket.
+    console.error('Speaker ticket email failed for submission:', submissionId, err);
+    return { error: 'We couldn\'t send the speaker ticket email. Please try again in a moment.' };
+  }
+
+  try {
+    await submissionRef.update({
+      speakerTicketEmailSentAt: Timestamp.fromDate(sentAt),
+      speakerTicketEmailSentBy: senderEmail,
+      reviewerNotes: FieldValue.arrayUnion({
+        text: `Speaker ticket link emailed by ${senderName}.`,
+        authorName: senderName,
+        createdAt: Timestamp.now(),
+      }),
+    });
+  } catch {
+    return { error: 'The ticket email was sent, but we couldn\'t record it against this submission. Please refresh before sending again.' };
+  }
+
+  revalidatePath('/admin');
+  revalidatePath('/admin/speakers');
   return {};
 }
