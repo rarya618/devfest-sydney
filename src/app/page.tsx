@@ -507,9 +507,9 @@ export default async function Home() {
                         <Image
                           src={sponsor.logoUrl}
                           alt={sponsor.name}
-                          width={160}
-                          height={48}
-                          className={group.tier === 'platinum' ? 'h-14 w-auto object-contain' : 'h-10 w-auto object-contain'}
+                          width={192}
+                          height={56}
+                          className={group.tier === 'platinum' ? 'h-14 w-40 max-w-full object-contain' : 'h-12 w-32 max-w-full object-contain'}
                         />
                       </a>
                     ))}

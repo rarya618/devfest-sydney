@@ -1,5 +1,5 @@
 import { adminDb } from '@/lib/firebase-admin';
-import type { Sponsor, SponsorTier } from '@/lib/types';
+import type { CommunityPartner, Sponsor, SponsorTier } from '@/lib/types';
 
 export const TIER_ORDER: SponsorTier[] = ['platinum', 'gold', 'silver', 'community'];
 
@@ -16,6 +16,15 @@ export async function fetchSponsors(): Promise<Sponsor[]> {
   try {
     const snapshot = await adminDb.collection('sponsors').orderBy('order').get();
     return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Sponsor));
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchCommunityPartners(): Promise<CommunityPartner[]> {
+  try {
+    const snapshot = await adminDb.collection('partners').orderBy('order').get();
+    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as CommunityPartner));
   } catch {
     return [];
   }

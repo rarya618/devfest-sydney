@@ -17,14 +17,25 @@ export type GdgOnCampusChapter = '' | 'usyd' | 'uts' | 'other';
 export type ShowcaseStage = 'idea' | 'prototype' | 'live';
 export type ShowcaseStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
 
-export interface Sponsor {
+// Shape shared by sponsors and community partners: what a card or logo on /partners needs.
+export interface PartnerOrganisation {
   id: string;
   name: string;
   logoUrl: string;
   website: string;
-  tier: SponsorTier;
   order: number;
+  // Optional short blurb; with one, /partners renders a card instead of a bare logo
+  description?: string;
 }
+
+// Paid or in-kind sponsors, in the `sponsors` collection, listed by tier
+export interface Sponsor extends PartnerOrganisation {
+  tier: SponsorTier;
+}
+
+// Community partners (meetups, student groups, other developer communities) that promote
+// DevFest to their members in a reciprocal, unpaid arrangement. `partners` collection.
+export type CommunityPartner = PartnerOrganisation;
 
 export interface AdminUser {
   email: string;

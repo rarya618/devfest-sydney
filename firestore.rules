@@ -61,7 +61,21 @@ rules_version='2';
 //   - name: string (required, 1–100 chars)
 //   - tier: string (required) — 'platinum' | 'gold' | 'silver' | 'community'
 //   - logoUrl: string (required, valid https URL, max 500 chars)
-//   - websiteUrl: string (optional, valid https URL, max 500 chars)
+//   - website: string (required, valid https URL, max 500 chars)
+//   - order: number (required), sort position within the tier
+//   - description: string (optional, max 600 chars), short blurb shown on /partners
+//
+// Collection: partners
+// Document ID: slug of the organisation name (e.g. "gdg-on-campus-usyd")
+// Community partners: meetups, student groups and other developer communities that
+// promote DevFest to their members. Reciprocal, not paid; paid or in-kind sponsors
+// belong in `sponsors` (the `community` tier for the smallest ones).
+// Fields:
+//   - name: string (required, 1–100 chars)
+//   - logoUrl: string (required, valid https URL, max 500 chars)
+//   - website: string (required, valid https URL, max 500 chars)
+//   - order: number (required), sort position in the section
+//   - description: string (optional, max 600 chars), short blurb shown on /partners
 //
 // Collection: team
 // Document ID: auto-generated
@@ -292,13 +306,25 @@ service cloud.firestore {
         isValidOptionalString('location', 1, 100);
     }
 
+    // Shared by sponsors and community partners: name, logo, website, order, optional blurb.
+    function isValidOrganisation(data) {
+      return data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+        data.logoUrl is string && isValidHttpsUrl(data.logoUrl) &&
+        data.website is string && isValidHttpsUrl(data.website) &&
+        data.order is number &&
+        (!('description' in data) || (data.description is string && data.description.size() <= 600));
+    }
+
     function isValidSponsor(data) {
       let allowedTiers = ['platinum', 'gold', 'silver', 'community'];
-      return data.keys().hasOnly(['name', 'tier', 'logoUrl', 'websiteUrl']) &&
-        data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+      return data.keys().hasOnly(['name', 'tier', 'logoUrl', 'website', 'order', 'description']) &&
         data.tier in allowedTiers &&
-        data.logoUrl is string && isValidHttpsUrl(data.logoUrl) &&
-        isValidOptionalHttpsUrl('websiteUrl');
+        isValidOrganisation(data);
+    }
+
+    function isValidCommunityPartner(data) {
+      return data.keys().hasOnly(['name', 'logoUrl', 'website', 'order', 'description']) &&
+        isValidOrganisation(data);
     }
 
     function isValidTeamMember(data) {
@@ -383,6 +409,16 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isAdmin() && isValidSponsor(request.resource.data);
       allow update: if isAdmin() && isValidSponsor(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // partners — community partners; public read, admin-only write
+    // ===============================================================
+    match /partners/{partnerId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidCommunityPartner(request.resource.data);
+      allow update: if isAdmin() && isValidCommunityPartner(request.resource.data);
       allow delete: if isAdmin();
     }
 

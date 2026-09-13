@@ -6,7 +6,8 @@ import Footer from '@/components/Footer';
 import Reveal from '@/components/Reveal';
 import { areTicketsOpen } from '@/lib/tickets';
 import { isCfsOpen } from '@/lib/cfs';
-import { fetchPartnerAssets, fetchSponsors, groupSponsorsByTier, TIER_LABELS } from '@/lib/sponsors';
+import { fetchCommunityPartners, fetchPartnerAssets, fetchSponsors, groupSponsorsByTier, TIER_LABELS } from '@/lib/sponsors';
+import type { PartnerOrganisation } from '@/lib/types';
 
 // The navbar ticket CTA follows the on-sale date, and sponsors appear as they are added,
 // so this page is rendered per request like the other public pages.
@@ -41,11 +42,78 @@ function ProspectusButton({ href, className }: { href: string; className: string
 const primaryButton = 'inline-flex items-center gap-2.5 px-7 py-2 bg-google-green-deep text-white text-base font-bold rounded border border-google-green-deep transition-opacity hover:opacity-80';
 const outlineButton = 'inline-flex items-center gap-2.5 px-7 py-2 bg-transparent text-white text-base font-bold rounded border border-white/40 transition-colors hover:border-white';
 
+// Every logo sits in a fixed box with both a height and a width cap, so a stacked lockup
+// fills the height and a wide wordmark fills the width and the two read at a similar weight.
+function SponsorCard({ sponsor, label, logoBoxClass, delay }: { sponsor: PartnerOrganisation; label: string; logoBoxClass: string; delay: number }) {
+  return (
+    <Reveal delay={delay} className="w-full md:w-[calc(50%-0.75rem)] rounded-2xl bg-surface p-8 flex flex-col items-start gap-5">
+      <Image src={sponsor.logoUrl} alt={sponsor.name} width={288} height={96} className={`${logoBoxClass} max-w-full object-contain object-left`} />
+      <div>
+        <p className="text-xs font-bold text-google-green mb-2">{label}</p>
+        <p className="text-white/70 leading-relaxed">{sponsor.description}</p>
+        <a
+          href={sponsor.website}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Visit the ${sponsor.name} website`}
+          className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-white/70 hover:text-white transition-colors"
+        >
+          Visit {sponsor.name}
+          <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 8h10M9 4l4 4-4 4" />
+          </svg>
+        </a>
+      </div>
+    </Reveal>
+  );
+}
+
+function SponsorLogoLink({ sponsor, logoBoxClass }: { sponsor: PartnerOrganisation; logoBoxClass: string }) {
+  return (
+    <a
+      href={sponsor.website}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`${sponsor.name} website`}
+      className="opacity-80 hover:opacity-100 transition-opacity"
+    >
+      <Image src={sponsor.logoUrl} alt={sponsor.name} width={288} height={96} className={`${logoBoxClass} max-w-full object-contain`} />
+    </a>
+  );
+}
+
+// A group with blurbs gets a row of cards, then the rest of the group as a logo row, so no
+// organisation appears twice. Shared by the sponsor tiers and the community partners.
+function PartnerGroup({ sponsors, label, cardLogoBoxClass, rowLogoBoxClass }: { sponsors: PartnerOrganisation[]; label: string; cardLogoBoxClass: string; rowLogoBoxClass: string }) {
+  const sponsorsWithBlurb = sponsors.filter((sponsor) => sponsor.description);
+  const logoOnlySponsors = sponsors.filter((sponsor) => !sponsor.description);
+  return (
+    <>
+      {sponsorsWithBlurb.length > 0 && (
+        <div className={`flex flex-wrap justify-center gap-6 ${logoOnlySponsors.length > 0 ? 'mb-10' : ''}`}>
+          {sponsorsWithBlurb.map((sponsor, index) => (
+            <SponsorCard key={sponsor.id} sponsor={sponsor} label={label} logoBoxClass={cardLogoBoxClass} delay={index * 0.1} />
+          ))}
+        </div>
+      )}
+      {logoOnlySponsors.length > 0 && (
+        <div className="flex flex-wrap items-center justify-center gap-10">
+          {logoOnlySponsors.map((sponsor) => (
+            <SponsorLogoLink key={sponsor.id} sponsor={sponsor} logoBoxClass={rowLogoBoxClass} />
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
 export default async function PartnersPage() {
   const cfsOpen = isCfsOpen();
   const cfsCloseDate = process.env.CFS_CLOSE_DATE;
   const ticketsOnSale = areTicketsOpen();
-  const [sponsors, assets] = await Promise.all([fetchSponsors(), fetchPartnerAssets()]);
+  // Sponsors (paid or in-kind, every tier including community) and community partners
+  // (reciprocal, unpaid) are separate collections and separate sections.
+  const [sponsors, communityPartners, assets] = await Promise.all([fetchSponsors(), fetchCommunityPartners(), fetchPartnerAssets()]);
   const sponsorGroups = groupSponsorsByTier(sponsors);
 
   return (
@@ -137,26 +205,12 @@ export default async function PartnersPage() {
               {sponsorGroups.map((group) => (
                 <div key={group.tier}>
                   <p className="text-xs font-bold text-white/50 mb-6 text-center">{TIER_LABELS[group.tier]}</p>
-                  <div className="flex flex-wrap items-center justify-center gap-10">
-                    {group.sponsors.map((sponsor) => (
-                      <a
-                        key={sponsor.id}
-                        href={sponsor.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`${sponsor.name} website`}
-                        className="opacity-80 hover:opacity-100 transition-opacity"
-                      >
-                        <Image
-                          src={sponsor.logoUrl}
-                          alt={sponsor.name}
-                          width={200}
-                          height={64}
-                          className={group.tier === 'platinum' ? 'h-16 w-auto object-contain' : 'h-11 w-auto object-contain'}
-                        />
-                      </a>
-                    ))}
-                  </div>
+                  <PartnerGroup
+                    sponsors={group.sponsors}
+                    label={`${TIER_LABELS[group.tier]} sponsor`}
+                    cardLogoBoxClass={group.tier === 'platinum' ? 'h-24 w-56' : 'h-20 w-48'}
+                    rowLogoBoxClass={group.tier === 'platinum' ? 'h-16 w-44' : 'h-14 w-36'}
+                  />
                 </div>
               ))}
             </div>
@@ -165,6 +219,33 @@ export default async function PartnersPage() {
               <p className="text-white/65 leading-relaxed">
                 Sponsor logos appear here as partnerships are signed. The first names on this page get the longest run of
                 visibility before the event, on the site, in social posts and in the lead-up to ticket sales.
+              </p>
+            </Reveal>
+          )}
+        </div>
+      </section>
+
+      {/* Community partners */}
+      <section id="community" className="pt-20 px-4 sm:px-6 lg:px-12">
+        <div className="max-w-5xl mx-auto">
+          <Reveal className={`text-center ${communityPartners.length > 0 ? 'mb-12' : 'mb-5'}`}>
+            <p className="text-xs font-bold text-google-green mb-3">Community partners</p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+              {communityPartners.length > 0 ? 'The communities we build with' : 'Community partners are being confirmed'}
+            </h2>
+          </Reveal>
+
+          {communityPartners.length > 0 ? (
+            <PartnerGroup sponsors={communityPartners} label="Community partner" cardLogoBoxClass="h-20 w-48" rowLogoBoxClass="h-14 w-36" />
+          ) : (
+            <Reveal delay={0.1} className="max-w-2xl mx-auto text-center">
+              <p className="text-white/65 leading-relaxed">
+                Meetups, student groups and developer communities that help spread the word about DevFest Sydney are
+                listed here. If your community would like to partner with us, email{' '}
+                <a href={CONTACT_HREF} className="text-white underline underline-offset-4 hover:text-white/80">
+                  {CONTACT_EMAIL}
+                </a>
+                .
               </p>
             </Reveal>
           )}
