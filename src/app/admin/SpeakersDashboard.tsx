@@ -9,7 +9,7 @@ import Alert from '@/components/Alert';
 import { formatDate, getInitials } from '@/lib/format';
 import {
   TRACK_LABELS,
-  TRACK_COLORS,
+  TRACK_CHIP_COLORS,
   TRACK_BORDER_COLORS,
   TRACK_DOT_COLORS,
   FORMAT_LABELS,
@@ -181,7 +181,7 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
           </p>
 
           <div className="flex flex-wrap items-center gap-1.5 gap-y-2 mt-3">
-            <span className={`inline-flex items-center gap-1.5 text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] font-bold ${TRACK_COLORS[speaker.track]}`}>
+            <span className={`inline-flex items-center gap-1.5 text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] font-bold ${TRACK_CHIP_COLORS[speaker.track]}`}>
               <span className={`w-1.5 h-1.5 rounded-full ${TRACK_DOT_COLORS[speaker.track]}`} aria-hidden="true" />
               {TRACK_LABELS[speaker.track]}
             </span>
@@ -292,7 +292,7 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
               className={`inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                 ticketSent
                   ? 'text-white/55 hover:text-white hover:bg-white/[0.08]'
-                  : 'bg-google-blue/15 text-google-blue hover:bg-google-blue-deep hover:text-white'
+                  : 'bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white'
               }`}
             >
               <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
@@ -311,7 +311,7 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
                 <button
                   onClick={() => setConfirmingRemove(false)}
                   aria-label="Keep this speaker"
-                  className="text-xs px-2.5 py-1 rounded-lg border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
+                  className="text-xs px-2.5 py-1 rounded-lg border border-white/40 text-white/50 hover:border-white/60 hover:text-white transition-colors"
                 >
                   Keep
                 </button>

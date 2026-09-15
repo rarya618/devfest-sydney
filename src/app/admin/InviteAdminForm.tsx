@@ -45,7 +45,7 @@ export default function InviteAdminForm({ onDone, onError }: Props) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Jane Smith"
-              className="w-full bg-white/[0.06] border border-white/35 rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 outline-none focus:border-google-blue/50 transition-colors"
+              className="w-full bg-white/[0.06] border border-white/35 rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 outline-none focus:border-google-blue transition-colors"
             />
           </div>
           <div>
@@ -59,7 +59,7 @@ export default function InviteAdminForm({ onDone, onError }: Props) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="jane@example.com"
-              className="w-full bg-white/[0.06] border border-white/35 rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 outline-none focus:border-google-blue/50 transition-colors"
+              className="w-full bg-white/[0.06] border border-white/35 rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 outline-none focus:border-google-blue transition-colors"
             />
           </div>
 
@@ -67,7 +67,7 @@ export default function InviteAdminForm({ onDone, onError }: Props) {
             <button
               type="button"
               onClick={onDone}
-              className="flex-1 text-sm px-4 py-2 rounded-lg border border-white/10 text-white/70 hover:border-white/20 hover:text-white transition-colors"
+              className="flex-1 text-sm px-4 py-2 rounded-lg border border-white/40 text-white/70 hover:border-white/60 hover:text-white transition-colors"
             >
               Cancel
             </button>

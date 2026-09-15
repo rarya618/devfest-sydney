@@ -16,7 +16,7 @@ type StatAccent = 'neutral' | 'blue' | 'yellow' | 'green' | 'muted';
 
 const STAT_ACCENT_STYLES: Record<StatAccent, { border: string; bg: string; iconBg: string; iconText: string; countText: string }> = {
   neutral: { border: 'border-white/15', bg: 'bg-surface', iconBg: 'bg-white/10', iconText: 'text-white/70', countText: 'text-white' },
-  blue: { border: 'border-google-blue/25', bg: 'bg-google-blue/[0.08]', iconBg: 'bg-google-blue/15', iconText: 'text-google-blue', countText: 'text-google-blue' },
+  blue: { border: 'border-google-blue/25', bg: 'bg-google-blue/[0.08]', iconBg: 'bg-google-blue/15', iconText: 'text-google-blue-light', countText: 'text-google-blue' },
   yellow: { border: 'border-google-yellow/25', bg: 'bg-google-yellow/[0.08]', iconBg: 'bg-google-yellow/15', iconText: 'text-google-yellow', countText: 'text-google-yellow' },
   green: { border: 'border-google-green/25', bg: 'bg-google-green/[0.08]', iconBg: 'bg-google-green/15', iconText: 'text-google-green', countText: 'text-google-green' },
   muted: { border: 'border-white/10', bg: 'bg-surface', iconBg: 'bg-white/10', iconText: 'text-white/55', countText: 'text-white/50' },

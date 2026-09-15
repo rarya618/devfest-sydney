@@ -33,7 +33,7 @@ interface LinkChipProps {
 }
 
 const LINK_CHIP_ACCENTS: Record<LinkChipProps['accent'], { iconBg: string; iconText: string; hoverBorder: string; hoverBg: string }> = {
-  blue: { iconBg: 'bg-google-blue/15', iconText: 'text-google-blue', hoverBorder: 'group-hover:border-google-blue/30', hoverBg: 'group-hover:bg-google-blue/[0.08]' },
+  blue: { iconBg: 'bg-google-blue/15', iconText: 'text-google-blue-light', hoverBorder: 'group-hover:border-google-blue/30', hoverBg: 'group-hover:bg-google-blue/[0.08]' },
   red: { iconBg: 'bg-google-red/15', iconText: 'text-google-red-light', hoverBorder: 'group-hover:border-google-red/30', hoverBg: 'group-hover:bg-google-red/[0.08]' },
 };
 
@@ -132,7 +132,7 @@ function SendSpeakerTicketButton({
       className={`inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
         alreadySent
           ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
-          : 'bg-google-blue/15 text-google-blue hover:bg-google-blue-deep hover:text-white'
+          : 'bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white'
       }`}
     >
       <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
@@ -256,7 +256,7 @@ function ReviewerNotesPanel({ submissionId, notes, onError }: ReviewerNotesPanel
           rows={2}
           maxLength={2000}
           disabled={isPending}
-          className="flex-1 rounded-lg border border-white/35 bg-white/[0.06] px-3 py-2 text-xs text-white placeholder:text-white/50 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30 resize-none disabled:opacity-50"
+          className="flex-1 rounded-lg border border-white/35 bg-white/[0.06] px-3 py-2 text-xs text-white placeholder:text-white/50 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40 resize-none disabled:opacity-50"
         />
         <button
           type="submit"
@@ -338,7 +338,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
           onChange={onToggleSelect}
           disabled={bulkActionsPending}
           aria-label={`Select submission: ${submission.talkTitle}`}
-          className="mt-[0.28125rem] shrink-0 w-4 h-4 rounded-md border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue/40"
+          className="mt-[0.28125rem] shrink-0 w-4 h-4 rounded-md border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue"
         />
         <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{submission.talkTitle}</h3>
       </div>
@@ -374,7 +374,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
               </span>
             )}
             {submission.isGoogleDeveloperExpert && (
-              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue border-google-blue/25">
+              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25">
                 GDE
               </span>
             )}
@@ -778,7 +778,7 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
           onChange={onToggleSelect}
           disabled={bulkActionsPending}
           aria-label={`Select submission: ${submission.talkTitle}`}
-          className="shrink-0 w-4 h-4 rounded-md border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue/40"
+          className="shrink-0 w-4 h-4 rounded-md border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue"
         />
 
         <div className="flex-1 min-w-0">
@@ -790,7 +790,7 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
             <span>&middot;</span>
             <span className="truncate">{FORMAT_LABELS[submission.format]} &middot; {EXPERIENCE_LABELS[submission.experienceLevel]}</span>
             {submission.isGoogleDeveloperExpert && (
-              <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-blue/15 text-google-blue">GDE</span>
+              <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-blue/15 text-google-blue-light">GDE</span>
             )}
             {submission.isFirstTimeSpeaker && (
               <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-green/15 text-google-green">First-timer</span>
@@ -1581,7 +1581,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 aria-label="Filter and sort submissions"
                 className={`inline-flex items-center justify-center w-10 h-10 rounded-full transition-colors ${
                   filtersMenuOpen || trackFilter !== 'all' || sort !== 'newest'
-                    ? 'text-google-blue bg-google-blue/15'
+                    ? 'text-google-blue-light bg-google-blue/15'
                     : 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
                 }`}
               >
@@ -1604,7 +1604,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                       value={trackFilter}
                       onChange={(e) => setTrackFilter(e.target.value as TrackFilter)}
                       aria-label="Filter by track"
-                      className="w-full rounded-lg border border-white/10 bg-white/[0.06] px-2.5 py-1.5 text-sm font-medium text-white/70 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30"
+                      className="w-full rounded-lg border border-white/35 bg-white/[0.06] px-2.5 py-1.5 text-sm font-medium text-white/70 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
                     >
                       <option value="all">All tracks</option>
                       {(Object.entries(TRACK_LABELS) as [Track, string][]).map(([value, label]) => (
@@ -1622,7 +1622,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                       value={sort}
                       onChange={(e) => setSort(e.target.value as SortOption)}
                       aria-label="Sort submissions"
-                      className="w-full rounded-lg border border-white/10 bg-white/[0.06] px-2.5 py-1.5 text-sm font-medium text-white/70 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30"
+                      className="w-full rounded-lg border border-white/35 bg-white/[0.06] px-2.5 py-1.5 text-sm font-medium text-white/70 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
                     >
                       {(Object.entries(SORT_LABELS) as [SortOption, string][]).map(([value, label]) => (
                         <option key={value} value={value}>{label}</option>
@@ -1692,7 +1692,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                       onChange={toggleSelectAllVisible}
                       disabled={sorted.length === 0 || isBulkPending}
                       aria-label="Select all visible submissions"
-                      className="w-4 h-4 rounded border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue/40"
+                      className="w-4 h-4 rounded border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue"
                     />
                     Select all visible
                   </label>
@@ -1760,7 +1760,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                   <h2 className="text-base font-bold text-white">{group.name}</h2>
                   <span className="text-sm text-white/55">{group.email}</span>
                   {group.submissions.length > 1 && (
-                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-google-blue/15 text-google-blue border border-google-blue/25">
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-google-blue/15 text-google-blue-light border border-google-blue/25">
                       {group.submissions.length} submissions
                     </span>
                   )}

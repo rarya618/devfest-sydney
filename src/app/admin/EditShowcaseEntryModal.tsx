@@ -33,7 +33,7 @@ function toEditableFields(entry: ShowcaseSubmission): ShowcaseEditableFields {
 }
 
 const inputClasses =
-  'w-full rounded-lg border border-white/35 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30';
+  'w-full rounded-lg border border-white/35 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40';
 const labelClasses = 'block text-xs font-semibold text-white/50 mb-1';
 
 export default function EditShowcaseEntryModal({ entry, onClose, onError }: Props) {
@@ -268,7 +268,7 @@ export default function EditShowcaseEntryModal({ entry, onClose, onError }: Prop
                     type="button"
                     onClick={() => removeCoPresenter(index)}
                     aria-label={`Remove co-presenter ${index + 1}`}
-                    className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-lg border border-white/10 text-white/55 hover:border-white/20 hover:text-white transition-colors"
+                    className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-lg border border-white/40 text-white/55 hover:border-white/60 hover:text-white transition-colors"
                   >
                     <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                       <path strokeLinecap="round" d="M4 4l8 8M12 4l-8 8" />
@@ -281,7 +281,7 @@ export default function EditShowcaseEntryModal({ entry, onClose, onError }: Prop
                   type="button"
                   onClick={addCoPresenter}
                   aria-label="Add a co-presenter"
-                  className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/70 hover:border-white/20 hover:text-white transition-colors"
+                  className="text-xs px-3 py-1.5 rounded-lg border border-white/40 text-white/70 hover:border-white/60 hover:text-white transition-colors"
                 >
                   Add co-presenter
                 </button>
@@ -305,7 +305,7 @@ export default function EditShowcaseEntryModal({ entry, onClose, onError }: Prop
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
+              className="text-xs px-3 py-1.5 rounded-lg border border-white/40 text-white/50 hover:border-white/60 hover:text-white transition-colors"
             >
               Cancel
             </button>

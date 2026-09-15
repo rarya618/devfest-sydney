@@ -71,7 +71,7 @@ function ReviewerNotesPanel({ entryId, notes, onError }: ReviewerNotesPanelProps
           rows={2}
           maxLength={2000}
           disabled={isPending}
-          className="flex-1 rounded-lg border border-white/35 bg-white/[0.06] px-3 py-2 text-xs text-white placeholder:text-white/50 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30 resize-none disabled:opacity-50"
+          className="flex-1 rounded-lg border border-white/35 bg-white/[0.06] px-3 py-2 text-xs text-white placeholder:text-white/50 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40 resize-none disabled:opacity-50"
         />
         <button
           type="submit"
@@ -179,7 +179,7 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
           {SHOWCASE_STAGE_LABELS[entry.stage]}
         </span>
         {entry.isFirstTimePresenter && (
-          <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue border-google-blue/25">
+          <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25">
             First-time presenter
           </span>
         )}

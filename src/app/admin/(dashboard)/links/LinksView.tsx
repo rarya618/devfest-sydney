@@ -80,7 +80,7 @@ export default function LinksView() {
                   value={values[key]}
                   onChange={(e) => setValues((prev) => ({ ...prev, [key]: e.target.value }))}
                   placeholder={placeholder}
-                  className="w-full bg-white/[0.04] border border-white/35 rounded-lg px-3 py-1.5 text-sm text-white placeholder-white/50 outline-none focus:border-google-blue/50 transition-colors"
+                  className="w-full bg-white/[0.04] border border-white/35 rounded-lg px-3 py-1.5 text-sm text-white placeholder-white/50 outline-none focus:border-google-blue transition-colors"
                 />
               </div>
             ))}

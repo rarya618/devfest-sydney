@@ -26,7 +26,7 @@ function toEditableFields(member: VolunteerSubmission): CrewEditableFields {
 }
 
 const inputClasses =
-  'w-full rounded-lg border border-white/35 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-google-blue/50 focus:ring-1 focus:ring-google-blue/30';
+  'w-full rounded-lg border border-white/35 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40';
 const labelClasses = 'block text-xs font-semibold text-white/50 mb-1';
 const sectionHeadingClasses = 'text-[11px] font-bold uppercase tracking-wider text-white/50';
 
@@ -249,7 +249,7 @@ export default function EditCrewMemberModal({ member, onClose, onError }: Props)
                         onClick={handlePhotoRemove}
                         disabled={isUploadingPhoto || isPending}
                         aria-label="Remove crew photo"
-                        className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors disabled:opacity-50"
+                        className="text-xs px-3 py-1.5 rounded-lg border border-white/40 text-white/50 hover:border-white/60 hover:text-white transition-colors disabled:opacity-50"
                       >
                         Remove
                       </button>
@@ -268,7 +268,7 @@ export default function EditCrewMemberModal({ member, onClose, onError }: Props)
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
+              className="text-xs px-3 py-1.5 rounded-lg border border-white/40 text-white/50 hover:border-white/60 hover:text-white transition-colors"
             >
               Cancel
             </button>

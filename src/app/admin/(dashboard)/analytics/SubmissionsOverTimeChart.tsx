@@ -157,7 +157,7 @@ export default function SubmissionsOverTimeChart({ entries, noun, accent }: Prop
                 className="stroke-white/10"
                 strokeWidth={1}
               />
-              <text x={paddingLeft - 6} y={yForValue(value)} textAnchor="end" dominantBaseline="middle" className="fill-white/40" fontSize={labelFontSize}>
+              <text x={paddingLeft - 6} y={yForValue(value)} textAnchor="end" dominantBaseline="middle" className="fill-white/55" fontSize={labelFontSize}>
                 {value}
               </text>
             </g>
@@ -169,7 +169,7 @@ export default function SubmissionsOverTimeChart({ entries, noun, accent }: Prop
               x={xForIndex(index)}
               y={chartHeight - 6}
               textAnchor={index === 0 ? 'start' : index === points.length - 1 ? 'end' : 'middle'}
-              className="fill-white/40"
+              className="fill-white/55"
               fontSize={labelFontSize}
             >
               {points[index].label}
@@ -197,7 +197,7 @@ export default function SubmissionsOverTimeChart({ entries, noun, accent }: Prop
               transform: tooltipOnRight ? 'translateX(8px)' : 'translateX(calc(-100% - 8px))',
             }}
           >
-            <p className="text-white/50 mb-1">{hovered.label}</p>
+            <p className="text-white/70 mb-1">{hovered.label}</p>
             <p>
               <span className="font-bold">{hovered.cumulative}</span> total
             </p>

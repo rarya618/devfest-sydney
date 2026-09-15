@@ -28,6 +28,15 @@ export const TRACK_COLORS: Record<Track, string> = {
   showcase: 'text-google-yellow',
 };
 
+// The admin track chips put the same label on a tinted pill sitting on an already-lifted
+// card, which costs the core blue enough to drop it to 4.5:1 at 11px. Blue 300 is the
+// on-tint variant and clears it at 7.7:1. Green and yellow are unaffected, so they stay
+// on the core colours and the public speaker page keeps reading TRACK_COLORS as before.
+export const TRACK_CHIP_COLORS: Record<Track, string> = {
+  ...TRACK_COLORS,
+  developer: 'text-google-blue-light',
+};
+
 export const TRACK_BORDER_COLORS: Record<Track, string> = {
   developer: 'border-l-google-blue',
   builder: 'border-l-google-green',

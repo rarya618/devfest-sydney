@@ -104,7 +104,7 @@ function CrewCard({ member, onError }: CrewCardProps) {
             {isOrganiser ? (
               <span
                 title="Added to the crew by an admin rather than through the volunteer signup form."
-                className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-blue/15 text-google-blue"
+                className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-blue/15 text-google-blue-light"
               >
                 Organiser
               </span>
@@ -133,7 +133,7 @@ function CrewCard({ member, onError }: CrewCardProps) {
 
           <div className="flex flex-wrap items-center gap-1.5 gap-y-2 mt-3">
             {isOrganiser ? (
-              <span className="inline-flex items-center gap-1.5 text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] font-bold text-google-blue">
+              <span className="inline-flex items-center gap-1.5 text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] font-bold text-google-blue-light">
                 <span className="w-1.5 h-1.5 rounded-full bg-google-blue" aria-hidden="true" />
                 {member.organiserRole || 'No role set'}
               </span>
@@ -169,7 +169,7 @@ function CrewCard({ member, onError }: CrewCardProps) {
             {member.showOnCrewPage ? (
               <span
                 title={isOrganiser ? 'Listed on the public crew page and on the landing page.' : 'Listed on the public crew page, once they have confirmed.'}
-                className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue border-google-blue/25"
+                className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25"
               >
                 On the crew page
               </span>
@@ -293,7 +293,7 @@ function CrewCard({ member, onError }: CrewCardProps) {
                 <button
                   onClick={() => setConfirmingRemove(false)}
                   aria-label={`Keep ${isOrganiser ? 'this organiser' : 'this crew member'}`}
-                  className="text-xs px-2.5 py-1 rounded-lg border border-white/10 text-white/50 hover:border-white/20 hover:text-white transition-colors"
+                  className="text-xs px-2.5 py-1 rounded-lg border border-white/40 text-white/50 hover:border-white/60 hover:text-white transition-colors"
                 >
                   Keep
                 </button>

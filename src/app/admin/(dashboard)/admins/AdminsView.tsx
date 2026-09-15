@@ -70,7 +70,7 @@ export default function AdminsView({ admins, currentAdminEmail }: Props) {
                   onClick={() => handleRemove(admin.email)}
                   disabled={isSelf || isPending}
                   aria-label={`Remove admin access for ${admin.name}`}
-                  className="order-3 md:order-4 shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border border-google-red/30 text-google-red-light hover:bg-google-red/[0.06] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="order-3 md:order-4 shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border border-google-red-light/60 text-google-red-light hover:bg-google-red/[0.06] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {removing ? 'Removing…' : 'Remove'}
                 </button>
