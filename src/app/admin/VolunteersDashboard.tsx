@@ -18,7 +18,7 @@ import {
   VOLUNTEER_CONFIRMATION_CHIPS,
   GDG_ON_CAMPUS_CHAPTER_LABELS,
 } from '@/lib/volunteerLabels';
-import type { ReviewerNote, VolunteerStatus, VolunteerSubmission } from '@/lib/types';
+import type { ReviewerNote, VolunteerArea, VolunteerStatus, VolunteerSubmission } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
 
 interface ReviewerNotesPanelProps {
@@ -411,10 +411,12 @@ interface Props {
 }
 
 type FilterStatus = 'all' | VolunteerStatus;
+type FilterArea = 'all' | VolunteerArea;
 
 export default function VolunteersDashboard({ volunteers }: Props) {
   const mobileBarHidden = useMobileBarHidden();
   const [filter, setFilter] = useState<FilterStatus>('all');
+  const [areaFilter, setAreaFilter] = useState<FilterArea>('all');
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchWidthOpen, setSearchWidthOpen] = useState(false);
@@ -497,9 +499,27 @@ export default function VolunteersDashboard({ volunteers }: Props) {
   ).length;
 
   const query = search.trim().toLowerCase();
-  const filtered = volunteers
-    .filter((v) => filter === 'all' || v.status === filter)
+  const withinStatus = volunteers.filter((v) => filter === 'all' || v.status === filter);
+  const filtered = withinStatus
+    .filter((v) => areaFilter === 'all' || v.areasOfInterest.includes(areaFilter))
     .filter((v) => !query || v.name.toLowerCase().includes(query) || v.email.toLowerCase().includes(query));
+
+  // Areas of interest are multi-select, so a volunteer shows under every area they ticked
+  // and the tab counts add up to more than the total. Counted within the chosen status, so
+  // the number on a tab is what clicking it shows. Only areas someone actually asked for
+  // get a tab: nine of them with most reading zero is a row to scroll past, not a filter.
+  const areaCounts = new Map<VolunteerArea, number>();
+  for (const volunteer of withinStatus) {
+    for (const area of volunteer.areasOfInterest) {
+      areaCounts.set(area, (areaCounts.get(area) ?? 0) + 1);
+    }
+  }
+  const areaTabs: { value: FilterArea; label: string; count: number }[] = [
+    { value: 'all', label: 'All areas', count: withinStatus.length },
+    ...(Object.keys(VOLUNTEER_AREA_LABELS) as VolunteerArea[])
+      .filter((area) => (areaCounts.get(area) ?? 0) > 0 || area === areaFilter)
+      .map((area) => ({ value: area, label: VOLUNTEER_AREA_LABELS[area], count: areaCounts.get(area) ?? 0 })),
+  ];
 
   const filterTabs: { value: FilterStatus; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -630,6 +650,36 @@ export default function VolunteersDashboard({ volunteers }: Props) {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Areas of interest as a tab row. Status is a menu because a signup is in exactly
+            one state; an area is a lens on the queue, and the row shows how thin each one
+            is without opening anything. */}
+        <div
+          role="group"
+          aria-label="Filter volunteers by area of interest"
+          className="mt-3 -mx-4 md:-mx-5 px-4 md:px-5 flex items-center gap-2 overflow-x-auto"
+        >
+          {areaTabs.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setAreaFilter(tab.value)}
+              aria-pressed={areaFilter === tab.value}
+              aria-label={
+                tab.value === 'all'
+                  ? 'Show volunteer signups from every area'
+                  : `Show volunteer signups interested in ${tab.label.toLowerCase()}`
+              }
+              className={`shrink-0 inline-flex items-center gap-2 h-9 text-sm px-4 rounded-full transition-colors font-bold ${
+                areaFilter === tab.value
+                  ? 'bg-white/[0.12] text-white'
+                  : 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
+              }`}
+            >
+              {tab.label}
+              <span className="font-medium text-white/60">{tab.count}</span>
+            </button>
+          ))}
         </div>
       </div>
 
