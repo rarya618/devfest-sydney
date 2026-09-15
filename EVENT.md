@@ -44,6 +44,9 @@ timetable separate from the Call for Speakers.
 ### Builder's Space
 Dedicated room with mentors and Google Developer Experts (GDEs) providing hands-on support throughout the day.
 
+### Speaker Dinner
+Held the evening before the event, Friday 9 October 2026, for the speakers and the organising team. Venue, time and RSVP are not settled yet; the speaker confirmation screen tells confirmed speakers it is happening and that details will follow by email.
+
 ### Agentathon (Shelved)
 **Status:** Shelved for now — not currently planned for the 2026 event. Removed from the landing page; keep this section for reference in case it's revived for a future edition.
 

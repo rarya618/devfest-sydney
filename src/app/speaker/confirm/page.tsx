@@ -5,6 +5,7 @@ import { adminDb } from '@/lib/firebase-admin';
 import { formatDeadlineDate } from '@/lib/format';
 import { verifySpeakerConfirmToken } from '@/lib/speakerConfirm';
 import ConfirmParticipation from './ConfirmParticipation';
+import SpeakerNextSteps from './SpeakerNextSteps';
 
 // Reached only from a link in an acceptance email, and the answer depends on a Firestore
 // read that changes the moment the speaker clicks, so there is nothing to prerender.
@@ -103,10 +104,13 @@ export default async function SpeakerConfirmPage({ searchParams }: ConfirmPagePr
             </div>
 
             {talk.alreadyConfirmed ? (
-              <p className="text-white/70 leading-relaxed">
-                Thanks, we have you down as speaking. We&rsquo;ll be in touch with your speaker
-                ticket and the running order for the day.
-              </p>
+              <>
+                <p className="text-white/70 leading-relaxed">
+                  Thanks, we have you down as speaking. We&rsquo;ll be in touch with the running
+                  order for the day.
+                </p>
+                <SpeakerNextSteps ticketUrl={process.env.SPEAKER_TICKET_URL?.trim() || null} />
+              </>
             ) : (
               <>
                 <ConfirmParticipation

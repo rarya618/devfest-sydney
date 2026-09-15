@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import Alert from '@/components/Alert';
 import { confirmSpeakerParticipation } from './actions';
+import SpeakerNextSteps from './SpeakerNextSteps';
 
 interface ConfirmParticipationProps {
   token: string;
@@ -16,6 +17,9 @@ interface ConfirmParticipationProps {
 export default function ConfirmParticipation({ token, talkTitle, intro }: ConfirmParticipationProps) {
   const [isPending, startTransition] = useTransition();
   const [confirmed, setConfirmed] = useState(false);
+  // Handed back by the action on a successful confirmation, so the ticket button can
+  // appear without a reload. Null means the link isn't configured on the server.
+  const [ticketUrl, setTicketUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   function handleConfirm() {
@@ -24,6 +28,7 @@ export default function ConfirmParticipation({ token, talkTitle, intro }: Confir
       if (result.error) {
         setError(result.error);
       } else {
+        setTicketUrl(result.ticketUrl ?? null);
         setConfirmed(true);
       }
     });
@@ -37,8 +42,9 @@ export default function ConfirmParticipation({ token, talkTitle, intro }: Confir
       >
         <p className="text-2xl font-bold text-google-green">You&rsquo;re confirmed</p>
         <p className="mt-3 text-white/70 leading-relaxed">
-          Thanks for confirming. We&rsquo;ll be in touch with your speaker ticket and the running order for the day.
+          Thanks for confirming. We&rsquo;ll be in touch with the running order for the day.
         </p>
+        <SpeakerNextSteps ticketUrl={ticketUrl} />
       </div>
     );
   }
