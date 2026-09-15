@@ -8,6 +8,7 @@ import {
   archiveShowcaseEntry,
   addShowcaseReviewerNote,
 } from './showcaseActions';
+import EditShowcaseEntryModal from './EditShowcaseEntryModal';
 import Alert from '@/components/Alert';
 import { formatDate } from '@/lib/format';
 import {
@@ -93,6 +94,7 @@ interface ShowcaseRowProps {
 function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
   const [isPending, startTransition] = useTransition();
   const [notesOpen, setNotesOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement>(null);
@@ -378,6 +380,16 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
                 >
                   Notes{entry.reviewerNotes.length > 0 ? ` (${entry.reviewerNotes.length})` : ''}
                 </button>
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    setIsEditing(true);
+                    setMoreOpen(false);
+                  }}
+                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                >
+                  Edit
+                </button>
                 {entry.status !== 'archived' && (
                   <button
                     role="menuitem"
@@ -398,6 +410,14 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
 
       {notesOpen && (
         <ReviewerNotesPanel entryId={entry.id} notes={entry.reviewerNotes} onError={onError} />
+      )}
+
+      {isEditing && (
+        <EditShowcaseEntryModal
+          entry={entry}
+          onClose={() => setIsEditing(false)}
+          onError={onError}
+        />
       )}
     </div>
   );
