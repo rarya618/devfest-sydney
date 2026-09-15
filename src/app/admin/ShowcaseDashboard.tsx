@@ -15,7 +15,7 @@ import {
   SHOWCASE_STATUS_LABELS,
   SHOWCASE_STAGE_LABELS,
 } from '@/lib/showcaseLabels';
-import type { ReviewerNote, ShowcaseStatus, ShowcaseSubmission } from '@/lib/types';
+import type { ReviewerNote, ShowcaseStage, ShowcaseStatus, ShowcaseSubmission } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
 
 interface ReviewerNotesPanelProps {
@@ -408,10 +408,12 @@ interface Props {
 }
 
 type FilterStatus = 'all' | ShowcaseStatus;
+type FilterStage = 'all' | ShowcaseStage;
 
 export default function ShowcaseDashboard({ entries }: Props) {
   const mobileBarHidden = useMobileBarHidden();
   const [filter, setFilter] = useState<FilterStatus>('all');
+  const [stageFilter, setStageFilter] = useState<FilterStage>('all');
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchWidthOpen, setSearchWidthOpen] = useState(false);
@@ -490,8 +492,9 @@ export default function ShowcaseDashboard({ entries }: Props) {
   };
 
   const query = search.trim().toLowerCase();
-  const filtered = entries
-    .filter((entry) => filter === 'all' || entry.status === filter)
+  const withinStatus = entries.filter((entry) => filter === 'all' || entry.status === filter);
+  const filtered = withinStatus
+    .filter((entry) => stageFilter === 'all' || entry.stage === stageFilter)
     .filter(
       (entry) =>
         !query ||
@@ -500,6 +503,18 @@ export default function ShowcaseDashboard({ entries }: Props) {
         entry.email.toLowerCase().includes(query) ||
         entry.pitch.toLowerCase().includes(query)
     );
+
+  // Counted within the chosen status, so the number on a tab is what clicking it shows.
+  // All three stages are always offered, unlike the volunteers' areas: there are only three
+  // of them, and an empty "Live and in use" is worth seeing rather than hiding.
+  const stageTabs: { value: FilterStage; label: string; count: number }[] = [
+    { value: 'all', label: 'All stages', count: withinStatus.length },
+    ...(Object.keys(SHOWCASE_STAGE_LABELS) as ShowcaseStage[]).map((stage) => ({
+      value: stage,
+      label: SHOWCASE_STAGE_LABELS[stage],
+      count: withinStatus.filter((entry) => entry.stage === stage).length,
+    })),
+  ];
 
   const filterTabs: { value: FilterStatus; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -629,6 +644,36 @@ export default function ShowcaseDashboard({ entries }: Props) {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Stage as a tab row, matching /admin/volunteers: status is a menu because an entry
+            is in exactly one state, while stage is a lens on the queue and the row shows how
+            much of it is still an idea without opening anything. */}
+        <div
+          role="group"
+          aria-label="Filter entries by project stage"
+          className="mt-3 -mx-4 md:-mx-5 px-4 md:px-5 flex items-center gap-2 overflow-x-auto"
+        >
+          {stageTabs.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setStageFilter(tab.value)}
+              aria-pressed={stageFilter === tab.value}
+              aria-label={
+                tab.value === 'all'
+                  ? 'Show entries at every stage'
+                  : `Show entries at the ${tab.label.toLowerCase()} stage`
+              }
+              className={`shrink-0 inline-flex items-center gap-2 h-9 text-sm px-4 rounded-full transition-colors font-bold ${
+                stageFilter === tab.value
+                  ? 'bg-white/[0.12] text-white'
+                  : 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
+              }`}
+            >
+              {tab.label}
+              <span className="font-medium text-white/60">{tab.count}</span>
+            </button>
+          ))}
         </div>
       </div>
 
