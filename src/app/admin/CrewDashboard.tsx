@@ -347,37 +347,15 @@ export default function CrewDashboard({ crew }: Props) {
   const [confirmationFilter, setConfirmationFilter] = useState<FilterConfirmation>('all');
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
-  const [areaMenuOpen, setAreaMenuOpen] = useState(false);
   const [confirmationMenuOpen, setConfirmationMenuOpen] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const areaMenuRef = useRef<HTMLDivElement>(null);
   const confirmationMenuRef = useRef<HTMLDivElement>(null);
   const searchWidthOpen = searchOpen || Boolean(search);
 
   useEffect(() => {
     if (searchOpen) searchInputRef.current?.focus();
   }, [searchOpen]);
-
-  useEffect(() => {
-    if (!areaMenuOpen) return;
-
-    function handlePointerDown(event: MouseEvent) {
-      if (areaMenuRef.current && !areaMenuRef.current.contains(event.target as Node)) {
-        setAreaMenuOpen(false);
-      }
-    }
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setAreaMenuOpen(false);
-    }
-
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [areaMenuOpen]);
 
   useEffect(() => {
     if (!confirmationMenuOpen) return;
@@ -455,8 +433,14 @@ export default function CrewDashboard({ crew }: Props) {
     { value: 'confirmed', label: VOLUNTEER_CONFIRMATION_CHIPS.confirmed.label },
   ];
 
+  // Counted within the chosen confirmation, so the number on a tab is what clicking it
+  // shows. Which tabs exist still comes from the whole crew, so the row doesn't reshuffle
+  // under the cursor when the confirmation filter changes.
+  const withinConfirmation = crew.filter(
+    (member) => confirmationFilter === 'all' || (!member.isOrganiser && member.confirmation === confirmationFilter)
+  );
   const areaCounts = new Map<FilterArea, number>(
-    areaTabs.map((tab) => [tab.value, crew.filter((member) => matchesArea(member, tab.value)).length])
+    areaTabs.map((tab) => [tab.value, withinConfirmation.filter((member) => matchesArea(member, tab.value)).length])
   );
   // Confirmation is a volunteer's journey: an organiser was never emailed and has nothing
   // to confirm, so they count only under "Any status" and never as "Not emailed".
@@ -619,49 +603,33 @@ export default function CrewDashboard({ crew }: Props) {
               )}
             </div>
 
-            <div className="relative shrink-0" ref={areaMenuRef}>
-              <button
-                onClick={() => setAreaMenuOpen((open) => !open)}
-                aria-haspopup="menu"
-                aria-expanded={areaMenuOpen}
-                aria-label="Filter crew by assigned area"
-                className={`inline-flex items-center gap-2 h-10 text-sm px-4 rounded-full transition-colors font-bold ${
-                  areaMenuOpen ? 'bg-white/[0.12] text-white' : 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
-                }`}
-              >
-                {areaTabs.find((tab) => tab.value === areaFilter)?.label ?? 'All areas'}
-                <span className="font-medium text-white/60">{areaCounts.get(areaFilter) ?? 0}</span>
-                <svg className={`w-3 h-3 text-white/55 transition-transform ${areaMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
-                </svg>
-              </button>
-
-              {areaMenuOpen && (
-                <div
-                  role="menu"
-                  className="absolute right-0 top-full mt-2 w-56 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
-                >
-                  {areaTabs.map((tab) => (
-                    <button
-                      key={tab.value}
-                      role="menuitem"
-                      onClick={() => {
-                        setAreaFilter(tab.value);
-                        setAreaMenuOpen(false);
-                      }}
-                      aria-pressed={areaFilter === tab.value}
-                      className={`w-full flex items-center justify-between gap-3 text-left text-sm px-4 py-2.5 transition-colors ${
-                        areaFilter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
-                      }`}
-                    >
-                      {tab.label}
-                      <span className="text-white/55">{areaCounts.get(tab.value) ?? 0}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
           </div>
+        </div>
+
+        {/* Assigned area as a tab row, matching /admin/volunteers and /admin/showcase:
+            confirmation is a menu because a crew member is in exactly one state, while the
+            area row doubles as the roster at a glance. */}
+        <div
+          role="group"
+          aria-label="Filter crew by assigned area"
+          className="mt-3 -mx-4 md:-mx-5 px-4 md:px-5 flex items-center gap-2 overflow-x-auto"
+        >
+          {areaTabs.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setAreaFilter(tab.value)}
+              aria-pressed={areaFilter === tab.value}
+              aria-label={tab.value === 'all' ? 'Show the whole crew' : `Show crew in: ${tab.label}`}
+              className={`shrink-0 inline-flex items-center gap-2 h-9 text-sm px-4 rounded-full transition-colors font-bold ${
+                areaFilter === tab.value
+                  ? 'bg-white/[0.12] text-white'
+                  : 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
+              }`}
+            >
+              {tab.label}
+              <span className="font-medium text-white/60">{areaCounts.get(tab.value) ?? 0}</span>
+            </button>
+          ))}
         </div>
       </div>
 
