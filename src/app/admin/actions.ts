@@ -17,6 +17,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // speaker document and the proposal it fell back to.
 interface AcceptanceEmailSession {
   name: string;
+  email: string;
   talkTitle: string;
   format: TalkFormat;
   track: Track;
@@ -481,8 +482,10 @@ export async function archiveSubmission(submissionId: string): Promise<{ error?:
 }
 
 // The speaker document promoted from a submission, or null when the proposal was accepted
-// but never promoted. Only the fields the acceptance email renders are read back, and a
-// document missing any of them is ignored so a half-written record can't blank the email.
+// but never promoted. Only the fields the emails need are read back, and a document missing
+// any of them is ignored so a half-written record can't blank one. All or nothing on
+// purpose: a record good enough to address is good enough to quote, and mailing the edited
+// title to the address on the proposal would be the same bug twice.
 async function fetchPromotedSpeaker(submissionId: string): Promise<AcceptanceEmailSession | null> {
   let snapshot;
   try {
@@ -495,10 +498,13 @@ async function fetchPromotedSpeaker(submissionId: string): Promise<AcceptanceEma
   if (snapshot.empty) return null;
 
   const speaker = snapshot.docs[0].data();
-  const { name, talkTitle, format, track, experienceLevel } = speaker;
+  const { name, email, talkTitle, format, track, experienceLevel } = speaker;
   if (!name || !talkTitle || !format || !track || !experienceLevel) return null;
+  // An address the admin has corrected in the profile is the one to use, but only if it is
+  // actually an address: a broken one would bounce the email into nowhere.
+  if (!email || !EMAIL_PATTERN.test(email)) return null;
 
-  return { name, talkTitle, format, track, experienceLevel };
+  return { name, email, talkTitle, format, track, experienceLevel };
 }
 
 // Telling an accepted speaker is a separate, deliberate step from accepting them: bulk
@@ -528,10 +534,10 @@ export async function sendAcceptanceEmail(submissionId: string): Promise<{ error
     return { error: 'Only accepted submissions can be sent an acceptance email. Accept this proposal first.' };
   }
 
-  // An admin who edits a talk title or track in /admin/speakers expects a resend to carry
-  // the correction. The speaker document is the edited, authoritative version of the
-  // session, so it wins wherever it exists; the proposal is the fallback for a submission
-  // that was accepted but never promoted.
+  // An admin who edits a talk title, track or address in /admin/speakers expects a resend
+  // to carry the correction. The speaker document is the edited, authoritative version of
+  // the speaker, so it wins wherever it exists; the proposal is the fallback for a
+  // submission that was accepted but never promoted.
   const promotedSpeaker = await fetchPromotedSpeaker(submissionId);
   const session = promotedSpeaker ?? submission;
 
@@ -551,7 +557,7 @@ export async function sendAcceptanceEmail(submissionId: string): Promise<{ error
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
       from: `GDG Sydney <${process.env.RESEND_FROM_EMAIL}>`,
-      to: submission.email,
+      to: session.email,
       bcc: 'hello@gdgsydney.com',
       replyTo: 'hello@gdgsydney.com',
       subject: acceptanceEmailSubject(session.talkTitle),
@@ -632,18 +638,22 @@ export async function sendSpeakerTicketEmail(submissionId: string): Promise<{ er
     return { error: 'This speaker hasn\'t confirmed their participation yet, so the ticket can\'t be sent.' };
   }
 
+  // Same reasoning as the acceptance email: the promoted speaker is the edited record, so
+  // a corrected name or address is carried here too.
+  const speaker = (await fetchPromotedSpeaker(submissionId)) ?? submission;
+
   const sentAt = new Date();
 
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
       from: `GDG Sydney <${process.env.RESEND_FROM_EMAIL}>`,
-      to: submission.email,
+      to: speaker.email,
       bcc: 'hello@gdgsydney.com',
       replyTo: 'hello@gdgsydney.com',
       subject: speakerTicketEmailSubject(),
       html: buildSpeakerTicketEmail({
-        name: submission.name,
+        name: speaker.name,
         ticketUrl,
       }),
     });
