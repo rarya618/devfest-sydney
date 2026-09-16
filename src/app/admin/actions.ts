@@ -13,6 +13,16 @@ import type { ExperienceLevel, TalkFormat, Track } from '@/lib/types';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// The half of a speaker record the acceptance email renders, shared by the promoted
+// speaker document and the proposal it fell back to.
+interface AcceptanceEmailSession {
+  name: string;
+  talkTitle: string;
+  format: TalkFormat;
+  track: Track;
+  experienceLevel: ExperienceLevel;
+}
+
 export async function addAdmin(email: string, name: string): Promise<{ error?: string }> {
   let currentAdminEmail: string;
   try {
@@ -470,6 +480,27 @@ export async function archiveSubmission(submissionId: string): Promise<{ error?:
   }
 }
 
+// The speaker document promoted from a submission, or null when the proposal was accepted
+// but never promoted. Only the fields the acceptance email renders are read back, and a
+// document missing any of them is ignored so a half-written record can't blank the email.
+async function fetchPromotedSpeaker(submissionId: string): Promise<AcceptanceEmailSession | null> {
+  let snapshot;
+  try {
+    snapshot = await adminDb.collection('speakers').where('submissionId', '==', submissionId).limit(1).get();
+  } catch {
+    // The proposal is a workable fallback, so a failed lookup shouldn't block the send.
+    return null;
+  }
+
+  if (snapshot.empty) return null;
+
+  const speaker = snapshot.docs[0].data();
+  const { name, talkTitle, format, track, experienceLevel } = speaker;
+  if (!name || !talkTitle || !format || !track || !experienceLevel) return null;
+
+  return { name, talkTitle, format, track, experienceLevel };
+}
+
 // Telling an accepted speaker is a separate, deliberate step from accepting them: bulk
 // accept would otherwise fire a batch of emails, and undoing an acceptance can't unsend
 // one. Records when it went and who sent it so a second organiser can see it's been done.
@@ -497,6 +528,13 @@ export async function sendAcceptanceEmail(submissionId: string): Promise<{ error
     return { error: 'Only accepted submissions can be sent an acceptance email. Accept this proposal first.' };
   }
 
+  // An admin who edits a talk title or track in /admin/speakers expects a resend to carry
+  // the correction. The speaker document is the edited, authoritative version of the
+  // session, so it wins wherever it exists; the proposal is the fallback for a submission
+  // that was accepted but never promoted.
+  const promotedSpeaker = await fetchPromotedSpeaker(submissionId);
+  const session = promotedSpeaker ?? submission;
+
   const sentAt = new Date();
   const confirmBy = confirmDeadlineFrom(sentAt);
 
@@ -516,13 +554,13 @@ export async function sendAcceptanceEmail(submissionId: string): Promise<{ error
       to: submission.email,
       bcc: 'hello@gdgsydney.com',
       replyTo: 'hello@gdgsydney.com',
-      subject: acceptanceEmailSubject(submission.talkTitle),
+      subject: acceptanceEmailSubject(session.talkTitle),
       html: buildAcceptanceEmail({
-        name: submission.name,
-        talkTitle: submission.talkTitle,
-        format: submission.format,
-        track: submission.track,
-        experienceLevel: submission.experienceLevel,
+        name: session.name,
+        talkTitle: session.talkTitle,
+        format: session.format,
+        track: session.track,
+        experienceLevel: session.experienceLevel,
         confirmUrl: confirmLink,
         confirmByIso: confirmBy.toISOString(),
       }),
