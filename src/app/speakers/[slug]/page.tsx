@@ -135,7 +135,11 @@ export default async function SpeakerPage({ params }: PageProps) {
                 {speaker.name}
               </h1>
               {speaker.tagline && (
-                <p className="text-lg text-white/70 leading-relaxed animate-slide-up" style={{ animationDelay: '0.15s' }}>
+                <p
+                  className="text-lg text-white/70 leading-relaxed line-clamp-3 animate-slide-up"
+                  style={{ animationDelay: '0.15s' }}
+                  title={speaker.tagline}
+                >
                   {speaker.tagline}
                 </p>
               )}

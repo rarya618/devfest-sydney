@@ -62,7 +62,11 @@ function SpeakerCard({ speaker, delay }: { speaker: PublicSpeaker; delay: number
               {speaker.name}
             </Link>
           </h3>
-          {speaker.tagline && <p className="mt-0.5 text-sm text-white/60 leading-snug">{speaker.tagline}</p>}
+          {speaker.tagline && (
+            <p className="mt-0.5 text-sm text-white/60 leading-snug line-clamp-3" title={speaker.tagline}>
+              {speaker.tagline}
+            </p>
+          )}
           {hasLinks && (
             <div className="mt-2 flex items-center gap-3">
               {speaker.linkedinUrl && (
