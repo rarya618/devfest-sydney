@@ -57,6 +57,8 @@ export async function fetchSubmissions(): Promise<Submission[]> {
       speakerConfirmedAt: toIsoOrNull(data.speakerConfirmedAt as Timestamp | undefined),
       speakerTicketEmailSentAt: toIsoOrNull(data.speakerTicketEmailSentAt as Timestamp | undefined),
       speakerTicketEmailSentBy: data.speakerTicketEmailSentBy ?? '',
+      rejectionEmailSentAt: toIsoOrNull(data.rejectionEmailSentAt as Timestamp | undefined),
+      rejectionEmailSentBy: data.rejectionEmailSentBy ?? '',
       reviewerNotes: ((data.reviewerNotes ?? []) as Array<{
         text?: string;
         authorName?: string;

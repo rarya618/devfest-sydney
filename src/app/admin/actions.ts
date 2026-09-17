@@ -7,6 +7,7 @@ import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { Resend } from 'resend';
 import { acceptanceEmailSubject, buildAcceptanceEmail } from '@/lib/acceptanceEmail';
 import { buildSpeakerTicketEmail, speakerTicketEmailSubject } from '@/lib/speakerTicketEmail';
+import { buildRejectionEmail, rejectionEmailSubject } from '@/lib/rejectionEmail';
 import { confirmDeadlineFrom, confirmUrl } from '@/lib/speakerConfirm';
 import { normaliseProfileUrl } from '@/lib/speakers';
 import type { ExperienceLevel, TalkFormat, Track } from '@/lib/types';
@@ -680,5 +681,78 @@ export async function sendSpeakerTicketEmail(submissionId: string): Promise<{ er
 
   revalidatePath('/admin');
   revalidatePath('/admin/speakers');
+  return {};
+}
+
+// Telling a speaker their proposal wasn't accepted, sent explicitly for the same reasons as
+// the acceptance email: bulk reject would otherwise mail a batch of people at once, and
+// Restore can't unsend one. Rejected proposals are never promoted, so the submission is
+// the only record to read from.
+// `emailSent` is set on the one failure where the email did go out, so the bulk send can
+// tell the admin not to retry that speaker rather than mailing them twice.
+export async function sendRejectionEmail(submissionId: string): Promise<{ error?: string; emailSent?: boolean }> {
+  let senderName: string;
+  let senderEmail: string;
+  try {
+    ({ name: senderName, email: senderEmail } = await verifyAdminSession());
+  } catch {
+    return { error: 'Your session has expired. Please sign in again.' };
+  }
+
+  const submissionRef = adminDb.collection('submissions').doc(submissionId);
+
+  let submission: FirebaseFirestore.DocumentData;
+  try {
+    const snap = await submissionRef.get();
+    if (!snap.exists) return { error: 'Submission not found.' };
+    submission = snap.data()!;
+  } catch {
+    return { error: 'Could not load this submission. Please try again.' };
+  }
+
+  if (submission.status !== 'rejected') {
+    return { error: 'Only rejected submissions can be sent a rejection email. Reject this proposal first.' };
+  }
+
+  const sentAt = new Date();
+
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: `GDG Sydney <${process.env.RESEND_FROM_EMAIL}>`,
+      to: submission.email,
+      bcc: 'hello@gdgsydney.com',
+      // The email invites a reply about presenting at a meetup, so replies need to land
+      // somewhere an organiser reads.
+      replyTo: 'hello@gdgsydney.com',
+      subject: rejectionEmailSubject(submission.talkTitle),
+      html: buildRejectionEmail({
+        name: submission.name,
+        talkTitle: submission.talkTitle,
+      }),
+    });
+  } catch (err) {
+    console.error('Rejection email failed for submission:', submissionId, err);
+    return { error: 'We couldn\'t send the rejection email. Please try again in a moment.' };
+  }
+
+  try {
+    await submissionRef.update({
+      rejectionEmailSentAt: Timestamp.fromDate(sentAt),
+      rejectionEmailSentBy: senderEmail,
+      reviewerNotes: FieldValue.arrayUnion({
+        text: `Rejection email sent by ${senderName}.`,
+        authorName: senderName,
+        createdAt: Timestamp.now(),
+      }),
+    });
+  } catch {
+    return {
+      error: 'The email was sent, but we couldn\'t record it against this submission. Please refresh before sending again.',
+      emailSent: true,
+    };
+  }
+
+  revalidatePath('/admin');
   return {};
 }

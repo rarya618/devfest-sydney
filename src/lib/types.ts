@@ -100,6 +100,10 @@ export interface Submission {
   // held back while their slot is still being worked out.
   speakerTicketEmailSentAt: string | null; // ISO date string
   speakerTicketEmailSentBy: string;
+  // Null until an admin sends the rejection email. Rejecting a proposal never mails the
+  // speaker on its own, for the same reason acceptance doesn't.
+  rejectionEmailSentAt: string | null; // ISO date string
+  rejectionEmailSentBy: string;
 }
 
 export interface VolunteerSubmission {

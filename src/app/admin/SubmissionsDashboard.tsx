@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef, useTransition, type FormEvent, type ReactNode } from 'react';
-import { promoteSubmission, rejectSubmission, restoreSubmission, undoPromotion, archiveSubmission, addReviewerNote, deleteReviewerNote, sendAcceptanceEmail, sendSpeakerTicketEmail } from './actions';
+import { promoteSubmission, rejectSubmission, restoreSubmission, undoPromotion, archiveSubmission, addReviewerNote, deleteReviewerNote, sendAcceptanceEmail, sendSpeakerTicketEmail, sendRejectionEmail } from './actions';
 import EditSubmissionModal from './EditSubmissionModal';
 import Alert from '@/components/Alert';
 import { formatDate } from '@/lib/format';
@@ -140,6 +140,65 @@ function SendSpeakerTicketButton({
         <path strokeLinecap="round" strokeDasharray="1.5 1.5" d="M10 4v8" />
       </svg>
     </button>
+  );
+}
+
+// The declined-proposal counterpart to the acceptance envelope. Rejecting never emails
+// anyone, so a rejected card carries this until the speaker has actually been told.
+function SendRejectionEmailButton({
+  submission,
+  onSend,
+  disabled,
+}: {
+  submission: Submission;
+  onSend: () => void;
+  disabled: boolean;
+}) {
+  const alreadySent = Boolean(submission.rejectionEmailSentAt);
+
+  return (
+    <button
+      onClick={onSend}
+      disabled={disabled}
+      aria-label={`${alreadySent ? 'Resend' : 'Send'} rejection email to ${submission.name} for: ${submission.talkTitle}`}
+      title={
+        alreadySent
+          ? `Resend rejection email (sent ${formatDate(submission.rejectionEmailSentAt!)}${submission.rejectionEmailSentBy ? ` by ${submission.rejectionEmailSentBy}` : ''})`
+          : 'Send rejection email'
+      }
+      className={`inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+        alreadySent
+          ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
+          : 'bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white'
+      }`}
+    >
+      <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+        <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
+      </svg>
+    </button>
+  );
+}
+
+function RejectionEmailState({ submission }: { submission: Submission }) {
+  if (submission.rejectionEmailSentAt) {
+    return (
+      <span
+        title={`Rejection email sent ${formatDate(submission.rejectionEmailSentAt)}${submission.rejectionEmailSentBy ? ` by ${submission.rejectionEmailSentBy}` : ''}`}
+        className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
+      >
+        Emailed
+      </span>
+    );
+  }
+
+  return (
+    <span
+      title="This speaker hasn't been told yet. Send the rejection email from the action rail."
+      className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-yellow/15 text-google-yellow"
+    >
+      Not emailed
+    </span>
   );
 }
 
@@ -543,6 +602,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         <span className="text-white/50 text-xs font-bold">&middot;</span>
         <span className="text-xs font-bold text-white/55">{formatDate(submission.submittedAt)}</span>
         {submission.status === 'accepted' && <AcceptanceState submission={submission} />}
+        {submission.status === 'rejected' && <RejectionEmailState submission={submission} />}
       </div>
       </div>
 
@@ -590,6 +650,13 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
                 </svg>
               </button>
             </div>
+          )}
+          {submission.status === 'rejected' && (
+            <SendRejectionEmailButton
+              submission={submission}
+              onSend={() => handleAction(sendRejectionEmail)}
+              disabled={isPending || bulkActionsPending}
+            />
           )}
           {submission.status === 'accepted' && (
             <SendAcceptanceEmailButton
@@ -809,6 +876,12 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
           </span>
         )}
 
+        {submission.status === 'rejected' && (
+          <span className="hidden sm:inline-flex shrink-0">
+            <RejectionEmailState submission={submission} />
+          </span>
+        )}
+
         {submission.status === 'pending' && (
           <div className="hidden md:inline-flex shrink-0 rounded-full border border-white/15 overflow-hidden">
             <button
@@ -835,6 +908,13 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
               </svg>
             </button>
           </div>
+        )}
+        {submission.status === 'rejected' && (
+          <SendRejectionEmailButton
+            submission={submission}
+            onSend={() => handleAction(sendRejectionEmail)}
+            disabled={isPending || bulkActionsPending}
+          />
         )}
         {submission.status === 'accepted' && (
           <SendAcceptanceEmailButton
@@ -1026,6 +1106,10 @@ type FilterStatus = 'all' | SubmissionStatus;
 type TrackFilter = 'all' | Track;
 type SortOption = 'newest' | 'oldest' | 'track' | 'submitter';
 
+// Resend's default limit is a couple of sends a second, so bulk rejection emails go out
+// one at a time with this much room between them.
+const REJECTION_EMAIL_SPACING_MS = 600;
+
 const TRACK_SORT_ORDER: Record<Track, number> = {
   developer: 0,
   builder: 1,
@@ -1113,6 +1197,8 @@ export default function SubmissionsDashboard({ submissions }: Props) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [isBulkPending, startBulkTransition] = useTransition();
+  const [isConfirmingRejectionEmails, setIsConfirmingRejectionEmails] = useState(false);
+  const [rejectionEmailProgress, setRejectionEmailProgress] = useState<{ sent: number; total: number } | null>(null);
   const [filtersMenuOpen, setFiltersMenuOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const [trackStatsOpen, setTrackStatsOpen] = useState(false);
@@ -1256,6 +1342,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
 
   function clearSelection() {
     setSelectedIds(new Set());
+    setIsConfirmingRejectionEmails(false);
   }
 
   function runBulkAction(
@@ -1292,6 +1379,49 @@ export default function SubmissionsDashboard({ submissions }: Props) {
       archiveSubmission,
       'Accepted submissions can\'t be archived. Undo the acceptance first.'
     );
+  }
+
+  // Resends are skipped: bulk is for telling the people who haven't heard yet, and a
+  // speaker already emailed can be resent from their own card if that is really wanted.
+  const unsentRejectionTargets = sorted.filter(
+    (s) => selectedIds.has(s.id) && s.status === 'rejected' && !s.rejectionEmailSentAt
+  );
+
+  function handleBulkSendRejectionEmails() {
+    const targets = unsentRejectionTargets;
+    setIsConfirmingRejectionEmails(false);
+    if (targets.length === 0) return;
+
+    startBulkTransition(async () => {
+      let sendFailures = 0;
+      let recordFailures = 0;
+      setRejectionEmailProgress({ sent: 0, total: targets.length });
+
+      // One at a time with a gap between them: Resend rate limits sends per second, and
+      // firing a whole selection in parallel would bounce most of it.
+      for (const [index, target] of targets.entries()) {
+        if (index > 0) await new Promise((resolve) => setTimeout(resolve, REJECTION_EMAIL_SPACING_MS));
+        const result = await sendRejectionEmail(target.id);
+        if (result.error) {
+          if (result.emailSent) recordFailures += 1;
+          else sendFailures += 1;
+        }
+        setRejectionEmailProgress({ sent: index + 1, total: targets.length });
+      }
+
+      setRejectionEmailProgress(null);
+      clearSelection();
+
+      if (recordFailures > 0) {
+        setAlertMessage(
+          `${recordFailures} rejection ${recordFailures === 1 ? 'email was' : 'emails were'} sent but couldn't be recorded, so those cards may still say Not emailed. Refresh the page before sending again so nobody is emailed twice.`
+        );
+      } else if (sendFailures > 0) {
+        setAlertMessage(
+          `${sendFailures} of ${targets.length} rejection emails couldn't be sent. Those cards still say Not emailed, so you can select them and try again.`
+        );
+      }
+    });
   }
 
   function handleExportSummary() {
@@ -1401,6 +1531,44 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 >
                   Accept
                 </button>
+                {rejectionEmailProgress ? (
+                  <span role="status" className="shrink-0 h-10 inline-flex items-center text-sm text-white/70 px-2">
+                    Sending {rejectionEmailProgress.sent} of {rejectionEmailProgress.total} rejection emails
+                  </span>
+                ) : isConfirmingRejectionEmails ? (
+                  <span className="shrink-0 inline-flex items-center gap-2">
+                    <span className="text-sm text-white/70">
+                      Email {unsentRejectionTargets.length} {unsentRejectionTargets.length === 1 ? 'speaker' : 'speakers'}? This can&apos;t be undone.
+                    </span>
+                    <button
+                      onClick={() => setIsConfirmingRejectionEmails(false)}
+                      aria-label="Cancel sending rejection emails"
+                      className="shrink-0 h-10 text-sm px-4 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleBulkSendRejectionEmails}
+                      disabled={isBulkPending || unsentRejectionTargets.length === 0}
+                      aria-label={`Send rejection emails to ${unsentRejectionTargets.length} selected speakers`}
+                      className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-60"
+                    >
+                      Send
+                    </button>
+                  </span>
+                ) : (
+                  unsentRejectionTargets.length > 0 && (
+                    <button
+                      onClick={() => setIsConfirmingRejectionEmails(true)}
+                      disabled={isBulkPending}
+                      aria-label={`Email ${unsentRejectionTargets.length} selected rejected speakers who haven't been told yet`}
+                      title="Skips anyone already emailed"
+                      className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white transition-colors disabled:opacity-60"
+                    >
+                      Email {unsentRejectionTargets.length} {unsentRejectionTargets.length === 1 ? 'rejection' : 'rejections'}
+                    </button>
+                  )
+                )}
                 <button
                   onClick={handleBulkArchive}
                   disabled={isBulkPending}
