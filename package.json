@@ -11,7 +11,7 @@
   "dependencies": {
     "firebase": "^12.14.0",
     "firebase-admin": "^14.0.0",
-    "next": "15.5.19",
+    "next": "15.5.25",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "resend": "^6.12.4"
@@ -22,7 +22,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.5.19",
+    "eslint-config-next": "15.5.25",
     "playwright": "^1.60.0",
     "postcss": "^8",
     "tailwindcss": "^4.3.0",
