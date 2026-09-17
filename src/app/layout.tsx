@@ -45,6 +45,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* display=block on purpose: swap would flash the icon ligature names as text. The
+            no-page-custom-font rule is written for pages/_document.js and does not apply to
+            the App Router root layout, which loads this on every page. */}
+        {/* eslint-disable-next-line @next/next/google-font-display, @next/next/no-page-custom-font */}
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:FILL@0..1&display=block"
           rel="stylesheet"

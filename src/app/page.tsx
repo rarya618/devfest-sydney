@@ -16,7 +16,6 @@ import { fetchPublicOrganisers } from '@/lib/volunteers';
 import { buildEventJsonLd } from '@/lib/eventJsonLd';
 import { getInitials } from '@/lib/format';
 import { TRACK_DOT_COLORS, TRACK_LABELS } from '@/lib/submissionLabels';
-import type { Timestamp } from 'firebase-admin/firestore';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
@@ -27,9 +26,6 @@ export const metadata: Metadata = {
 // areTicketsOpen() returned during the build: ISR regeneration was measured NOT to pick
 // the change up, while force-dynamic does so immediately.
 export const dynamic = 'force-dynamic';
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://devfest.gdgsydney.com';
-
 
 const TRACK_DETAILS: { name: string; color: string; audience: string; topics: string[] }[] = [
   {

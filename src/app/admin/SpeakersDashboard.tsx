@@ -597,12 +597,12 @@ export default function SpeakersDashboard({ speakers }: Props) {
                   {confirmationTabs.map((tab) => (
                     <button
                       key={tab.value}
-                      role="menuitem"
+                      role="menuitemradio"
                       onClick={() => {
                         setConfirmationFilter(tab.value);
                         setConfirmationMenuOpen(false);
                       }}
-                      aria-pressed={confirmationFilter === tab.value}
+                      aria-checked={confirmationFilter === tab.value}
                       className={`w-full flex items-center justify-between gap-3 text-left text-sm px-4 py-2.5 transition-colors ${
                         confirmationFilter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
                       }`}
@@ -640,12 +640,12 @@ export default function SpeakersDashboard({ speakers }: Props) {
                   {filterTabs.map((tab) => (
                     <button
                       key={tab.value}
-                      role="menuitem"
+                      role="menuitemradio"
                       onClick={() => {
                         setFilter(tab.value);
                         setTrackMenuOpen(false);
                       }}
-                      aria-pressed={filter === tab.value}
+                      aria-checked={filter === tab.value}
                       className={`w-full flex items-center justify-between gap-3 text-left text-sm px-4 py-2.5 transition-colors ${
                         filter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
                       }`}

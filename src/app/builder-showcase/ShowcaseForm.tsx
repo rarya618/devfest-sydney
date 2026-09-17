@@ -206,7 +206,8 @@ export default function ShowcaseForm() {
     }));
     setErrors((prev) => {
       if (!prev.coPresenters) return prev;
-      const { [id]: _removed, ...rest } = prev.coPresenters;
+      const rest = { ...prev.coPresenters };
+      delete rest[id];
       return { ...prev, coPresenters: rest };
     });
   }
@@ -220,7 +221,8 @@ export default function ShowcaseForm() {
     }));
     setErrors((prev) => {
       if (!prev.coPresenters?.[id]) return prev;
-      const { [id]: _cleared, ...rest } = prev.coPresenters;
+      const rest = { ...prev.coPresenters };
+      delete rest[id];
       return { ...prev, coPresenters: rest };
     });
   }
