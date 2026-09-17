@@ -6,7 +6,15 @@ import Footer from '@/components/Footer';
 import Reveal from '@/components/Reveal';
 import { areTicketsOpen } from '@/lib/tickets';
 import { isCfsOpen } from '@/lib/cfs';
-import { fetchCommunityPartners, fetchPartnerAssets, fetchSponsors, groupSponsorsByTier, TIER_LABELS } from '@/lib/sponsors';
+import {
+  fetchCommunityPartners,
+  fetchPartnerAssets,
+  fetchSponsors,
+  groupSponsorsByTier,
+  PARTNERS_CARD_LOGO_BOXES,
+  PARTNERS_ROW_LOGO_BOXES,
+  TIER_LABELS,
+} from '@/lib/sponsors';
 import type { PartnerOrganisation } from '@/lib/types';
 
 // The navbar ticket CTA follows the on-sale date, and sponsors appear as they are added,
@@ -47,7 +55,7 @@ const outlineButton = 'inline-flex items-center gap-2.5 px-7 py-2 bg-transparent
 function SponsorCard({ sponsor, label, logoBoxClass, delay }: { sponsor: PartnerOrganisation; label: string; logoBoxClass: string; delay: number }) {
   return (
     <Reveal delay={delay} className="w-full md:w-[calc(50%-0.75rem)] rounded-2xl bg-surface p-8 flex flex-col items-start gap-5">
-      <Image src={sponsor.logoUrl} alt={sponsor.name} width={288} height={96} className={`${logoBoxClass} max-w-full object-contain object-left`} />
+      <Image src={sponsor.logoUrl} alt={sponsor.name} width={288} height={96} className={`${logoBoxClass} max-w-full object-contain object-left brightness-0 invert`} />
       <div>
         <p className="text-xs font-bold text-google-green mb-2">{label}</p>
         <p className="text-white/70 leading-relaxed">{sponsor.description}</p>
@@ -77,7 +85,7 @@ function SponsorLogoLink({ sponsor, logoBoxClass }: { sponsor: PartnerOrganisati
       aria-label={`${sponsor.name} website`}
       className="opacity-80 hover:opacity-100 transition-opacity"
     >
-      <Image src={sponsor.logoUrl} alt={sponsor.name} width={288} height={96} className={`${logoBoxClass} max-w-full object-contain`} />
+      <Image src={sponsor.logoUrl} alt={sponsor.name} width={288} height={96} className={`${logoBoxClass} max-w-full object-contain brightness-0 invert`} />
     </a>
   );
 }
@@ -156,7 +164,7 @@ export default async function PartnersPage() {
         </div>
       </section>
 
-      {/* Presenting and venue partners */}
+      {/* Diamond and Venue sponsors */}
       <section id="presenting" className="pb-20 px-4 sm:px-6 lg:px-12">
         <div className="max-w-5xl mx-auto">
           <Reveal className="mb-10 text-center">
@@ -166,10 +174,10 @@ export default async function PartnersPage() {
           <div className="grid md:grid-cols-2 gap-6">
             <Reveal className="rounded-2xl bg-surface p-8 flex flex-col items-start gap-5">
               {assets.googleLogoUrl && (
-                <Image src={assets.googleLogoUrl} alt="Google" width={160} height={48} className="h-12 w-auto object-contain" />
+                <Image src={assets.googleLogoUrl} alt="Google" width={288} height={96} className="h-24 w-72 max-w-full object-contain object-left brightness-0 invert" />
               )}
               <div>
-                <p className="text-xs font-bold text-google-green mb-2">Presenting partner</p>
+                <p className="text-xs font-bold text-google-green mb-2">Diamond Sponsor</p>
                 <p className="text-white/70 leading-relaxed">
                   Google backs DevFest Sydney with an event grant and ecosystem support across Gemini, Google Cloud and Firebase.
                 </p>
@@ -177,10 +185,10 @@ export default async function PartnersPage() {
             </Reveal>
             <Reveal delay={0.1} className="rounded-2xl bg-surface p-8 flex flex-col items-start gap-5">
               {assets.torrensLogoUrl && (
-                <Image src={assets.torrensLogoUrl} alt="Torrens University" width={120} height={36} className="h-12 w-auto object-contain" />
+                <Image src={assets.torrensLogoUrl} alt="Torrens University" width={240} height={80} className="h-20 w-60 max-w-full object-contain object-left brightness-0 invert" />
               )}
               <div>
-                <p className="text-xs font-bold text-google-green mb-2">Venue partner</p>
+                <p className="text-xs font-bold text-google-green mb-2">Venue Sponsor</p>
                 <p className="text-white/70 leading-relaxed">
                   Torrens University hosts the day at its Surry Hills campus, minutes from Central Station.
                 </p>
@@ -208,8 +216,8 @@ export default async function PartnersPage() {
                   <PartnerGroup
                     sponsors={group.sponsors}
                     label={`${TIER_LABELS[group.tier]} sponsor`}
-                    cardLogoBoxClass={group.tier === 'platinum' ? 'h-24 w-56' : 'h-20 w-48'}
-                    rowLogoBoxClass={group.tier === 'platinum' ? 'h-16 w-44' : 'h-14 w-36'}
+                    cardLogoBoxClass={PARTNERS_CARD_LOGO_BOXES[group.tier]}
+                    rowLogoBoxClass={PARTNERS_ROW_LOGO_BOXES[group.tier]}
                   />
                 </div>
               ))}
@@ -236,7 +244,7 @@ export default async function PartnersPage() {
           </Reveal>
 
           {communityPartners.length > 0 ? (
-            <PartnerGroup sponsors={communityPartners} label="Community partner" cardLogoBoxClass="h-20 w-48" rowLogoBoxClass="h-14 w-36" />
+            <PartnerGroup sponsors={communityPartners} label="Community partner" cardLogoBoxClass={PARTNERS_CARD_LOGO_BOXES.community} rowLogoBoxClass={PARTNERS_ROW_LOGO_BOXES.community} />
           ) : (
             <Reveal delay={0.1} className="max-w-2xl mx-auto text-center">
               <p className="text-white/65 leading-relaxed">

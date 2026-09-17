@@ -31,6 +31,8 @@ export interface PartnerOrganisation {
 // Paid or in-kind sponsors, in the `sponsors` collection, listed by tier
 export interface Sponsor extends PartnerOrganisation {
   tier: SponsorTier;
+  // Set on a sponsor that is agreed but not yet ready to announce; kept off every page
+  hidden?: boolean;
 }
 
 // Community partners (meetups, student groups, other developer communities) that promote

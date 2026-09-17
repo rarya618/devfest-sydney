@@ -10,7 +10,7 @@ import { isCfsOpen } from '@/lib/cfs';
 import Reveal from '@/components/Reveal';
 import Countdown from '@/components/Countdown';
 import { adminDb } from '@/lib/firebase-admin';
-import { fetchSponsors, fetchPartnerAssets, groupSponsorsByTier, TIER_LABELS } from '@/lib/sponsors';
+import { fetchSponsors, fetchPartnerAssets, groupSponsorsByTier, LANDING_LOGO_BOXES, TIER_LABELS } from '@/lib/sponsors';
 import { fetchPublicSpeakers } from '@/lib/speakers';
 import { fetchPublicOrganisers } from '@/lib/volunteers';
 import { buildEventJsonLd } from '@/lib/eventJsonLd';
@@ -467,10 +467,16 @@ export default async function Home() {
           <p className="text-lg font-medium text-white/55">Supported by</p>
           <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center gap-8 sm:gap-16">
             {googleLogoUrl && (
-              <Image src={googleLogoUrl} alt="Google" width={160} height={48} className="h-16 w-auto object-contain opacity-70" />
+              <div className="flex flex-col items-center gap-3">
+                <Image src={googleLogoUrl} alt="Google" width={208} height={64} className={`${LANDING_LOGO_BOXES.diamond} max-w-full object-contain opacity-70 brightness-0 invert`} />
+                <p className="text-xs font-bold text-white/50">Diamond Sponsor</p>
+              </div>
             )}
             {torrensLogoUrl && (
-              <Image src={torrensLogoUrl} alt="Torrens University" width={120} height={36} className="h-14 w-auto object-contain opacity-70" />
+              <div className="flex flex-col items-center gap-3">
+                <Image src={torrensLogoUrl} alt="Torrens University" width={176} height={56} className={`${LANDING_LOGO_BOXES.venue} max-w-full object-contain opacity-70 brightness-0 invert`} />
+                <p className="text-xs font-bold text-white/50">Venue Sponsor</p>
+              </div>
             )}
           </div>
 
@@ -496,7 +502,7 @@ export default async function Home() {
                           alt={sponsor.name}
                           width={192}
                           height={56}
-                          className={group.tier === 'platinum' ? 'h-14 w-40 max-w-full object-contain' : 'h-12 w-32 max-w-full object-contain'}
+                          className={`${LANDING_LOGO_BOXES.tiers[group.tier]} max-w-full object-contain brightness-0 invert`}
                         />
                       </a>
                     ))}

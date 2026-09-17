@@ -324,8 +324,9 @@ service cloud.firestore {
 
     function isValidSponsor(data) {
       let allowedTiers = ['platinum', 'gold', 'silver', 'community'];
-      return data.keys().hasOnly(['name', 'tier', 'logoUrl', 'website', 'order', 'description']) &&
+      return data.keys().hasOnly(['name', 'tier', 'logoUrl', 'website', 'order', 'description', 'hidden']) &&
         data.tier in allowedTiers &&
+        (!('hidden' in data) || data.hidden is bool) &&
         isValidOrganisation(data);
     }
 
