@@ -483,14 +483,10 @@ export default async function Home() {
           {sponsorGroups.length > 0 && (
             <div className="w-full mt-8 space-y-10">
               {sponsorGroups.map((group) => (
-                <div key={group.tier}>
-                  <p className="text-xs font-bold text-white/50 mb-6 text-center">
-                    {TIER_LABELS[group.tier]}
-                  </p>
-                  <div className="flex flex-wrap items-center justify-center gap-10">
-                    {group.sponsors.map((sponsor) => (
+                <div key={group.tier} className="flex flex-wrap items-start justify-center gap-10">
+                  {group.sponsors.map((sponsor) => (
+                    <div key={sponsor.id} className="flex flex-col items-center gap-3">
                       <a
-                        key={sponsor.id}
                         href={sponsor.website}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -505,8 +501,9 @@ export default async function Home() {
                           className={`${LANDING_LOGO_BOXES.tiers[group.tier]} max-w-full object-contain brightness-0 invert`}
                         />
                       </a>
-                    ))}
-                  </div>
+                      <p className="text-xs font-bold text-white/50">{TIER_LABELS[group.tier]} Sponsor</p>
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>

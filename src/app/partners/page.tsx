@@ -164,13 +164,14 @@ export default async function PartnersPage() {
         </div>
       </section>
 
-      {/* Diamond and Venue sponsors */}
-      <section id="presenting" className="pb-20 px-4 sm:px-6 lg:px-12">
+      {/* Sponsors: Diamond and Venue first, then every tier from the `sponsors` collection */}
+      <section id="sponsors" className="py-20 px-4 sm:px-6 lg:px-12 bg-white/[0.02] border-y border-white/8">
         <div className="max-w-5xl mx-auto">
-          <Reveal className="mb-10 text-center">
-            <p className="text-xs font-bold text-google-green mb-3">Supported by</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">The partners behind the day</h2>
+          <Reveal className="mb-12 text-center">
+            <p className="text-xs font-bold text-google-green mb-3">Sponsors</p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">The organisations making 2026 happen</h2>
           </Reveal>
+
           <div className="grid md:grid-cols-2 gap-6">
             <Reveal className="rounded-2xl bg-surface p-8 flex flex-col items-start gap-5">
               {assets.googleLogoUrl && (
@@ -195,21 +196,9 @@ export default async function PartnersPage() {
               </div>
             </Reveal>
           </div>
-        </div>
-      </section>
 
-      {/* Sponsors */}
-      <section id="sponsors" className="py-20 px-4 sm:px-6 lg:px-12 bg-white/[0.02] border-y border-white/8">
-        <div className="max-w-5xl mx-auto">
-          <Reveal className={`text-center ${sponsorGroups.length > 0 ? 'mb-12' : 'mb-5'}`}>
-            <p className="text-xs font-bold text-google-green mb-3">Sponsors</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-              {sponsorGroups.length > 0 ? 'The organisations making 2026 happen' : 'Sponsors are being confirmed'}
-            </h2>
-          </Reveal>
-
-          {sponsorGroups.length > 0 ? (
-            <div className="space-y-14">
+          {sponsorGroups.length > 0 && (
+            <div className="mt-14 space-y-14">
               {sponsorGroups.map((group) => (
                 <div key={group.tier}>
                   <p className="text-xs font-bold text-white/50 mb-6 text-center">{TIER_LABELS[group.tier]}</p>
@@ -222,13 +211,6 @@ export default async function PartnersPage() {
                 </div>
               ))}
             </div>
-          ) : (
-            <Reveal delay={0.1} className="max-w-2xl mx-auto text-center">
-              <p className="text-white/65 leading-relaxed">
-                Sponsor logos appear here as partnerships are signed. The first names on this page get the longest run of
-                visibility before the event, on the site, in social posts and in the lead-up to ticket sales.
-              </p>
-            </Reveal>
           )}
         </div>
       </section>
