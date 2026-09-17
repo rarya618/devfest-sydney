@@ -200,7 +200,7 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
       >
         <div className="overflow-hidden">
 
-      <p className="text-sm text-white/65 leading-relaxed mb-5">{entry.description}</p>
+      <p className="text-sm text-white/65 leading-relaxed mb-5 whitespace-pre-wrap break-words">{entry.description}</p>
 
       {(entry.builtWith || entry.coPresenters.length > 0 || entry.demoRequirements || hasTracking) && (
         <div className="space-y-3 mb-5">
