@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef, useTransition, type FormEvent, type ReactNode } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef, useTransition, type FormEvent, type ReactNode } from 'react';
 import { promoteSubmission, rejectSubmission, restoreSubmission, undoPromotion, archiveSubmission, addReviewerNote, deleteReviewerNote, sendAcceptanceEmail, sendSpeakerTicketEmail, sendRejectionEmail } from './actions';
 import EditSubmissionModal from './EditSubmissionModal';
 import Alert from '@/components/Alert';
@@ -16,6 +16,7 @@ import {
   EXPERIENCE_LABELS,
 } from '@/lib/submissionLabels';
 import type { ReviewerNote, Submission, SubmissionStatus, Track } from '@/lib/types';
+import { applicantKey, rejectionEmailBlocker, type RejectionEmailBlocker } from '@/lib/rejectionEligibility';
 import { useMobileBarHidden } from './MobileBarContext';
 
 function toHref(value: string): string | null {
@@ -180,7 +181,7 @@ function SendRejectionEmailButton({
   );
 }
 
-function RejectionEmailState({ submission }: { submission: Submission }) {
+function RejectionEmailState({ submission, blocker }: { submission: Submission; blocker: RejectionEmailBlocker | null }) {
   if (submission.rejectionEmailSentAt) {
     return (
       <span
@@ -188,6 +189,28 @@ function RejectionEmailState({ submission }: { submission: Submission }) {
         className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
       >
         Emailed
+      </span>
+    );
+  }
+
+  if (blocker === 'accepted-proposal') {
+    return (
+      <span
+        title="This person has another proposal accepted, so they don't get a rejection email. Mention this talk to them yourself if you want to."
+        className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-green/15 text-google-green"
+      >
+        Speaking
+      </span>
+    );
+  }
+
+  if (blocker === 'pending-proposal') {
+    return (
+      <span
+        title="This person has another proposal waiting for review. Decide it first so they only get one email."
+        className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
+      >
+        Pending decision
       </span>
     );
   }
@@ -336,9 +359,11 @@ interface SubmissionRowProps {
   selected: boolean;
   onToggleSelect: () => void;
   bulkActionsPending: boolean;
+  // Why this person's rejection email can't go yet, worked out across all their proposals.
+  rejectionBlocker: RejectionEmailBlocker | null;
 }
 
-function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActionsPending }: SubmissionRowProps) {
+function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActionsPending, rejectionBlocker }: SubmissionRowProps) {
   const [isPending, startTransition] = useTransition();
   const [isEditing, setIsEditing] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
@@ -602,7 +627,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         <span className="text-white/50 text-xs font-bold">&middot;</span>
         <span className="text-xs font-bold text-white/55">{formatDate(submission.submittedAt)}</span>
         {submission.status === 'accepted' && <AcceptanceState submission={submission} />}
-        {submission.status === 'rejected' && <RejectionEmailState submission={submission} />}
+        {submission.status === 'rejected' && <RejectionEmailState submission={submission} blocker={rejectionBlocker} />}
       </div>
       </div>
 
@@ -651,7 +676,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
               </button>
             </div>
           )}
-          {submission.status === 'rejected' && (
+          {submission.status === 'rejected' && !rejectionBlocker && (
             <SendRejectionEmailButton
               submission={submission}
               onSend={() => handleAction(sendRejectionEmail)}
@@ -781,7 +806,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
   );
 }
 
-function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulkActionsPending }: SubmissionRowProps) {
+function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulkActionsPending, rejectionBlocker }: SubmissionRowProps) {
   const [isPending, startTransition] = useTransition();
   const [isEditing, setIsEditing] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
@@ -878,7 +903,7 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
 
         {submission.status === 'rejected' && (
           <span className="hidden sm:inline-flex shrink-0">
-            <RejectionEmailState submission={submission} />
+            <RejectionEmailState submission={submission} blocker={rejectionBlocker} />
           </span>
         )}
 
@@ -909,7 +934,7 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
             </button>
           </div>
         )}
-        {submission.status === 'rejected' && (
+        {submission.status === 'rejected' && !rejectionBlocker && (
           <SendRejectionEmailButton
             submission={submission}
             onSend={() => handleAction(sendRejectionEmail)}
@@ -1199,6 +1224,19 @@ export default function SubmissionsDashboard({ submissions }: Props) {
   const [isBulkPending, startBulkTransition] = useTransition();
   const [isConfirmingRejectionEmails, setIsConfirmingRejectionEmails] = useState(false);
   const [rejectionEmailProgress, setRejectionEmailProgress] = useState<{ sent: number; total: number } | null>(null);
+
+  // Worked out over every submission, not just the filtered view: a person's accepted talk
+  // still blocks their rejection email when the list is showing Rejected only.
+  const rejectionBlockerByApplicant = useMemo(() => {
+    const statusesByApplicant = new Map<string, SubmissionStatus[]>();
+    for (const submission of submissions) {
+      const key = applicantKey(submission.email);
+      statusesByApplicant.set(key, [...(statusesByApplicant.get(key) ?? []), submission.status]);
+    }
+    return new Map(
+      [...statusesByApplicant].map(([key, statuses]) => [key, rejectionEmailBlocker(statuses)] as const)
+    );
+  }, [submissions]);
   const [filtersMenuOpen, setFiltersMenuOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const [trackStatsOpen, setTrackStatsOpen] = useState(false);
@@ -1383,9 +1421,21 @@ export default function SubmissionsDashboard({ submissions }: Props) {
 
   // Resends are skipped: bulk is for telling the people who haven't heard yet, and a
   // speaker already emailed can be resent from their own card if that is really wanted.
-  const unsentRejectionTargets = sorted.filter(
-    (s) => selectedIds.has(s.id) && s.status === 'rejected' && !s.rejectionEmailSentAt
-  );
+  // One target per person: the server names all their rejected proposals in one email, so
+  // selecting two of someone's cards must not send them two.
+  const unsentRejectionTargets = [
+    ...new Map(
+      sorted
+        .filter(
+          (s) =>
+            selectedIds.has(s.id) &&
+            s.status === 'rejected' &&
+            !s.rejectionEmailSentAt &&
+            !rejectionBlockerByApplicant.get(applicantKey(s.email))
+        )
+        .map((s) => [applicantKey(s.email), s] as const)
+    ).values(),
+  ];
 
   function handleBulkSendRejectionEmails() {
     const targets = unsentRejectionTargets;
@@ -1561,11 +1611,11 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                     <button
                       onClick={() => setIsConfirmingRejectionEmails(true)}
                       disabled={isBulkPending}
-                      aria-label={`Email ${unsentRejectionTargets.length} selected rejected speakers who haven't been told yet`}
-                      title="Skips anyone already emailed"
+                      aria-label={`Email ${unsentRejectionTargets.length} selected rejected ${unsentRejectionTargets.length === 1 ? 'person' : 'people'} who haven't been told yet`}
+                      title="One email per person. Skips anyone already emailed, speaking, or with a proposal still pending."
                       className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white transition-colors disabled:opacity-60"
                     >
-                      Email {unsentRejectionTargets.length} {unsentRejectionTargets.length === 1 ? 'rejection' : 'rejections'}
+                      Email {unsentRejectionTargets.length} {unsentRejectionTargets.length === 1 ? 'person' : 'people'}
                     </button>
                   )
                 )}
@@ -1943,6 +1993,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                         selected={selectedIds.has(submission.id)}
                         onToggleSelect={() => toggleSelect(submission.id)}
                         bulkActionsPending={isBulkPending}
+                        rejectionBlocker={rejectionBlockerByApplicant.get(applicantKey(submission.email)) ?? null}
                       />
                     ) : (
                       <SubmissionRow
@@ -1952,6 +2003,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                         selected={selectedIds.has(submission.id)}
                         onToggleSelect={() => toggleSelect(submission.id)}
                         bulkActionsPending={isBulkPending}
+                        rejectionBlocker={rejectionBlockerByApplicant.get(applicantKey(submission.email)) ?? null}
                       />
                     )
                   )}
@@ -1970,6 +2022,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                   selected={selectedIds.has(submission.id)}
                   onToggleSelect={() => toggleSelect(submission.id)}
                   bulkActionsPending={isBulkPending}
+                  rejectionBlocker={rejectionBlockerByApplicant.get(applicantKey(submission.email)) ?? null}
                 />
               ) : (
                 <SubmissionRow
@@ -1979,6 +2032,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                   selected={selectedIds.has(submission.id)}
                   onToggleSelect={() => toggleSelect(submission.id)}
                   bulkActionsPending={isBulkPending}
+                  rejectionBlocker={rejectionBlockerByApplicant.get(applicantKey(submission.email)) ?? null}
                 />
               )
             )}

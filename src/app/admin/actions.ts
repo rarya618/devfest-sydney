@@ -8,9 +8,10 @@ import { Resend } from 'resend';
 import { acceptanceEmailSubject, buildAcceptanceEmail } from '@/lib/acceptanceEmail';
 import { buildSpeakerTicketEmail, speakerTicketEmailSubject } from '@/lib/speakerTicketEmail';
 import { buildRejectionEmail, rejectionEmailSubject } from '@/lib/rejectionEmail';
+import { applicantKey, rejectionEmailBlocker } from '@/lib/rejectionEligibility';
 import { confirmDeadlineFrom, confirmUrl } from '@/lib/speakerConfirm';
 import { normaliseProfileUrl } from '@/lib/speakers';
-import type { ExperienceLevel, TalkFormat, Track } from '@/lib/types';
+import type { ExperienceLevel, SubmissionStatus, TalkFormat, Track } from '@/lib/types';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -686,8 +687,10 @@ export async function sendSpeakerTicketEmail(submissionId: string): Promise<{ er
 
 // Telling a speaker their proposal wasn't accepted, sent explicitly for the same reasons as
 // the acceptance email: bulk reject would otherwise mail a batch of people at once, and
-// Restore can't unsend one. Rejected proposals are never promoted, so the submission is
-// the only record to read from.
+// Restore can't unsend one. It goes to the person rather than the proposal: every rejected
+// proposal under the same address is named in one email and marked as sent together, so
+// someone who submitted three talks hears from us once.
+//
 // `emailSent` is set on the one failure where the email did go out, so the bulk send can
 // tell the admin not to retry that speaker rather than mailing them twice.
 export async function sendRejectionEmail(submissionId: string): Promise<{ error?: string; emailSent?: boolean }> {
@@ -699,13 +702,19 @@ export async function sendRejectionEmail(submissionId: string): Promise<{ error?
     return { error: 'Your session has expired. Please sign in again.' };
   }
 
-  const submissionRef = adminDb.collection('submissions').doc(submissionId);
-
   let submission: FirebaseFirestore.DocumentData;
+  let applicantProposals: FirebaseFirestore.QueryDocumentSnapshot[];
   try {
-    const snap = await submissionRef.get();
+    const snap = await adminDb.collection('submissions').doc(submissionId).get();
     if (!snap.exists) return { error: 'Submission not found.' };
     submission = snap.data()!;
+
+    // The whole collection rather than a where() on the address: an admin edit can leave
+    // stray capitals or spaces, and the dashboard groups on the normalised form. It is a
+    // few dozen documents.
+    const allSnap = await adminDb.collection('submissions').get();
+    const key = applicantKey(String(submission.email ?? ''));
+    applicantProposals = allSnap.docs.filter((doc) => applicantKey(String(doc.data().email ?? '')) === key);
   } catch {
     return { error: 'Could not load this submission. Please try again.' };
   }
@@ -713,6 +722,19 @@ export async function sendRejectionEmail(submissionId: string): Promise<{ error?
   if (submission.status !== 'rejected') {
     return { error: 'Only rejected submissions can be sent a rejection email. Reject this proposal first.' };
   }
+
+  const blocker = rejectionEmailBlocker(applicantProposals.map((doc) => doc.data().status as SubmissionStatus));
+  if (blocker === 'accepted-proposal') {
+    return { error: `${submission.name} is speaking with another proposal, so they shouldn't get a rejection email.` };
+  }
+  if (blocker === 'pending-proposal') {
+    return { error: `${submission.name} still has a proposal waiting for review. Decide it first so they only get one email.` };
+  }
+
+  const rejectedProposals = applicantProposals
+    .filter((doc) => doc.data().status === 'rejected')
+    .sort((a, b) => (a.data().submittedAt?.toMillis?.() ?? 0) - (b.data().submittedAt?.toMillis?.() ?? 0));
+  const talkTitles = rejectedProposals.map((doc) => String(doc.data().talkTitle));
 
   const sentAt = new Date();
 
@@ -725,11 +747,8 @@ export async function sendRejectionEmail(submissionId: string): Promise<{ error?
       // The email invites a reply about presenting at a meetup, so replies need to land
       // somewhere an organiser reads.
       replyTo: 'hello@gdgsydney.com',
-      subject: rejectionEmailSubject(submission.talkTitle),
-      html: buildRejectionEmail({
-        name: submission.name,
-        talkTitle: submission.talkTitle,
-      }),
+      subject: rejectionEmailSubject(talkTitles),
+      html: buildRejectionEmail({ name: submission.name, talkTitles }),
     });
   } catch (err) {
     console.error('Rejection email failed for submission:', submissionId, err);
@@ -737,15 +756,23 @@ export async function sendRejectionEmail(submissionId: string): Promise<{ error?
   }
 
   try {
-    await submissionRef.update({
-      rejectionEmailSentAt: Timestamp.fromDate(sentAt),
-      rejectionEmailSentBy: senderEmail,
-      reviewerNotes: FieldValue.arrayUnion({
-        text: `Rejection email sent by ${senderName}.`,
-        authorName: senderName,
-        createdAt: Timestamp.now(),
-      }),
-    });
+    const noteText =
+      rejectedProposals.length === 1
+        ? `Rejection email sent by ${senderName}.`
+        : `Rejection email sent by ${senderName}, covering all ${rejectedProposals.length} of this person's rejected proposals.`;
+    const batch = adminDb.batch();
+    rejectedProposals.forEach((doc) =>
+      batch.update(doc.ref, {
+        rejectionEmailSentAt: Timestamp.fromDate(sentAt),
+        rejectionEmailSentBy: senderEmail,
+        reviewerNotes: FieldValue.arrayUnion({
+          text: noteText,
+          authorName: senderName,
+          createdAt: Timestamp.now(),
+        }),
+      })
+    );
+    await batch.commit();
   } catch {
     return {
       error: 'The email was sent, but we couldn\'t record it against this submission. Please refresh before sending again.',
