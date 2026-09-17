@@ -1,5 +1,6 @@
 import { formatDeadlineDate } from '@/lib/format';
 import type { ExperienceLevel, TalkFormat, Track } from '@/lib/types';
+import { escapeHtml } from '@/lib/escapeHtml';
 
 // Built to the "Email template - Confirmed Speaker" frame in the DevFest Figma file.
 // Table-based and inline-styled throughout: email clients strip stylesheets, and several
@@ -45,15 +46,6 @@ const LEVEL_LABELS: Record<ExperienceLevel, string> = {
   advanced: 'Advanced',
 };
 
-// Anything interpolated into the HTML is speaker-entered, so it is escaped rather than
-// trusted: a talk title containing a stray angle bracket would otherwise break the layout.
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
 
 function indicatorPill(color: string, label: string): string {
   return `

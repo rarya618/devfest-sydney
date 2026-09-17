@@ -3,6 +3,7 @@ import { adminDb } from '@/lib/firebase-admin';
 import { isShowcaseOpen } from '@/lib/showcase';
 import { Resend } from 'resend';
 import { FieldValue } from 'firebase-admin/firestore';
+import { escapeHtml } from '@/lib/escapeHtml';
 
 type ShowcaseStage = 'idea' | 'prototype' | 'live';
 
@@ -143,16 +144,6 @@ function validatePayload(body: unknown): ShowcasePayload {
   };
 }
 
-// Escapes values interpolated into the confirmation email. Unlike the volunteer email,
-// which only ever renders labels we wrote ourselves, this one echoes the entrant's own
-// project name and pitch straight back into HTML.
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
 
 function buildConfirmationEmail(entry: ShowcasePayload): string {
   const font = "font-family:'Google Sans',Roboto,sans-serif;letter-spacing:-0.01em;";

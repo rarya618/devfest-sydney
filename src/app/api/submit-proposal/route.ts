@@ -3,6 +3,7 @@ import { adminDb } from '@/lib/firebase-admin';
 import { isCfsOpen } from '@/lib/cfs';
 import { Resend } from 'resend';
 import { FieldValue } from 'firebase-admin/firestore';
+import { escapeHtml } from '@/lib/escapeHtml';
 
 type TalkFormat = 'talk' | 'lightning-talk' | 'workshop';
 type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced';
@@ -163,7 +164,7 @@ function buildConfirmationEmail(submission: SubmissionPayload): string {
                 Thanks for your submission
               </h1>
               <h2 style="margin:0 0 24px;${font}font-size:44px;font-weight:700;color:#34A853;line-height:1.5;">
-                ${submission.name.split(' ')[0]}
+                ${escapeHtml(submission.name.split(' ')[0])}
               </h2>
               <p style="margin:0 0 40px;${font}font-size:24px;font-weight:400;color:#ffffff;line-height:1.75;">
                 We appreciate the effort you've put into submitting a talk for DevFest Sydney. We will review and get back to you via email.
@@ -173,7 +174,7 @@ function buildConfirmationEmail(submission: SubmissionPayload): string {
               <table cellpadding="0" cellspacing="0" width="100%" style="background:rgba(255,255,255,0.06);border-radius:12px;">
                 <tr>
                   <td style="padding:40px;text-align:center;">
-                    <h3 style="margin:0 0 24px;${font}font-size:32px;font-weight:700;color:#ffffff;line-height:1.5;">${submission.talkTitle}</h3>
+                    <h3 style="margin:0 0 24px;${font}font-size:32px;font-weight:700;color:#ffffff;line-height:1.5;">${escapeHtml(submission.talkTitle)}</h3>
                     <div>${indicators}</div>
                   </td>
                 </tr>

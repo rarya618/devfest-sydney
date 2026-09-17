@@ -1,6 +1,7 @@
 import { formatDeadlineDate } from '@/lib/format';
 import { VOLUNTEER_AREA_LABELS, VOLUNTEER_SHIFT_LABELS } from '@/lib/volunteerLabels';
 import type { VolunteerArea, VolunteerShift } from '@/lib/types';
+import { escapeHtml } from '@/lib/escapeHtml';
 
 // Same table-based construction and escaping as acceptanceEmail.ts: email clients strip
 // stylesheets, and several still ignore flexbox and CSS variables entirely. Green rather
@@ -21,15 +22,6 @@ const FONT = "font-family:'Google Sans',Roboto,sans-serif;letter-spacing:-0.01em
 const WORDMARK_URL =
   'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/site-assets/logo-wordmark.png';
 
-// Anything interpolated into the HTML is volunteer-entered or admin-entered, so it is
-// escaped rather than trusted.
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
 
 function indicatorPill(color: string, label: string): string {
   return `

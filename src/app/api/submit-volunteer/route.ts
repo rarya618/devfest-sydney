@@ -3,6 +3,7 @@ import { adminDb } from '@/lib/firebase-admin';
 import { isVolunteerOpen } from '@/lib/volunteer';
 import { Resend } from 'resend';
 import { FieldValue } from 'firebase-admin/firestore';
+import { escapeHtml } from '@/lib/escapeHtml';
 
 type GdgOnCampusChapter = '' | 'usyd' | 'uts' | 'other';
 const VALID_CHAPTERS: GdgOnCampusChapter[] = ['usyd', 'uts', 'other'];
@@ -137,7 +138,7 @@ function buildConfirmationEmail(volunteer: VolunteerPayload): string {
                 Thanks for signing up
               </h1>
               <h2 style="margin:0 0 24px;${font}font-size:44px;font-weight:700;color:#EA4335;line-height:1.5;">
-                ${volunteer.name.split(' ')[0]}
+                ${escapeHtml(volunteer.name.split(' ')[0])}
               </h2>
               <p style="margin:0 0 40px;${font}font-size:24px;font-weight:400;color:#ffffff;line-height:1.75;">
                 Thanks for offering to volunteer at DevFest Sydney. We'll be in touch via email with next steps.

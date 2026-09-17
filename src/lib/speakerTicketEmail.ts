@@ -1,3 +1,5 @@
+import { escapeHtml } from '@/lib/escapeHtml';
+
 // The speaker-facing "here is your complimentary ticket" email, sent from the admin once a
 // speaker has confirmed. Same table-based, inline-styled construction as
 // acceptanceEmail.ts, and for the same reason: email clients strip stylesheets.
@@ -10,16 +12,6 @@ export interface SpeakerTicketEmailDetails {
 const FONT = "font-family:'Google Sans',Roboto,sans-serif;letter-spacing:-0.01em;";
 const WORDMARK_URL =
   'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/site-assets/logo-wordmark.png';
-
-// The speaker's own name reaches this template, so it is escaped on the way in, exactly
-// as in the acceptance email.
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
 
 function card(innerHtml: string): string {
   return `
