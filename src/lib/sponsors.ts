@@ -19,18 +19,22 @@ export const LANDING_LOGO_BOXES = {
   tiers: { platinum: 'h-12 w-40', gold: 'h-11 w-36', silver: 'h-10 w-32', community: 'h-9 w-28' } satisfies Record<SponsorTier, string>,
 };
 
+// Both scales step down from the Venue sponsor's box on `/partners` (`h-16 w-44`), which in
+// turn sits under the Diamond sponsor's, so a tier logo never out-sizes the two above it.
+// The row boxes are one step under their own tier's card, since a logo with no blurb beside
+// it reads larger at the same measurements.
 export const PARTNERS_CARD_LOGO_BOXES: Record<SponsorTier, string> = {
-  platinum: 'h-22 w-56',
-  gold: 'h-20 w-48',
-  silver: 'h-14 w-40',
-  community: 'h-12 w-36',
+  platinum: 'h-14 w-40',
+  gold: 'h-13 w-36',
+  silver: 'h-12 w-32',
+  community: 'h-11 w-28',
 };
 
 export const PARTNERS_ROW_LOGO_BOXES: Record<SponsorTier, string> = {
-  platinum: 'h-16 w-44',
-  gold: 'h-14 w-40',
-  silver: 'h-12 w-36',
-  community: 'h-10 w-32',
+  platinum: 'h-12 w-36',
+  gold: 'h-11 w-32',
+  silver: 'h-10 w-28',
+  community: 'h-9 w-24',
 };
 
 // Every fetch here returns an empty value rather than throwing, so a Firestore blip

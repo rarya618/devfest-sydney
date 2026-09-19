@@ -175,7 +175,7 @@ export default async function PartnersPage() {
           <div className="grid md:grid-cols-2 gap-6">
             <Reveal className="rounded-2xl bg-surface p-8 flex flex-col items-start gap-5">
               {assets.googleLogoUrl && (
-                <Image src={assets.googleLogoUrl} alt="Google" width={288} height={96} className="h-24 w-72 max-w-full object-contain object-left brightness-0 invert" />
+                <Image src={assets.googleLogoUrl} alt="Google" width={288} height={96} className="h-18 w-52 max-w-full object-contain object-left brightness-0 invert" />
               )}
               <div>
                 <p className="text-xs font-bold text-google-green mb-2">Diamond Sponsor</p>
@@ -186,7 +186,7 @@ export default async function PartnersPage() {
             </Reveal>
             <Reveal delay={0.1} className="rounded-2xl bg-surface p-8 flex flex-col items-start gap-5">
               {assets.torrensLogoUrl && (
-                <Image src={assets.torrensLogoUrl} alt="Torrens University" width={240} height={80} className="h-20 w-60 max-w-full object-contain object-left brightness-0 invert" />
+                <Image src={assets.torrensLogoUrl} alt="Torrens University" width={240} height={80} className="h-16 w-44 max-w-full object-contain object-left brightness-0 invert" />
               )}
               <div>
                 <p className="text-xs font-bold text-google-green mb-2">Venue Sponsor</p>
