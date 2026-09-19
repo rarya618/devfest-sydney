@@ -71,6 +71,8 @@ export async function fetchVolunteers(): Promise<VolunteerSubmission[]> {
       acceptanceEmailSentBy: data.acceptanceEmailSentBy ?? '',
       confirmByDate: toIsoOrNull(data.confirmByDate as Timestamp | undefined),
       volunteerConfirmedAt: toIsoOrNull(data.volunteerConfirmedAt as Timestamp | undefined),
+      ticketSentAt: toIsoOrNull(data.ticketSentAt as Timestamp | undefined),
+      ticketSentBy: data.ticketSentBy ?? '',
       confirmation: toConfirmation(data),
       isOrganiser: data.isOrganiser ?? false,
       organiserRole: data.organiserRole ?? '',

@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import Alert from '@/components/Alert';
 import { confirmVolunteering } from './actions';
+import VolunteerNextSteps, { type VolunteerLinks } from './VolunteerNextSteps';
 
 interface ConfirmVolunteeringProps {
   token: string;
@@ -15,32 +16,35 @@ interface ConfirmVolunteeringProps {
 
 export default function ConfirmVolunteering({ token, name, intro }: ConfirmVolunteeringProps) {
   const [isPending, startTransition] = useTransition();
-  const [confirmed, setConfirmed] = useState(false);
+  const [links, setLinks] = useState<VolunteerLinks | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   function handleConfirm() {
     startTransition(async () => {
       const result = await confirmVolunteering(token);
-      if (result.error) {
-        setError(result.error);
+      if (result.error || !result.links) {
+        setError(result.error ?? 'We couldn\'t record your confirmation just now. Please try again in a moment.');
       } else {
-        setConfirmed(true);
+        setLinks(result.links);
       }
     });
   }
 
-  if (confirmed) {
+  if (links) {
     return (
-      <div
-        role="status"
-        className="rounded-2xl border border-google-green/30 bg-google-green/10 px-6 py-8 text-center"
-      >
-        <p className="text-2xl font-bold text-google-green">You&rsquo;re on the crew</p>
-        <p className="mt-3 text-white/70 leading-relaxed">
-          Thanks for confirming. We&rsquo;ll be in touch closer to the day with the run sheet, your
-          arrival time, and who to find when you get there.
-        </p>
-      </div>
+      <>
+        <div
+          role="status"
+          className="rounded-2xl border border-google-green/30 bg-google-green/10 px-6 py-8 text-center"
+        >
+          <p className="text-2xl font-bold text-google-green">You&rsquo;re on the crew</p>
+          <p className="mt-3 text-white/70 leading-relaxed">
+            Thanks for confirming. We&rsquo;ll be in touch closer to the day with the run sheet,
+            your arrival time, and who to find when you get there.
+          </p>
+        </div>
+        <VolunteerNextSteps {...links} />
+      </>
     );
   }
 

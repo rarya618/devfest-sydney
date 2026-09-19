@@ -145,6 +145,22 @@ env:
     availability:
       - RUNTIME
 
+  # Volunteer ticket and WhatsApp links, shown on /volunteer/confirm once a volunteer has
+  # confirmed. Secrets: the ticket link carries a Humanitix access code, and the invite
+  # lets anyone who holds it into the group. NOTE: adding these blocks does not create the
+  # secrets. Create each with `firebase apphosting:secrets:set <NAME> --project
+  # devfest-sydney-2026` and grant the backend access before the next rollout, or it fails
+  # with "Misconfigured secret".
+  - variable: VOLUNTEER_TICKET_URL
+    secret: VOLUNTEER_TICKET_URL
+    availability:
+      - RUNTIME
+
+  - variable: VOLUNTEER_WHATSAPP_URL
+    secret: VOLUNTEER_WHATSAPP_URL
+    availability:
+      - RUNTIME
+
   # Resend — stored as secrets
   - variable: RESEND_API_KEY
     secret: RESEND_API_KEY

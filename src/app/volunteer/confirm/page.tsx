@@ -3,10 +3,11 @@ import type { Timestamp } from 'firebase-admin/firestore';
 import Image from 'next/image';
 import { adminDb } from '@/lib/firebase-admin';
 import { formatDeadlineDate } from '@/lib/format';
-import { verifyVolunteerConfirmToken } from '@/lib/volunteerConfirm';
+import { verifyVolunteerConfirmToken, volunteerTicketUrl, volunteerWhatsappUrl } from '@/lib/volunteerConfirm';
 import { VOLUNTEER_AREA_LABELS, VOLUNTEER_SHIFT_LABELS } from '@/lib/volunteerLabels';
 import type { VolunteerArea, VolunteerShift } from '@/lib/types';
 import ConfirmVolunteering from './ConfirmVolunteering';
+import VolunteerNextSteps from './VolunteerNextSteps';
 
 // Reached only from a link in an acceptance email, and the answer depends on a Firestore
 // read that changes the moment the volunteer clicks, so there is nothing to prerender.
@@ -28,6 +29,7 @@ interface AcceptedVolunteer {
   assignedShift: VolunteerShift;
   confirmByIso: string | null;
   alreadyConfirmed: boolean;
+  ticketAlreadySent: boolean;
 }
 
 async function loadAcceptedVolunteer(token: string): Promise<AcceptedVolunteer | null> {
@@ -48,6 +50,7 @@ async function loadAcceptedVolunteer(token: string): Promise<AcceptedVolunteer |
     assignedShift: volunteer.assignedShift ?? '',
     confirmByIso: confirmByDate ? confirmByDate.toDate().toISOString() : null,
     alreadyConfirmed: Boolean(volunteer.volunteerConfirmedAt),
+    ticketAlreadySent: Boolean(volunteer.ticketSentAt),
   };
 }
 
@@ -124,10 +127,18 @@ export default async function VolunteerConfirmPage({ searchParams }: ConfirmPage
             </div>
 
             {volunteer.alreadyConfirmed ? (
-              <p className="text-white/70 leading-relaxed">
-                Thanks, we have you down for the day. We&rsquo;ll be in touch closer to the day with
-                the run sheet, your arrival time, and who to find when you get there.
-              </p>
+              <>
+                <p className="text-white/70 leading-relaxed">
+                  Thanks, we have you down for the day. We&rsquo;ll be in touch closer to the day
+                  with the run sheet, your arrival time, and who to find when you get there.
+                </p>
+                {/* Rendered only on this branch: the links belong to someone who has said yes. */}
+                <VolunteerNextSteps
+                  ticketUrl={volunteer.ticketAlreadySent ? null : volunteerTicketUrl()}
+                  ticketAlreadySent={volunteer.ticketAlreadySent}
+                  whatsappUrl={volunteerWhatsappUrl()}
+                />
+              </>
             ) : (
               <>
                 <ConfirmVolunteering

@@ -8,7 +8,7 @@ import { createHmac, timingSafeEqual } from 'crypto';
 const TOKEN_SEPARATOR = '.';
 
 // Speakers get this long to confirm before we start offering the slot to someone else.
-export const CONFIRM_WINDOW_DAYS = 8;
+export const CONFIRM_WINDOW_DAYS = 6;
 
 function signingSecret(): string {
   const secret = process.env.SPEAKER_CONFIRM_SECRET;
@@ -60,7 +60,7 @@ export function confirmUrl(submissionId: string): string {
 }
 
 // The window opens when the acceptance email is sent, not when the proposal was accepted:
-// a speaker's week starts the moment they can actually read about it.
+// a speaker's window starts the moment they can actually read about it.
 export function confirmDeadlineFrom(sentAt: Date): Date {
   const deadline = new Date(sentAt);
   deadline.setDate(deadline.getDate() + CONFIRM_WINDOW_DAYS);

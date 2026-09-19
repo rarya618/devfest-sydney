@@ -237,6 +237,38 @@ export async function addOrganiser(fields: NewOrganiserFields): Promise<{ error?
   }
 }
 
+// Records, by hand, that a volunteer already has their ticket. The ticket itself goes out
+// outside the site (from Humanitix, or in person), so this is a note rather than a send.
+// Its one effect beyond the dashboard: /volunteer/confirm stops showing that volunteer the
+// ticket link. Unticking clears it, for a mark made on the wrong card.
+export async function setTicketSent(volunteerId: string, ticketSent: boolean): Promise<{ error?: string }> {
+  let adminEmail: string;
+  try {
+    ({ email: adminEmail } = await verifyAdminSession());
+  } catch {
+    return { error: 'Your session has expired. Please sign in again.' };
+  }
+
+  try {
+    const volunteerRef = adminDb.collection('volunteers').doc(volunteerId);
+    const snapshot = await volunteerRef.get();
+    if (!snapshot.exists) return { error: 'Volunteer signup not found.' };
+    if (snapshot.data()?.status !== 'accepted') {
+      return { error: 'This volunteer is no longer on the crew. Refresh the page to see their current status.' };
+    }
+
+    await volunteerRef.update(
+      ticketSent
+        ? { ticketSentAt: FieldValue.serverTimestamp(), ticketSentBy: adminEmail }
+        : { ticketSentAt: FieldValue.delete(), ticketSentBy: FieldValue.delete() }
+    );
+    revalidatePath('/admin/crew');
+    return {};
+  } catch {
+    return { error: 'Could not update the ticket status. Please try again.' };
+  }
+}
+
 const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
 const PHOTO_EXTENSIONS: Record<string, string> = {
   'image/jpeg': 'jpg',

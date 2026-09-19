@@ -9,7 +9,7 @@ const TOKEN_SEPARATOR = '.';
 // Volunteers get this long to confirm before we start offering the spot to someone else.
 // Shorter than the speakers' window: a volunteer is confirming availability, not
 // rearranging a month around preparing a talk.
-export const VOLUNTEER_CONFIRM_WINDOW_DAYS = 7;
+export const VOLUNTEER_CONFIRM_WINDOW_DAYS = 5;
 
 function signingSecret(): string {
   const secret = process.env.VOLUNTEER_CONFIRM_SECRET;
@@ -61,9 +61,21 @@ export function volunteerConfirmUrl(volunteerId: string): string {
 }
 
 // The window opens when the acceptance email is sent, not when the signup was accepted:
-// a volunteer's week starts the moment they can actually read about it.
+// a volunteer's window starts the moment they can actually read about it.
 export function volunteerConfirmDeadlineFrom(sentAt: Date): Date {
   const deadline = new Date(sentAt);
   deadline.setDate(deadline.getDate() + VOLUNTEER_CONFIRM_WINDOW_DAYS);
   return deadline;
+}
+
+// The two links a volunteer is handed once they have confirmed. Both read per call, and
+// both are secrets: the ticket link carries a Humanitix access code, and a WhatsApp
+// invite lets anyone who holds it into the group. Null when unset, which the confirm page
+// treats as "we'll send it to you" rather than showing a dead button.
+export function volunteerTicketUrl(): string | null {
+  return process.env.VOLUNTEER_TICKET_URL?.trim() || null;
+}
+
+export function volunteerWhatsappUrl(): string | null {
+  return process.env.VOLUNTEER_WHATSAPP_URL?.trim() || null;
 }

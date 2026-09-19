@@ -128,6 +128,8 @@ rules_version='2';
 //   - acceptanceEmailSentAt: timestamp, acceptanceEmailSentBy: string
 //   - confirmByDate: timestamp - the volunteer's deadline to confirm
 //   - volunteerConfirmedAt: timestamp - set from /volunteer/confirm
+//   - ticketSentAt: timestamp (optional) - marked by hand on /admin/crew; hides the ticket link on /volunteer/confirm
+//   - ticketSentBy: string (optional) - email of the admin who marked it
 //
 //   Organisers. Added straight onto the crew from /admin/crew rather than arriving
 //   through the signup form, so they share this collection but skip the review and

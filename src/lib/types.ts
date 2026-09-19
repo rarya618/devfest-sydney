@@ -140,6 +140,11 @@ export interface VolunteerSubmission {
   acceptanceEmailSentBy: string;
   confirmByDate: string | null; // ISO date string; the volunteer's deadline to confirm
   volunteerConfirmedAt: string | null; // ISO date string; set from /volunteer/confirm
+  // Set by hand from /admin/crew once a volunteer's ticket has gone out some other way
+  // (the organisers issuing it straight from Humanitix, say). While it is set,
+  // /volunteer/confirm stops showing the volunteer ticket link, so nobody claims twice.
+  ticketSentAt: string | null; // ISO date string
+  ticketSentBy: string;
   // Derived from the three fields above rather than stored, so it can never disagree.
   confirmation: VolunteerConfirmation;
   // Organisers are added by an admin from /admin/crew rather than arriving through the

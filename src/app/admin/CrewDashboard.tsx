@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
-import { removeFromCrew } from './crewActions';
+import { removeFromCrew, setTicketSent } from './crewActions';
 import { sendVolunteerAcceptanceEmail } from './volunteerActions';
 import EditCrewMemberModal from './EditCrewMemberModal';
 import AddOrganiserModal from './AddOrganiserModal';
@@ -70,6 +70,17 @@ function CrewCard({ member, onError }: CrewCardProps) {
   function handleSendAcceptanceEmail() {
     startTransition(async () => {
       const result = await sendVolunteerAcceptanceEmail(member.id);
+      if (result.error) onError(result.error);
+    });
+  }
+
+  const ticketSent = Boolean(member.ticketSentAt);
+
+  // Marked by hand once the ticket has gone out some other way. While it is set,
+  // /volunteer/confirm hides the ticket link from this volunteer.
+  function handleToggleTicketSent() {
+    startTransition(async () => {
+      const result = await setTicketSent(member.id, !ticketSent);
       if (result.error) onError(result.error);
     });
   }
@@ -183,6 +194,14 @@ function CrewCard({ member, onError }: CrewCardProps) {
                 </span>
               )
             )}
+            {!isOrganiser && ticketSent && (
+              <span
+                title="Marked as having their ticket. The ticket link is hidden from them on the confirmation page."
+                className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25"
+              >
+                Ticket sent
+              </span>
+            )}
             {member.dietaryRequirements && (
               <span
                 title={member.dietaryRequirements}
@@ -246,6 +265,12 @@ function CrewCard({ member, onError }: CrewCardProps) {
                 ) : member.confirmByDate ? (
                   <> &middot; Confirmation due {formatDate(member.confirmByDate)}</>
                 ) : null}
+                {member.ticketSentAt && (
+                  <>
+                    {' '}&middot; Ticket marked sent {formatDate(member.ticketSentAt)}
+                    {member.ticketSentBy && <> by {member.ticketSentBy}</>}
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -280,6 +305,30 @@ function CrewCard({ member, onError }: CrewCardProps) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
             </svg>
           </button>
+          )}
+
+          {!isOrganiser && (
+            <button
+              onClick={handleToggleTicketSent}
+              disabled={isPending}
+              aria-pressed={ticketSent}
+              aria-label={
+                ticketSent
+                  ? `${member.name} is marked as having their ticket. Unmark it to show them the ticket link again.`
+                  : `Mark ${member.name}'s ticket as sent, which hides the ticket link on their confirmation page`
+              }
+              title={ticketSent ? 'Ticket sent: click to unmark' : 'Mark ticket as sent'}
+              className={`inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                ticketSent
+                  ? 'bg-google-blue/15 text-google-blue-light hover:bg-white/[0.08] hover:text-white'
+                  : 'text-white/55 hover:text-white hover:bg-white/[0.08]'
+              }`}
+            >
+              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 6.25V4.5a1 1 0 011-1h11a1 1 0 011 1v1.75a1.75 1.75 0 000 3.5V11.5a1 1 0 01-1 1h-11a1 1 0 01-1-1V9.75a1.75 1.75 0 000-3.5z" />
+                <path strokeLinecap="round" strokeDasharray="1.5 1.5" d="M10 4v8" />
+              </svg>
+            </button>
           )}
 
           {confirmingRemove ? (
@@ -456,6 +505,7 @@ export default function CrewDashboard({ crew }: Props) {
   const confirmedCount = confirmationCounts.confirmed;
   const unassignedCount = volunteers.filter((member) => member.assignedArea === '').length;
   const organiserCount = crew.length - volunteers.length;
+  const withoutTicketCount = volunteers.filter((member) => !member.ticketSentAt).length;
 
   const query = search.trim().toLowerCase();
   const filtered = crew
@@ -480,6 +530,7 @@ export default function CrewDashboard({ crew }: Props) {
               {organiserCount > 0 && <> &middot; {organiserCount} organiser{organiserCount === 1 ? '' : 's'}</>} &middot; {confirmedCount} confirmed
               {notEmailedCount > 0 && <> &middot; {notEmailedCount} not emailed</>}
               {unassignedCount > 0 && <> &middot; {unassignedCount} without an area</>}
+              {withoutTicketCount > 0 && <> &middot; {withoutTicketCount} without a ticket</>}
             </p>
           </div>
 
