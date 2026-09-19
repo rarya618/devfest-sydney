@@ -526,9 +526,9 @@ export default async function Home() {
         <section id="organisers" className="py-24 px-6">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-14 text-center">The organisers</h2>
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-10 gap-x-6">
+            <div className="flex flex-wrap justify-center gap-y-10 gap-x-6">
               {organisers.map((member) => (
-                <div key={member.id} className="text-center">
+                <div key={member.id} className="w-40 sm:w-56 text-center">
                   <div className="w-20 h-20 rounded-full mx-auto mb-4 overflow-hidden bg-white/5">
                     {member.photoUrl ? (
                       <Image
