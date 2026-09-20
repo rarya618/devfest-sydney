@@ -3,7 +3,7 @@ export type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced';
 export type Track = 'developer' | 'builder' | 'workshop' | 'showcase';
 export type SubmissionStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
 export type SponsorTier = 'platinum' | 'gold' | 'silver' | 'community';
-export type VolunteerArea = 'registration' | 'av-tech' | 'speaker-support' | 'workshop-facilitator' | 'general-floater' | 'setup-packdown' | 'photography' | 'social-media' | 'merch-table';
+export type VolunteerArea = 'registration' | 'av-tech' | 'speaker-support' | 'workshop-facilitator' | 'mc' | 'general-floater' | 'setup-packdown' | 'photography' | 'social-media' | 'merch-table';
 export type VolunteerStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
 // The part of the day a crew member is rostered for. Empty until an admin assigns one:
 // the signup form never asked, so an unset shift is the normal starting state.
@@ -153,7 +153,7 @@ export interface VolunteerSubmission {
   // the acceptance/confirmation flow does not apply to them.
   isOrganiser: boolean;
   // Free text ("Lead organiser", "Sponsorship", "Marketing"): an organiser's job is not
-  // one of the nine VolunteerAreas, and squeezing it into one would misname it. Empty
+  // one of the VolunteerAreas, and squeezing it into one would misname it. Empty
   // for volunteers.
   organiserRole: string;
   // Shown beside an organiser on the landing page, which is where the old `team`

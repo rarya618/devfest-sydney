@@ -6,7 +6,7 @@ import { GDG_ON_CAMPUS_CHAPTERS } from '@/lib/volunteerLabels';
 import type { GdgOnCampusChapter } from '@/lib/types';
 import { getTrackingParams } from '@/lib/tracking';
 
-type VolunteerArea = 'registration' | 'av-tech' | 'speaker-support' | 'workshop-facilitator' | 'general-floater' | 'setup-packdown' | 'photography' | 'social-media' | 'merch-table';
+type VolunteerArea = 'registration' | 'av-tech' | 'speaker-support' | 'workshop-facilitator' | 'mc' | 'general-floater' | 'setup-packdown' | 'photography' | 'social-media' | 'merch-table';
 type SubmitState = 'idle' | 'submitting' | 'success';
 
 interface FormFields {
@@ -36,6 +36,7 @@ const AREAS: { value: VolunteerArea; label: string }[] = [
   { value: 'av-tech', label: 'AV / Tech' },
   { value: 'speaker-support', label: 'Speaker support' },
   { value: 'workshop-facilitator', label: 'Workshop facilitator' },
+  { value: 'mc', label: 'MC' },
   { value: 'general-floater', label: 'General floater' },
   { value: 'setup-packdown', label: 'Setup / Pack-down' },
   { value: 'photography', label: 'Photography' },

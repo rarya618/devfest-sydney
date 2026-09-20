@@ -12,6 +12,7 @@ const VOLUNTEER_AREAS: VolunteerArea[] = [
   'av-tech',
   'speaker-support',
   'workshop-facilitator',
+  'mc',
   'general-floater',
   'setup-packdown',
   'photography',

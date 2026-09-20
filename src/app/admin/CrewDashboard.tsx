@@ -453,7 +453,7 @@ export default function CrewDashboard({ crew }: Props) {
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
 
   // Organisers have a role rather than an area, so they sit in their own bucket: they are
-  // not "unassigned", and they belong to none of the nine areas.
+  // not "unassigned", and they belong to none of the volunteer areas.
   const matchesArea = (member: VolunteerSubmission, filter: FilterArea) => {
     if (filter === 'all') return true;
     if (filter === 'organisers') return member.isOrganiser;
@@ -462,8 +462,8 @@ export default function CrewDashboard({ crew }: Props) {
     return member.assignedArea === filter;
   };
 
-  // Only areas somebody is actually rostered to are offered: a menu of nine areas with
-  // eight zeroes in it is a list of things that haven't happened.
+  // Only areas somebody is actually rostered to are offered: a menu of every area with
+  // a zero against most of them is a list of things that haven't happened.
   const areaTabs: { value: FilterArea; label: string }[] = [
     { value: 'all', label: 'All areas' },
     ...(crew.some((member) => member.isOrganiser) ? [{ value: 'organisers' as const, label: 'Organisers' }] : []),

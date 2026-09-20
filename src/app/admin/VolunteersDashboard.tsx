@@ -507,7 +507,7 @@ export default function VolunteersDashboard({ volunteers }: Props) {
   // Areas of interest are multi-select, so a volunteer shows under every area they ticked
   // and the tab counts add up to more than the total. Counted within the chosen status, so
   // the number on a tab is what clicking it shows. Only areas someone actually asked for
-  // get a tab: nine of them with most reading zero is a row to scroll past, not a filter.
+  // get a tab: a full list with most reading zero is a row to scroll past, not a filter.
   const areaCounts = new Map<VolunteerArea, number>();
   for (const volunteer of withinStatus) {
     for (const area of volunteer.areasOfInterest) {

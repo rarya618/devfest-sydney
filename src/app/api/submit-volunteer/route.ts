@@ -8,7 +8,7 @@ import { escapeHtml } from '@/lib/escapeHtml';
 type GdgOnCampusChapter = '' | 'usyd' | 'uts' | 'other';
 const VALID_CHAPTERS: GdgOnCampusChapter[] = ['usyd', 'uts', 'other'];
 
-type VolunteerArea = 'registration' | 'av-tech' | 'speaker-support' | 'workshop-facilitator' | 'general-floater' | 'setup-packdown' | 'photography' | 'social-media' | 'merch-table';
+type VolunteerArea = 'registration' | 'av-tech' | 'speaker-support' | 'workshop-facilitator' | 'mc' | 'general-floater' | 'setup-packdown' | 'photography' | 'social-media' | 'merch-table';
 
 interface VolunteerPayload {
   name: string;
@@ -41,7 +41,7 @@ function sanitizeTracking(input: unknown): Record<string, string> {
   return tracking;
 }
 
-const VALID_AREAS: VolunteerArea[] = ['registration', 'av-tech', 'speaker-support', 'workshop-facilitator', 'general-floater', 'setup-packdown', 'photography', 'social-media', 'merch-table'];
+const VALID_AREAS: VolunteerArea[] = ['registration', 'av-tech', 'speaker-support', 'workshop-facilitator', 'mc', 'general-floater', 'setup-packdown', 'photography', 'social-media', 'merch-table'];
 const MOTIVATION_MAX = 1000;
 const PRIOR_EXPERIENCE_MAX = 1000;
 const GOOGLE_TECH_EXPERIENCE_MAX = 1000;
@@ -52,6 +52,7 @@ const AREA_LABELS: Record<VolunteerArea, string> = {
   'av-tech': 'AV / Tech',
   'speaker-support': 'Speaker support',
   'workshop-facilitator': 'Workshop facilitator',
+  mc: 'MC',
   'general-floater': 'General floater',
   'setup-packdown': 'Setup / Pack-down',
   photography: 'Photography',

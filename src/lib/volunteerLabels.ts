@@ -19,6 +19,7 @@ export const VOLUNTEER_AREA_LABELS: Record<VolunteerArea, string> = {
   'av-tech': 'AV / Tech',
   'speaker-support': 'Speaker support',
   'workshop-facilitator': 'Workshop facilitator',
+  mc: 'MC',
   'general-floater': 'General floater',
   'setup-packdown': 'Setup / Pack-down',
   photography: 'Photography',

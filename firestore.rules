@@ -100,7 +100,7 @@ rules_version='2';
 //   - phone: string (optional, max 30 chars)
 //   - motivation: string (required, 1–1000 chars) — why they want to volunteer
 //   - areasOfInterest: list of strings (required, 1+ items) — subset of
-//     'registration' | 'av-tech' | 'speaker-support' | 'workshop-facilitator' | 'general-floater' |
+//     'registration' | 'av-tech' | 'speaker-support' | 'workshop-facilitator' | 'mc' | 'general-floater' |
 //     'setup-packdown' | 'photography' | 'social-media' | 'merch-table'
 //   - priorExperience: string (optional, max 1000 chars)
 //   - googleTechExperience: string (optional, max 1000 chars) — experience with Google
@@ -256,7 +256,7 @@ service cloud.firestore {
     }
 
     function isValidVolunteerSubmission(data) {
-      let allowedAreas = ['registration', 'av-tech', 'speaker-support', 'workshop-facilitator', 'general-floater',
+      let allowedAreas = ['registration', 'av-tech', 'speaker-support', 'workshop-facilitator', 'mc', 'general-floater',
                           'setup-packdown', 'photography', 'social-media', 'merch-table'];
       return data.keys().hasOnly(['name', 'email', 'phone', 'motivation',
                                    'areasOfInterest', 'priorExperience', 'googleTechExperience',
