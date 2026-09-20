@@ -16,6 +16,7 @@ import {
 } from '@/lib/volunteerLabels';
 import type { VolunteerArea, VolunteerConfirmation, VolunteerSubmission } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
+import HistoryDisclosure, { stampedOn, type HistoryRow } from './HistoryDisclosure';
 
 // Neither 'unassigned' nor 'organisers' is a VolunteerArea. 'unassigned' is the absence
 // of one, and the filter reached for most while the roster is still being built;
@@ -35,6 +36,30 @@ function CrewAvatar({ member }: { member: VolunteerSubmission }) {
       )}
     </div>
   );
+}
+
+// The crew card's history rows. The first label changes because an organiser was added
+// by an admin rather than arriving through the signup form.
+function crewHistoryRows(member: VolunteerSubmission, isOrganiser: boolean): HistoryRow[] {
+  const rows: HistoryRow[] = [
+    { label: isOrganiser ? 'Added' : 'Signed up', value: formatDate(member.submittedAt) },
+  ];
+
+  if (member.acceptanceEmailSentAt) {
+    rows.push({ label: 'Acceptance sent', value: stampedOn(formatDate(member.acceptanceEmailSentAt), member.acceptanceEmailSentBy) });
+  }
+
+  if (member.volunteerConfirmedAt) {
+    rows.push({ label: 'Confirmed', value: formatDate(member.volunteerConfirmedAt) });
+  } else if (member.confirmByDate) {
+    rows.push({ label: 'Confirmation due', value: formatDate(member.confirmByDate) });
+  }
+
+  if (member.ticketSentAt) {
+    rows.push({ label: 'Ticket sent', value: stampedOn(formatDate(member.ticketSentAt), member.ticketSentBy) });
+  }
+
+  return rows;
 }
 
 interface CrewCardProps {
@@ -93,7 +118,7 @@ function CrewCard({ member, onError }: CrewCardProps) {
 
   function handleCardClick(event: React.MouseEvent<HTMLDivElement>) {
     const target = event.target as HTMLElement;
-    if (target.closest('button, a, input, textarea, select, [role="menu"], [role="dialog"]')) return;
+    if (target.closest('button, a, input, textarea, select, summary, [role="menu"], [role="dialog"]')) return;
     if (window.getSelection()?.toString()) return;
     setIsOpen((open) => !open);
   }
@@ -252,26 +277,7 @@ function CrewCard({ member, onError }: CrewCardProps) {
                 </p>
               )}
 
-              <p className="mt-4 text-xs text-white/50">
-                {isOrganiser ? 'Added' : 'Signed up'} {formatDate(member.submittedAt)}
-                {member.acceptanceEmailSentAt && (
-                  <>
-                    {' '}&middot; Acceptance email sent {formatDate(member.acceptanceEmailSentAt)}
-                    {member.acceptanceEmailSentBy && <> by {member.acceptanceEmailSentBy}</>}
-                  </>
-                )}
-                {member.volunteerConfirmedAt ? (
-                  <> &middot; Confirmed {formatDate(member.volunteerConfirmedAt)}</>
-                ) : member.confirmByDate ? (
-                  <> &middot; Confirmation due {formatDate(member.confirmByDate)}</>
-                ) : null}
-                {member.ticketSentAt && (
-                  <>
-                    {' '}&middot; Ticket marked sent {formatDate(member.ticketSentAt)}
-                    {member.ticketSentBy && <> by {member.ticketSentBy}</>}
-                  </>
-                )}
-              </p>
+              <HistoryDisclosure subjectName={member.name} rows={crewHistoryRows(member, isOrganiser)} />
             </div>
           </div>
         </div>

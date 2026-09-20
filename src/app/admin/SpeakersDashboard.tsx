@@ -17,6 +17,30 @@ import {
 } from '@/lib/submissionLabels';
 import type { Speaker, SpeakerConfirmation, Track } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
+import HistoryDisclosure, { stampedOn, type HistoryRow } from './HistoryDisclosure';
+
+// The speaker card's history rows. Same shape as the crew card's, so the two dashboards
+// read the same way; the dates themselves differ because a speaker is promoted from a
+// proposal rather than signing up.
+function speakerHistoryRows(speaker: Speaker): HistoryRow[] {
+  const rows: HistoryRow[] = [{ label: 'Added to lineup', value: formatDate(speaker.promotedAt) }];
+
+  if (speaker.acceptanceEmailSentAt) {
+    rows.push({ label: 'Acceptance sent', value: stampedOn(formatDate(speaker.acceptanceEmailSentAt), speaker.acceptanceEmailSentBy) });
+  }
+
+  if (speaker.speakerConfirmedAt) {
+    rows.push({ label: 'Confirmed', value: formatDate(speaker.speakerConfirmedAt) });
+  } else if (speaker.confirmByDate) {
+    rows.push({ label: 'Confirmation due', value: formatDate(speaker.confirmByDate) });
+  }
+
+  if (speaker.speakerTicketEmailSentAt) {
+    rows.push({ label: 'Ticket sent', value: stampedOn(formatDate(speaker.speakerTicketEmailSentAt), speaker.speakerTicketEmailSentBy) });
+  }
+
+  return rows;
+}
 
 type FilterTrack = 'all' | Track;
 type FilterConfirmation = 'all' | SpeakerConfirmation;
@@ -143,7 +167,7 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
 
   function handleCardClick(event: React.MouseEvent<HTMLDivElement>) {
     const target = event.target as HTMLElement;
-    if (target.closest('button, a, input, textarea, select, [role="menu"], [role="dialog"]')) return;
+    if (target.closest('button, a, input, textarea, select, summary, [role="menu"], [role="dialog"]')) return;
     if (window.getSelection()?.toString()) return;
     setIsOpen((open) => !open);
   }
@@ -228,26 +252,7 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
                 </div>
               )}
 
-              <p className="mt-4 text-xs text-white/50">
-                Added to the lineup {formatDate(speaker.promotedAt)}
-                {speaker.acceptanceEmailSentAt && (
-                  <>
-                    {' '}&middot; Acceptance email sent {formatDate(speaker.acceptanceEmailSentAt)}
-                    {speaker.acceptanceEmailSentBy && <> by {speaker.acceptanceEmailSentBy}</>}
-                  </>
-                )}
-                {speaker.speakerConfirmedAt ? (
-                  <> &middot; Confirmed {formatDate(speaker.speakerConfirmedAt)}</>
-                ) : speaker.confirmByDate ? (
-                  <> &middot; Confirmation due {formatDate(speaker.confirmByDate)}</>
-                ) : null}
-                {speaker.speakerTicketEmailSentAt && (
-                  <>
-                    {' '}&middot; Ticket sent {formatDate(speaker.speakerTicketEmailSentAt)}
-                    {speaker.speakerTicketEmailSentBy && <> by {speaker.speakerTicketEmailSentBy}</>}
-                  </>
-                )}
-              </p>
+              <HistoryDisclosure subjectName={speaker.name} rows={speakerHistoryRows(speaker)} />
             </div>
           </div>
         </div>
