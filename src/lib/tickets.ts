@@ -46,7 +46,7 @@ export function ticketsHref(source?: string): string {
 export const TICKET_INCLUSIONS: { title: string; description: string; color: string }[] = [
   {
     title: 'All three tracks',
-    description: 'Move freely between the Developer, Builder, and Workshops tracks across the whole day.',
+    description: 'Move freely between the Spotlight, Developer, Builder, and Workshops tracks across the whole day.',
     color: 'google-blue',
   },
   {

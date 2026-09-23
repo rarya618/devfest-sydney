@@ -20,6 +20,9 @@ The role of the professional developer is evolving — from writing code to revi
 
 ## Tracks
 
+### Spotlight Track
+Headline talks on the main stage in the Auditorium, for developers and builders alike. Added 2026-09-23 when the schedule was set: no one proposed into it through the CfS; organisers move speakers onto it.
+
 ### 1. Developer Track
 Technical sessions for professional engineers.
 

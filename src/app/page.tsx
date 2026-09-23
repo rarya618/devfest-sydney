@@ -29,6 +29,12 @@ export const dynamic = 'force-dynamic';
 
 const TRACK_DETAILS: { name: string; color: string; audience: string; topics: string[] }[] = [
   {
+    name: 'Spotlight track',
+    color: 'google-red',
+    audience: 'Headline talks on the main stage in the Auditorium, for developers and builders alike. The place to start if you are not sure where to go.',
+    topics: ['Main stage', 'Headline talks', 'For everyone'],
+  },
+  {
     name: 'Developer track',
     color: 'google-blue',
     audience: 'A deep-tech dive into Gemini API, Flutter, Firebase, Android, and Cloud. Perfect for engineers looking to master Google’s latest ecosystem tools.',
@@ -49,6 +55,7 @@ const TRACK_DETAILS: { name: string; color: string; audience: string; topics: st
 ];
 
 const TRACK_DOT: Record<string, string> = {
+  'google-red': 'bg-google-red',
   'google-blue': 'bg-google-blue',
   'google-green': 'bg-google-green',
   'google-yellow': 'bg-google-yellow',
@@ -303,7 +310,7 @@ export default async function Home() {
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight">However you build, there&apos;s a track for you</h2>
           </Reveal>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 gap-8">
             {TRACK_DETAILS.map((track, i) => (
               <Reveal
                 key={track.name}

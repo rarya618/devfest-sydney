@@ -9,7 +9,7 @@ import type { ExperienceLevel, TalkFormat, Track } from '@/lib/types';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const TALK_FORMATS: TalkFormat[] = ['talk', 'lightning-talk', 'workshop'];
-const TRACKS: Track[] = ['developer', 'builder', 'workshop', 'showcase'];
+const TRACKS: Track[] = ['spotlight', 'developer', 'builder', 'workshop', 'showcase'];
 const EXPERIENCE_LEVELS: ExperienceLevel[] = ['beginner', 'intermediate', 'advanced'];
 
 // Everything on a speaker document except submissionId and promotedAt, which record where

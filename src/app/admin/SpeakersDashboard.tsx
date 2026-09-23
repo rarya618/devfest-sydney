@@ -449,6 +449,7 @@ export default function SpeakersDashboard({ speakers }: Props) {
 
   const counts: Record<FilterTrack, number> = {
     all: speakers.length,
+    spotlight: speakers.filter((speaker) => speaker.track === 'spotlight').length,
     developer: speakers.filter((speaker) => speaker.track === 'developer').length,
     builder: speakers.filter((speaker) => speaker.track === 'builder').length,
     workshop: speakers.filter((speaker) => speaker.track === 'workshop').length,
@@ -482,6 +483,7 @@ export default function SpeakersDashboard({ speakers }: Props) {
 
   const filterTabs: { value: FilterTrack; label: string }[] = [
     { value: 'all', label: 'All tracks' },
+    { value: 'spotlight', label: TRACK_LABELS.spotlight },
     { value: 'developer', label: TRACK_LABELS.developer },
     { value: 'builder', label: TRACK_LABELS.builder },
     { value: 'workshop', label: TRACK_LABELS.workshop },

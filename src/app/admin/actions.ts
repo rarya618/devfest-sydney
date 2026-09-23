@@ -217,7 +217,7 @@ export interface SubmissionEditableFields {
 }
 
 const TALK_FORMATS: TalkFormat[] = ['talk', 'lightning-talk', 'workshop'];
-const TRACKS: Track[] = ['developer', 'builder', 'workshop', 'showcase'];
+const TRACKS: Track[] = ['spotlight', 'developer', 'builder', 'workshop', 'showcase'];
 const EXPERIENCE_LEVELS: ExperienceLevel[] = ['beginner', 'intermediate', 'advanced'];
 
 // The exact shape a submission document takes in Firestore, matching what

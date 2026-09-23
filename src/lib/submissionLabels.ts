@@ -15,6 +15,7 @@ export const STATUS_LABELS: Record<SubmissionStatus, string> = {
 };
 
 export const TRACK_LABELS: Record<Track, string> = {
+  spotlight: 'Spotlight',
   developer: 'Developer',
   builder: 'Builder',
   workshop: 'Workshops',
@@ -22,6 +23,8 @@ export const TRACK_LABELS: Record<Track, string> = {
 };
 
 export const TRACK_COLORS: Record<Track, string> = {
+  // Core red text fails AA on the dark page (see BRANDING.md), so Spotlight uses Red 300.
+  spotlight: 'text-google-red-light',
   developer: 'text-google-blue',
   builder: 'text-google-green',
   workshop: 'text-google-yellow',
@@ -38,6 +41,7 @@ export const TRACK_CHIP_COLORS: Record<Track, string> = {
 };
 
 export const TRACK_BORDER_COLORS: Record<Track, string> = {
+  spotlight: 'border-l-google-red',
   developer: 'border-l-google-blue',
   builder: 'border-l-google-green',
   workshop: 'border-l-google-yellow',
@@ -45,6 +49,7 @@ export const TRACK_BORDER_COLORS: Record<Track, string> = {
 };
 
 export const TRACK_DOT_COLORS: Record<Track, string> = {
+  spotlight: 'bg-google-red',
   developer: 'bg-google-blue',
   builder: 'bg-google-green',
   workshop: 'bg-google-yellow',

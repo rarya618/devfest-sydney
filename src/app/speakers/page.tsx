@@ -19,15 +19,16 @@ export const dynamic = 'force-dynamic';
 
 const title = 'Speakers';
 const description =
-  'Meet the speakers of DevFest Sydney 2026. Talks and workshops across the Developer and Builder tracks, Saturday 10 October at Torrens University, Surry Hills.';
+  'Meet the speakers of DevFest Sydney 2026. Talks and workshops across the Spotlight, Developer, Builder and Workshops tracks, Saturday 10 October at Torrens University, Surry Hills.';
 
 export const metadata: Metadata = buildPageMetadata({ title, description, path: '/speakers' });
 
 // Display order for the track groups. Showcase is not a speaking track, so any speaker
 // filed under it is listed last.
-const TRACK_ORDER: Track[] = ['developer', 'builder', 'workshop', 'showcase'];
+const TRACK_ORDER: Track[] = ['spotlight', 'developer', 'builder', 'workshop', 'showcase'];
 
 const TRACK_DESCRIPTIONS: Record<Track, string> = {
+  spotlight: 'Headline sessions on the main stage in the Auditorium.',
   developer: 'Technical sessions for professional engineers.',
   builder: 'For product managers, designers, founders, and anyone building with AI.',
   workshop: 'Hands-on sessions where you build alongside the speaker.',

@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 
 const title = 'Tickets';
 const description =
-  'Get your ticket for DevFest Sydney 2026 on Saturday 10 October at Torrens University, Surry Hills. One ticket covers the Developer, Builder, and Workshops tracks.';
+  'Get your ticket for DevFest Sydney 2026 on Saturday 10 October at Torrens University, Surry Hills. One ticket covers the Spotlight, Developer, Builder, and Workshops tracks.';
 
 export const metadata: Metadata = buildPageMetadata({ title, description, path: '/tickets' });
 

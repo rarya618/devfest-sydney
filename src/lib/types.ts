@@ -1,6 +1,8 @@
 export type TalkFormat = 'talk' | 'lightning-talk' | 'workshop';
 export type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced';
-export type Track = 'developer' | 'builder' | 'workshop' | 'showcase';
+// Spotlight is the Auditorium's track. Nobody proposes into it (the CfS offers only the
+// first three); an organiser moves a speaker onto it from /admin/speakers.
+export type Track = 'spotlight' | 'developer' | 'builder' | 'workshop' | 'showcase';
 export type SubmissionStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
 export type SponsorTier = 'platinum' | 'gold' | 'silver' | 'community';
 export type VolunteerArea = 'registration' | 'av-tech' | 'speaker-support' | 'workshop-facilitator' | 'mc' | 'general-floater' | 'setup-packdown' | 'photography' | 'social-media' | 'merch-table';
@@ -260,4 +262,54 @@ export interface PublicSpeaker {
   tagline: string;
   photoUrl: string;
   previousSlugs: string[];
+}
+
+// The rooms the day runs in. 'all' is a break that happens everywhere at once (registration,
+// lunch), drawn as one full-width row. A plenary names its actual room but is drawn full
+// width as well, since nothing runs against it.
+export type ScheduleRoom = 'auditorium' | 'developer' | 'builder' | 'workshops' | 'all';
+// A session belongs to one or more speakers and takes its title from their talk; a break
+// or plenary carries its own title and has no speaker.
+export type ScheduleKind = 'session' | 'break' | 'plenary';
+
+// A document in the `schedule` collection, as stored.
+export interface ScheduleItem {
+  id: string;
+  kind: ScheduleKind;
+  // For a session, the fallback shown until its speaker has confirmed ("Workshop",
+  // "Lightning talks"); for a break or plenary, the title itself.
+  title: string;
+  // Ids in the `speakers` collection. References rather than names, so a speaker renamed
+  // in /admin/speakers is renamed here too, and an unconfirmed one is never shown.
+  speakerIds: string[];
+  startTime: string; // ISO date string (serialized from Firestore Timestamp)
+  durationMinutes: number;
+  room: ScheduleRoom;
+  // Marked "TBC" on the page: the slot is held but what fills it is not settled.
+  isTentative: boolean;
+}
+
+// The speaker details a schedule slot needs, cut down from PublicSpeaker.
+export interface ScheduleSpeaker {
+  name: string;
+  slug: string;
+  photoUrl: string;
+}
+
+// What /schedule renders. Speaker-derived fields are only filled for confirmed speakers.
+export interface PublicScheduleSlot {
+  id: string;
+  kind: ScheduleKind;
+  title: string;
+  speakers: ScheduleSpeaker[];
+  // True when a speaker is assigned but has not confirmed, so the slot can say a speaker
+  // is coming without naming them. False for a slot nobody has been given yet.
+  hasUnannouncedSpeaker: boolean;
+  // Null for breaks, plenaries and sessions whose speaker has not confirmed yet.
+  track: Track | null;
+  format: TalkFormat | null;
+  startTime: string; // ISO date string
+  endTime: string; // ISO date string
+  room: ScheduleRoom;
+  isTentative: boolean;
 }
