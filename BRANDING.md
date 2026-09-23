@@ -21,7 +21,7 @@ The main typeface. Use **Bold** for titles and large sentences; **Regular** for 
 | Bold (700) | Headings, CTAs, hero text |
 
 ### Secondary — Google Sans Mono
-Used for short lines, speaker names, data labels, and anywhere a "code-style" feel is needed. Not for long-form body copy.
+Used for short lines, data labels (times, dates, metadata), and anywhere a "code-style" feel is needed. Not for long-form body copy, and not for people's names: speaker, crew and organiser names are set in Google Sans across the site.
 
 **Implementation:** Local Google Sans and Google Sans Mono files in `src/fonts/`, subset to Latin and served as woff2, declared via `@font-face` in `globals.css` at weights 400, 500 and 700. Mapped to `--font-sans` and `--font-mono` in the `@theme` block.
 
@@ -34,7 +34,7 @@ Used for short lines, speaker names, data labels, and anywhere a "code-style" fe
 | Blue 500 | `#4285F4` | Primary CTA, links, Developer Track accent |
 | Green 500 | `#34A853` | Success states, Builder Track accent |
 | Yellow 600 | `#f9ab00` | Warnings, Builder Showcase accent, Workshops Track accent |
-| Red 500 | `#EA4335` | Errors, Speaker/CfS accent |
+| Red 500 | `#EA4335` | Errors, Speaker/CfS accent, Spotlight Track accent (text uses `text-google-red-light`) |
 
 ### Halftone Colors
 
