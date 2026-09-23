@@ -1,6 +1,7 @@
 import { SITE_OG_IMAGE } from '@/lib/metadata';
 import { getVerifiedSession } from '@/lib/adminSession';
 import { fetchSpeakers } from '@/lib/speakers';
+import { fetchSessionTimesBySpeakerId } from '@/lib/schedule';
 import SpeakersDashboard from '../../SpeakersDashboard';
 
 export const metadata = {
@@ -10,7 +11,13 @@ export const metadata = {
 };
 
 export default async function SpeakersPage() {
-  const [, speakers] = await Promise.all([getVerifiedSession(), fetchSpeakers()]);
+  // Null when the schedule can't be read, so the dashboard hides the calendar controls
+  // rather than reading every speaker as unscheduled and offering cancellations.
+  const [, speakers, sessionTimes] = await Promise.all([
+    getVerifiedSession(),
+    fetchSpeakers(),
+    fetchSessionTimesBySpeakerId().catch(() => null),
+  ]);
 
-  return <SpeakersDashboard speakers={speakers} />;
+  return <SpeakersDashboard speakers={speakers} sessionTimes={sessionTimes} />;
 }

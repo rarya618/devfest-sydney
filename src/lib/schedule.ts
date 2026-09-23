@@ -1,29 +1,12 @@
 import { adminDb } from '@/lib/firebase-admin';
 import { fetchPublicSpeakers } from '@/lib/speakers';
 import type { PublicScheduleSlot, PublicSpeaker, ScheduleItem, ScheduleKind, ScheduleRoom, SpeakerSessionTime } from '@/lib/types';
+import { SCHEDULE_ROOMS } from '@/lib/scheduleLabels';
+
+// The browser-safe half (room labels, time formatting, grid helpers) lives in
+// scheduleLabels.ts so client components can use it without pulling in the Admin SDK.
+export { SCHEDULE_ROOMS, SCHEDULE_ROOM_LABELS, spansAllRooms, roomColumnIndex, formatScheduleTime } from '@/lib/scheduleLabels';
 import type { Timestamp } from 'firebase-admin/firestore';
-
-// Column order on the grid, left to right. 'all' is not a column: it spans them.
-export const SCHEDULE_ROOMS: Exclude<ScheduleRoom, 'all'>[] = ['auditorium', 'developer', 'builder', 'workshops'];
-
-export const SCHEDULE_ROOM_LABELS: Record<ScheduleRoom, { name: string; detail: string }> = {
-  auditorium: { name: 'Auditorium', detail: 'Spotlight track' },
-  developer: { name: 'Room 3.10', detail: 'Developer track' },
-  builder: { name: 'Room 3.08', detail: 'Builder track' },
-  workshops: { name: 'Room 3.03', detail: 'Workshops track' },
-  all: { name: 'All rooms', detail: '' },
-};
-
-// Breaks held everywhere and plenaries (keynotes, the Builder Showcase) take a full-width
-// row: nothing runs against them, so the other rooms have nothing to show.
-export function spansAllRooms(slot: Pick<PublicScheduleSlot, 'kind' | 'room'>): boolean {
-  return slot.room === 'all' || slot.kind === 'plenary';
-}
-
-// Left-to-right position of a room's column, or -1 for 'all', which has none.
-export function roomColumnIndex(room: ScheduleRoom): number {
-  return (SCHEDULE_ROOMS as ScheduleRoom[]).indexOf(room);
-}
 
 const SCHEDULE_KINDS: ScheduleKind[] = ['session', 'break', 'plenary'];
 const SCHEDULE_ROOM_VALUES: ScheduleRoom[] = [...SCHEDULE_ROOMS, 'all'];
@@ -95,27 +78,30 @@ export async function fetchPublicSchedule(): Promise<PublicScheduleSlot[]> {
   }
 }
 
+function toSessionTime(item: ScheduleItem): SpeakerSessionTime {
+  const endTime = new Date(new Date(item.startTime).getTime() + item.durationMinutes * 60_000).toISOString();
+  return { startTime: item.startTime, endTime, room: item.room };
+}
+
+// Every scheduled speaker's slot, keyed by speaker id. Throws on a failed read: callers
+// that act on the answer (sending an invite or a cancellation) must not mistake "could
+// not read the schedule" for "not on the schedule".
+export async function fetchSessionTimesBySpeakerId(): Promise<Record<string, SpeakerSessionTime>> {
+  const items = await fetchScheduleItems();
+  const sessionTimes: Record<string, SpeakerSessionTime> = {};
+  for (const item of items) {
+    for (const speakerId of item.speakerIds) sessionTimes[speakerId] = toSessionTime(item);
+  }
+  return sessionTimes;
+}
+
 // A speaker's slot, or null when they are not on the schedule yet (or the read fails, so
 // the page falls back to "times are announced with the schedule" rather than erroring).
 // Only called for a confirmed speaker, since their page does not exist otherwise.
 export async function fetchSpeakerSessionTime(speakerId: string): Promise<SpeakerSessionTime | null> {
   try {
-    const items = await fetchScheduleItems();
-    const slot = items.find((item) => item.speakerIds.includes(speakerId));
-    if (!slot) return null;
-    const endTime = new Date(new Date(slot.startTime).getTime() + slot.durationMinutes * 60_000).toISOString();
-    return { startTime: slot.startTime, endTime, room: slot.room };
+    return (await fetchSessionTimesBySpeakerId())[speakerId] ?? null;
   } catch {
     return null;
   }
-}
-
-// "10:50 am", pinned to Sydney: App Hosting runs in UTC (see src/lib/format.ts).
-export function formatScheduleTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString('en-AU', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-    timeZone: 'Australia/Sydney',
-  });
 }

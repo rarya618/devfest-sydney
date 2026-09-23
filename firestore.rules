@@ -39,6 +39,10 @@ rules_version='2';
 //   - photoUrl: string (optional, valid https URL or empty — starts blank until an admin adds one)
 //   - previousSlugs: list of strings (optional) — slugs the speaker's page used to live at,
 //     appended by updateSpeaker() on a rename so /speakers/<old-slug> can redirect
+//   - calendarInviteSentAt, calendarInviteSentBy, calendarInviteSequence, calendarInviteSlot
+//     (optional) — written by sendCalendarInvite() (src/app/admin/calendarInviteActions.ts);
+//     calendarInviteSlot is a map { startTime, endTime, room, talkTitle } of what the last
+//     invite said, removed when a cancellation is sent
 //
 // Collection: admins
 // Document ID: user's email address
@@ -285,7 +289,9 @@ service cloud.firestore {
       return data.keys().hasOnly(['name', 'email', 'talkTitle', 'abstract', 'format',
                                    'track', 'experienceLevel', 'linkedinUrl', 'githubUrl',
                                    'websiteUrl', 'submissionId', 'promotedAt', 'bio',
-                                   'tagline', 'photoUrl', 'previousSlugs']) &&
+                                   'tagline', 'photoUrl', 'previousSlugs',
+                                   'calendarInviteSentAt', 'calendarInviteSentBy',
+                                   'calendarInviteSequence', 'calendarInviteSlot']) &&
         data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
         data.email is string && isValidEmail(data.email) &&
         data.talkTitle is string && data.talkTitle.size() >= 1 && data.talkTitle.size() <= 150 &&

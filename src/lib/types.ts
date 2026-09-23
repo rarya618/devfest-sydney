@@ -242,6 +242,13 @@ export interface Speaker {
   speakerConfirmedAt: string | null; // ISO date string
   speakerTicketEmailSentAt: string | null; // ISO date string
   speakerTicketEmailSentBy: string | null;
+  // The calendar invite for their session, recorded on the speaker document (it follows the
+  // schedule, not the proposal). Null until one is sent. calendarInviteSlot is what the
+  // last invite said, so the dashboard can tell when the schedule has moved since; it goes
+  // back to null once a cancellation is sent.
+  calendarInviteSentAt: string | null; // ISO date string
+  calendarInviteSentBy: string | null;
+  calendarInviteSlot: CalendarInviteSlot | null;
 }
 
 // What /speakers renders. Deliberately a subset of Speaker: no email, no submission id,
@@ -302,6 +309,19 @@ export interface SpeakerSessionTime {
   endTime: string; // ISO date string
   room: ScheduleRoom;
 }
+
+// What a speaker's calendar invite last told them.
+export interface CalendarInviteSlot extends SpeakerSessionTime {
+  talkTitle: string;
+}
+
+// Where a speaker's calendar invite stands against the current schedule.
+//   unscheduled: not on the schedule and never sent one, so there is nothing to send
+//   not-sent:    on the schedule, no invite yet
+//   sent:        the invite matches the schedule
+//   changed:     the time, room or title moved after the invite went out
+//   removed:     an invite went out but they are no longer on the schedule
+export type CalendarInviteStatus = 'unscheduled' | 'not-sent' | 'sent' | 'changed' | 'removed';
 
 // What /schedule renders. Speaker-derived fields are only filled for confirmed speakers.
 export interface PublicScheduleSlot {

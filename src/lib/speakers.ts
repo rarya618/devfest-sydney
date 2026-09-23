@@ -1,5 +1,5 @@
 import { adminDb } from '@/lib/firebase-admin';
-import type { PublicSpeaker, Speaker, SpeakerConfirmation } from '@/lib/types';
+import type { CalendarInviteSlot, PublicSpeaker, ScheduleRoom, Speaker, SpeakerConfirmation } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
 
 interface SubmissionConfirmationFields {
@@ -20,6 +20,20 @@ function toConfirmation(submission: SubmissionConfirmationFields | undefined): S
   if (submission.speakerConfirmedAt) return 'confirmed';
   if (submission.acceptanceEmailSentAt) return 'awaiting';
   return 'not-emailed';
+}
+
+// The snapshot sendCalendarInvite() writes. Anything malformed reads as "no invite
+// details", which the dashboard treats as needing a fresh send rather than hiding it.
+function toCalendarInviteSlot(value: unknown): CalendarInviteSlot | null {
+  if (!value || typeof value !== 'object') return null;
+  const slot = value as Record<string, unknown>;
+  if (typeof slot.startTime !== 'string' || typeof slot.endTime !== 'string' || typeof slot.room !== 'string') return null;
+  return {
+    startTime: slot.startTime,
+    endTime: slot.endTime,
+    room: slot.room as ScheduleRoom,
+    talkTitle: typeof slot.talkTitle === 'string' ? slot.talkTitle : '',
+  };
 }
 
 // Profile links arrive through the CfS form, which never required a scheme, so
@@ -90,6 +104,9 @@ export async function fetchSpeakers(): Promise<Speaker[]> {
       speakerConfirmedAt: toIsoOrNull(sourceSubmission?.speakerConfirmedAt),
       speakerTicketEmailSentAt: toIsoOrNull(sourceSubmission?.speakerTicketEmailSentAt),
       speakerTicketEmailSentBy: sourceSubmission?.speakerTicketEmailSentBy ?? null,
+      calendarInviteSentAt: toIsoOrNull(data.calendarInviteSentAt as Timestamp | undefined),
+      calendarInviteSentBy: data.calendarInviteSentBy ?? null,
+      calendarInviteSlot: toCalendarInviteSlot(data.calendarInviteSlot),
     } satisfies Speaker;
   });
 }

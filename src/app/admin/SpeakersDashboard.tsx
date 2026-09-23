@@ -4,6 +4,7 @@ import { useState, useTransition, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { removeSpeaker } from './speakerActions';
 import { sendAcceptanceEmail, sendSpeakerTicketEmail } from './actions';
+import { sendCalendarInvite } from './calendarInviteActions';
 import EditSpeakerModal from './EditSpeakerModal';
 import Alert from '@/components/Alert';
 import { formatDate, getInitials } from '@/lib/format';
@@ -15,7 +16,9 @@ import {
   FORMAT_LABELS,
   EXPERIENCE_LABELS,
 } from '@/lib/submissionLabels';
-import type { Speaker, SpeakerConfirmation, Track } from '@/lib/types';
+import { calendarInviteStatus } from '@/lib/calendarInvite';
+import { formatScheduleTime, SCHEDULE_ROOM_LABELS } from '@/lib/scheduleLabels';
+import type { CalendarInviteStatus, Speaker, SpeakerConfirmation, SpeakerSessionTime, Track } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
 import HistoryDisclosure, { stampedOn, type HistoryRow } from './HistoryDisclosure';
 
@@ -39,8 +42,45 @@ function speakerHistoryRows(speaker: Speaker): HistoryRow[] {
     rows.push({ label: 'Ticket sent', value: stampedOn(formatDate(speaker.speakerTicketEmailSentAt), speaker.speakerTicketEmailSentBy) });
   }
 
+  if (speaker.calendarInviteSentAt) {
+    rows.push({ label: 'Calendar invite', value: stampedOn(formatDate(speaker.calendarInviteSentAt), speaker.calendarInviteSentBy) });
+  }
+
   return rows;
 }
+
+// Null when the schedule could not be read: the calendar controls are hidden rather than
+// guessing, since a wrong "off the schedule" would offer a cancellation.
+function inviteStatusFor(speaker: Speaker, sessionTimes: Record<string, SpeakerSessionTime> | null): CalendarInviteStatus | null {
+  if (!sessionTimes) return null;
+  return calendarInviteStatus(speaker.calendarInviteSlot, sessionTimes[speaker.id] ?? null, speaker.talkTitle);
+}
+
+// The statuses that still need something sent. Bulk sends only the first two:
+// cancellations go one at a time, from the card, on purpose.
+const INVITE_NEEDS_SENDING: CalendarInviteStatus[] = ['not-sent', 'changed', 'removed'];
+
+const INVITE_CHIP: Partial<Record<CalendarInviteStatus, { label: string; title: string }>> = {
+  'not-sent': {
+    label: 'No calendar invite',
+    title: 'This speaker is on the schedule but hasn\'t been sent a calendar invite. Send it with the calendar button.',
+  },
+  changed: {
+    label: 'Schedule changed',
+    title: 'Their time, room or talk title has changed since the invite went out. The calendar button sends an update to the same event.',
+  },
+  removed: {
+    label: 'Off the schedule',
+    title: 'They were sent an invite but are no longer on the schedule. The calendar button sends a cancellation that removes it from their calendar.',
+  },
+};
+
+const INVITE_BUTTON_TITLE: Record<Exclude<CalendarInviteStatus, 'unscheduled'>, string> = {
+  'not-sent': 'Send calendar invite',
+  changed: 'Send calendar update',
+  removed: 'Send calendar cancellation',
+  sent: 'Resend calendar invite',
+};
 
 type FilterTrack = 'all' | Track;
 type FilterConfirmation = 'all' | SpeakerConfirmation;
@@ -114,10 +154,12 @@ function ProfileLink({ href, label }: ProfileLinkProps) {
 
 interface SpeakerCardProps {
   speaker: Speaker;
+  session: SpeakerSessionTime | null;
+  inviteStatus: CalendarInviteStatus | null;
   onError: (message: string) => void;
 }
 
-function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
+function SpeakerCard({ speaker, session, inviteStatus, onError }: SpeakerCardProps) {
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -160,10 +202,22 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
     });
   }
 
+  function handleSendCalendarInvite() {
+    startTransition(async () => {
+      const result = await sendCalendarInvite(speaker.id);
+      if (result.error) onError(result.error);
+    });
+  }
+
   const alreadyEmailed = Boolean(speaker.acceptanceEmailSentAt);
   const canEmail = speaker.confirmation !== 'unknown';
   const canSendTicket = speaker.confirmation === 'confirmed';
   const ticketSent = Boolean(speaker.speakerTicketEmailSentAt);
+  // Confirmed only, as the action enforces: an invite announces a slot the speaker has
+  // agreed to turn up for.
+  const inviteAction = canSendTicket && inviteStatus && inviteStatus !== 'unscheduled' ? inviteStatus : null;
+  const inviteNeedsSending = inviteAction ? INVITE_NEEDS_SENDING.includes(inviteAction) : false;
+  const inviteChip = inviteAction ? INVITE_CHIP[inviteAction] : undefined;
 
   function handleCardClick(event: React.MouseEvent<HTMLDivElement>) {
     const target = event.target as HTMLElement;
@@ -229,6 +283,20 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
                 className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25"
               >
                 No ticket sent
+              </span>
+            )}
+            {session && (
+              <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-medium">
+                {session.room === 'all' ? '' : `${SCHEDULE_ROOM_LABELS[session.room].name} · `}
+                {formatScheduleTime(session.startTime)}
+              </span>
+            )}
+            {inviteChip && (
+              <span
+                title={inviteChip.title}
+                className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25"
+              >
+                {inviteChip.label}
               </span>
             )}
           </div>
@@ -307,6 +375,25 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
             </button>
           )}
 
+          {inviteAction && (
+            <button
+              onClick={handleSendCalendarInvite}
+              disabled={isPending}
+              aria-label={`${INVITE_BUTTON_TITLE[inviteAction]} to ${speaker.name}`}
+              title={INVITE_BUTTON_TITLE[inviteAction]}
+              className={`inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                inviteNeedsSending
+                  ? 'bg-google-yellow/15 text-google-yellow hover:bg-google-yellow hover:text-black-02'
+                  : 'text-white/55 hover:text-white hover:bg-white/[0.08]'
+              }`}
+            >
+              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                <rect x="2" y="3" width="12" height="11" rx="1.5" />
+                <path strokeLinecap="round" d="M2 6.5h12M5.5 1.75v2.5M10.5 1.75v2.5" />
+              </svg>
+            </button>
+          )}
+
           {confirmingRemove ? (
             <div role="group" aria-label={`Confirm removing ${speaker.name}`} className="flex flex-col items-end gap-1.5 bg-[#2d2e31] border border-white/10 rounded-xl px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.45)] w-52">
               <p className="text-xs text-white/70 leading-snug text-left w-full">
@@ -360,11 +447,22 @@ function SpeakerCard({ speaker, onError }: SpeakerCardProps) {
 
 interface Props {
   speakers: Speaker[];
+  // Speaker id to their slot. Null when the schedule couldn't be read.
+  sessionTimes: Record<string, SpeakerSessionTime> | null;
 }
 
-export default function SpeakersDashboard({ speakers }: Props) {
+// Resend rate limits sends per second, so a bulk send goes one at a time with this gap,
+// the same spacing the rejection emails use on /admin.
+const CALENDAR_INVITE_SPACING_MS = 600;
+
+export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
   const mobileBarHidden = useMobileBarHidden();
-  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [alertMessage, setAlertMessage] = useState<string | null>(
+    sessionTimes ? null : 'The schedule couldn\'t be loaded, so calendar invites are hidden for now. Refresh the page to try again.'
+  );
+  const [isConfirmingInvites, setIsConfirmingInvites] = useState(false);
+  const [inviteProgress, setInviteProgress] = useState<{ sent: number; total: number } | null>(null);
+  const [isBulkPending, startBulkTransition] = useTransition();
   const [filter, setFilter] = useState<FilterTrack>('all');
   const [confirmationFilter, setConfirmationFilter] = useState<FilterConfirmation>('all');
   const [search, setSearch] = useState('');
@@ -468,6 +566,47 @@ export default function SpeakersDashboard({ speakers }: Props) {
   const awaitingTicketCount = speakers.filter(
     (speaker) => speaker.confirmation === 'confirmed' && !speaker.speakerTicketEmailSentAt
   ).length;
+  const inviteStatuses = new Map(speakers.map((speaker) => [speaker.id, inviteStatusFor(speaker, sessionTimes)]));
+  // First invites and updates. Cancellations are left to each card: removing an event from
+  // someone's calendar should be a decision made about that one person.
+  const bulkInviteTargets = speakers.filter((speaker) => {
+    const status = inviteStatuses.get(speaker.id);
+    return speaker.confirmation === 'confirmed' && (status === 'not-sent' || status === 'changed');
+  });
+
+  function handleBulkSendInvites() {
+    const targets = bulkInviteTargets;
+    setIsConfirmingInvites(false);
+    if (targets.length === 0) return;
+
+    startBulkTransition(async () => {
+      let sendFailures = 0;
+      let recordFailures = 0;
+      setInviteProgress({ sent: 0, total: targets.length });
+
+      for (const [index, target] of targets.entries()) {
+        if (index > 0) await new Promise((resolve) => setTimeout(resolve, CALENDAR_INVITE_SPACING_MS));
+        const result = await sendCalendarInvite(target.id);
+        if (result.error) {
+          if (result.emailSent) recordFailures += 1;
+          else sendFailures += 1;
+        }
+        setInviteProgress({ sent: index + 1, total: targets.length });
+      }
+
+      setInviteProgress(null);
+
+      if (recordFailures > 0) {
+        setAlertMessage(
+          `${recordFailures} calendar ${recordFailures === 1 ? 'invite was' : 'invites were'} sent but couldn't be recorded, so those cards may still ask for one. Refresh the page before sending again so nobody gets a duplicate.`
+        );
+      } else if (sendFailures > 0) {
+        setAlertMessage(
+          `${sendFailures} of ${targets.length} calendar invites couldn't be sent. Those cards still ask for one, so you can send them again.`
+        );
+      }
+    });
+  }
 
   const query = search.trim().toLowerCase();
   const filtered = speakers
@@ -509,11 +648,54 @@ export default function SpeakersDashboard({ speakers }: Props) {
               {counts.all} in the lineup &middot; {confirmedCount} confirmed
               {notEmailedCount > 0 && <> &middot; {notEmailedCount} not emailed</>}
               {awaitingTicketCount > 0 && <> &middot; {awaitingTicketCount} without a ticket</>}
+              {bulkInviteTargets.length > 0 && <> &middot; {bulkInviteTargets.length} calendar {bulkInviteTargets.length === 1 ? 'invite' : 'invites'} to send</>}
               {incompleteCount > 0 && <> &middot; {incompleteCount} with profile gaps</>}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 min-w-0">
+            {inviteProgress ? (
+              <p role="status" className="shrink-0 h-10 inline-flex items-center px-4 rounded-full bg-white/[0.06] text-sm font-bold text-white/70">
+                Sending invites {inviteProgress.sent} of {inviteProgress.total}
+              </p>
+            ) : isConfirmingInvites ? (
+              <div role="group" aria-label="Confirm sending calendar invites" className="shrink-0 flex items-center gap-2 h-10 pl-4 pr-1.5 rounded-full bg-[#2d2e31] border border-white/10">
+                <span className="text-sm text-white/70">
+                  Email {bulkInviteTargets.length} {bulkInviteTargets.length === 1 ? 'speaker' : 'speakers'}?
+                </span>
+                <button
+                  onClick={() => setIsConfirmingInvites(false)}
+                  aria-label="Cancel sending calendar invites"
+                  className="text-xs px-2.5 py-1 rounded-full border border-white/40 text-white/60 hover:border-white/60 hover:text-white transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleBulkSendInvites}
+                  aria-label={`Send calendar invites to ${bulkInviteTargets.length} speakers`}
+                  className="text-xs px-2.5 py-1 rounded-full bg-google-yellow text-black-02 font-bold hover:opacity-90 transition-opacity"
+                >
+                  Send
+                </button>
+              </div>
+            ) : (
+              bulkInviteTargets.length > 0 && (
+                <button
+                  onClick={() => setIsConfirmingInvites(true)}
+                  disabled={isBulkPending}
+                  aria-label={`Send calendar invites to the ${bulkInviteTargets.length} confirmed speakers who need one`}
+                  title="Sends first invites and updates. Cancellations are sent from each card."
+                  className="shrink-0 inline-flex items-center gap-2 h-10 text-sm px-4 rounded-full font-bold bg-google-yellow/15 text-google-yellow hover:bg-google-yellow hover:text-black-02 transition-colors disabled:opacity-50"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                    <rect x="2" y="3" width="12" height="11" rx="1.5" />
+                    <path strokeLinecap="round" d="M2 6.5h12M5.5 1.75v2.5M10.5 1.75v2.5" />
+                  </svg>
+                  Send {bulkInviteTargets.length} {bulkInviteTargets.length === 1 ? 'invite' : 'invites'}
+                </button>
+              )
+            )}
+
             <div
               ref={searchContainerRef}
               className={`relative shrink-0 h-10 rounded-full transition-all duration-300 ease-in-out ${
@@ -680,7 +862,13 @@ export default function SpeakersDashboard({ speakers }: Props) {
         ) : (
           <div className="grid grid-cols-1 gap-5 items-start">
             {filtered.map((speaker) => (
-              <SpeakerCard key={speaker.id} speaker={speaker} onError={setAlertMessage} />
+              <SpeakerCard
+                key={speaker.id}
+                speaker={speaker}
+                session={sessionTimes?.[speaker.id] ?? null}
+                inviteStatus={inviteStatuses.get(speaker.id) ?? null}
+                onError={setAlertMessage}
+              />
             ))}
           </div>
         )}
