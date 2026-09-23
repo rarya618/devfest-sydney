@@ -1,6 +1,6 @@
 import { adminDb } from '@/lib/firebase-admin';
 import { fetchPublicSpeakers } from '@/lib/speakers';
-import type { PublicScheduleSlot, PublicSpeaker, ScheduleItem, ScheduleKind, ScheduleRoom } from '@/lib/types';
+import type { PublicScheduleSlot, PublicSpeaker, ScheduleItem, ScheduleKind, ScheduleRoom, SpeakerSessionTime } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
 
 // Column order on the grid, left to right. 'all' is not a column: it spans them.
@@ -92,6 +92,21 @@ export async function fetchPublicSchedule(): Promise<PublicScheduleSlot[]> {
     return items.map((item) => toPublicSlot(item, confirmedSpeakersById));
   } catch {
     return [];
+  }
+}
+
+// A speaker's slot, or null when they are not on the schedule yet (or the read fails, so
+// the page falls back to "times are announced with the schedule" rather than erroring).
+// Only called for a confirmed speaker, since their page does not exist otherwise.
+export async function fetchSpeakerSessionTime(speakerId: string): Promise<SpeakerSessionTime | null> {
+  try {
+    const items = await fetchScheduleItems();
+    const slot = items.find((item) => item.speakerIds.includes(speakerId));
+    if (!slot) return null;
+    const endTime = new Date(new Date(slot.startTime).getTime() + slot.durationMinutes * 60_000).toISOString();
+    return { startTime: slot.startTime, endTime, room: slot.room };
+  } catch {
+    return null;
   }
 }
 

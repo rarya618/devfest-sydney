@@ -296,6 +296,13 @@ export interface ScheduleSpeaker {
   photoUrl: string;
 }
 
+// When and where one speaker is on, for their page on /speakers/[slug].
+export interface SpeakerSessionTime {
+  startTime: string; // ISO date string
+  endTime: string; // ISO date string
+  room: ScheduleRoom;
+}
+
 // What /schedule renders. Speaker-derived fields are only filled for confirmed speakers.
 export interface PublicScheduleSlot {
   id: string;

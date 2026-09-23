@@ -12,6 +12,7 @@ import { isCfsOpen } from '@/lib/cfs';
 import { fetchPublicSpeakerBySlug, fetchPublicSpeakers, findCurrentSlugForPreviousSlug } from '@/lib/speakers';
 import { getInitials } from '@/lib/format';
 import { buildEventReference } from '@/lib/eventJsonLd';
+import { fetchSpeakerSessionTime, formatScheduleTime, SCHEDULE_ROOM_LABELS } from '@/lib/schedule';
 import { LinkedInIcon, GitHubIcon, WebsiteIcon } from '@/components/SocialIcons';
 import { FORMAT_LABELS, TRACK_LABELS, TRACK_DOT_COLORS, TRACK_COLORS } from '@/lib/submissionLabels';
 import type { PublicSpeaker } from '@/lib/types';
@@ -81,6 +82,12 @@ export default async function SpeakerPage({ params }: PageProps) {
     if (currentSlug) permanentRedirect(`/speakers/${currentSlug}`);
     notFound();
   }
+  // Fetched after the speaker, since it needs their id. Null until they are on the schedule.
+  const sessionTime = await fetchSpeakerSessionTime(speaker.id);
+  const sessionTimeLabel = sessionTime
+    ? `${formatScheduleTime(sessionTime.startTime)} to ${formatScheduleTime(sessionTime.endTime)}`
+    : '';
+  const sessionRoomLabel = sessionTime && sessionTime.room !== 'all' ? SCHEDULE_ROOM_LABELS[sessionTime.room].name : '';
 
   const cfsOpen = isCfsOpen();
   const cfsCloseDate = process.env.CFS_CLOSE_DATE;
@@ -173,7 +180,18 @@ export default async function SpeakerPage({ params }: PageProps) {
           <div className="space-y-8">
             <Reveal>
               <article className="rounded-xl bg-surface p-8 md:p-10">
-                <p className="text-xs font-bold text-white/55 mb-3">{FORMAT_LABELS[speaker.format]}</p>
+                <p className="text-xs font-bold text-white/55 mb-3">
+                  {FORMAT_LABELS[speaker.format]}
+                  {sessionTime && (
+                    <span className="font-normal">
+                      {' · '}
+                      <span className="font-mono">
+                        <time dateTime={sessionTime.startTime}>{sessionTimeLabel}</time>
+                      </span>
+                      {sessionRoomLabel && ` · ${sessionRoomLabel}`}
+                    </span>
+                  )}
+                </p>
                 <h2 className="text-2xl md:text-3xl font-bold tracking-tight leading-snug mb-3">{speaker.talkTitle}</h2>
                 <p className="text-white/70 leading-relaxed whitespace-pre-wrap">{speaker.abstract}</p>
               </article>
@@ -194,10 +212,26 @@ export default async function SpeakerPage({ params }: PageProps) {
               <div>
                 <p className="text-xs font-bold text-white/55 mb-2">Catch this session</p>
                 <p className="font-bold text-white">Saturday, 10 October 2026</p>
-                <p className="text-sm text-white/60 mt-0.5">Torrens University, Surry Hills</p>
-                <p className="text-sm text-white/55 mt-3 leading-relaxed">
-                  Session times are announced with the schedule. One ticket covers every track.
+                {sessionTime && (
+                  <p className="font-mono text-sm text-white/85 mt-1">
+                    <time dateTime={sessionTime.startTime}>{sessionTimeLabel}</time>
+                  </p>
+                )}
+                <p className="text-sm text-white/60 mt-0.5">
+                  {sessionRoomLabel ? `${sessionRoomLabel}, Torrens University, Surry Hills` : 'Torrens University, Surry Hills'}
                 </p>
+                {sessionTime ? (
+                  <p className="text-sm text-white/55 mt-3 leading-relaxed">
+                    One ticket covers every track.{' '}
+                    <Link href="/schedule" className="font-bold text-white/80 underline underline-offset-2 decoration-white/30 hover:decoration-white transition-colors">
+                      See the full schedule
+                    </Link>
+                  </p>
+                ) : (
+                  <p className="text-sm text-white/55 mt-3 leading-relaxed">
+                    Session times are announced with the schedule. One ticket covers every track.
+                  </p>
+                )}
               </div>
               {ticketsOnSale ? (
                 <TicketsLink
