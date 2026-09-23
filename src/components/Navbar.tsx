@@ -34,6 +34,7 @@ const SHOWCASE_HREF = '/builder-showcase';
 
 const NAV_LINKS = [
   { href: '/speakers', label: 'Speakers' },
+  { href: '/schedule', label: 'Schedule' },
   { href: '/partners', label: 'Partners' },
   { href: SHOWCASE_HREF, label: 'Builder Showcase' },
 ];
@@ -124,9 +125,9 @@ export default function Navbar({
             />
           </Link>
 
-          <div className="flex items-center gap-8">
-            {/* Links */}
-            <div className="hidden md:flex items-center gap-8 text-sm font-bold text-white whitespace-nowrap">
+          <div className="flex items-center gap-6 lg:gap-8">
+            {/* Links: tighter spacing below lg so four items and the CTA fit beside the logo at 768px */}
+            <div className="hidden md:flex items-center gap-5 lg:gap-8 text-sm font-bold text-white whitespace-nowrap">
               {NAV_LINKS.map((link) =>
                 link.href === SHOWCASE_HREF ? (
                   <ShowcaseLink key={link.href} source="navbar" className="hover:text-white/80 transition-colors">
@@ -145,14 +146,14 @@ export default function Navbar({
               <TicketsLink
                 source="navbar"
                 aria-label="Get tickets for DevFest Sydney 2026 on Humanitix"
-                className={`hidden md:inline-flex items-center px-5.5 py-1.75 text-sm font-bold rounded-sm border transition-opacity hover:opacity-80 ${ACCENT_CLASSES[accent]}`}
+                className={`hidden md:inline-flex items-center whitespace-nowrap px-5.5 py-1.75 text-sm font-bold rounded-sm border transition-opacity hover:opacity-80 ${ACCENT_CLASSES[accent]}`}
               >
                 Get tickets
               </TicketsLink>
             ) : (
               <CfsLink
                 source="navbar"
-                className={`hidden md:inline-flex items-center px-5.5 py-1.75 text-sm font-bold rounded-sm border transition-opacity hover:opacity-80 ${ACCENT_CLASSES[accent]}`}
+                className={`hidden md:inline-flex items-center whitespace-nowrap px-5.5 py-1.75 text-sm font-bold rounded-sm border transition-opacity hover:opacity-80 ${ACCENT_CLASSES[accent]}`}
               >
                 Apply to speak
               </CfsLink>
