@@ -27,7 +27,7 @@ rules_version='2';
 //   - talkTitle: string (required, 1–150 chars)
 //   - abstract: string (required, 1–2000 chars)
 //   - format: string (required) — 'talk' | 'lightning-talk' | 'workshop'
-//   - track: string (required) — 'developer' | 'builder' | 'workshop' | 'showcase'
+//   - track: string (required) — 'spotlight' | 'developer' | 'builder' | 'workshop' | 'showcase'
 //   - experienceLevel: string (required) — 'beginner' | 'intermediate' | 'advanced'
 //   - linkedinUrl: string (optional, max 500 chars, may be empty)
 //   - githubUrl: string (optional, max 500 chars, may be empty)
@@ -46,14 +46,15 @@ rules_version='2';
 //   - name: string (optional, max 100 chars) — display name
 //
 // Collection: schedule
-// Document ID: auto-generated
+// Document ID: "<HHMM>-<room>", written by scripts/seed-schedule.mjs
 // Fields:
-//   - title: string (required, 1–150 chars)
-//   - speakerName: string (optional, max 100 chars)
+//   - kind: string (required) — 'session' | 'break' | 'plenary'
+//   - title: string (required, 1–150 chars); a session's placeholder until its speaker confirms
+//   - speakerIds: list of `speakers` doc ids (required, may be empty, max 10)
 //   - startTime: timestamp (required)
-//   - durationMinutes: number (required, positive integer)
-//   - track: string (required) — 'developer' | 'builder' | 'showcase' | 'all'
-//   - location: string (optional, max 100 chars)
+//   - durationMinutes: number (required, 1–480)
+//   - room: string (required) — 'auditorium' | 'developer' | 'builder' | 'workshops' | 'all'
+//   - isTentative: bool (required); shown as "TBC"
 //
 // Collection: sponsors
 // Document ID: auto-generated
@@ -279,7 +280,7 @@ service cloud.firestore {
 
     function isValidSpeaker(data) {
       let allowedFormats = ['talk', 'lightning-talk', 'workshop'];
-      let allowedTracks = ['developer', 'builder', 'workshop', 'showcase'];
+      let allowedTracks = ['spotlight', 'developer', 'builder', 'workshop', 'showcase'];
       let allowedLevels = ['beginner', 'intermediate', 'advanced'];
       return data.keys().hasOnly(['name', 'email', 'talkTitle', 'abstract', 'format',
                                    'track', 'experienceLevel', 'linkedinUrl', 'githubUrl',
@@ -304,15 +305,17 @@ service cloud.firestore {
     }
 
     function isValidScheduleItem(data) {
-      let allowedTracks = ['developer', 'builder', 'showcase', 'all'];
-      return data.keys().hasOnly(['title', 'speakerName', 'startTime',
-                                   'durationMinutes', 'track', 'location']) &&
+      let allowedKinds = ['session', 'break', 'plenary'];
+      let allowedRooms = ['auditorium', 'developer', 'builder', 'workshops', 'all'];
+      return data.keys().hasOnly(['kind', 'title', 'speakerIds', 'startTime',
+                                   'durationMinutes', 'room', 'isTentative']) &&
+        data.kind in allowedKinds &&
         data.title is string && data.title.size() >= 1 && data.title.size() <= 150 &&
-        isValidOptionalString('speakerName', 1, 100) &&
+        data.speakerIds is list && data.speakerIds.size() <= 10 &&
         data.startTime is timestamp &&
         data.durationMinutes is number && data.durationMinutes > 0 && data.durationMinutes <= 480 &&
-        data.track in allowedTracks &&
-        isValidOptionalString('location', 1, 100);
+        data.room in allowedRooms &&
+        data.isTentative is bool;
     }
 
     // Shared by sponsors and community partners: name, logo, website, order, optional blurb.
