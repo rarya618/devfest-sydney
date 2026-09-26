@@ -137,13 +137,17 @@ function ScheduleGrid({ slots }: { slots: PublicScheduleSlot[] }) {
 
   return (
     <div className="hidden lg:grid grid-cols-[5.5rem_repeat(4,minmax(0,1fr))] gap-3">
-      <div aria-hidden="true" />
-      {SCHEDULE_ROOMS.map((room) => (
-        <div key={room} className="pb-2 border-b border-white/15">
-          <p className="font-bold text-white">{SCHEDULE_ROOM_LABELS[room].name}</p>
-          <p className="text-sm text-white/55">{SCHEDULE_ROOM_LABELS[room].detail}</p>
-        </div>
-      ))}
+      {/* One subgrid row rather than five sticky cells, so the opaque strip also covers the
+          gaps between columns and cards never show through as they scroll under it. */}
+      <div className="col-span-full grid grid-cols-subgrid sticky top-[84px] z-10 pt-3 bg-[#010103]">
+        <div aria-hidden="true" />
+        {SCHEDULE_ROOMS.map((room) => (
+          <div key={room} className="pb-2 border-b border-white/15">
+            <p className="font-bold text-white">{SCHEDULE_ROOM_LABELS[room].name}</p>
+            <p className="text-sm text-white/55">{SCHEDULE_ROOM_LABELS[room].detail}</p>
+          </div>
+        ))}
+      </div>
 
       {boundaries
         .filter((boundary) => startTimes.has(boundary))
