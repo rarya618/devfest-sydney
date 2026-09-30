@@ -541,6 +541,7 @@ export default function CrewDashboard({ crew }: Props) {
         'Email',
         'Phone',
         'Role or area',
+        'Signed up for',
         'Shift',
         'Confirmation',
         'Ticket sent',
@@ -560,6 +561,7 @@ export default function CrewDashboard({ crew }: Props) {
           : member.assignedArea
             ? VOLUNTEER_AREA_LABELS[member.assignedArea]
             : '',
+        member.areasOfInterest.map((area) => VOLUNTEER_AREA_LABELS[area]).join(', '),
         VOLUNTEER_SHIFT_LABELS[member.assignedShift],
         member.isOrganiser ? '' : VOLUNTEER_CONFIRMATION_CHIPS[member.confirmation].label,
         member.isOrganiser ? '' : formatCsvBoolean(Boolean(member.ticketSentAt)),
