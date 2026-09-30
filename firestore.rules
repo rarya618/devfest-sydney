@@ -126,7 +126,8 @@ rules_version='2';
 //   unlisted field, and update is admin-only, so they only ever arrive through the
 //   Admin SDK, which bypasses these rules. isValidVolunteerSubmission therefore does
 //   not list them.
-//   - assignedArea: string - a VolunteerArea, or '' when not rostered yet
+//   - assignedArea: string - a VolunteerArea, or '' when not rostered yet. Also allows
+//     'videography' and 'lead-volunteer', which are roster-only and never an areaOfInterest
 //   - assignedShift: string - 'full-day' | 'morning' | 'afternoon', or '' when unset
 //   - photoUrl: string (optional, max 500 chars) - crew-photos/ object in the default bucket
 //   - showOnCrewPage: boolean - opt-in to being named on the public /crew page

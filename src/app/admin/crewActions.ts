@@ -18,6 +18,8 @@ const VOLUNTEER_AREAS: VolunteerArea[] = [
   'photography',
   'social-media',
   'merch-table',
+  'videography',
+  'lead-volunteer',
 ];
 const VOLUNTEER_SHIFTS: VolunteerShift[] = ['', 'full-day', 'morning', 'afternoon'];
 

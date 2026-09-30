@@ -15,6 +15,7 @@ export const VOLUNTEER_STATUS_LABELS: Record<VolunteerStatus, string> = {
 };
 
 export const VOLUNTEER_AREA_LABELS: Record<VolunteerArea, string> = {
+  'lead-volunteer': 'Lead volunteer',
   registration: 'Registration',
   'av-tech': 'AV / Tech',
   'speaker-support': 'Speaker support',
@@ -23,6 +24,7 @@ export const VOLUNTEER_AREA_LABELS: Record<VolunteerArea, string> = {
   'general-floater': 'General floater',
   'setup-packdown': 'Setup / Pack-down',
   photography: 'Photography',
+  videography: 'Videography',
   'social-media': 'Social media',
   'merch-table': 'Merch table',
 };

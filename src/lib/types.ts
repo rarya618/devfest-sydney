@@ -5,7 +5,9 @@ export type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced';
 export type Track = 'spotlight' | 'developer' | 'builder' | 'workshop' | 'showcase';
 export type SubmissionStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
 export type SponsorTier = 'platinum' | 'gold' | 'silver' | 'community';
-export type VolunteerArea = 'registration' | 'av-tech' | 'speaker-support' | 'workshop-facilitator' | 'mc' | 'general-floater' | 'setup-packdown' | 'photography' | 'social-media' | 'merch-table';
+// The last two are roster-only: an admin assigns them on /admin/crew, and the signup form
+// (which keeps its own list) never offers them as an area of interest.
+export type VolunteerArea = 'registration' | 'av-tech' | 'speaker-support' | 'workshop-facilitator' | 'mc' | 'general-floater' | 'setup-packdown' | 'photography' | 'social-media' | 'merch-table' | 'videography' | 'lead-volunteer';
 export type VolunteerStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
 // The part of the day a crew member is rostered for. Empty until an admin assigns one:
 // the signup form never asked, so an unset shift is the normal starting state.
