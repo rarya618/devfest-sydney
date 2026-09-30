@@ -4,7 +4,10 @@ import { revalidatePath } from 'next/cache';
 import { adminDb } from '@/lib/firebase-admin';
 import { verifyAdminSession } from '@/lib/adminSession';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { Resend } from 'resend';
 import type { CoPresenter, ShowcaseStage } from '@/lib/types';
+import { buildShowcaseAcceptanceEmail, showcaseAcceptanceEmailSubject } from '@/lib/showcaseAcceptanceEmail';
+import { showcaseConfirmDeadlineFrom, showcaseConfirmUrl } from '@/lib/showcaseConfirm';
 
 async function setShowcaseStatus(
   entryId: string,
@@ -211,4 +214,92 @@ export async function updateShowcaseEntry(
   } catch {
     return { error: 'Could not save these changes. Please try again.' };
   }
+}
+
+// Tells an accepted entrant their demo is in, and asks them to confirm. A separate,
+// explicit step from accepting, as with speakers and volunteers: accepting is a decision,
+// emailing is telling someone about it, and an admin should choose when.
+export async function sendShowcaseAcceptanceEmail(entryId: string): Promise<{ error?: string }> {
+  let senderName: string;
+  let senderEmail: string;
+  try {
+    ({ name: senderName, email: senderEmail } = await verifyAdminSession());
+  } catch {
+    return { error: 'Your session has expired. Please sign in again.' };
+  }
+
+  const entryRef = adminDb.collection('showcase').doc(entryId);
+
+  let entry: FirebaseFirestore.DocumentData;
+  try {
+    const snap = await entryRef.get();
+    if (!snap.exists) return { error: 'Showcase entry not found.' };
+    entry = snap.data()!;
+  } catch {
+    return { error: 'Could not load this showcase entry. Please try again.' };
+  }
+
+  if (entry.status !== 'accepted') {
+    return { error: 'Only accepted demos can be sent an acceptance email. Accept this entry first.' };
+  }
+
+  const sentAt = new Date();
+  const confirmBy = showcaseConfirmDeadlineFrom(sentAt);
+
+  let confirmLink: string;
+  try {
+    confirmLink = showcaseConfirmUrl(entryId);
+  } catch {
+    // Thrown when SHOWCASE_CONFIRM_SECRET is missing. An acceptance email with a dead
+    // confirm button would be worse than not sending it at all.
+    return { error: 'The showcase confirmation link isn\'t configured on the server, so this email can\'t be sent yet.' };
+  }
+
+  const coPresenterNames = ((entry.coPresenters ?? []) as Array<{ name?: string }>)
+    .map((coPresenter) => coPresenter.name?.trim() ?? '')
+    .filter(Boolean);
+
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: `GDG Sydney <${process.env.RESEND_FROM_EMAIL}>`,
+      to: entry.email,
+      bcc: 'hello@gdgsydney.com',
+      replyTo: 'hello@gdgsydney.com',
+      subject: showcaseAcceptanceEmailSubject(entry.projectName),
+      html: buildShowcaseAcceptanceEmail({
+        name: entry.name,
+        projectName: entry.projectName,
+        stage: entry.stage ?? 'prototype',
+        coPresenterNames,
+        confirmUrl: confirmLink,
+        confirmByIso: confirmBy.toISOString(),
+      }),
+    });
+  } catch (err) {
+    // Unlike the public form, this failure is surfaced: the admin is standing right there
+    // and needs to know the entrant was never told.
+    console.error('Showcase acceptance email failed for entry:', entryId, err);
+    return { error: 'We couldn\'t send the acceptance email. Please try again in a moment.' };
+  }
+
+  try {
+    await entryRef.update({
+      acceptanceEmailSentAt: Timestamp.fromDate(sentAt),
+      acceptanceEmailSentBy: senderEmail,
+      confirmByDate: Timestamp.fromDate(confirmBy),
+      reviewerNotes: FieldValue.arrayUnion({
+        text: `Acceptance email sent by ${senderName}. Confirmation due ${confirmBy.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', timeZone: 'Australia/Sydney' })}.`,
+        authorName: senderName,
+        createdAt: Timestamp.now(),
+      }),
+    });
+  } catch {
+    // The email is already gone, so this is reported as a bookkeeping failure rather than
+    // a send failure: resending would email the entrant twice.
+    return { error: 'The email was sent, but we couldn\'t record it against this entry. Please refresh before sending again.' };
+  }
+
+  revalidatePath('/admin/showcase');
+  return {};
 }

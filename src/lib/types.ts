@@ -18,6 +18,8 @@ export type VolunteerConfirmation = 'not-emailed' | 'awaiting' | 'confirmed';
 export type GdgOnCampusChapter = '' | 'usyd' | 'uts' | 'other';
 export type ShowcaseStage = 'idea' | 'prototype' | 'live';
 export type ShowcaseStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
+// Whether an accepted entrant has been told and has confirmed. Same three states as volunteers.
+export type ShowcaseConfirmation = 'not-emailed' | 'awaiting' | 'confirmed';
 
 // Shape shared by sponsors and community partners: what a card or logo on /partners needs.
 export interface PartnerOrganisation {
@@ -207,6 +209,11 @@ export interface ShowcaseSubmission {
   submittedAt: string; // ISO date string (serialized from Firestore Timestamp)
   status: ShowcaseStatus;
   reviewerNotes: ReviewerNote[];
+  acceptanceEmailSentAt: string | null; // ISO date string
+  acceptanceEmailSentBy: string;
+  confirmByDate: string | null; // ISO date string; the entrant's deadline to confirm
+  showcaseConfirmedAt: string | null; // ISO date string; set from /builder-showcase/confirm
+  confirmation: ShowcaseConfirmation;
 }
 
 // Whether the speaker behind a promoted talk has actually been told and has confirmed.

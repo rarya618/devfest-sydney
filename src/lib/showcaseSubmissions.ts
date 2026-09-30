@@ -1,6 +1,18 @@
 import { adminDb } from '@/lib/firebase-admin';
-import type { CoPresenter, ReviewerNote, ShowcaseSubmission } from '@/lib/types';
+import type { CoPresenter, ReviewerNote, ShowcaseConfirmation, ShowcaseSubmission } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
+
+function toIsoOrNull(timestamp: Timestamp | undefined): string | null {
+  return timestamp ? timestamp.toDate().toISOString() : null;
+}
+
+// Derived rather than stored, so the chip can never disagree with the two timestamps it
+// is describing. Mirrors toConfirmation() in volunteers.ts.
+function toConfirmation(data: FirebaseFirestore.DocumentData): ShowcaseConfirmation {
+  if (data.showcaseConfirmedAt) return 'confirmed';
+  if (data.acceptanceEmailSentAt) return 'awaiting';
+  return 'not-emailed';
+}
 
 export async function fetchShowcaseSubmissions(): Promise<ShowcaseSubmission[]> {
   const snapshot = await adminDb
@@ -48,6 +60,11 @@ export async function fetchShowcaseSubmissions(): Promise<ShowcaseSubmission[]> 
         authorName: note.authorName ?? '',
         createdAt: note.createdAt ? note.createdAt.toDate().toISOString() : new Date().toISOString(),
       })) satisfies ReviewerNote[],
+      acceptanceEmailSentAt: toIsoOrNull(data.acceptanceEmailSentAt as Timestamp | undefined),
+      acceptanceEmailSentBy: data.acceptanceEmailSentBy ?? '',
+      confirmByDate: toIsoOrNull(data.confirmByDate as Timestamp | undefined),
+      showcaseConfirmedAt: toIsoOrNull(data.showcaseConfirmedAt as Timestamp | undefined),
+      confirmation: toConfirmation(data),
     } satisfies ShowcaseSubmission;
   });
 }

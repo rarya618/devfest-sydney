@@ -167,6 +167,9 @@ rules_version='2';
 //   - submittedAt: timestamp (required)
 //   - status: string (required) - 'pending' | 'accepted' | 'rejected' | 'archived'
 //   - reviewerNotes: list of maps (optional) - admin-only notes
+//   - acceptanceEmailSentAt, acceptanceEmailSentBy, confirmByDate (optional) - written by
+//     sendShowcaseAcceptanceEmail() (src/app/admin/showcaseActions.ts)
+//   - showcaseConfirmedAt: timestamp (optional) - set from /builder-showcase/confirm
 //
 // ===============================================================
 

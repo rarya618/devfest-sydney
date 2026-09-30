@@ -7,14 +7,16 @@ import {
   restoreShowcaseEntry,
   archiveShowcaseEntry,
   addShowcaseReviewerNote,
+  sendShowcaseAcceptanceEmail,
 } from './showcaseActions';
 import EditShowcaseEntryModal from './EditShowcaseEntryModal';
 import Alert from '@/components/Alert';
-import { formatDate } from '@/lib/format';
+import { formatDate, formatDeadlineDate } from '@/lib/format';
 import {
   SHOWCASE_STATUS_DOT_STYLES,
   SHOWCASE_STATUS_LABELS,
   SHOWCASE_STAGE_LABELS,
+  SHOWCASE_CONFIRMATION_CHIPS,
 } from '@/lib/showcaseLabels';
 import type { ReviewerNote, ShowcaseStage, ShowcaseStatus, ShowcaseSubmission } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
@@ -152,7 +154,19 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
     >
       <div className="flex items-stretch gap-4">
       <div className="flex-1 min-w-0 flex flex-col">
-      <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight mb-1.5">{entry.projectName}</h3>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-1.5">
+        <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{entry.projectName}</h3>
+        {/* Only on accepted entries: "Not emailed" against a pending one would read as a
+            task, when the thing to do first is decide. */}
+        {entry.status === 'accepted' && (
+          <span
+            title={SHOWCASE_CONFIRMATION_CHIPS[entry.confirmation].title}
+            className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${SHOWCASE_CONFIRMATION_CHIPS[entry.confirmation].className}`}
+          >
+            {SHOWCASE_CONFIRMATION_CHIPS[entry.confirmation].label}
+          </span>
+        )}
+      </div>
       <p className="text-sm text-white/65 leading-relaxed mb-3">{entry.pitch}</p>
 
       <div className="mb-3">
@@ -202,8 +216,19 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
 
       <p className="text-sm text-white/65 leading-relaxed mb-5 whitespace-pre-wrap break-words">{entry.description}</p>
 
-      {(entry.builtWith || entry.coPresenters.length > 0 || entry.demoRequirements || hasTracking) && (
+      {(entry.builtWith || entry.coPresenters.length > 0 || entry.demoRequirements || hasTracking || entry.acceptanceEmailSentAt) && (
         <div className="space-y-3 mb-5">
+          {entry.status === 'accepted' && entry.acceptanceEmailSentAt && (
+            <p className="text-sm text-white/55">
+              Acceptance email sent {formatDate(entry.acceptanceEmailSentAt)}
+              {entry.acceptanceEmailSentBy && <> by {entry.acceptanceEmailSentBy}</>}
+              {entry.showcaseConfirmedAt ? (
+                <> &middot; Confirmed {formatDate(entry.showcaseConfirmedAt)}</>
+              ) : (
+                entry.confirmByDate && <> &middot; Confirmation due {formatDeadlineDate(entry.confirmByDate)}</>
+              )}
+            </p>
+          )}
           {entry.builtWith && (
             <p className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
               <span className="font-bold text-white/85">Built with: </span>
@@ -329,6 +354,24 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
                 </svg>
               </button>
             </div>
+          )}
+          {entry.status === 'accepted' && (
+            <button
+              onClick={() => handleAction(sendShowcaseAcceptanceEmail)}
+              disabled={isPending}
+              aria-label={`${entry.acceptanceEmailSentAt ? 'Resend' : 'Send'} the Builder Showcase acceptance email to ${entry.name} for ${entry.projectName}`}
+              title={entry.acceptanceEmailSentAt ? 'Resend acceptance email' : 'Send acceptance email'}
+              className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-60 ${
+                entry.acceptanceEmailSentAt
+                  ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
+                  : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
+              }`}
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
+              </svg>
+            </button>
           )}
           {(entry.status === 'rejected' || entry.status === 'archived' || entry.status === 'accepted') && (
             <button
@@ -510,6 +553,10 @@ export default function ShowcaseDashboard({ entries }: Props) {
     rejected: entries.filter((entry) => entry.status === 'rejected').length,
     archived: entries.filter((entry) => entry.status === 'archived').length,
   };
+  // Accepted but never told: the gap that leaves someone waiting to hear from us.
+  const notEmailedCount = entries.filter(
+    (entry) => entry.status === 'accepted' && entry.confirmation === 'not-emailed'
+  ).length;
 
   const query = search.trim().toLowerCase();
   const withinStatus = entries.filter((entry) => filter === 'all' || entry.status === filter);
@@ -552,6 +599,7 @@ export default function ShowcaseDashboard({ entries }: Props) {
             <h1 className="text-xl font-bold text-white tracking-tight">Builder Showcase</h1>
             <p className="mt-0.5 text-sm text-white/55">
               {counts.all} total &middot; {counts.pending} pending review
+              {notEmailedCount > 0 && <> &middot; {notEmailedCount} accepted, not emailed</>}
             </p>
           </div>
 
