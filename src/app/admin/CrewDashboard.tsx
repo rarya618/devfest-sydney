@@ -174,19 +174,20 @@ function CrewCard({ member, onError }: CrewCardProps) {
           )}
 
           <div className="flex flex-wrap items-center gap-1.5 gap-y-2 mt-3">
-            {isOrganiser ? (
+            {isOrganiser && (
               <span className="inline-flex items-center gap-1.5 text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] font-bold text-google-blue-light">
                 <span className="w-1.5 h-1.5 rounded-full bg-google-blue" aria-hidden="true" />
                 {member.organiserRole || 'No role set'}
               </span>
-            ) : member.assignedArea ? (
+            )}
+            {member.assignedArea ? (
               <span className="inline-flex items-center gap-1.5 text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] font-bold text-google-green">
                 <span className="w-1.5 h-1.5 rounded-full bg-google-green" aria-hidden="true" />
                 {VOLUNTEER_AREA_LABELS[member.assignedArea]}
               </span>
             ) : (
               <span
-                title="This volunteer has no area yet. Assign one from Edit so they know what they're doing on the day."
+                title={`This ${isOrganiser ? 'organiser' : 'volunteer'} has no area yet. Assign one from Edit so they know what they're doing on the day.`}
                 className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25"
               >
                 No area assigned
@@ -464,12 +465,11 @@ export default function CrewDashboard({ crew }: Props) {
 
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
 
-  // Organisers have a role rather than an area, so they sit in their own bucket: they are
-  // not "unassigned", and they belong to none of the volunteer areas.
+  // Organisers are rostered to areas like everyone else, so they show up under their area
+  // as well as in their own bucket.
   const matchesArea = (member: VolunteerSubmission, filter: FilterArea) => {
     if (filter === 'all') return true;
     if (filter === 'organisers') return member.isOrganiser;
-    if (member.isOrganiser) return false;
     if (filter === 'unassigned') return member.assignedArea === '';
     return member.assignedArea === filter;
   };
@@ -479,11 +479,11 @@ export default function CrewDashboard({ crew }: Props) {
   const areaTabs: { value: FilterArea; label: string }[] = [
     { value: 'all', label: 'All areas' },
     ...(crew.some((member) => member.isOrganiser) ? [{ value: 'organisers' as const, label: 'Organisers' }] : []),
-    ...(crew.some((member) => !member.isOrganiser && member.assignedArea === '')
+    ...(crew.some((member) => member.assignedArea === '')
       ? [{ value: 'unassigned' as const, label: 'No area assigned' }]
       : []),
     ...(Object.keys(VOLUNTEER_AREA_LABELS) as VolunteerArea[])
-      .filter((area) => crew.some((member) => !member.isOrganiser && member.assignedArea === area))
+      .filter((area) => crew.some((member) => member.assignedArea === area))
       .map((area) => ({ value: area as FilterArea, label: VOLUNTEER_AREA_LABELS[area] })),
   ];
 
@@ -515,7 +515,7 @@ export default function CrewDashboard({ crew }: Props) {
 
   const notEmailedCount = confirmationCounts['not-emailed'];
   const confirmedCount = confirmationCounts.confirmed;
-  const unassignedCount = volunteers.filter((member) => member.assignedArea === '').length;
+  const unassignedCount = crew.filter((member) => member.assignedArea === '').length;
   const organiserCount = crew.length - volunteers.length;
   const withoutTicketCount = volunteers.filter((member) => !member.ticketSentAt).length;
 
@@ -532,7 +532,7 @@ export default function CrewDashboard({ crew }: Props) {
     );
 
   // Exports what is on screen, so a filter doubles as "the AV team" or "who still needs
-  // a ticket". One row per person, organisers included, with the role or area in one column.
+  // a ticket". One row per person, organisers included.
   function handleExport() {
     const rows = [
       [
@@ -540,7 +540,8 @@ export default function CrewDashboard({ crew }: Props) {
         'Type',
         'Email',
         'Phone',
-        'Role or area',
+        'Role',
+        'Area',
         'Signed up for',
         'Shift',
         'Confirmation',
@@ -556,11 +557,8 @@ export default function CrewDashboard({ crew }: Props) {
         member.isOrganiser ? 'Organiser' : 'Volunteer',
         member.email,
         member.phone,
-        member.isOrganiser
-          ? member.organiserRole
-          : member.assignedArea
-            ? VOLUNTEER_AREA_LABELS[member.assignedArea]
-            : '',
+        member.isOrganiser ? member.organiserRole : '',
+        member.assignedArea ? VOLUNTEER_AREA_LABELS[member.assignedArea] : '',
         member.areasOfInterest.map((area) => VOLUNTEER_AREA_LABELS[area]).join(', '),
         VOLUNTEER_SHIFT_LABELS[member.assignedShift],
         member.isOrganiser ? '' : VOLUNTEER_CONFIRMATION_CHIPS[member.confirmation].label,

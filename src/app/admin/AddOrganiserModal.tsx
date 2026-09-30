@@ -3,7 +3,7 @@
 import { useState, useTransition, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { addOrganiser, type NewOrganiserFields } from './crewActions';
-import { VOLUNTEER_SHIFT_LABELS } from '@/lib/volunteerLabels';
+import { VOLUNTEER_AREA_LABELS, VOLUNTEER_SHIFT_LABELS } from '@/lib/volunteerLabels';
 
 interface Props {
   onClose: () => void;
@@ -16,6 +16,7 @@ const EMPTY_ORGANISER: NewOrganiserFields = {
   phone: '',
   organiserRole: '',
   linkedinUrl: '',
+  assignedArea: '',
   assignedShift: 'full-day',
   showOnCrewPage: false,
 };
@@ -137,6 +138,20 @@ export default function AddOrganiserModal({ onClose, onError }: Props) {
                   value={fields.linkedinUrl}
                   onChange={(event) => update('linkedinUrl', event.target.value)}
                 />
+              </div>
+              <div>
+                <label className={labelClasses} htmlFor="organiser-area">Assigned area</label>
+                <select
+                  id="organiser-area"
+                  className={inputClasses}
+                  value={fields.assignedArea}
+                  onChange={(event) => update('assignedArea', event.target.value as NewOrganiserFields['assignedArea'])}
+                >
+                  <option value="">Not assigned yet</option>
+                  {Object.entries(VOLUNTEER_AREA_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className={labelClasses} htmlFor="organiser-shift">Shift</label>

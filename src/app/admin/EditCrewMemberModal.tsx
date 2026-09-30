@@ -110,44 +110,42 @@ export default function EditCrewMemberModal({ member, onClose, onError }: Props)
           <div className="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
             <p className="text-xs text-white/50">
               {member.isOrganiser
-                ? 'What this organiser does, and what the public crew and landing pages show.'
+                ? 'What this organiser does on the day, and what the public crew and landing pages show.'
                 : `The roster and what the public crew page shows. What ${member.name.split(/\s+/)[0] || 'this volunteer'} wrote on the signup form is left as they wrote it.`}
             </p>
 
             <div className="space-y-4">
-              <h3 className={sectionHeadingClasses}>{member.isOrganiser ? 'Role' : 'Roster'}</h3>
+              <h3 className={sectionHeadingClasses}>Roster</h3>
+
+              {member.isOrganiser && (
+                <div>
+                  <label className={labelClasses} htmlFor="crew-role">Role</label>
+                  <input
+                    id="crew-role"
+                    type="text"
+                    maxLength={80}
+                    className={inputClasses}
+                    value={fields.organiserRole}
+                    placeholder="Lead organiser"
+                    onChange={(event) => update('organiserRole', event.target.value)}
+                  />
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  {member.isOrganiser ? (
-                    <>
-                      <label className={labelClasses} htmlFor="crew-role">Role</label>
-                      <input
-                        id="crew-role"
-                        type="text"
-                        maxLength={80}
-                        className={inputClasses}
-                        value={fields.organiserRole}
-                        placeholder="Lead organiser"
-                        onChange={(event) => update('organiserRole', event.target.value)}
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <label className={labelClasses} htmlFor="crew-area">Assigned area</label>
-                      <select
-                        id="crew-area"
-                        className={inputClasses}
-                        value={fields.assignedArea}
-                        onChange={(event) => update('assignedArea', event.target.value as CrewEditableFields['assignedArea'])}
-                      >
-                        <option value="">Not assigned yet</option>
-                        {Object.entries(VOLUNTEER_AREA_LABELS).map(([value, label]) => (
-                          <option key={value} value={value}>{label}</option>
-                        ))}
-                      </select>
-                    </>
-                  )}
+                  <label className={labelClasses} htmlFor="crew-area">Assigned area</label>
+                  <select
+                    id="crew-area"
+                    className={inputClasses}
+                    value={fields.assignedArea}
+                    onChange={(event) => update('assignedArea', event.target.value as CrewEditableFields['assignedArea'])}
+                  >
+                    <option value="">Not assigned yet</option>
+                    {Object.entries(VOLUNTEER_AREA_LABELS).map(([value, label]) => (
+                      <option key={value} value={value}>{label}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className={labelClasses} htmlFor="crew-shift">Shift</label>

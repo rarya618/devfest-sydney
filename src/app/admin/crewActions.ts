@@ -29,8 +29,8 @@ export interface CrewEditableFields {
   assignedShift: VolunteerShift;
   showOnCrewPage: boolean;
   photoUrl: string;
-  // Organisers only, and ignored for anyone who came through the signup form: a
-  // volunteer's job on the day is an assignedArea, and their LinkedIn was never asked for.
+  // Organisers only, and ignored for anyone who came through the signup form: an
+  // organiser's role sits beside their area, and a volunteer's LinkedIn was never asked for.
   organiserRole: string;
   linkedinUrl: string;
 }
@@ -44,6 +44,7 @@ export interface NewOrganiserFields {
   phone: string;
   organiserRole: string;
   linkedinUrl: string;
+  assignedArea: VolunteerArea | '';
   assignedShift: VolunteerShift;
   showOnCrewPage: boolean;
 }
@@ -62,7 +63,7 @@ function validateLink(value: string, label: string): { error: string } | { value
 
 function validateCrewFields(fields: CrewEditableFields): { error: string } | { values: CrewEditableFields } {
   if (fields.assignedArea !== '' && !VOLUNTEER_AREAS.includes(fields.assignedArea)) {
-    return { error: 'Please choose a valid area for this volunteer.' };
+    return { error: 'Please choose a valid area for this crew member.' };
   }
   if (!VOLUNTEER_SHIFTS.includes(fields.assignedShift)) {
     return { error: 'Please choose a valid shift for this volunteer.' };
@@ -111,16 +112,12 @@ export async function updateCrewMember(volunteerId: string, fields: CrewEditable
       return { error: 'This volunteer is no longer on the crew. Refresh the page to see their current status.' };
     }
 
-    // The two kinds of crew member own different halves of the form: an organiser has a
-    // role and a LinkedIn, a volunteer has an assigned area. Writing the other half would
-    // store a value nothing renders and the modal never offered.
+    // Everyone on the crew has an area and a shift. An organiser also has a role and a
+    // LinkedIn, which a volunteer doesn't: writing those for a volunteer would store a
+    // value nothing renders and the modal never offered.
     const isOrganiser = Boolean(snapshot.data()?.isOrganiser);
-    const { assignedArea, organiserRole, linkedinUrl, ...shared } = validated.values;
-    await volunteerRef.update(
-      isOrganiser
-        ? { ...shared, organiserRole, linkedinUrl }
-        : { ...shared, assignedArea }
-    );
+    const { organiserRole, linkedinUrl, ...shared } = validated.values;
+    await volunteerRef.update(isOrganiser ? { ...shared, organiserRole, linkedinUrl } : shared);
     revalidateCrewPages();
     return {};
   } catch {
@@ -199,6 +196,9 @@ export async function addOrganiser(fields: NewOrganiserFields): Promise<{ error?
   const linkedin = validateLink(fields.linkedinUrl, 'LinkedIn');
   if ('error' in linkedin) return { error: linkedin.error };
 
+  if (fields.assignedArea !== '' && !VOLUNTEER_AREAS.includes(fields.assignedArea)) {
+    return { error: 'Please choose a valid area for this organiser.' };
+  }
   if (!VOLUNTEER_SHIFTS.includes(fields.assignedShift)) {
     return { error: 'Please choose a valid shift for this organiser.' };
   }
@@ -215,7 +215,7 @@ export async function addOrganiser(fields: NewOrganiserFields): Promise<{ error?
       // which is the state every crew query filters on.
       status: 'accepted',
       submittedAt: FieldValue.serverTimestamp(),
-      assignedArea: '',
+      assignedArea: fields.assignedArea,
       assignedShift: fields.assignedShift,
       showOnCrewPage: Boolean(fields.showOnCrewPage),
       photoUrl: '',
