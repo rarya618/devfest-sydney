@@ -17,6 +17,7 @@ import {
 } from '@/lib/submissionLabels';
 import type { ReviewerNote, Submission, SubmissionStatus, Track } from '@/lib/types';
 import { applicantKey, rejectionEmailBlocker, type RejectionEmailBlocker } from '@/lib/rejectionEligibility';
+import { csvFilename, downloadCsv, formatCsvBoolean } from '@/lib/csv';
 import { useMobileBarHidden } from './MobileBarContext';
 
 function toHref(value: string): string | null {
@@ -1176,25 +1177,6 @@ function groupBySubmitter(list: Submission[]): SubmitterGroup[] {
   return result.sort((a, b) => b.latestAt - a.latestAt);
 }
 
-function formatCsvBoolean(value: boolean): string {
-  return value ? 'Yes' : 'No';
-}
-
-function escapeCsvCell(value: string): string {
-  return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
-}
-
-function downloadCsv(filename: string, rows: string[][]) {
-  const csv = rows.map((row) => row.map(escapeCsvCell).join(',')).join('\r\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
 export default function SubmissionsDashboard({ submissions }: Props) {
   const mobileBarHidden = useMobileBarHidden();
   const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
@@ -1490,7 +1472,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
         formatDate(s.submittedAt),
       ]),
     ];
-    downloadCsv(`submissions-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+    downloadCsv(csvFilename('submissions'), rows);
   }
 
   function handleExportFull() {
@@ -1554,7 +1536,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
         s.reviewerNotes.map((note) => `${note.authorName} (${formatDate(note.createdAt)}): ${note.text}`).join('\n'),
       ]),
     ];
-    downloadCsv(`submissions-full-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+    downloadCsv(csvFilename('submissions-full'), rows);
   }
 
   const selectedCount = visibleSelectedIds.length;

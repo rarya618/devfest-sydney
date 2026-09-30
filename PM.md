@@ -31,7 +31,7 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 - `/admin` — Review CfS submissions, promote accepted speakers to `speakers` collection
 - `/admin/speakers` — Manage the promoted `speakers` collection (edit public profile and session details, remove from lineup)
 - `/admin/volunteers` — Review volunteer signups (accept, reject, restore, archive)
-- `/admin/crew` — Manage accepted volunteers (assign area and shift, upload photo, opt in to `/crew`, remove from crew) and add organisers directly
+- `/admin/crew` — Manage accepted volunteers (assign area and shift, upload photo, opt in to `/crew`, remove from crew), add organisers directly, and export the filtered roster as CSV
 - `/admin/showcase` — Review Builder Showcase entries (accept, reject, restore, archive)
 - `/admin/admins` — Manage authorised admin emails
 - `/admin/analytics` — Submission stats and trends

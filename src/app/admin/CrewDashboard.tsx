@@ -7,6 +7,7 @@ import { sendVolunteerAcceptanceEmail } from './volunteerActions';
 import EditCrewMemberModal from './EditCrewMemberModal';
 import AddOrganiserModal from './AddOrganiserModal';
 import Alert from '@/components/Alert';
+import { csvFilename, downloadCsv, formatCsvBoolean } from '@/lib/csv';
 import { formatDate, getInitials } from '@/lib/format';
 import {
   VOLUNTEER_AREA_LABELS,
@@ -60,6 +61,11 @@ function crewHistoryRows(member: VolunteerSubmission, isOrganiser: boolean): His
   }
 
   return rows;
+}
+
+function formatGdgOnCampusExec(member: VolunteerSubmission): string {
+  if (!member.hasBeenGdgOnCampusExec) return 'No';
+  return member.gdgOnCampusChapter ? `Yes (${GDG_ON_CAMPUS_CHAPTER_LABELS[member.gdgOnCampusChapter]})` : 'Yes';
 }
 
 interface CrewCardProps {
@@ -525,6 +531,48 @@ export default function CrewDashboard({ crew }: Props) {
         member.phone.toLowerCase().includes(query)
     );
 
+  // Exports what is on screen, so a filter doubles as "the AV team" or "who still needs
+  // a ticket". One row per person, organisers included, with the role or area in one column.
+  function handleExport() {
+    const rows = [
+      [
+        'Name',
+        'Type',
+        'Email',
+        'Phone',
+        'Role or area',
+        'Shift',
+        'Confirmation',
+        'Ticket sent',
+        'On crew page',
+        'Dietary requirements',
+        'Torrens',
+        'GDG on Campus exec',
+        'Signed up',
+      ],
+      ...filtered.map((member) => [
+        member.name,
+        member.isOrganiser ? 'Organiser' : 'Volunteer',
+        member.email,
+        member.phone,
+        member.isOrganiser
+          ? member.organiserRole
+          : member.assignedArea
+            ? VOLUNTEER_AREA_LABELS[member.assignedArea]
+            : '',
+        VOLUNTEER_SHIFT_LABELS[member.assignedShift],
+        member.isOrganiser ? '' : VOLUNTEER_CONFIRMATION_CHIPS[member.confirmation].label,
+        member.isOrganiser ? '' : formatCsvBoolean(Boolean(member.ticketSentAt)),
+        formatCsvBoolean(member.showOnCrewPage),
+        member.dietaryRequirements,
+        member.isOrganiser ? '' : formatCsvBoolean(member.isTorrensStudentOrStaff),
+        member.isOrganiser ? '' : formatGdgOnCampusExec(member),
+        member.isOrganiser ? '' : formatDate(member.submittedAt),
+      ]),
+    ];
+    downloadCsv(csvFilename('crew'), rows);
+  }
+
   return (
     <>
       <div className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-[#010103]/95 backdrop-blur-sm`}>
@@ -550,6 +598,18 @@ export default function CrewDashboard({ crew }: Props) {
                 <path strokeLinecap="round" d="M8 3.5v9M3.5 8h9" />
               </svg>
               Add organiser
+            </button>
+
+            <button
+              onClick={handleExport}
+              disabled={filtered.length === 0}
+              aria-label={`Export the ${filtered.length} crew member${filtered.length === 1 ? '' : 's'} shown as a CSV`}
+              title="Export CSV"
+              className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 1.5v8m0 0L5 6.5m3 3l3-3M2.5 11v2A1.5 1.5 0 004 14.5h8a1.5 1.5 0 001.5-1.5v-2" />
+              </svg>
             </button>
 
             <div
