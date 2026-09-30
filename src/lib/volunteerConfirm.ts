@@ -9,7 +9,7 @@ const TOKEN_SEPARATOR = '.';
 // Volunteers get this long to confirm before we start offering the spot to someone else.
 // Shorter than the speakers' window: a volunteer is confirming availability, not
 // rearranging a month around preparing a talk.
-export const VOLUNTEER_CONFIRM_WINDOW_DAYS = 5;
+export const VOLUNTEER_CONFIRM_WINDOW_DAYS = 2;
 
 function signingSecret(): string {
   const secret = process.env.VOLUNTEER_CONFIRM_SECRET;
