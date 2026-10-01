@@ -156,6 +156,15 @@ env:
     availability:
       - RUNTIME
 
+  # Builder Showcase complimentary ticket link, shown on /builder-showcase/confirm once an
+  # entrant has confirmed. A secret because the access code unlocks free tickets. NOTE:
+  # adding this block does not create the secret: create it and grant the backend access
+  # before the next rollout, or it fails with "Misconfigured secret".
+  - variable: SHOWCASE_TICKET_URL
+    secret: SHOWCASE_TICKET_URL
+    availability:
+      - RUNTIME
+
   # Volunteer ticket and WhatsApp links, shown on /volunteer/confirm once a volunteer has
   # confirmed. Secrets: the ticket link carries a Humanitix access code, and the invite
   # lets anyone who holds it into the group. NOTE: adding these blocks does not create the

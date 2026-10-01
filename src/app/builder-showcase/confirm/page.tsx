@@ -7,6 +7,7 @@ import { verifyShowcaseConfirmToken } from '@/lib/showcaseConfirm';
 import { SHOWCASE_STAGE_LABELS } from '@/lib/showcaseLabels';
 import type { ShowcaseStage } from '@/lib/types';
 import ConfirmShowcaseDemo from './ConfirmShowcaseDemo';
+import ShowcaseNextSteps from './ShowcaseNextSteps';
 
 // Reached only from a link in an acceptance email, and the answer depends on a Firestore
 // read that changes the moment the entrant clicks, so there is nothing to prerender.
@@ -27,6 +28,7 @@ interface AcceptedEntry {
   stage: ShowcaseStage;
   confirmByIso: string | null;
   alreadyConfirmed: boolean;
+  hasCoPresenters: boolean;
 }
 
 async function loadAcceptedEntry(token: string): Promise<AcceptedEntry | null> {
@@ -46,6 +48,7 @@ async function loadAcceptedEntry(token: string): Promise<AcceptedEntry | null> {
     stage: entry.stage ?? 'prototype',
     confirmByIso: confirmByDate ? confirmByDate.toDate().toISOString() : null,
     alreadyConfirmed: Boolean(entry.showcaseConfirmedAt),
+    hasCoPresenters: (entry.coPresenters ?? []).length > 0,
   };
 }
 
@@ -106,10 +109,17 @@ export default async function ShowcaseConfirmPage({ searchParams }: ConfirmPageP
             </div>
 
             {entry.alreadyConfirmed ? (
-              <p className="text-white/70 leading-relaxed">
-                Thanks, we have you down for the Builder Showcase. We&rsquo;ll be in touch closer to
-                the day with the running order and when to be at the stage for a quick tech check.
-              </p>
+              <>
+                <p className="text-white/70 leading-relaxed">
+                  Thanks, we have you down for the Builder Showcase. We&rsquo;ll be in touch closer
+                  to the day with the running order and when to be at the stage for a quick tech
+                  check.
+                </p>
+                <ShowcaseNextSteps
+                  ticketUrl={process.env.SHOWCASE_TICKET_URL?.trim() || null}
+                  hasCoPresenters={entry.hasCoPresenters}
+                />
+              </>
             ) : (
               <>
                 <ConfirmShowcaseDemo

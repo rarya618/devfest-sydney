@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import Alert from '@/components/Alert';
 import { confirmShowcaseDemo } from './actions';
+import ShowcaseNextSteps from './ShowcaseNextSteps';
 
 interface ConfirmShowcaseDemoProps {
   token: string;
@@ -16,6 +17,8 @@ interface ConfirmShowcaseDemoProps {
 export default function ConfirmShowcaseDemo({ token, projectName, intro }: ConfirmShowcaseDemoProps) {
   const [isPending, startTransition] = useTransition();
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [ticketUrl, setTicketUrl] = useState<string | null>(null);
+  const [hasCoPresenters, setHasCoPresenters] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function handleConfirm() {
@@ -24,6 +27,8 @@ export default function ConfirmShowcaseDemo({ token, projectName, intro }: Confi
       if (result.error) {
         setError(result.error);
       } else {
+        setTicketUrl(result.ticketUrl ?? null);
+        setHasCoPresenters(result.hasCoPresenters ?? false);
         setIsConfirmed(true);
       }
     });
@@ -31,16 +36,19 @@ export default function ConfirmShowcaseDemo({ token, projectName, intro }: Confi
 
   if (isConfirmed) {
     return (
-      <div
-        role="status"
-        className="rounded-2xl border border-google-yellow/30 bg-google-yellow/10 px-6 py-8 text-center"
-      >
-        <p className="text-2xl font-bold text-google-yellow">See you on stage</p>
-        <p className="mt-3 text-white/70 leading-relaxed">
-          Thanks for confirming. We&rsquo;ll be in touch closer to the day with the running order
-          and when to be at the stage for a quick tech check.
-        </p>
-      </div>
+      <>
+        <div
+          role="status"
+          className="rounded-2xl border border-google-yellow/30 bg-google-yellow/10 px-6 py-8 text-center"
+        >
+          <p className="text-2xl font-bold text-google-yellow">See you on stage</p>
+          <p className="mt-3 text-white/70 leading-relaxed">
+            Thanks for confirming. We&rsquo;ll be in touch closer to the day with the running order
+            and when to be at the stage for a quick tech check.
+          </p>
+        </div>
+        <ShowcaseNextSteps ticketUrl={ticketUrl} hasCoPresenters={hasCoPresenters} />
+      </>
     );
   }
 
