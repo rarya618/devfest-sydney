@@ -215,6 +215,8 @@ export interface ShowcaseSubmission {
   acceptanceEmailSentBy: string;
   confirmByDate: string | null; // ISO date string; the entrant's deadline to confirm
   showcaseConfirmedAt: string | null; // ISO date string; set from /builder-showcase/confirm
+  showcaseTicketEmailSentAt: string | null; // ISO date string
+  showcaseTicketEmailSentBy: string;
   confirmation: ShowcaseConfirmation;
 }
 

@@ -8,6 +8,7 @@ import {
   archiveShowcaseEntry,
   addShowcaseReviewerNote,
   sendShowcaseAcceptanceEmail,
+  sendShowcaseTicketEmail,
 } from './showcaseActions';
 import EditShowcaseEntryModal from './EditShowcaseEntryModal';
 import Alert from '@/components/Alert';
@@ -100,6 +101,9 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement>(null);
+  // The ticket link unlocks a free ticket, so it is only offered once the entrant has
+  // confirmed. sendShowcaseTicketEmail enforces the same rule server-side.
+  const canSendTicket = entry.status === 'accepted' && Boolean(entry.showcaseConfirmedAt);
 
   function handleAction(action: (id: string) => Promise<{ error?: string }>) {
     startTransition(async () => {
@@ -166,6 +170,14 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
             {SHOWCASE_CONFIRMATION_CHIPS[entry.confirmation].label}
           </span>
         )}
+        {canSendTicket && !entry.showcaseTicketEmailSentAt && (
+          <span
+            title="This entrant has confirmed but hasn't been emailed their complimentary ticket. Send it with the ticket button."
+            className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-yellow/15 text-google-yellow"
+          >
+            No ticket sent
+          </span>
+        )}
       </div>
       <p className="text-sm text-white/65 leading-relaxed mb-3">{entry.pitch}</p>
 
@@ -226,6 +238,12 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
                 <> &middot; Confirmed {formatDate(entry.showcaseConfirmedAt)}</>
               ) : (
                 entry.confirmByDate && <> &middot; Confirmation due {formatDeadlineDate(entry.confirmByDate)}</>
+              )}
+              {entry.showcaseTicketEmailSentAt && (
+                <>
+                  {' '}&middot; Ticket sent {formatDate(entry.showcaseTicketEmailSentAt)}
+                  {entry.showcaseTicketEmailSentBy && <> by {entry.showcaseTicketEmailSentBy}</>}
+                </>
               )}
             </p>
           )}
@@ -370,6 +388,24 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
               <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                 <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
+              </svg>
+            </button>
+          )}
+          {canSendTicket && (
+            <button
+              onClick={() => handleAction(sendShowcaseTicketEmail)}
+              disabled={isPending}
+              aria-label={`${entry.showcaseTicketEmailSentAt ? 'Resend' : 'Send'} the complimentary Builder Showcase ticket to ${entry.name} for ${entry.projectName}`}
+              title={entry.showcaseTicketEmailSentAt ? 'Resend showcase ticket' : 'Send showcase ticket'}
+              className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-60 ${
+                entry.showcaseTicketEmailSentAt
+                  ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
+                  : 'bg-google-yellow/15 text-google-yellow hover:bg-google-yellow hover:text-black-02'
+              }`}
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 6.25V4.5a1 1 0 011-1h11a1 1 0 011 1v1.75a1.75 1.75 0 000 3.5V11.5a1 1 0 01-1 1h-11a1 1 0 01-1-1V9.75a1.75 1.75 0 000-3.5z" />
+                <path strokeLinecap="round" strokeDasharray="1.5 1.5" d="M10 4v8" />
               </svg>
             </button>
           )}
@@ -557,6 +593,9 @@ export default function ShowcaseDashboard({ entries }: Props) {
   const notEmailedCount = entries.filter(
     (entry) => entry.status === 'accepted' && entry.confirmation === 'not-emailed'
   ).length;
+  const awaitingTicketCount = entries.filter(
+    (entry) => entry.status === 'accepted' && entry.showcaseConfirmedAt && !entry.showcaseTicketEmailSentAt
+  ).length;
 
   const query = search.trim().toLowerCase();
   const withinStatus = entries.filter((entry) => filter === 'all' || entry.status === filter);
@@ -600,6 +639,7 @@ export default function ShowcaseDashboard({ entries }: Props) {
             <p className="mt-0.5 text-sm text-white/55">
               {counts.all} total &middot; {counts.pending} pending review
               {notEmailedCount > 0 && <> &middot; {notEmailedCount} accepted, not emailed</>}
+              {awaitingTicketCount > 0 && <> &middot; {awaitingTicketCount} without a ticket</>}
             </p>
           </div>
 

@@ -64,6 +64,8 @@ export async function fetchShowcaseSubmissions(): Promise<ShowcaseSubmission[]> 
       acceptanceEmailSentBy: data.acceptanceEmailSentBy ?? '',
       confirmByDate: toIsoOrNull(data.confirmByDate as Timestamp | undefined),
       showcaseConfirmedAt: toIsoOrNull(data.showcaseConfirmedAt as Timestamp | undefined),
+      showcaseTicketEmailSentAt: toIsoOrNull(data.showcaseTicketEmailSentAt as Timestamp | undefined),
+      showcaseTicketEmailSentBy: data.showcaseTicketEmailSentBy ?? '',
       confirmation: toConfirmation(data),
     } satisfies ShowcaseSubmission;
   });

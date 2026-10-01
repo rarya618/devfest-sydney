@@ -8,6 +8,7 @@ import { Resend } from 'resend';
 import type { CoPresenter, ShowcaseStage } from '@/lib/types';
 import { buildShowcaseAcceptanceEmail, showcaseAcceptanceEmailSubject } from '@/lib/showcaseAcceptanceEmail';
 import { showcaseConfirmDeadlineFrom, showcaseConfirmUrl } from '@/lib/showcaseConfirm';
+import { buildShowcaseTicketEmail, showcaseTicketEmailSubject } from '@/lib/showcaseTicketEmail';
 
 async function setShowcaseStatus(
   entryId: string,
@@ -298,6 +299,85 @@ export async function sendShowcaseAcceptanceEmail(entryId: string): Promise<{ er
     // The email is already gone, so this is reported as a bookkeeping failure rather than
     // a send failure: resending would email the entrant twice.
     return { error: 'The email was sent, but we couldn\'t record it against this entry. Please refresh before sending again.' };
+  }
+
+  revalidatePath('/admin/showcase');
+  return {};
+}
+
+// The complimentary showcase ticket, sent once the entrant has confirmed. Gated on the
+// confirmation rather than the acceptance, as with speakers: the link unlocks a free
+// ticket. The confirm page shows the same link, so this is for entrants who confirmed
+// before it did, or who want it in their inbox.
+export async function sendShowcaseTicketEmail(entryId: string): Promise<{ error?: string }> {
+  let senderName: string;
+  let senderEmail: string;
+  try {
+    ({ name: senderName, email: senderEmail } = await verifyAdminSession());
+  } catch {
+    return { error: 'Your session has expired. Please sign in again.' };
+  }
+
+  const ticketUrl = process.env.SHOWCASE_TICKET_URL?.trim();
+  if (!ticketUrl) {
+    return { error: 'The showcase ticket link isn\'t configured on the server, so this email can\'t be sent yet.' };
+  }
+
+  const entryRef = adminDb.collection('showcase').doc(entryId);
+
+  let entry: FirebaseFirestore.DocumentData;
+  try {
+    const snap = await entryRef.get();
+    if (!snap.exists) return { error: 'Showcase entry not found.' };
+    entry = snap.data()!;
+  } catch {
+    return { error: 'Could not load this showcase entry. Please try again.' };
+  }
+
+  if (entry.status !== 'accepted') {
+    return { error: 'Only accepted demos can be sent a showcase ticket. Accept this entry first.' };
+  }
+  if (!entry.showcaseConfirmedAt) {
+    return { error: 'This entrant hasn\'t confirmed their demo yet, so the ticket can\'t be sent.' };
+  }
+
+  const coPresenterNames = ((entry.coPresenters ?? []) as Array<{ name?: string }>)
+    .map((coPresenter) => coPresenter.name?.trim() ?? '')
+    .filter(Boolean);
+
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: `GDG Sydney <${process.env.RESEND_FROM_EMAIL}>`,
+      to: entry.email,
+      bcc: 'hello@gdgsydney.com',
+      replyTo: 'hello@gdgsydney.com',
+      subject: showcaseTicketEmailSubject(),
+      html: buildShowcaseTicketEmail({
+        name: entry.name,
+        projectName: entry.projectName,
+        coPresenterNames,
+        ticketUrl,
+      }),
+    });
+  } catch (err) {
+    console.error('Showcase ticket email failed for entry:', entryId, err);
+    return { error: 'We couldn\'t send the showcase ticket email. Please try again in a moment.' };
+  }
+
+  try {
+    await entryRef.update({
+      showcaseTicketEmailSentAt: Timestamp.now(),
+      showcaseTicketEmailSentBy: senderEmail,
+      reviewerNotes: FieldValue.arrayUnion({
+        text: `Showcase ticket link emailed by ${senderName}.`,
+        authorName: senderName,
+        createdAt: Timestamp.now(),
+      }),
+    });
+  } catch {
+    // The email is already gone, so resending would mail the entrant twice.
+    return { error: 'The ticket email was sent, but we couldn\'t record it against this entry. Please refresh before sending again.' };
   }
 
   revalidatePath('/admin/showcase');
