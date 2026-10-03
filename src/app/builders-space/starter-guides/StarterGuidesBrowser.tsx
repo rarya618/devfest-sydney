@@ -9,7 +9,6 @@ import {
   STARTER_GUIDE_CODING_LABELS,
   starterGuideSetupLabel,
   starterGuideTimeLabel,
-  starterGuideCheckedLabel,
   type StarterGuide,
   type StarterGuideGroup,
 } from './guides';
@@ -45,7 +44,6 @@ function GuideCard({ guide, borderClass }: { guide: StarterGuide; borderClass: s
   const codingLabel = STARTER_GUIDE_CODING_LABELS[guide.coding];
   const setupLabel = starterGuideSetupLabel(guide);
   const timeLabel = starterGuideTimeLabel(guide);
-  const checkedLabel = starterGuideCheckedLabel(guide);
 
   return (
     <li>
@@ -53,7 +51,7 @@ function GuideCard({ guide, borderClass }: { guide: StarterGuide; borderClass: s
         href={guide.href}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label={`Open ${guide.title}, ${codingLabel}, ${setupLabel}, takes about ${timeLabel.replace('~', '')}, link checked ${checkedLabel} (opens in a new tab)`}
+        aria-label={`Open ${guide.title}, ${codingLabel}, ${setupLabel}, takes about ${timeLabel.replace('~', '')} (opens in a new tab)`}
         className={`group flex h-full flex-col gap-3 rounded-lg border-t-4 ${borderClass} bg-surface px-6 pt-9 pb-6 transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue`}
       >
         {guide.logo && (
@@ -75,15 +73,12 @@ function GuideCard({ guide, borderClass }: { guide: StarterGuide; borderClass: s
             </li>
           ))}
         </ul>
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1" aria-hidden="true">
-          <span className="inline-flex items-center gap-1 text-sm font-bold text-white">
-            Get started
-            <span className="material-symbols-outlined text-sm leading-none transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
-              arrow_outward
-            </span>
+        <span className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-white" aria-hidden="true">
+          Get started
+          <span className="material-symbols-outlined text-sm leading-none transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+            arrow_outward
           </span>
-          <span className="font-mono text-xs text-white/50">Checked {checkedLabel}</span>
-        </div>
+        </span>
       </a>
     </li>
   );

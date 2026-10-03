@@ -4,7 +4,7 @@ import { buildPageMetadata } from '@/lib/metadata';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { areTicketsOpen } from '@/lib/tickets';
-import { STARTER_GUIDES } from './guides';
+import { STARTER_GUIDES, STARTER_GUIDES_LAST_CHECKED, formatStarterGuidesCheckedDate } from './guides';
 import StarterGuidesBrowser from './StarterGuidesBrowser';
 
 // Rendered per request: the navbar ticket CTA follows the on-sale date (see the note in
@@ -35,8 +35,12 @@ export default function StarterGuides() {
           </h1>
 
           <p className="text-white/70 text-lg max-w-2xl mx-auto leading-relaxed animate-slide-up" style={{ animationDelay: '0.2s' }}>
-            Official starter guides for trying something new. Pick one, open your laptop and
+            Handpicked starter guides for trying something new. Pick one, open your laptop and
             work through it at your own pace.
+          </p>
+
+          <p className="mt-6 font-mono text-sm text-white/55 animate-slide-up" style={{ animationDelay: '0.3s' }}>
+            All links checked {formatStarterGuidesCheckedDate(STARTER_GUIDES_LAST_CHECKED)}
           </p>
         </div>
       </section>
