@@ -80,9 +80,8 @@ function GuideCard({ guide, borderClass }: { guide: StarterGuide; borderClass: s
   );
 }
 
-// Cards sit in a grid beside the sidebar: two columns where the sidebar leaves room for them,
-// three on wide screens.
-const CARD_GRID_CLASSES = 'grid gap-6 sm:grid-cols-2 xl:grid-cols-3';
+// Cards sit in a grid beside the sidebar: one column on phones, never more than two.
+const CARD_GRID_CLASSES = 'grid gap-6 sm:grid-cols-2';
 
 export default function StarterGuidesBrowser() {
   const [query, setQuery] = useState('');
