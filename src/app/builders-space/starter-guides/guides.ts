@@ -520,4 +520,69 @@ export const STARTER_GUIDES: StarterGuide[] = [
       height: 242,
     },
   },
+  {
+    title: 'Query big data with the BigQuery sandbox',
+    href: 'https://docs.cloud.google.com/bigquery/docs/sandbox',
+    group: 'web',
+    summary:
+      "Run SQL over Google's public datasets in the browser, with no credit card or billing account. The free sandbox covers 10 GiB of storage and 1 TiB of queries a month.",
+    coding: 'coding',
+    // The BigQuery product icon from the Cloud docs (clouddocs/images/icons/products/bigquery-color.svg),
+    // rendered and trimmed.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/bigquery.png',
+      alt: 'BigQuery',
+      width: 400,
+      height: 400,
+    },
+  },
+  {
+    title: 'Add passkey sign-in to a web app',
+    href: 'https://developers.google.com/codelabs/passkey-form-autofill',
+    group: 'web',
+    summary:
+      "Finish a demo app's sign-in so people can create a passkey and use it instead of a password, with the browser offering it right in the sign-in form.",
+    coding: 'coding',
+    needs: 'npm',
+    // The passkey icon from passkeys.dev (img/logo512x512.png), the FIDO Alliance's standard
+    // symbol for passkeys. The codelab is Google's, but Google has no passkey mark of its own.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/passkey.png',
+      alt: 'Passkey',
+      width: 395,
+      height: 400,
+    },
+  },
+  {
+    title: 'Get to know Firebase for Flutter',
+    href: 'https://firebase.google.com/codelabs/firebase-get-to-know-flutter',
+    group: 'mobile',
+    summary:
+      'Build an event RSVP and guestbook chat app for Android, iOS and the web, with Firebase Authentication for sign-in and Cloud Firestore for live data.',
+    coding: 'coding',
+    needs: 'Flutter SDK',
+    // Same Firebase lockup as the Firebase for web card.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/firebase.png',
+      alt: 'Firebase',
+      width: 1600,
+      height: 422,
+    },
+  },
+  {
+    title: 'Make a colour scheme with Material Theme Builder',
+    href: 'https://material-foundation.github.io/material-theme-builder/',
+    group: 'prototype',
+    summary:
+      'Pick a colour or upload an image and get a full Material 3 colour scheme, with light and dark modes, ready to export to your code.',
+    coding: 'no-code',
+    // Material 3's mark from m3.material.io (static/assets/m3-favicon.svg), rendered and trimmed.
+    // The tool's own icon is Flutter's default app icon. Links to the tool: it has no separate guide.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/material.png',
+      alt: 'Material Design',
+      width: 400,
+      height: 400,
+    },
+  },
 ];

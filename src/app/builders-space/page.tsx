@@ -12,14 +12,14 @@ export const dynamic = 'force-dynamic';
 
 const title = "Builder's Space";
 const description =
-  'A room at DevFest Sydney 2026 set aside for building. Bring your laptop and work on your own project, or pick up a starter guide and try something new.';
+  'A room at DevFest Sydney 2026 set aside for building. Bring your laptop and work on your own project, or open a starter guide and try something new.';
 
 export const metadata: Metadata = buildPageMetadata({ title, description, path: '/builders-space' });
 
 // Deliberately limited to what EVENT.md confirms: a dedicated room, open all day,
 // unstaffed, with starter guides. Nothing here should read as a promise of mentors or
-// help on hand. No room number, opening hours or guide topics until the organisers
-// settle them.
+// help on hand. The starter guides are online only, with no handouts. No room number or
+// opening hours until the organisers settle them.
 const WHAT_ITS_FOR = [
   {
     title: 'Bring what you are building',
@@ -74,7 +74,7 @@ export default function BuildersSpace() {
 
           <p className="text-white text-lg max-w-2xl mx-auto leading-relaxed mb-14 animate-slide-up" style={{ animationDelay: '0.2s' }}>
             A room set aside for building, open all day. Bring your laptop, work on
-            your own project, or pick up a starter guide and try something new.
+            your own project, or open a starter guide and try something new.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-5">

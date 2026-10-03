@@ -70,7 +70,7 @@ function GuideCard({ guide, borderClass }: { guide: StarterGuide; borderClass: s
           ))}
         </ul>
         <span className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-white" aria-hidden="true">
-          Open guide
+          Get started
           <span className="material-symbols-outlined text-sm leading-none transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
             arrow_outward
           </span>
