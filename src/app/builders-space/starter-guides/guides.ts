@@ -25,8 +25,9 @@ export const STARTER_GUIDE_CODING_LABELS: Record<StarterGuideCoding, string> = {
 };
 
 // The sections the page is split into, in the order they appear. Each takes a brand colour
-// for its cards' top border: green and blue match the Builder and Developer tracks.
-export type StarterGuideGroup = 'prototype' | 'ai' | 'web' | 'mobile';
+// for its cards' top border: green and blue match the Builder and Developer tracks, and the
+// fifth group takes Halftone Red, since the four core colours are already used.
+export type StarterGuideGroup = 'prototype' | 'ai' | 'web' | 'collaborate' | 'mobile';
 
 export interface StarterGuideGroupInfo {
   id: StarterGuideGroup;
@@ -41,6 +42,7 @@ export const STARTER_GUIDE_GROUPS: StarterGuideGroupInfo[] = [
   { id: 'prototype', label: 'Prototype and automate', borderClass: 'border-t-google-green', dotClass: 'bg-google-green' },
   { id: 'ai', label: 'Build with Gemini and agents', borderClass: 'border-t-google-blue', dotClass: 'bg-google-blue' },
   { id: 'web', label: 'Web and cloud', borderClass: 'border-t-google-yellow', dotClass: 'bg-google-yellow' },
+  { id: 'collaborate', label: 'Ship and collaborate', borderClass: 'border-t-halftone-red', dotClass: 'bg-halftone-red' },
   { id: 'mobile', label: 'Mobile', borderClass: 'border-t-google-red', dotClass: 'bg-google-red' },
 ];
 
@@ -395,7 +397,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
   {
     title: 'Make your first Asana API request',
     href: 'https://developers.asana.com/docs/quick-start',
-    group: 'prototype',
+    group: 'collaborate',
     summary:
       "Create a personal access token and use curl to read, create and update tasks in your Asana workspace, the first step to automating your team's busywork.",
     coding: 'coding',
@@ -406,6 +408,66 @@ export const STARTER_GUIDES: StarterGuide[] = [
       alt: 'Asana',
       width: 1600,
       height: 317,
+    },
+  },
+  {
+    title: 'Hello World on GitHub',
+    href: 'https://docs.github.com/en/get-started/using-github/hello-world',
+    group: 'collaborate',
+    summary:
+      "Learn GitHub's pull request workflow in the browser: make a repository, start a branch, commit a change and merge it. No coding needed.",
+    coding: 'no-code',
+    // The white GitHub lockup from GitHub's logo pack (brand.github.com/GitHub_Logos.zip),
+    // rendered and trimmed. Shared by every GitHub card.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/github.png',
+      alt: 'GitHub',
+      width: 1200,
+      height: 275,
+    },
+  },
+  {
+    title: 'Code in the browser with GitHub Codespaces',
+    href: 'https://docs.github.com/en/codespaces/quickstart',
+    group: 'collaborate',
+    summary:
+      'Open a sample app in VS Code running in your browser, run it and edit it live. Personal accounts get free monthly hours, so it is a setup for other guides too.',
+    coding: 'coding',
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/github.png',
+      alt: 'GitHub',
+      width: 1200,
+      height: 275,
+    },
+  },
+  {
+    title: 'Publish a site with GitHub Pages',
+    href: 'https://docs.github.com/en/pages/quickstart',
+    group: 'collaborate',
+    summary:
+      'Create a repository named after your username and GitHub publishes it as your own site at username.github.io, set up entirely in the browser.',
+    coding: 'no-code',
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/github.png',
+      alt: 'GitHub',
+      width: 1200,
+      height: 275,
+    },
+  },
+  {
+    title: 'Get started with the Linear API',
+    href: 'https://linear.app/developers/graphql',
+    group: 'collaborate',
+    summary:
+      "Make a personal API key and query your Linear issues and projects with curl through Linear's GraphQL API, the same API Linear's own apps use.",
+    coding: 'coding',
+    // Linear's light wordmark from their brand pack (static.linear.app/design-assets), rendered
+    // and trimmed.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/linear.png',
+      alt: 'Linear',
+      width: 1200,
+      height: 300,
     },
   },
 ];
