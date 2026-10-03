@@ -7,7 +7,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { areTicketsOpen } from '@/lib/tickets';
 import { isBuildersSpaceRevealed } from '@/lib/buildersSpace';
-import { STARTER_GUIDES, STARTER_GUIDE_CODING_LABELS, STARTER_GUIDE_SETUP_LABELS } from './guides';
+import { STARTER_GUIDES, STARTER_GUIDE_CODING_LABELS, starterGuideSetupLabel } from './guides';
 
 // Rendered per request: the navbar ticket CTA follows the on-sale date (see the note in
 // `src/app/page.tsx`), and like /builders-space this stays a 404 until the day.
@@ -65,7 +65,7 @@ export default function StarterGuides() {
                     href={guide.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label={`Open ${guide.title}, ${STARTER_GUIDE_CODING_LABELS[guide.coding]}, ${STARTER_GUIDE_SETUP_LABELS[guide.setup]} (opens in a new tab)`}
+                    aria-label={`Open ${guide.title}, ${STARTER_GUIDE_CODING_LABELS[guide.coding]}, ${starterGuideSetupLabel(guide)} (opens in a new tab)`}
                     className={`group flex h-full flex-col gap-3 rounded-lg border-t-4 ${CARD_BORDERS[guideIndex % CARD_BORDERS.length]} bg-surface px-6 pt-9 pb-6 transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue`}
                   >
                     {guide.logo && (
@@ -81,7 +81,7 @@ export default function StarterGuides() {
                     <p className="flex-1 text-base text-white/75 leading-relaxed">{guide.summary}</p>
                     {/* Below the flex-1 summary, so the tags line up across a row of cards. */}
                     <ul className="flex flex-wrap gap-2" aria-hidden="true">
-                      {[STARTER_GUIDE_CODING_LABELS[guide.coding], STARTER_GUIDE_SETUP_LABELS[guide.setup]].map((tagLabel) => (
+                      {[STARTER_GUIDE_CODING_LABELS[guide.coding], starterGuideSetupLabel(guide)].map((tagLabel) => (
                         <li key={tagLabel} className="inline-flex items-center rounded px-1.5 py-0.5 font-mono text-[11px] font-bold text-white/70 border border-white/25">
                           {tagLabel}
                         </li>

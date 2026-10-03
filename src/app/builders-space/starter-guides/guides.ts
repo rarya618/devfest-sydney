@@ -13,23 +13,22 @@ export interface StarterGuideLogo {
   height: number;
 }
 
-// Whether finishing the guide means writing code, and whether it can be done in a browser
-// with nothing installed. Setup is the least a guide needs, not the only way to do it: Astro
-// also has a CLI, but its templates open in StackBlitz, so it counts as 'browser'. Shown as
-// two tags on each card: the questions that decide whether someone can pick a guide up in
-// the room. No difficulty level, since every guide here is a starter.
+// Whether finishing the guide means writing code. Shown as a tag on each card, beside the
+// `needs` tag: together they decide whether someone can pick a guide up in the room. No
+// difficulty level, since every guide here is a starter.
 export type StarterGuideCoding = 'no-code' | 'coding';
-export type StarterGuideSetup = 'browser' | 'install';
 
 export const STARTER_GUIDE_CODING_LABELS: Record<StarterGuideCoding, string> = {
   'no-code': 'No code',
   coding: 'Coding',
 };
 
-export const STARTER_GUIDE_SETUP_LABELS: Record<StarterGuideSetup, string> = {
-  browser: 'No install needed',
-  install: 'Install required',
-};
+// The setup tag: "Needs <needs>", else "<optional> optional", else "No install needed".
+export function starterGuideSetupLabel(guide: StarterGuide): string {
+  if (guide.needs) return `Needs ${guide.needs}`;
+  if (guide.optional) return `${guide.optional} optional`;
+  return 'No install needed';
+}
 
 export interface StarterGuide {
   title: string;
@@ -38,7 +37,13 @@ export interface StarterGuide {
   // One sentence on what you will make or learn.
   summary: string;
   coding: StarterGuideCoding;
-  setup: StarterGuideSetup;
+  // What has to be on the laptop before starting, named rather than a bare "install required",
+  // since "npm or pip" and "Android Studio" are very different asks on venue Wi-Fi. Leave it
+  // out when the guide can be done in a browser, and name the local route in `optional` instead.
+  needs?: string;
+  // A tool for an optional local route, when the guide also works in a browser with nothing
+  // installed. Astro's templates open in StackBlitz, but can also be started with npm.
+  optional?: string;
   logo?: StarterGuideLogo;
 }
 
@@ -47,9 +52,9 @@ export const STARTER_GUIDES: StarterGuide[] = [
     title: 'Astro starter templates',
     href: 'https://astro.new/latest/',
     summary:
-      'Pick one of the official Astro starter templates, from a blog to a portfolio, and open it in your browser with nothing to install.',
+      'Pick one of the official Astro starter templates, from a blog to a portfolio, and open it in your browser with nothing to install, or start it locally with npm.',
     coding: 'coding',
-    setup: 'browser',
+    optional: 'npm',
     // Astro's "gradient logo on dark" from astro.build/press. Their guidelines ask for the full
     // logo rather than the standalone mark.
     logo: {
@@ -65,7 +70,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     summary:
       'Get an API key from Google AI Studio and make your first Gemini API call in minutes, in Python, JavaScript, Java, Go or REST.',
     coding: 'coding',
-    setup: 'install',
+    needs: 'npm or pip',
     // The dark-theme "Gemini API" lockup ai.google.dev itself uses
     // (_static/googledevai/images/gemini-api-logo-dark-theme.svg), rendered and trimmed.
     logo: {
@@ -81,7 +86,6 @@ export const STARTER_GUIDES: StarterGuide[] = [
     summary:
       'Describe the app you want in plain English and let Build mode write and run it for you, with no code and nothing to install.',
     coding: 'no-code',
-    setup: 'browser',
     // The AI Studio product mark from gstatic (productlogos/ai_studio, 512dp), trimmed. Mark
     // only: no wordmark lockup is published, and the card title names it.
     logo: {
@@ -97,7 +101,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     summary:
       "Install Google's Agent Development Kit and build your first AI agent that can use tools, in Python, TypeScript, Go, Java or Kotlin.",
     coding: 'coding',
-    setup: 'install',
+    needs: 'npm or pip',
     // The ADK mark adk.dev uses (assets/agent-development-kit.png), trimmed. Mark only, as
     // the site itself shows it.
     logo: {
@@ -113,7 +117,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     summary:
       'Build a small app that generates names and keeps a list of favourites, and learn how Flutter layouts, state and responsive design fit together.',
     coding: 'coding',
-    setup: 'install',
+    needs: 'Flutter SDK',
     // The white horizontal lockup docs.flutter.dev uses
     // (branding/flutter/logo+text/horizontal/white.svg), rendered and trimmed.
     logo: {
@@ -129,7 +133,6 @@ export const STARTER_GUIDES: StarterGuide[] = [
     summary:
       'Build an event RSVP and chat app with Firebase Authentication for sign-in and Cloud Firestore for live data.',
     coding: 'coding',
-    setup: 'browser',
     // The firebase.google.com header lockup with its grey wordmark set to white, matching
     // Firebase's reversed lockup for dark backgrounds. Rendered and trimmed.
     logo: {
@@ -145,7 +148,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     summary:
       'Make a personalised greeting app in Android Studio with Kotlin and Jetpack Compose, and preview it as you change it.',
     coding: 'coding',
-    setup: 'install',
+    needs: 'Android Studio',
     // The Android head from developer.android.com (static/images/logos/android.svg), rendered
     // and trimmed. The site's own "Developers" lockup has dark text and is only 274px wide.
     logo: {
@@ -161,7 +164,6 @@ export const STARTER_GUIDES: StarterGuide[] = [
     summary:
       'Put a sample container live on its own public URL with Cloud Run. Needs a Google Cloud project with billing turned on.',
     coding: 'no-code',
-    setup: 'browser',
     // The Cloud Run product icon from the Cloud docs (clouddocs/images/icons/products/run-color.svg),
     // rendered and trimmed.
     logo: {
