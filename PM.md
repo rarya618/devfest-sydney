@@ -15,6 +15,7 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 - `/` — Hero, About, Speakers (accepted), Schedule, Venue, Sponsors, Organisers
 - `/call-for-speakers` — CfS form with open/closed state
 - `/builder-showcase` — Builder Showcase call for demos, with open/closed state
+- `/builders-space` — Static page for the Builder's Space room (added 2026-10-03). The room is unstaffed, so the copy promises a place to build, not help. No room number or hours yet
 - `/volunteer` — Volunteer signup form with open/closed state
 - `/volunteer/confirm` — accepted volunteers confirm from a signed link in their acceptance email (no login, `noindex`)
 - `/crew` — Public crew page; Organisers and Volunteers in separate groups. Volunteers are shown only once they have confirmed AND an admin has opted them in; organisers need only the opt-in

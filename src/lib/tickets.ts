@@ -51,7 +51,7 @@ export const TICKET_INCLUSIONS: { title: string; description: string; color: str
   },
   {
     title: "The Builder's Space",
-    description: 'A dedicated room with mentors and Google Developer Experts on hand to help you build.',
+    description: 'A room set aside for building, open all day, for working on your own project between sessions.',
     color: 'google-green',
   },
   {

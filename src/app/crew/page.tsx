@@ -22,7 +22,7 @@ export const dynamic = 'force-dynamic';
 
 const title = 'Crew';
 const description =
-  'The volunteers running DevFest Sydney 2026. The people on registration, AV, speaker support and the Builder’s Space on Saturday 10 October at Torrens University, Surry Hills.';
+  'The volunteers running DevFest Sydney 2026. The people on registration, AV and speaker support on Saturday 10 October at Torrens University, Surry Hills.';
 
 export const metadata: Metadata = buildPageMetadata({ title, description, path: '/crew' });
 

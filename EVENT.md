@@ -45,7 +45,7 @@ timetable separate from the Call for Speakers.
 ## Special Features
 
 ### Builder's Space
-Dedicated room with mentors and Google Developer Experts (GDEs) providing hands-on support throughout the day.
+Dedicated room, open throughout the day, for attendees to build on their own projects. **Unstaffed** (confirmed 2026-10-03): no mentors or GDEs are stationed in it, so nothing on the site should promise help on hand. Public page at `/builders-space`.
 
 ### Speaker Dinner
 Held the evening before the event, Friday 9 October 2026, for the speakers and the organising team. Venue, time and RSVP are not settled yet; the speaker confirmation screen tells confirmed speakers it is happening and that details will follow by email.

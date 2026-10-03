@@ -57,6 +57,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: isShowcaseOpen() ? 0.8 : 0.4,
     },
     {
+      url: `${siteUrl}/builders-space`,
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    {
       url: `${siteUrl}/volunteer`,
       changeFrequency: 'daily',
       priority: isVolunteerOpen() ? 0.7 : 0.3,

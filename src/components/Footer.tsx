@@ -19,6 +19,7 @@ const COLUMNS: { heading: string; links: { label: string; href: string; external
     heading: 'Support',
     links: [
       { label: 'Builder Showcase', href: '/builder-showcase' },
+      { label: "Builder's Space", href: '/builders-space' },
       { label: 'Volunteer', href: '/volunteer' },
       { label: 'Crew', href: '/crew' },
       { label: 'FAQ', href: '/faq' },
