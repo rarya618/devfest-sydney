@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { buildPageMetadata } from '@/lib/metadata';
@@ -77,6 +78,16 @@ export default async function StarterGuidePage({ params }: PageProps) {
             <span aria-hidden="true">←</span> All starter guides
           </Link>
 
+          {guide.logo && (
+            <Image
+              src={guide.logo.url}
+              alt={guide.logo.alt}
+              width={guide.logo.width}
+              height={guide.logo.height}
+              priority
+              className="mb-6 h-10 w-auto object-contain"
+            />
+          )}
           <h1 className="text-[clamp(2.25rem,8vw,3.5rem)] font-bold leading-[1.05] tracking-tight text-white mb-4 animate-slide-up">
             {guide.title}
           </h1>

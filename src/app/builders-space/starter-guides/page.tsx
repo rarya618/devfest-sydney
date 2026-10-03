@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { buildPageMetadata } from '@/lib/metadata';
@@ -67,6 +68,15 @@ export default function StarterGuides() {
                     aria-label={`Open the ${guide.title} starter guide`}
                     className={`group flex h-full flex-col gap-3 rounded-lg border-t-4 ${CARD_BORDERS[guideIndex % CARD_BORDERS.length]} bg-surface p-6 transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue`}
                   >
+                    {guide.logo && (
+                      <Image
+                        src={guide.logo.url}
+                        alt={guide.logo.alt}
+                        width={guide.logo.width}
+                        height={guide.logo.height}
+                        className="mb-3 h-8 w-auto self-start object-contain"
+                      />
+                    )}
                     <h2 className="text-xl font-bold text-white">{guide.title}</h2>
                     {metaLine && <p className="font-mono text-xs text-white/60">{metaLine}</p>}
                     <p className="flex-1 text-base text-white/75 leading-relaxed">{guide.summary}</p>

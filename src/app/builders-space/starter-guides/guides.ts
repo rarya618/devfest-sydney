@@ -17,11 +17,22 @@ export interface StarterGuideLink {
   href: string;
 }
 
+export interface StarterGuideLogo {
+  // A public Firebase Storage URL (storage.googleapis.com), never a file in the repo. Use
+  // the vendor's logo for dark backgrounds, trimmed of transparent padding.
+  url: string;
+  alt: string;
+  // The file's pixel size, which next/image needs to reserve the space.
+  width: number;
+  height: number;
+}
+
 export interface StarterGuide {
   // The guide's URL, e.g. /builders-space/starter-guides/astro. Changing it breaks any
   // link or QR code already pointing at the old one.
   slug: string;
   title: string;
+  logo?: StarterGuideLogo;
   // One or two sentences on what you will have at the end.
   summary: string;
   // Short metadata, shown in the mono line under the title, e.g. "About 20 minutes".
@@ -39,6 +50,14 @@ export const STARTER_GUIDES: StarterGuide[] = [
   {
     slug: 'astro',
     title: 'Astro starter templates',
+    // Astro's "gradient logo on dark" from astro.build/press. Their guidelines ask for the full
+    // logo rather than the standalone mark.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/astro.png',
+      alt: 'Astro',
+      width: 1522,
+      height: 400,
+    },
     summary:
       'Spin up a website from one of the official Astro starter templates, either in the browser or on your own machine, and have it running in a few minutes.',
     timeNeeded: 'About 15 minutes',
