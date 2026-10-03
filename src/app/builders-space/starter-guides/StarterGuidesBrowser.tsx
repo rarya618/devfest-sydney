@@ -4,9 +4,12 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import {
   STARTER_GUIDES,
+  STARTER_GUIDE_BEGINNER_PATH,
   STARTER_GUIDE_GROUPS,
   STARTER_GUIDE_CODING_LABELS,
   starterGuideSetupLabel,
+  starterGuideTimeLabel,
+  starterGuideCheckedLabel,
   type StarterGuide,
   type StarterGuideGroup,
 } from './guides';
@@ -16,6 +19,7 @@ type GroupFilter = StarterGuideGroup | 'all';
 
 const GROUP_ORDER = Object.fromEntries(STARTER_GUIDE_GROUPS.map((groupInfo, groupIndex) => [groupInfo.id, groupIndex]));
 const GROUP_BORDER_CLASSES = Object.fromEntries(STARTER_GUIDE_GROUPS.map((groupInfo) => [groupInfo.id, groupInfo.borderClass]));
+const GROUP_SIDE_BORDER_CLASSES = Object.fromEntries(STARTER_GUIDE_GROUPS.map((groupInfo) => [groupInfo.id, groupInfo.sideBorderClass]));
 
 // Everything a search can match on: what the card shows, plus the name of its group.
 function searchableText(guide: StarterGuide): string {
@@ -40,6 +44,8 @@ function matchesQuery(guide: StarterGuide, query: string): boolean {
 function GuideCard({ guide, borderClass }: { guide: StarterGuide; borderClass: string }) {
   const codingLabel = STARTER_GUIDE_CODING_LABELS[guide.coding];
   const setupLabel = starterGuideSetupLabel(guide);
+  const timeLabel = starterGuideTimeLabel(guide);
+  const checkedLabel = starterGuideCheckedLabel(guide);
 
   return (
     <li>
@@ -47,7 +53,7 @@ function GuideCard({ guide, borderClass }: { guide: StarterGuide; borderClass: s
         href={guide.href}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label={`Open ${guide.title}, ${codingLabel}, ${setupLabel} (opens in a new tab)`}
+        aria-label={`Open ${guide.title}, ${codingLabel}, ${setupLabel}, takes about ${timeLabel.replace('~', '')}, link checked ${checkedLabel} (opens in a new tab)`}
         className={`group flex h-full flex-col gap-3 rounded-lg border-t-4 ${borderClass} bg-surface px-6 pt-9 pb-6 transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue`}
       >
         {guide.logo && (
@@ -63,20 +69,75 @@ function GuideCard({ guide, borderClass }: { guide: StarterGuide; borderClass: s
         <p className="flex-1 text-base text-white/75 leading-relaxed">{guide.summary}</p>
         {/* Below the flex-1 summary, so the tags line up across a row of cards. */}
         <ul className="flex flex-wrap gap-2" aria-hidden="true">
-          {[codingLabel, setupLabel].map((tagLabel) => (
+          {[codingLabel, setupLabel, timeLabel].map((tagLabel) => (
             <li key={tagLabel} className="inline-flex items-center rounded px-1.5 py-0.5 font-mono text-[11px] font-bold text-white/70 border border-white/25">
               {tagLabel}
             </li>
           ))}
         </ul>
-        <span className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-white" aria-hidden="true">
-          Get started
-          <span className="material-symbols-outlined text-sm leading-none transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
-            arrow_outward
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1" aria-hidden="true">
+          <span className="inline-flex items-center gap-1 text-sm font-bold text-white">
+            Get started
+            <span className="material-symbols-outlined text-sm leading-none transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+              arrow_outward
+            </span>
           </span>
-        </span>
+          <span className="font-mono text-xs text-white/50">Checked {checkedLabel}</span>
+        </div>
       </a>
     </li>
+  );
+}
+
+// The beginner path's steps joined to their guides, dropping any whose guide has been removed.
+const BEGINNER_STEPS = STARTER_GUIDE_BEGINNER_PATH.flatMap((step) => {
+  const guide = STARTER_GUIDES.find((candidate) => candidate.href === step.href);
+  return guide ? [{ ...step, guide }] : [];
+});
+const BEGINNER_TOTAL_MINUTES = BEGINNER_STEPS.reduce((total, step) => total + step.guide.minutes, 0);
+
+// A compact numbered list rather than more cards: the same guides appear as cards in their groups.
+function BeginnerPath() {
+  if (BEGINNER_STEPS.length === 0) return null;
+  const roundedTotal = Math.round(BEGINNER_TOTAL_MINUTES / 5) * 5;
+
+  return (
+    <section aria-labelledby="starter-guide-beginner-path" className="rounded-2xl border border-white/15 bg-white/[0.025] p-6 sm:p-8">
+      <h2 id="starter-guide-beginner-path" className="text-2xl font-bold text-white">
+        New to coding? Start with these {BEGINNER_STEPS.length}
+      </h2>
+      <p className="mt-2 text-base text-white/70 leading-relaxed">
+        In order, from no code to your first code. All in the browser with nothing to install, about{' '}
+        {roundedTotal} minutes in total.
+      </p>
+      <ol className="mt-6 flex flex-col gap-3">
+        {BEGINNER_STEPS.map((step, stepIndex) => (
+          <li key={step.href}>
+            <a
+              href={step.guide.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Step ${stepIndex + 1}: ${step.guide.title}. ${step.why} Takes about ${starterGuideTimeLabel(step.guide).replace('~', '')} (opens in a new tab)`}
+              className={`group flex items-center gap-4 rounded-lg border-l-4 ${GROUP_SIDE_BORDER_CLASSES[step.guide.group]} bg-surface px-4 py-4 transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue`}
+            >
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/35 font-mono text-sm font-bold text-white" aria-hidden="true">
+                {stepIndex + 1}
+              </span>
+              <span className="flex-1" aria-hidden="true">
+                <span className="block font-bold text-white">{step.guide.title}</span>
+                <span className="block text-sm text-white/70">{step.why}</span>
+              </span>
+              <span className="hidden sm:inline font-mono text-xs text-white/55" aria-hidden="true">
+                {starterGuideTimeLabel(step.guide)}
+              </span>
+              <span className="material-symbols-outlined text-base leading-none text-white transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true">
+                arrow_outward
+              </span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }
 
@@ -230,6 +291,7 @@ export default function StarterGuidesBrowser() {
           </div>
         ) : showGroupHeadings ? (
           <div className="flex flex-col gap-16">
+            <BeginnerPath />
             {groupedGuides.map((groupInfo) => (
               <section key={groupInfo.id} aria-labelledby={`starter-guide-group-${groupInfo.id}`}>
                 <h2 id={`starter-guide-group-${groupInfo.id}`} className="mb-6 text-2xl font-bold text-white">

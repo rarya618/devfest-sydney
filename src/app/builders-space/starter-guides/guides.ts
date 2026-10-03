@@ -32,18 +32,20 @@ export type StarterGuideGroup = 'prototype' | 'ai' | 'web' | 'collaborate' | 'mo
 export interface StarterGuideGroupInfo {
   id: StarterGuideGroup;
   label: string;
-  // Full class names so Tailwind generates them: the card's top border, and the dot beside the
-  // group in the sidebar.
+  // Full class names so Tailwind generates them: the card's top border, the dot beside the
+  // group in the sidebar, and a left border.
   borderClass: string;
   dotClass: string;
+  // The same colour as a left border, for the beginner path's rows.
+  sideBorderClass: string;
 }
 
 export const STARTER_GUIDE_GROUPS: StarterGuideGroupInfo[] = [
-  { id: 'prototype', label: 'Prototype and automate', borderClass: 'border-t-google-green', dotClass: 'bg-google-green' },
-  { id: 'ai', label: 'Build with Gemini and agents', borderClass: 'border-t-google-blue', dotClass: 'bg-google-blue' },
-  { id: 'web', label: 'Web and cloud', borderClass: 'border-t-google-yellow', dotClass: 'bg-google-yellow' },
-  { id: 'collaborate', label: 'Ship and collaborate', borderClass: 'border-t-halftone-red', dotClass: 'bg-halftone-red' },
-  { id: 'mobile', label: 'Mobile', borderClass: 'border-t-google-red', dotClass: 'bg-google-red' },
+  { id: 'prototype', label: 'Prototype and automate', borderClass: 'border-t-google-green', dotClass: 'bg-google-green', sideBorderClass: 'border-l-google-green' },
+  { id: 'ai', label: 'Build with Gemini and agents', borderClass: 'border-t-google-blue', dotClass: 'bg-google-blue', sideBorderClass: 'border-l-google-blue' },
+  { id: 'web', label: 'Web and cloud', borderClass: 'border-t-google-yellow', dotClass: 'bg-google-yellow', sideBorderClass: 'border-l-google-yellow' },
+  { id: 'collaborate', label: 'Ship and collaborate', borderClass: 'border-t-halftone-red', dotClass: 'bg-halftone-red', sideBorderClass: 'border-l-halftone-red' },
+  { id: 'mobile', label: 'Mobile', borderClass: 'border-t-google-red', dotClass: 'bg-google-red', sideBorderClass: 'border-l-google-red' },
 ];
 
 // The setup tag: "Needs <needs>", else "<optional> optional", else "No install needed".
@@ -51,6 +53,24 @@ export function starterGuideSetupLabel(guide: StarterGuide): string {
   if (guide.needs) return `Needs ${guide.needs}`;
   if (guide.optional) return `${guide.optional} optional`;
   return 'No install needed';
+}
+
+// "~15 min" under an hour, rounded to 5 minutes; "~1.5 hr" from an hour up, to the half hour.
+export function starterGuideTimeLabel(guide: StarterGuide): string {
+  if (guide.minutes < 60) return `~${Math.max(5, Math.round(guide.minutes / 5) * 5)} min`;
+  const hours = Math.round((guide.minutes / 60) * 2) / 2;
+  return `~${hours} hr`;
+}
+
+// "4 Oct 2026". Pinned to UTC so a YYYY-MM-DD date never shifts a day, and to one locale so the
+// server and browser render the same text.
+export function starterGuideCheckedLabel(guide: StarterGuide): string {
+  return new Date(`${guide.lastChecked}T00:00:00Z`).toLocaleDateString('en-AU', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
 }
 
 export interface StarterGuide {
@@ -68,8 +88,38 @@ export interface StarterGuide {
   // A tool for an optional local route, when the guide also works in a browser with nothing
   // installed. Astro's templates open in StackBlitz, but can also be started with npm.
   optional?: string;
+  // Roughly how long the guide takes, not counting installing anything in `needs`. Where a
+  // codelab states its own step times the figure is their total (noted beside the entry);
+  // everything else is our estimate. Shown as "~15 min", so it reads as approximate.
+  minutes: number;
+  // The date the link was last opened and found working, as YYYY-MM-DD. Update it whenever a
+  // guide is re-checked, and re-check them all before the day.
+  lastChecked: string;
   logo?: StarterGuideLogo;
 }
+
+// "New to coding? Start with these 3": a short path from no code to first code, shown above the
+// groups. Each step names a guide by its `href` and says why it comes at that point. All three
+// run in the browser with nothing to install, so the whole path works on a borrowed laptop.
+export interface StarterGuideBeginnerStep {
+  href: string;
+  why: string;
+}
+
+export const STARTER_GUIDE_BEGINNER_PATH: StarterGuideBeginnerStep[] = [
+  {
+    href: 'https://ai.google.dev/gemini-api/docs/aistudio-build-mode',
+    why: 'Make something that works before you write any code.',
+  },
+  {
+    href: 'https://docs.github.com/en/get-started/using-github/hello-world',
+    why: 'Learn how code is saved, changed and shared.',
+  },
+  {
+    href: 'https://colab.research.google.com/github/google-gemini/cookbook/blob/main/quickstarts/Get_started.ipynb',
+    why: 'Write and run your first lines of code, still in the browser.',
+  },
+];
 
 export const STARTER_GUIDES: StarterGuide[] = [
   {
@@ -80,6 +130,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
     group: 'web',
     coding: 'coding',
     optional: 'npm',
+    minutes: 15,
+    lastChecked: '2026-10-04',
     // Astro's "gradient logo on dark" from astro.build/press. Their guidelines ask for the full
     // logo rather than the standalone mark.
     logo: {
@@ -97,6 +149,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
     group: 'ai',
     coding: 'coding',
     needs: 'npm or pip',
+    minutes: 15,
+    lastChecked: '2026-10-04',
     // The dark-theme "Gemini API" lockup ai.google.dev itself uses
     // (_static/googledevai/images/gemini-api-logo-dark-theme.svg), rendered and trimmed.
     logo: {
@@ -113,6 +167,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
       'Describe the app you want in plain English and let Build mode write and run it for you, with no code and nothing to install.',
     group: 'prototype',
     coding: 'no-code',
+    minutes: 20,
+    lastChecked: '2026-10-04',
     // The AI Studio product mark from gstatic (productlogos/ai_studio, 512dp), trimmed. Mark
     // only: no wordmark lockup is published, and the card title names it.
     logo: {
@@ -130,6 +186,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
     group: 'ai',
     coding: 'coding',
     needs: 'npm or pip',
+    minutes: 30,
+    lastChecked: '2026-10-04',
     // The ADK mark adk.dev uses (assets/agent-development-kit.png), trimmed. Mark only, as
     // the site itself shows it.
     logo: {
@@ -147,6 +205,9 @@ export const STARTER_GUIDES: StarterGuide[] = [
     group: 'mobile',
     coding: 'coding',
     needs: 'Flutter SDK',
+    // The codelab's own step times add up to 85 minutes.
+    minutes: 85,
+    lastChecked: '2026-10-04',
     // The white horizontal lockup docs.flutter.dev uses
     // (branding/flutter/logo+text/horizontal/white.svg), rendered and trimmed.
     logo: {
@@ -163,6 +224,9 @@ export const STARTER_GUIDES: StarterGuide[] = [
       'Build an event RSVP and chat app with Firebase Authentication for sign-in and Cloud Firestore for live data.',
     group: 'web',
     coding: 'coding',
+    // The codelab's own step times add up to 52 minutes.
+    minutes: 52,
+    lastChecked: '2026-10-04',
     // The firebase.google.com header lockup with its grey wordmark set to white, matching
     // Firebase's reversed lockup for dark backgrounds. Rendered and trimmed.
     logo: {
@@ -180,6 +244,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
     group: 'mobile',
     coding: 'coding',
     needs: 'Android Studio',
+    minutes: 45,
+    lastChecked: '2026-10-04',
     // The Android head from developer.android.com (static/images/logos/android.svg), rendered
     // and trimmed. The site's own "Developers" lockup has dark text and is only 274px wide.
     logo: {
@@ -196,6 +262,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
       'Put a sample container live on its own public URL with Cloud Run. Needs a Google Cloud project with billing turned on.',
     group: 'web',
     coding: 'no-code',
+    minutes: 15,
+    lastChecked: '2026-10-04',
     // The Cloud Run product icon from the Cloud docs (clouddocs/images/icons/products/run-color.svg),
     // rendered and trimmed.
     logo: {
@@ -213,6 +281,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
     group: 'web',
     coding: 'coding',
     needs: 'npm',
+    minutes: 20,
+    lastChecked: '2026-10-04',
     // The white wordmark from Resend's brand pack (cdn.resend.com/brand/resend-brand-assets.zip),
     // rendered and trimmed.
     logo: {
@@ -230,6 +300,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
     group: 'web',
     coding: 'coding',
     needs: 'npm',
+    minutes: 15,
+    lastChecked: '2026-10-04',
     // The app icon react.email uses (brand/logo.png), trimmed. Mark only, as the site shows it.
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/react-email.png',
@@ -246,6 +318,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
     group: 'ai',
     coding: 'coding',
     needs: 'npm',
+    minutes: 15,
+    lastChecked: '2026-10-04',
     // The app icon geminicli.com uses (icon.png), trimmed and downsized.
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/gemini-cli.png',
@@ -261,6 +335,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
       "Run the Gemini API cookbook's starter notebook in Google Colab and try your first prompts in Python, all in the browser.",
     group: 'ai',
     coding: 'coding',
+    minutes: 20,
+    lastChecked: '2026-10-04',
     // The Colab mark from colab.research.google.com (img/colab_favicon_256px.png), trimmed.
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/colab.png',
@@ -276,6 +352,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
       'Describe an app or upload a sketch and Stitch, from Google Labs, designs the screens for you, ready to take into Figma or code.',
     group: 'prototype',
     coding: 'no-code',
+    minutes: 15,
+    lastChecked: '2026-10-04',
     // Stitch's 512px app icon (gstatic.com/labs-code/stitch/favicon-512x512.png). Links to the
     // tool itself: Stitch has no separate starter guide.
     logo: {
@@ -293,6 +371,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
     group: 'ai',
     coding: 'coding',
     needs: 'npm',
+    minutes: 30,
+    lastChecked: '2026-10-04',
     // The horizontal knockout lockup genkit.dev uses on dark (genkit_logo_horizontal_knockout), trimmed.
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/genkit.png',
@@ -308,6 +388,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
       'Remix a demo from the Opal gallery into your own AI mini app, built by describing each step in plain English.',
     group: 'prototype',
     coding: 'no-code',
+    minutes: 20,
+    lastChecked: '2026-10-04',
     // Opal publishes no logo file, so this is the wordmark cut from its share card
     // (opal.google/images/share-card-prod.png) and set to white on transparent.
     logo: {
@@ -324,6 +406,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
     summary:
       'Paste a short script into a Google Sheet to make your own spreadsheet function, then build from there to automate Sheets, Docs and Gmail.',
     coding: 'coding',
+    minutes: 15,
+    lastChecked: '2026-10-04',
     // The Apps Script product logo from gstatic (productlogos/apps_script, 512dp), trimmed.
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/apps-script.png',
@@ -339,6 +423,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
     summary:
       "Connect a GitHub repo and give Google's coding agent a task, like fixing a bug or writing docs. It works in the cloud and comes back with a change for you to review.",
     coding: 'coding',
+    minutes: 20,
+    lastChecked: '2026-10-04',
     // The light purple octopus from the Jules docs (docs/_astro/logo), the one that reads on a
     // dark background. Rendered and trimmed.
     logo: {
@@ -356,6 +442,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
       'Call Gemini straight from an Android, iOS, Flutter or web app with the Firebase AI Logic SDKs, on the no-cost Gemini Developer API.',
     coding: 'coding',
     needs: 'Android Studio, Xcode or Flutter SDK',
+    minutes: 45,
+    lastChecked: '2026-10-04',
     // Same Firebase lockup as the Firebase for web card.
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/firebase.png',
@@ -372,6 +460,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
       "Add a checkout button that sends people to a payment page Stripe hosts for you, then try it with Stripe's test card numbers so no real money moves.",
     coding: 'coding',
     needs: 'npm or pip',
+    minutes: 30,
+    lastChecked: '2026-10-04',
     // The white wordmark from Stripe's logo kit (stripe.com/newsroom/brand-assets), rendered and trimmed.
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/stripe.png',
@@ -387,6 +477,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
     summary:
       'Make a shareable payment page for a product, a subscription or pay-what-you-want from the Stripe Dashboard, with no website or code needed.',
     coding: 'no-code',
+    minutes: 10,
+    lastChecked: '2026-10-04',
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/stripe.png',
       alt: 'Stripe',
@@ -401,6 +493,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
     summary:
       "Create a personal access token and use curl to read, create and update tasks in your Asana workspace, the first step to automating your team's busywork.",
     coding: 'coding',
+    minutes: 20,
+    lastChecked: '2026-10-04',
     // Asana is a sponsor, so this reuses their sponsor logo (sponsor-logos/asana.png): the wordmark set
     // to white with the coral dots unchanged, Asana's reversed lockup for dark backgrounds.
     logo: {
@@ -417,6 +511,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
     summary:
       "Learn GitHub's pull request workflow in the browser: make a repository, start a branch, commit a change and merge it. No coding needed.",
     coding: 'no-code',
+    minutes: 15,
+    lastChecked: '2026-10-04',
     // The white GitHub lockup from GitHub's logo pack (brand.github.com/GitHub_Logos.zip),
     // rendered and trimmed. Shared by every GitHub card.
     logo: {
@@ -433,6 +529,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
     summary:
       'Open a sample app in VS Code running in your browser, run it and edit it live. Personal accounts get free monthly hours, so it is a setup for other guides too.',
     coding: 'coding',
+    minutes: 15,
+    lastChecked: '2026-10-04',
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/github.png',
       alt: 'GitHub',
@@ -447,6 +545,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
     summary:
       'Create a repository named after your username and GitHub publishes it as your own site at username.github.io, set up entirely in the browser.',
     coding: 'no-code',
+    minutes: 10,
+    lastChecked: '2026-10-04',
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/github.png',
       alt: 'GitHub',
@@ -461,6 +561,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
     summary:
       "Make a personal API key and query your Linear issues and projects with curl through Linear's GraphQL API, the same API Linear's own apps use.",
     coding: 'coding',
+    minutes: 20,
+    lastChecked: '2026-10-04',
     // Linear's light wordmark from their brand pack (static.linear.app/design-assets), rendered
     // and trimmed.
     logo: {
@@ -477,6 +579,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
     summary:
       "Pick a starter for Next.js, Astro, SvelteKit or more and deploy it with one click: Vercel copies it into a new repo of yours and puts it live on the free Hobby plan.",
     coding: 'no-code',
+    minutes: 10,
+    lastChecked: '2026-10-04',
     // The white Vercel triangle from vercel.com/geist/brands, rendered and trimmed. Mark only, as
     // Vercel shows it. Links to the templates gallery: deploying one is the starter.
     logo: {
@@ -494,6 +598,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
       "Use Vercel's open-source AI SDK with Gemini through its Google provider and a free API key from Google AI Studio, in any JavaScript or TypeScript app.",
     coding: 'coding',
     needs: 'npm',
+    minutes: 30,
+    lastChecked: '2026-10-04',
     // Links the Google provider page rather than the SDK's getting-started guides, which default
     // to Vercel's AI Gateway (its own key) and a non-Google model. Vercel's mark: the AI SDK has no
     // logo of its own.
@@ -512,6 +618,9 @@ export const STARTER_GUIDES: StarterGuide[] = [
       "Vercel's free course: build a full-stack dashboard with login, a database and pages for managing invoices. A whole course rather than a quick start, so pick a chapter.",
     coding: 'coding',
     needs: 'npm',
+    // A multi-chapter course with no stated length: 4 hours is a rough floor for working through it.
+    minutes: 240,
+    lastChecked: '2026-10-04',
     // The white Next.js logotype from vercel.com/geist/brands, rendered and trimmed.
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/nextjs.png',
@@ -527,6 +636,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
     summary:
       "Run SQL over Google's public datasets in the browser, with no credit card or billing account. The free sandbox covers 10 GiB of storage and 1 TiB of queries a month.",
     coding: 'coding',
+    minutes: 20,
+    lastChecked: '2026-10-04',
     // The BigQuery product icon from the Cloud docs (clouddocs/images/icons/products/bigquery-color.svg),
     // rendered and trimmed.
     logo: {
@@ -544,6 +655,9 @@ export const STARTER_GUIDES: StarterGuide[] = [
       "Finish a demo app's sign-in so people can create a passkey and use it instead of a password, with the browser offering it right in the sign-in form.",
     coding: 'coding',
     needs: 'npm',
+    // The codelab's own step times add up to 36 minutes.
+    minutes: 36,
+    lastChecked: '2026-10-04',
     // The passkey icon from passkeys.dev (img/logo512x512.png), the FIDO Alliance's standard
     // symbol for passkeys. The codelab is Google's, but Google has no passkey mark of its own.
     logo: {
@@ -561,6 +675,9 @@ export const STARTER_GUIDES: StarterGuide[] = [
       'Build an event RSVP and guestbook chat app for Android, iOS and the web, with Firebase Authentication for sign-in and Cloud Firestore for live data.',
     coding: 'coding',
     needs: 'Flutter SDK',
+    // The codelab's own step times add up to 53 minutes.
+    minutes: 53,
+    lastChecked: '2026-10-04',
     // Same Firebase lockup as the Firebase for web card.
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/firebase.png',
@@ -576,6 +693,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
     summary:
       'Pick a colour or upload an image and get a full Material 3 colour scheme, with light and dark modes, ready to export to your code.',
     coding: 'no-code',
+    minutes: 10,
+    lastChecked: '2026-10-04',
     // Material 3's mark from m3.material.io (static/assets/m3-favicon.svg), rendered and trimmed.
     // The tool's own icon is Flutter's default app icon. Links to the tool: it has no separate guide.
     logo: {
