@@ -3,6 +3,7 @@ import { buildPageMetadata } from '@/lib/metadata';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import EventDateVenue from '@/components/EventDateVenue';
 import Reveal from '@/components/Reveal';
 import TicketsLink from '@/components/TicketsLink';
 import { areTicketsOpen, TICKET_INCLUSIONS, TICKET_INCLUSION_DOT } from '@/lib/tickets';
@@ -58,13 +59,7 @@ export default function Tickets() {
         <div className="absolute inset-0 hero-atmosphere pointer-events-none" aria-hidden="true" />
 
         <div className="relative max-w-4xl mx-auto text-center">
-          <p className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-center gap-1.5 sm:gap-2.5 text-base font-bold text-white/80 animate-fade-in">
-            <span className="flex items-center gap-2.5">
-              <span>Saturday, 10 October 2026</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-white/80 shrink-0" aria-hidden="true" />
-            </span>
-            <span>Torrens University, Surry Hills</span>
-          </p>
+          <EventDateVenue />
 
           <h1
             className="text-[clamp(2.5rem,10vw,4rem)] md:text-[clamp(2.25rem,5.5vw,4rem)] font-bold leading-[0.95] tracking-tight text-white mb-6 animate-slide-up"
