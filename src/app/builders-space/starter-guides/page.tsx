@@ -42,7 +42,7 @@ export default function StarterGuides() {
           </h1>
 
           <p className="text-white/70 text-lg max-w-2xl mx-auto leading-relaxed animate-slide-up" style={{ animationDelay: '0.2s' }}>
-            Short, self-paced guides for trying something new. Pick one, open your laptop and
+            Official starter guides for trying something new. Pick one, open your laptop and
             work through it at your own pace.
           </p>
         </div>
@@ -59,14 +59,14 @@ export default function StarterGuides() {
         ) : (
           // Centred wrapping row rather than a grid, so one or two guides don't sit off to the left.
           <ul className="max-w-5xl mx-auto flex flex-wrap justify-center gap-6">
-            {STARTER_GUIDES.map((guide, guideIndex) => {
-              const metaLine = [guide.timeNeeded, guide.audience].filter(Boolean).join(' · ');
-              return (
-                <li key={guide.slug} className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
-                  <Link
-                    href={`/builders-space/starter-guides/${guide.slug}`}
-                    aria-label={`Open the ${guide.title} starter guide`}
-                    className={`group flex h-full flex-col gap-3 rounded-lg border-t-4 ${CARD_BORDERS[guideIndex % CARD_BORDERS.length]} bg-surface p-6 transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue`}
+            {STARTER_GUIDES.map((guide, guideIndex) => (
+                <li key={guide.href} className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+                  <a
+                    href={guide.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Open ${guide.title} (opens in a new tab)`}
+                    className={`group flex h-full flex-col gap-3 rounded-lg border-t-4 ${CARD_BORDERS[guideIndex % CARD_BORDERS.length]} bg-surface px-6 pt-9 pb-6 transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue`}
                   >
                     {guide.logo && (
                       <Image
@@ -78,15 +78,13 @@ export default function StarterGuides() {
                       />
                     )}
                     <h2 className="text-xl font-bold text-white">{guide.title}</h2>
-                    {metaLine && <p className="font-mono text-xs text-white/60">{metaLine}</p>}
                     <p className="flex-1 text-base text-white/75 leading-relaxed">{guide.summary}</p>
                     <span className="mt-2 text-sm font-bold text-white" aria-hidden="true">
-                      Open guide <span className="inline-block transition-transform group-hover:translate-x-1">→</span>
+                      Open guide <span className="inline-block transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">↗</span>
                     </span>
-                  </Link>
+                  </a>
                 </li>
-              );
-            })}
+            ))}
           </ul>
         )}
       </section>

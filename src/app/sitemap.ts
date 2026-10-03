@@ -5,7 +5,6 @@ import { isShowcaseOpen } from '@/lib/showcase';
 import { fetchPublicSpeakers } from '@/lib/speakers';
 import { isVolunteerOpen } from '@/lib/volunteer';
 import { isBuildersSpaceRevealed } from '@/lib/buildersSpace';
-import { STARTER_GUIDES } from '@/app/builders-space/starter-guides/guides';
 
 // The /tickets priority follows areTicketsOpen(), so don't freeze this at build time.
 // No lastModified: a date that reads "now" on every request tells crawlers nothing, and
@@ -62,11 +61,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ? [
           { url: `${siteUrl}/builders-space`, changeFrequency: 'monthly' as const, priority: 0.6 },
           { url: `${siteUrl}/builders-space/starter-guides`, changeFrequency: 'weekly' as const, priority: 0.5 },
-          ...STARTER_GUIDES.map((guide) => ({
-            url: `${siteUrl}/builders-space/starter-guides/${guide.slug}`,
-            changeFrequency: 'monthly' as const,
-            priority: 0.4,
-          })),
         ]
       : []),
     {
