@@ -59,7 +59,9 @@ export function starterGuideSetupLabel(guide: StarterGuide): string {
 
 // "~15 min" under an hour, rounded to 5 minutes; "~1.5 hr" from an hour up, to the half hour.
 export function starterGuideTimeLabel(guide: StarterGuide): string {
-  if (guide.minutes < 60) return `~${Math.max(5, Math.round(guide.minutes / 5) * 5)} min`;
+  // Round first, so 58 minutes reads "~1 hr" rather than "~60 min".
+  const roundedMinutes = Math.max(5, Math.round(guide.minutes / 5) * 5);
+  if (roundedMinutes < 60) return `~${roundedMinutes} min`;
   const hours = Math.round((guide.minutes / 60) * 2) / 2;
   return `~${hours} hr`;
 }
@@ -673,6 +675,27 @@ export const STARTER_GUIDES: StarterGuide[] = [
       alt: 'Material Design',
       width: 400,
       height: 400,
+    },
+  },
+  {
+    title: 'Protect your data with Firebase Security Rules',
+    href: 'https://firebase.google.com/codelabs/firebase-rules',
+    group: 'data',
+    summary:
+      'Lock down a small blog built on Cloud Firestore: write rules for who can read and change what, and prove them with tests against the local emulator.',
+    coding: 'coding',
+    // The codelab's prerequisites list Java 7 and Node 8.6, but the Firebase emulators it runs now
+    // need JDK 11+ and Node 16+ (firebase.google.com/docs/emulator-suite/install_and_configure),
+    // so the tag names the real minimum.
+    needs: 'npm and Java 11+',
+    // The codelab's own step times add up to 58 minutes.
+    minutes: 58,
+    // Same Firebase lockup as the other Firebase cards.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/firebase.png',
+      alt: 'Firebase',
+      width: 1600,
+      height: 422,
     },
   },
 ];
