@@ -362,4 +362,50 @@ export const STARTER_GUIDES: StarterGuide[] = [
       height: 422,
     },
   },
+  {
+    title: 'Take a payment with Stripe Checkout',
+    href: 'https://docs.stripe.com/checkout/quickstart',
+    group: 'web',
+    summary:
+      "Add a checkout button that sends people to a payment page Stripe hosts for you, then try it with Stripe's test card numbers so no real money moves.",
+    coding: 'coding',
+    needs: 'npm or pip',
+    // The white wordmark from Stripe's logo kit (stripe.com/newsroom/brand-assets), rendered and trimmed.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/stripe.png',
+      alt: 'Stripe',
+      width: 1200,
+      height: 499,
+    },
+  },
+  {
+    title: 'Sell something with a Stripe payment link',
+    href: 'https://docs.stripe.com/payment-links/create',
+    group: 'prototype',
+    summary:
+      'Make a shareable payment page for a product, a subscription or pay-what-you-want from the Stripe Dashboard, with no website or code needed.',
+    coding: 'no-code',
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/stripe.png',
+      alt: 'Stripe',
+      width: 1200,
+      height: 499,
+    },
+  },
+  {
+    title: 'Make your first Asana API request',
+    href: 'https://developers.asana.com/docs/quick-start',
+    group: 'prototype',
+    summary:
+      "Create a personal access token and use curl to read, create and update tasks in your Asana workspace, the first step to automating your team's busywork.",
+    coding: 'coding',
+    // Asana is a sponsor, so this reuses their sponsor logo (sponsor-logos/asana.png): the wordmark set
+    // to white with the coral dots unchanged, Asana's reversed lockup for dark backgrounds.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/sponsor-logos/asana.png',
+      alt: 'Asana',
+      width: 1600,
+      height: 317,
+    },
+  },
 ];
