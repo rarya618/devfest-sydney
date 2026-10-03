@@ -25,9 +25,10 @@ export const STARTER_GUIDE_CODING_LABELS: Record<StarterGuideCoding, string> = {
 };
 
 // The sections the page is split into, in the order they appear. Each takes a brand colour
-// for its cards' top border: green and blue match the Builder and Developer tracks, and the
-// fifth group takes Halftone Red, since the four core colours are already used.
-export type StarterGuideGroup = 'prototype' | 'ai' | 'web' | 'collaborate' | 'mobile';
+// for its cards' top border: green and blue match the Builder and Developer tracks. With the four
+// core colours used, the fifth group takes Halftone Red and the sixth Off White, the two left
+// that can't be mistaken for one already on the page.
+export type StarterGuideGroup = 'prototype' | 'ai' | 'web' | 'data' | 'collaborate' | 'mobile';
 
 export interface StarterGuideGroupInfo {
   id: StarterGuideGroup;
@@ -44,6 +45,7 @@ export const STARTER_GUIDE_GROUPS: StarterGuideGroupInfo[] = [
   { id: 'prototype', label: 'Prototype and automate', borderClass: 'border-t-google-green', dotClass: 'bg-google-green', sideBorderClass: 'border-l-google-green' },
   { id: 'ai', label: 'Build with Gemini and agents', borderClass: 'border-t-google-blue', dotClass: 'bg-google-blue', sideBorderClass: 'border-l-google-blue' },
   { id: 'web', label: 'Web and cloud', borderClass: 'border-t-google-yellow', dotClass: 'bg-google-yellow', sideBorderClass: 'border-l-google-yellow' },
+  { id: 'data', label: 'Data and security', borderClass: 'border-t-off-white', dotClass: 'bg-off-white', sideBorderClass: 'border-l-off-white' },
   { id: 'collaborate', label: 'Ship and collaborate', borderClass: 'border-t-halftone-red', dotClass: 'bg-halftone-red', sideBorderClass: 'border-l-halftone-red' },
   { id: 'mobile', label: 'Mobile', borderClass: 'border-t-google-red', dotClass: 'bg-google-red', sideBorderClass: 'border-l-google-red' },
 ];
@@ -605,7 +607,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
   {
     title: 'Query big data with the BigQuery sandbox',
     href: 'https://docs.cloud.google.com/bigquery/docs/sandbox',
-    group: 'web',
+    group: 'data',
     summary:
       "Run SQL over Google's public datasets in the browser, with no credit card or billing account. The free sandbox covers 10 GiB of storage and 1 TiB of queries a month.",
     coding: 'coding',
@@ -622,7 +624,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
   {
     title: 'Add passkey sign-in to a web app',
     href: 'https://developers.google.com/codelabs/passkey-form-autofill',
-    group: 'web',
+    group: 'data',
     summary:
       "Finish a demo app's sign-in so people can create a passkey and use it instead of a password, with the browser offering it right in the sign-in form.",
     coding: 'coding',
