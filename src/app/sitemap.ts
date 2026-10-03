@@ -4,6 +4,7 @@ import { isCfsOpen } from '@/lib/cfs';
 import { isShowcaseOpen } from '@/lib/showcase';
 import { fetchPublicSpeakers } from '@/lib/speakers';
 import { isVolunteerOpen } from '@/lib/volunteer';
+import { isBuildersSpaceRevealed } from '@/lib/buildersSpace';
 
 // The /tickets priority follows areTicketsOpen(), so don't freeze this at build time.
 // No lastModified: a date that reads "now" on every request tells crawlers nothing, and
@@ -56,11 +57,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'daily',
       priority: isShowcaseOpen() ? 0.8 : 0.4,
     },
-    {
-      url: `${siteUrl}/builders-space`,
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
+    ...(isBuildersSpaceRevealed()
+      ? [{ url: `${siteUrl}/builders-space`, changeFrequency: 'monthly' as const, priority: 0.6 }]
+      : []),
     {
       url: `${siteUrl}/volunteer`,
       changeFrequency: 'daily',

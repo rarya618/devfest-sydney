@@ -2,8 +2,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import VolunteerLink from './VolunteerLink';
 import ShowcaseLink from './ShowcaseLink';
+import { isBuildersSpaceRevealed } from '@/lib/buildersSpace';
 
-const COLUMNS: { heading: string; links: { label: string; href: string; external?: boolean }[] }[] = [
+const COLUMNS: { heading: string; links: { label: string; href: string; external?: boolean; hidden?: () => boolean }[] }[] = [
   {
     heading: 'Event',
     links: [
@@ -19,7 +20,8 @@ const COLUMNS: { heading: string; links: { label: string; href: string; external
     heading: 'Support',
     links: [
       { label: 'Builder Showcase', href: '/builder-showcase' },
-      { label: "Builder's Space", href: '/builders-space' },
+      // A surprise on the day: see src/lib/buildersSpace.ts.
+      { label: "Builder's Space", href: '/builders-space', hidden: () => !isBuildersSpaceRevealed() },
       { label: 'Volunteer', href: '/volunteer' },
       { label: 'Crew', href: '/crew' },
       { label: 'FAQ', href: '/faq' },
@@ -80,7 +82,7 @@ export default function Footer() {
               <div key={column.heading} className="min-w-[150px]">
                 <p className="text-xl font-bold text-white mb-3">{column.heading}</p>
                 <ul className="space-y-3">
-                  {column.links.map((link) => {
+                  {column.links.filter((link) => !link.hidden?.()).map((link) => {
                     if (link.label === 'Builder Showcase') {
                       return (
                         <li key={link.label}>

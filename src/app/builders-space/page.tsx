@@ -1,24 +1,27 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { buildPageMetadata } from '@/lib/metadata';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import TicketsLink from '@/components/TicketsLink';
 import { areTicketsOpen } from '@/lib/tickets';
+import { isBuildersSpaceRevealed } from '@/lib/buildersSpace';
 
-// The navbar ticket CTA follows the on-sale date, so this page is rendered per request
-// rather than prerendered: see the note in `src/app/page.tsx`.
+// Rendered per request: the navbar ticket CTA follows the on-sale date (see the note in
+// `src/app/page.tsx`), and the page itself stays a 404 until isBuildersSpaceRevealed().
 export const dynamic = 'force-dynamic';
 
 const title = "Builder's Space";
 const description =
-  'A room at DevFest Sydney 2026 set aside for building. Bring your laptop and work on your own project, or team up with someone you met in a talk.';
+  'A room at DevFest Sydney 2026 set aside for building. Bring your laptop and work on your own project, or pick up a starter guide and try something new.';
 
 export const metadata: Metadata = buildPageMetadata({ title, description, path: '/builders-space' });
 
-// Deliberately limited to what EVENT.md confirms: a dedicated room, open all day, and
-// unstaffed. Nothing here should read as a promise of mentors or help on hand. No room
-// number or opening hours until the organisers settle them.
+// Deliberately limited to what EVENT.md confirms: a dedicated room, open all day,
+// unstaffed, with starter guides. Nothing here should read as a promise of mentors or
+// help on hand. No room number, opening hours or guide topics until the organisers
+// settle them.
 const WHAT_ITS_FOR = [
   {
     title: 'Bring what you are building',
@@ -26,8 +29,8 @@ const WHAT_ITS_FOR = [
     color: 'google-green',
   },
   {
-    title: 'Try what you just heard',
-    desc: 'Came out of a talk wanting to give it a go? Open your laptop while it is still fresh, instead of saving it for next weekend.',
+    title: 'Explore something new',
+    desc: 'Came out of a talk wanting to give it a go? We will have starter guides for anyone exploring something new, so you can try it while it is still fresh.',
     color: 'google-blue',
   },
   {
@@ -52,6 +55,8 @@ const CARD_BORDER: Record<string, string> = {
 };
 
 export default function BuildersSpace() {
+  if (!isBuildersSpaceRevealed()) notFound();
+
   const ticketsOpen = areTicketsOpen();
 
   return (
@@ -72,8 +77,8 @@ export default function BuildersSpace() {
           </h1>
 
           <p className="text-white text-lg max-w-2xl mx-auto leading-relaxed mb-14 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-            A room set aside for building, open all day. Bring your laptop and
-            work on your own project between sessions.
+            A room set aside for building, open all day. Bring your laptop, work on
+            your own project, or pick up a starter guide and try something new.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-5">
@@ -132,7 +137,7 @@ export default function BuildersSpace() {
         <div className="max-w-xl mx-auto bg-white/[0.025] border border-white/10 rounded-2xl p-10 md:p-12 text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">Need a hand?</h2>
           <p className="text-white/70 leading-relaxed">
-            The Builder&apos;s Space is a self-serve room, with no one stationed in it. For anything
+            The Builder&apos;s Space is self-serve: there are starter guides, but no one stationed in the room. For anything
             you need on the day, find someone from the crew around the venue, or email{' '}
             <a href="mailto:hello@gdgsydney.com" className="text-white/85 hover:text-white underline underline-offset-2 transition-colors">
               hello@gdgsydney.com

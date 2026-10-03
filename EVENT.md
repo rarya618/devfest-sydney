@@ -45,7 +45,7 @@ timetable separate from the Call for Speakers.
 ## Special Features
 
 ### Builder's Space
-Dedicated room, open throughout the day, for attendees to build on their own projects. **Unstaffed** (confirmed 2026-10-03): no mentors or GDEs are stationed in it, so nothing on the site should promise help on hand. Public page at `/builders-space`.
+Dedicated room, open throughout the day, for attendees to build on their own projects. **Unstaffed** (confirmed 2026-10-03): no mentors or GDEs are stationed in it, so nothing on the site should promise help on hand. There will be starter guides for people exploring something new; topics and format (print or online) not settled yet. Public page at `/builders-space`, kept a surprise until the day: it, its footer link and its sitemap entry stay hidden until midnight on 10 October (`isBuildersSpaceRevealed()` in `src/lib/buildersSpace.ts`). The one-line card in the ticket section of `/` and `/tickets` stays up by choice.
 
 ### Speaker Dinner
 Held the evening before the event, Friday 9 October 2026, for the speakers and the organising team. Venue, time and RSVP are not settled yet; the speaker confirmation screen tells confirmed speakers it is happening and that details will follow by email.
