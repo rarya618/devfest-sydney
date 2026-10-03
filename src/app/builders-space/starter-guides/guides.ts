@@ -204,4 +204,78 @@ export const STARTER_GUIDES: StarterGuide[] = [
       height: 359,
     },
   },
+  {
+    title: 'Gemini CLI',
+    href: 'https://geminicli.com/docs/get-started/',
+    summary:
+      "Install Google's open-source AI agent for the terminal, sign in with your Google account, and have it read, write and run code in a project of yours.",
+    coding: 'coding',
+    needs: 'npm',
+    // The app icon geminicli.com uses (icon.png), trimmed and downsized.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/gemini-cli.png',
+      alt: 'Gemini CLI',
+      width: 512,
+      height: 512,
+    },
+  },
+  {
+    title: 'Get started with Gemini in Colab',
+    href: 'https://colab.research.google.com/github/google-gemini/cookbook/blob/main/quickstarts/Get_started.ipynb',
+    summary:
+      "Run the Gemini API cookbook's starter notebook in Google Colab and try your first prompts in Python, all in the browser.",
+    coding: 'coding',
+    // The Colab mark from colab.research.google.com (img/colab_favicon_256px.png), trimmed.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/colab.png',
+      alt: 'Google Colab',
+      width: 226,
+      height: 132,
+    },
+  },
+  {
+    title: 'Design app screens with Stitch',
+    href: 'https://stitch.withgoogle.com/',
+    summary:
+      'Describe an app or upload a sketch and Stitch, from Google Labs, designs the screens for you, ready to take into Figma or code.',
+    coding: 'no-code',
+    // Stitch's 512px app icon (gstatic.com/labs-code/stitch/favicon-512x512.png). Links to the
+    // tool itself: Stitch has no separate starter guide.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/stitch.png',
+      alt: 'Stitch',
+      width: 512,
+      height: 512,
+    },
+  },
+  {
+    title: 'Get started with Genkit',
+    href: 'https://genkit.dev/docs/js/get-started/',
+    summary:
+      "Add AI features to a JavaScript app with Genkit, Google's open-source framework from the Firebase team. Pick the guide for your framework.",
+    coding: 'coding',
+    needs: 'npm',
+    // The horizontal knockout lockup genkit.dev uses on dark (genkit_logo_horizontal_knockout), trimmed.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/genkit.png',
+      alt: 'Genkit',
+      width: 2352,
+      height: 712,
+    },
+  },
+  {
+    title: 'Build an AI mini app with Opal',
+    href: 'https://developers.google.com/opal/quickstart',
+    summary:
+      'Remix a demo from the Opal gallery into your own AI mini app, built by describing each step in plain English.',
+    coding: 'no-code',
+    // Opal publishes no logo file, so this is the wordmark cut from its share card
+    // (opal.google/images/share-card-prod.png) and set to white on transparent.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/opal.png',
+      alt: 'Opal',
+      width: 273,
+      height: 121,
+    },
+  },
 ];
