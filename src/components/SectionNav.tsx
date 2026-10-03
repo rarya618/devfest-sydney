@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 
 // Sticky in-page section nav for long single-page documents: a horizontal strip below `lg`,
-// a sidebar from `lg` up, both highlighting the section in view. Used by /conduct and the
-// Builder's Space starter guides.
+// a sidebar from `lg` up, both highlighting the section in view. Used by /conduct.
 interface Section {
   slug: string;
   title: string;
