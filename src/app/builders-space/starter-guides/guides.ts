@@ -1,4 +1,5 @@
-// The starter guides on /builders-space/starter-guides, in the order their cards appear.
+// The starter guides on /builders-space/starter-guides. Cards appear under their group, in
+// list order within it.
 // These are official guides that already exist elsewhere: each card links out to the
 // vendor's own page, so we write no steps and the vendor keeps them current. Add one by
 // appending an entry. While the list is empty the page shows an "on their way" message.
@@ -23,6 +24,24 @@ export const STARTER_GUIDE_CODING_LABELS: Record<StarterGuideCoding, string> = {
   coding: 'Coding',
 };
 
+// The sections the page is split into, in the order they appear. Each takes a brand colour
+// for its cards' top border: green and blue match the Builder and Developer tracks.
+export type StarterGuideGroup = 'no-code' | 'ai' | 'web' | 'mobile';
+
+export interface StarterGuideGroupInfo {
+  id: StarterGuideGroup;
+  label: string;
+  // Full class name so Tailwind generates it.
+  borderClass: string;
+}
+
+export const STARTER_GUIDE_GROUPS: StarterGuideGroupInfo[] = [
+  { id: 'no-code', label: 'Prototype without code', borderClass: 'border-t-google-green' },
+  { id: 'ai', label: 'Build with Gemini and agents', borderClass: 'border-t-google-blue' },
+  { id: 'web', label: 'Web and cloud', borderClass: 'border-t-google-yellow' },
+  { id: 'mobile', label: 'Mobile', borderClass: 'border-t-google-red' },
+];
+
 // The setup tag: "Needs <needs>", else "<optional> optional", else "No install needed".
 export function starterGuideSetupLabel(guide: StarterGuide): string {
   if (guide.needs) return `Needs ${guide.needs}`;
@@ -36,6 +55,7 @@ export interface StarterGuide {
   href: string;
   // One sentence on what you will make or learn.
   summary: string;
+  group: StarterGuideGroup;
   coding: StarterGuideCoding;
   // What has to be on the laptop before starting, named rather than a bare "install required",
   // since "npm or pip" and "Android Studio" are very different asks on venue Wi-Fi. Leave it
@@ -53,6 +73,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     href: 'https://astro.new/latest/',
     summary:
       'Pick one of the official Astro starter templates, from a blog to a portfolio, and open it in your browser with nothing to install, or start it locally with npm.',
+    group: 'web',
     coding: 'coding',
     optional: 'npm',
     // Astro's "gradient logo on dark" from astro.build/press. Their guidelines ask for the full
@@ -69,6 +90,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     href: 'https://ai.google.dev/gemini-api/docs/get-started',
     summary:
       'Get an API key from Google AI Studio and make your first Gemini API call in minutes, in Python, JavaScript, Java, Go or REST.',
+    group: 'ai',
     coding: 'coding',
     needs: 'npm or pip',
     // The dark-theme "Gemini API" lockup ai.google.dev itself uses
@@ -85,6 +107,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     href: 'https://ai.google.dev/gemini-api/docs/aistudio-build-mode',
     summary:
       'Describe the app you want in plain English and let Build mode write and run it for you, with no code and nothing to install.',
+    group: 'no-code',
     coding: 'no-code',
     // The AI Studio product mark from gstatic (productlogos/ai_studio, 512dp), trimmed. Mark
     // only: no wordmark lockup is published, and the card title names it.
@@ -100,6 +123,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     href: 'https://adk.dev/get-started/',
     summary:
       "Install Google's Agent Development Kit and build your first AI agent that can use tools, in Python, TypeScript, Go, Java or Kotlin.",
+    group: 'ai',
     coding: 'coding',
     needs: 'npm or pip',
     // The ADK mark adk.dev uses (assets/agent-development-kit.png), trimmed. Mark only, as
@@ -116,6 +140,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     href: 'https://codelabs.developers.google.com/codelabs/flutter-codelab-first',
     summary:
       'Build a small app that generates names and keeps a list of favourites, and learn how Flutter layouts, state and responsive design fit together.',
+    group: 'mobile',
     coding: 'coding',
     needs: 'Flutter SDK',
     // The white horizontal lockup docs.flutter.dev uses
@@ -132,6 +157,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     href: 'https://firebase.google.com/codelabs/firebase-get-to-know-web',
     summary:
       'Build an event RSVP and chat app with Firebase Authentication for sign-in and Cloud Firestore for live data.',
+    group: 'web',
     coding: 'coding',
     // The firebase.google.com header lockup with its grey wordmark set to white, matching
     // Firebase's reversed lockup for dark backgrounds. Rendered and trimmed.
@@ -147,6 +173,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     href: 'https://developer.android.com/codelabs/basic-android-kotlin-compose-first-app',
     summary:
       'Make a personalised greeting app in Android Studio with Kotlin and Jetpack Compose, and preview it as you change it.',
+    group: 'mobile',
     coding: 'coding',
     needs: 'Android Studio',
     // The Android head from developer.android.com (static/images/logos/android.svg), rendered
@@ -163,6 +190,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     href: 'https://docs.cloud.google.com/run/docs/quickstarts/deploy-container',
     summary:
       'Put a sample container live on its own public URL with Cloud Run. Needs a Google Cloud project with billing turned on.',
+    group: 'web',
     coding: 'no-code',
     // The Cloud Run product icon from the Cloud docs (clouddocs/images/icons/products/run-color.svg),
     // rendered and trimmed.
@@ -178,6 +206,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     href: 'https://resend.com/docs/send-with-nextjs',
     summary:
       'Send your first email to yourself from a Next.js app with Resend. The test sender works straight after sign-up, so there is no domain to set up.',
+    group: 'web',
     coding: 'coding',
     needs: 'npm',
     // The white wordmark from Resend's brand pack (cdn.resend.com/brand/resend-brand-assets.zip),
@@ -194,6 +223,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     href: 'https://react.email/docs/getting-started/automatic-setup',
     summary:
       'Design emails as React components with a live preview in your browser, starting from a project of ready-made templates.',
+    group: 'web',
     coding: 'coding',
     needs: 'npm',
     // The app icon react.email uses (brand/logo.png), trimmed. Mark only, as the site shows it.
@@ -209,6 +239,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     href: 'https://geminicli.com/docs/get-started/',
     summary:
       "Install Google's open-source AI agent for the terminal, sign in with your Google account, and have it read, write and run code in a project of yours.",
+    group: 'ai',
     coding: 'coding',
     needs: 'npm',
     // The app icon geminicli.com uses (icon.png), trimmed and downsized.
@@ -224,6 +255,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     href: 'https://colab.research.google.com/github/google-gemini/cookbook/blob/main/quickstarts/Get_started.ipynb',
     summary:
       "Run the Gemini API cookbook's starter notebook in Google Colab and try your first prompts in Python, all in the browser.",
+    group: 'ai',
     coding: 'coding',
     // The Colab mark from colab.research.google.com (img/colab_favicon_256px.png), trimmed.
     logo: {
@@ -238,6 +270,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     href: 'https://stitch.withgoogle.com/',
     summary:
       'Describe an app or upload a sketch and Stitch, from Google Labs, designs the screens for you, ready to take into Figma or code.',
+    group: 'no-code',
     coding: 'no-code',
     // Stitch's 512px app icon (gstatic.com/labs-code/stitch/favicon-512x512.png). Links to the
     // tool itself: Stitch has no separate starter guide.
@@ -253,6 +286,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     href: 'https://genkit.dev/docs/js/get-started/',
     summary:
       "Add AI features to a JavaScript app with Genkit, Google's open-source framework from the Firebase team. Pick the guide for your framework.",
+    group: 'ai',
     coding: 'coding',
     needs: 'npm',
     // The horizontal knockout lockup genkit.dev uses on dark (genkit_logo_horizontal_knockout), trimmed.
@@ -268,6 +302,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     href: 'https://developers.google.com/opal/quickstart',
     summary:
       'Remix a demo from the Opal gallery into your own AI mini app, built by describing each step in plain English.',
+    group: 'no-code',
     coding: 'no-code',
     // Opal publishes no logo file, so this is the wordmark cut from its share card
     // (opal.google/images/share-card-prod.png) and set to white on transparent.

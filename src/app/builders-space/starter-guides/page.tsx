@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { buildPageMetadata } from '@/lib/metadata';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { areTicketsOpen } from '@/lib/tickets';
-import { STARTER_GUIDES, STARTER_GUIDE_CODING_LABELS, starterGuideSetupLabel } from './guides';
+import { STARTER_GUIDES } from './guides';
+import StarterGuidesBrowser from './StarterGuidesBrowser';
 
 // Rendered per request: the navbar ticket CTA follows the on-sale date (see the note in
 // `src/app/page.tsx`). Live, but like /builders-space not promoted until the day.
@@ -16,9 +16,6 @@ const description =
   "Short, self-paced guides for trying something new in the Builder's Space at DevFest Sydney 2026.";
 
 export const metadata: Metadata = buildPageMetadata({ title, description, path: '/builders-space/starter-guides' });
-
-// Cards take the brand colours in turn. Full class names so Tailwind generates them.
-const CARD_BORDERS = ['border-t-google-green', 'border-t-google-blue', 'border-t-google-yellow', 'border-t-google-red'];
 
 export default function StarterGuides() {
   return (
@@ -53,46 +50,7 @@ export default function StarterGuides() {
             </p>
           </div>
         ) : (
-          // Centred wrapping row rather than a grid, so one or two guides don't sit off to the left.
-          <ul className="max-w-5xl mx-auto flex flex-wrap justify-center gap-6">
-            {STARTER_GUIDES.map((guide, guideIndex) => (
-                <li key={guide.href} className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
-                  <a
-                    href={guide.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`Open ${guide.title}, ${STARTER_GUIDE_CODING_LABELS[guide.coding]}, ${starterGuideSetupLabel(guide)} (opens in a new tab)`}
-                    className={`group flex h-full flex-col gap-3 rounded-lg border-t-4 ${CARD_BORDERS[guideIndex % CARD_BORDERS.length]} bg-surface px-6 pt-9 pb-6 transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue`}
-                  >
-                    {guide.logo && (
-                      <Image
-                        src={guide.logo.url}
-                        alt={guide.logo.alt}
-                        width={guide.logo.width}
-                        height={guide.logo.height}
-                        className="mb-3 h-8 w-auto self-start object-contain"
-                      />
-                    )}
-                    <h2 className="text-xl font-bold text-white">{guide.title}</h2>
-                    <p className="flex-1 text-base text-white/75 leading-relaxed">{guide.summary}</p>
-                    {/* Below the flex-1 summary, so the tags line up across a row of cards. */}
-                    <ul className="flex flex-wrap gap-2" aria-hidden="true">
-                      {[STARTER_GUIDE_CODING_LABELS[guide.coding], starterGuideSetupLabel(guide)].map((tagLabel) => (
-                        <li key={tagLabel} className="inline-flex items-center rounded px-1.5 py-0.5 font-mono text-[11px] font-bold text-white/70 border border-white/25">
-                          {tagLabel}
-                        </li>
-                      ))}
-                    </ul>
-                    <span className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-white" aria-hidden="true">
-                      Open guide
-                      <span className="material-symbols-outlined text-sm leading-none transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
-                        arrow_outward
-                      </span>
-                    </span>
-                  </a>
-                </li>
-            ))}
-          </ul>
+          <StarterGuidesBrowser />
         )}
       </section>
 
