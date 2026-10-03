@@ -19,6 +19,11 @@ export default function Reveal({
     const node = ref.current;
     if (!node) return;
 
+    // 15% of the element, but never more than 15% of the screen's height. A tall element (the
+    // schedule list on a phone is over 5,000px) would otherwise need more of itself on screen
+    // than the screen can show, and never appear.
+    const threshold = Math.min(0.15, (window.innerHeight * 0.15) / Math.max(node.offsetHeight, 1));
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -27,7 +32,7 @@ export default function Reveal({
           observer.disconnect();
         }
       },
-      { threshold: 0.15, rootMargin: '0px 0px -60px 0px' }
+      { threshold, rootMargin: '0px 0px -60px 0px' }
     );
 
     observer.observe(node);
