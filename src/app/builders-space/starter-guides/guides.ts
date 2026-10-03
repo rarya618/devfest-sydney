@@ -51,4 +51,60 @@ export const STARTER_GUIDES: StarterGuide[] = [
       height: 259,
     },
   },
+  {
+    title: 'Build apps in Google AI Studio',
+    href: 'https://ai.google.dev/gemini-api/docs/aistudio-build-mode',
+    summary:
+      'Describe the app you want in plain English and let Build mode write and run it for you, with no code and nothing to install.',
+    // The AI Studio product mark from gstatic (productlogos/ai_studio, 512dp), trimmed. Mark
+    // only: no wordmark lockup is published, and the card title names it.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/ai-studio.png',
+      alt: 'Google AI Studio',
+      width: 400,
+      height: 398,
+    },
+  },
+  {
+    title: 'Agent Development Kit',
+    href: 'https://adk.dev/get-started/',
+    summary:
+      "Install Google's Agent Development Kit and build your first AI agent that can use tools, in Python, TypeScript, Go, Java or Kotlin.",
+    // The ADK mark adk.dev uses (assets/agent-development-kit.png), trimmed. Mark only, as
+    // the site itself shows it.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/adk.png',
+      alt: 'Agent Development Kit',
+      width: 342,
+      height: 382,
+    },
+  },
+  {
+    title: 'Your first Flutter app',
+    href: 'https://codelabs.developers.google.com/codelabs/flutter-codelab-first',
+    summary:
+      'Build a small app that generates names and keeps a list of favourites, and learn how Flutter layouts, state and responsive design fit together.',
+    // The white horizontal lockup docs.flutter.dev uses
+    // (branding/flutter/logo+text/horizontal/white.svg), rendered and trimmed.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/flutter.png',
+      alt: 'Flutter',
+      width: 1600,
+      height: 449,
+    },
+  },
+  {
+    title: 'Get to know Firebase for web',
+    href: 'https://firebase.google.com/codelabs/firebase-get-to-know-web',
+    summary:
+      'Build an event RSVP and chat app with Firebase Authentication for sign-in and Cloud Firestore for live data.',
+    // The firebase.google.com header lockup with its grey wordmark set to white, matching
+    // Firebase's reversed lockup for dark backgrounds. Rendered and trimmed.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/firebase.png',
+      alt: 'Firebase',
+      width: 1600,
+      height: 422,
+    },
+  },
 ];
