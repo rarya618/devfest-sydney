@@ -1,16 +1,14 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { buildPageMetadata } from '@/lib/metadata';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { areTicketsOpen } from '@/lib/tickets';
-import { isBuildersSpaceRevealed } from '@/lib/buildersSpace';
 import { STARTER_GUIDES, STARTER_GUIDE_CODING_LABELS, starterGuideSetupLabel } from './guides';
 
 // Rendered per request: the navbar ticket CTA follows the on-sale date (see the note in
-// `src/app/page.tsx`), and like /builders-space this stays a 404 until the day.
+// `src/app/page.tsx`). Live, but like /builders-space not promoted until the day.
 export const dynamic = 'force-dynamic';
 
 const title = 'Starter Guides';
@@ -23,8 +21,6 @@ export const metadata: Metadata = buildPageMetadata({ title, description, path: 
 const CARD_BORDERS = ['border-t-google-green', 'border-t-google-blue', 'border-t-google-yellow', 'border-t-google-red'];
 
 export default function StarterGuides() {
-  if (!isBuildersSpaceRevealed()) notFound();
-
   return (
     <div className="bg-[#010103] text-white min-h-screen">
       <Navbar accent="green" areTicketsOpen={areTicketsOpen()} />

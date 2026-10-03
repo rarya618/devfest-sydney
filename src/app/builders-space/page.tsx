@@ -1,15 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { buildPageMetadata } from '@/lib/metadata';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import TicketsLink from '@/components/TicketsLink';
 import { areTicketsOpen } from '@/lib/tickets';
-import { isBuildersSpaceRevealed } from '@/lib/buildersSpace';
 
 // Rendered per request: the navbar ticket CTA follows the on-sale date (see the note in
-// `src/app/page.tsx`), and the page itself stays a 404 until isBuildersSpaceRevealed().
+// `src/app/page.tsx`). Live, but not linked from the footer until isBuildersSpaceRevealed().
 export const dynamic = 'force-dynamic';
 
 const title = "Builder's Space";
@@ -55,8 +53,6 @@ const CARD_BORDER: Record<string, string> = {
 };
 
 export default function BuildersSpace() {
-  if (!isBuildersSpaceRevealed()) notFound();
-
   const ticketsOpen = areTicketsOpen();
 
   return (
