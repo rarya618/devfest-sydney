@@ -173,4 +173,35 @@ export const STARTER_GUIDES: StarterGuide[] = [
       height: 512,
     },
   },
+  {
+    title: 'Send emails with Next.js',
+    href: 'https://resend.com/docs/send-with-nextjs',
+    summary:
+      'Send your first email to yourself from a Next.js app with Resend. The test sender works straight after sign-up, so there is no domain to set up.',
+    coding: 'coding',
+    needs: 'npm',
+    // The white wordmark from Resend's brand pack (cdn.resend.com/brand/resend-brand-assets.zip),
+    // rendered and trimmed.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/resend.png',
+      alt: 'Resend',
+      width: 1600,
+      height: 340,
+    },
+  },
+  {
+    title: 'React Email',
+    href: 'https://react.email/docs/getting-started/automatic-setup',
+    summary:
+      'Design emails as React components with a live preview in your browser, starting from a project of ready-made templates.',
+    coding: 'coding',
+    needs: 'npm',
+    // The app icon react.email uses (brand/logo.png), trimmed. Mark only, as the site shows it.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/react-email.png',
+      alt: 'React Email',
+      width: 359,
+      height: 359,
+    },
+  },
 ];
