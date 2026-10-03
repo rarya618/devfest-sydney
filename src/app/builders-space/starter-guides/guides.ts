@@ -50,6 +50,20 @@ export const STARTER_GUIDE_GROUPS: StarterGuideGroupInfo[] = [
   { id: 'mobile', label: 'Mobile', borderClass: 'border-t-google-red', dotClass: 'bg-google-red', sideBorderClass: 'border-l-google-red' },
 ];
 
+// The accounts a guide needs before you can finish it, shown as one tag ("Google account",
+// "Google + GitHub accounts"). Only the ones you'd have to sign up for: a guide that runs
+// locally or in an anonymous sandbox lists none.
+export type StarterGuideAccount = 'Google' | 'GitHub' | 'Stripe' | 'Resend' | 'Asana' | 'Linear' | 'Vercel';
+
+export function starterGuideAccountLabel(guide: StarterGuide): string | null {
+  if (!guide.accounts || guide.accounts.length === 0) return null;
+  return guide.accounts.length === 1
+    ? `${guide.accounts[0]} account`
+    : `${guide.accounts.join(' + ')} accounts`;
+}
+
+export const STARTER_GUIDE_BILLING_LABEL = 'Billing required';
+
 // The setup tag: "Needs <needs>", else "<optional> optional", else "No install needed".
 export function starterGuideSetupLabel(guide: StarterGuide): string {
   if (guide.needs) return `Needs ${guide.needs}`;
@@ -100,6 +114,11 @@ export interface StarterGuide {
   // codelab states its own step times the figure is their total (noted beside the entry);
   // everything else is our estimate. Shown as "~15 min", so it reads as approximate.
   minutes: number;
+  accounts?: StarterGuideAccount[];
+  // True when the guide can't be finished without a billing account (a card on file), even if
+  // what it uses stays inside a free tier. Shown as a yellow warning tag, since it's the thing
+  // most likely to stop someone partway through.
+  needsBilling?: boolean;
   logo?: StarterGuideLogo;
 }
 
@@ -154,6 +173,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     coding: 'coding',
     needs: 'npm or pip',
     minutes: 15,
+    accounts: ['Google'],
     // The dark-theme "Gemini API" lockup ai.google.dev itself uses
     // (_static/googledevai/images/gemini-api-logo-dark-theme.svg), rendered and trimmed.
     logo: {
@@ -171,6 +191,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     group: 'prototype',
     coding: 'no-code',
     minutes: 20,
+    accounts: ['Google'],
     // The AI Studio product mark from gstatic (productlogos/ai_studio, 512dp), trimmed. Mark
     // only: no wordmark lockup is published, and the card title names it.
     logo: {
@@ -189,6 +210,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     coding: 'coding',
     needs: 'npm or pip',
     minutes: 30,
+    accounts: ['Google'],
     // The ADK mark adk.dev uses (assets/agent-development-kit.png), trimmed. Mark only, as
     // the site itself shows it.
     logo: {
@@ -226,6 +248,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     coding: 'coding',
     // The codelab's own step times add up to 52 minutes.
     minutes: 52,
+    accounts: ['Google'],
     // The firebase.google.com header lockup with its grey wordmark set to white, matching
     // Firebase's reversed lockup for dark backgrounds. Rendered and trimmed.
     logo: {
@@ -261,6 +284,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
     group: 'web',
     coding: 'no-code',
     minutes: 15,
+    accounts: ['Google'],
+    needsBilling: true,
     // The Cloud Run product icon from the Cloud docs (clouddocs/images/icons/products/run-color.svg),
     // rendered and trimmed.
     logo: {
@@ -279,6 +304,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     coding: 'coding',
     needs: 'npm',
     minutes: 20,
+    accounts: ['Resend'],
     // The white wordmark from Resend's brand pack (cdn.resend.com/brand/resend-brand-assets.zip),
     // rendered and trimmed.
     logo: {
@@ -314,6 +340,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     coding: 'coding',
     needs: 'npm',
     minutes: 15,
+    accounts: ['Google'],
     // The app icon geminicli.com uses (icon.png), trimmed and downsized.
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/gemini-cli.png',
@@ -330,6 +357,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     group: 'ai',
     coding: 'coding',
     minutes: 20,
+    accounts: ['Google'],
     // The Colab mark from colab.research.google.com (img/colab_favicon_256px.png), trimmed.
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/colab.png',
@@ -346,6 +374,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     group: 'prototype',
     coding: 'no-code',
     minutes: 15,
+    accounts: ['Google'],
     // Stitch's 512px app icon (gstatic.com/labs-code/stitch/favicon-512x512.png). Links to the
     // tool itself: Stitch has no separate starter guide.
     logo: {
@@ -364,6 +393,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     coding: 'coding',
     needs: 'npm',
     minutes: 30,
+    accounts: ['Google'],
     // The horizontal knockout lockup genkit.dev uses on dark (genkit_logo_horizontal_knockout), trimmed.
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/genkit.png',
@@ -380,6 +410,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     group: 'prototype',
     coding: 'no-code',
     minutes: 20,
+    accounts: ['Google'],
     // Opal publishes no logo file, so this is the wordmark cut from its share card
     // (opal.google/images/share-card-prod.png) and set to white on transparent.
     logo: {
@@ -397,6 +428,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
       'Paste a short script into a Google Sheet to make your own spreadsheet function, then build from there to automate Sheets, Docs and Gmail.',
     coding: 'coding',
     minutes: 15,
+    accounts: ['Google'],
     // The Apps Script product logo from gstatic (productlogos/apps_script, 512dp), trimmed.
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/apps-script.png',
@@ -413,6 +445,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
       "Connect a GitHub repo and give Google's coding agent a task, like fixing a bug or writing docs. It works in the cloud and comes back with a change for you to review.",
     coding: 'coding',
     minutes: 20,
+    accounts: ['Google', 'GitHub'],
     // The light purple octopus from the Jules docs (docs/_astro/logo), the one that reads on a
     // dark background. Rendered and trimmed.
     logo: {
@@ -431,6 +464,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     coding: 'coding',
     needs: 'Android Studio, Xcode or Flutter SDK',
     minutes: 45,
+    accounts: ['Google'],
     // Same Firebase lockup as the Firebase for web card.
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/firebase.png',
@@ -448,6 +482,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     coding: 'coding',
     needs: 'npm or pip',
     minutes: 30,
+    accounts: ['Stripe'],
     // The white wordmark from Stripe's logo kit (stripe.com/newsroom/brand-assets), rendered and trimmed.
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/stripe.png',
@@ -464,6 +499,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
       'Make a shareable payment page for a product, a subscription or pay-what-you-want from the Stripe Dashboard, with no website or code needed.',
     coding: 'no-code',
     minutes: 10,
+    accounts: ['Stripe'],
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/stripe.png',
       alt: 'Stripe',
@@ -479,6 +515,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
       "Create a personal access token and use curl to read, create and update tasks in your Asana workspace, the first step to automating your team's busywork.",
     coding: 'coding',
     minutes: 20,
+    accounts: ['Asana'],
     // Asana is a sponsor, so this reuses their sponsor logo (sponsor-logos/asana.png): the wordmark set
     // to white with the coral dots unchanged, Asana's reversed lockup for dark backgrounds.
     logo: {
@@ -496,6 +533,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
       "Learn GitHub's pull request workflow in the browser: make a repository, start a branch, commit a change and merge it. No coding needed.",
     coding: 'no-code',
     minutes: 15,
+    accounts: ['GitHub'],
     // The white GitHub lockup from GitHub's logo pack (brand.github.com/GitHub_Logos.zip),
     // rendered and trimmed. Shared by every GitHub card.
     logo: {
@@ -513,6 +551,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
       'Open a sample app in VS Code running in your browser, run it and edit it live. Personal accounts get free monthly hours, so it is a setup for other guides too.',
     coding: 'coding',
     minutes: 15,
+    accounts: ['GitHub'],
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/github.png',
       alt: 'GitHub',
@@ -528,6 +567,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
       'Create a repository named after your username and GitHub publishes it as your own site at username.github.io, set up entirely in the browser.',
     coding: 'no-code',
     minutes: 10,
+    accounts: ['GitHub'],
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/github.png',
       alt: 'GitHub',
@@ -543,6 +583,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
       "Make a personal API key and query your Linear issues and projects with curl through Linear's GraphQL API, the same API Linear's own apps use.",
     coding: 'coding',
     minutes: 20,
+    accounts: ['Linear'],
     // Linear's light wordmark from their brand pack (static.linear.app/design-assets), rendered
     // and trimmed.
     logo: {
@@ -560,6 +601,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
       "Pick a starter for Next.js, Astro, SvelteKit or more and deploy it with one click: Vercel copies it into a new repo of yours and puts it live on the free Hobby plan.",
     coding: 'no-code',
     minutes: 10,
+    // GitHub stands in for any Git provider: Vercel also deploys to GitLab or Bitbucket.
+    accounts: ['Vercel', 'GitHub'],
     // The white Vercel triangle from vercel.com/geist/brands, rendered and trimmed. Mark only, as
     // Vercel shows it. Links to the templates gallery: deploying one is the starter.
     logo: {
@@ -578,6 +621,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     coding: 'coding',
     needs: 'npm',
     minutes: 30,
+    accounts: ['Google'],
     // Links the Google provider page rather than the SDK's getting-started guides, which default
     // to Vercel's AI Gateway (its own key) and a non-Google model. Vercel's mark: the AI SDK has no
     // logo of its own.
@@ -598,6 +642,8 @@ export const STARTER_GUIDES: StarterGuide[] = [
     needs: 'npm',
     // A multi-chapter course with no stated length: 4 hours is a rough floor for working through it.
     minutes: 240,
+    // The later chapters put the app on GitHub and its database and deploy on Vercel.
+    accounts: ['GitHub', 'Vercel'],
     // The white Next.js logotype from vercel.com/geist/brands, rendered and trimmed.
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/nextjs.png',
@@ -614,6 +660,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
       "Run SQL over Google's public datasets in the browser, with no credit card or billing account. The free sandbox covers 10 GiB of storage and 1 TiB of queries a month.",
     coding: 'coding',
     minutes: 20,
+    accounts: ['Google'],
     // The BigQuery product icon from the Cloud docs (clouddocs/images/icons/products/bigquery-color.svg),
     // rendered and trimmed.
     logo: {
@@ -652,6 +699,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     needs: 'Flutter SDK',
     // The codelab's own step times add up to 53 minutes.
     minutes: 53,
+    accounts: ['Google'],
     // Same Firebase lockup as the Firebase for web card.
     logo: {
       url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/firebase.png',

@@ -8,6 +8,8 @@ import {
   STARTER_GUIDE_GROUPS,
   STARTER_GUIDE_CODING_LABELS,
   starterGuideSetupLabel,
+  starterGuideAccountLabel,
+  STARTER_GUIDE_BILLING_LABEL,
   starterGuideTimeLabel,
   type StarterGuide,
   type StarterGuideGroup,
@@ -27,6 +29,8 @@ function searchableText(guide: StarterGuide): string {
     guide.summary,
     STARTER_GUIDE_CODING_LABELS[guide.coding],
     starterGuideSetupLabel(guide),
+    starterGuideAccountLabel(guide) ?? '',
+    guide.needsBilling ? STARTER_GUIDE_BILLING_LABEL : '',
     GROUP_LABELS[guide.group],
   ]
     .join(' ')
@@ -44,6 +48,15 @@ function GuideCard({ guide, borderClass }: { guide: StarterGuide; borderClass: s
   const codingLabel = STARTER_GUIDE_CODING_LABELS[guide.coding];
   const setupLabel = starterGuideSetupLabel(guide);
   const timeLabel = starterGuideTimeLabel(guide);
+  const accountLabel = starterGuideAccountLabel(guide);
+  // Billing is the one tag drawn as a warning: it's what most often stops someone partway.
+  const tags = [
+    { label: codingLabel, isWarning: false },
+    { label: setupLabel, isWarning: false },
+    ...(accountLabel ? [{ label: accountLabel, isWarning: false }] : []),
+    ...(guide.needsBilling ? [{ label: STARTER_GUIDE_BILLING_LABEL, isWarning: true }] : []),
+    { label: timeLabel, isWarning: false },
+  ];
 
   return (
     <li>
@@ -51,7 +64,10 @@ function GuideCard({ guide, borderClass }: { guide: StarterGuide; borderClass: s
         href={guide.href}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label={`Open ${guide.title}, ${codingLabel}, ${setupLabel}, takes about ${timeLabel.replace('~', '')} (opens in a new tab)`}
+        aria-label={`Open ${guide.title}, ${tags
+          .filter((tag) => tag.label !== timeLabel)
+          .map((tag) => tag.label)
+          .join(', ')}, takes about ${timeLabel.replace('~', '')} (opens in a new tab)`}
         className={`group flex h-full flex-col gap-3 rounded-lg border-t-4 ${borderClass} bg-surface px-6 pt-9 pb-6 transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue`}
       >
         {guide.logo && (
@@ -67,9 +83,14 @@ function GuideCard({ guide, borderClass }: { guide: StarterGuide; borderClass: s
         <p className="flex-1 text-base text-white/75 leading-relaxed">{guide.summary}</p>
         {/* Below the flex-1 summary, so the tags line up across a row of cards. */}
         <ul className="flex flex-wrap gap-2" aria-hidden="true">
-          {[codingLabel, setupLabel, timeLabel].map((tagLabel) => (
-            <li key={tagLabel} className="inline-flex items-center rounded px-1.5 py-0.5 font-mono text-[11px] font-bold text-white/70 border border-white/25">
-              {tagLabel}
+          {tags.map((tag) => (
+            <li
+              key={tag.label}
+              className={`inline-flex items-center rounded px-1.5 py-0.5 font-mono text-[11px] font-bold border ${
+                tag.isWarning ? 'text-google-yellow border-google-yellow/60' : 'text-white/70 border-white/25'
+              }`}
+            >
+              {tag.label}
             </li>
           ))}
         </ul>
@@ -90,6 +111,8 @@ const BEGINNER_STEPS = STARTER_GUIDE_BEGINNER_PATH.flatMap((step) => {
   return guide ? [{ ...step, guide }] : [];
 });
 const BEGINNER_TOTAL_MINUTES = BEGINNER_STEPS.reduce((total, step) => total + step.guide.minutes, 0);
+// Every account the path needs, in first-use order, so nobody stops at step 2 to sign up.
+const BEGINNER_ACCOUNTS = [...new Set(BEGINNER_STEPS.flatMap((step) => step.guide.accounts ?? []))];
 
 // A compact numbered list rather than more cards: the same guides appear as cards in their groups.
 function BeginnerPath() {
@@ -104,6 +127,8 @@ function BeginnerPath() {
       <p className="mt-2 text-base text-white/70 leading-relaxed">
         In order, from no code to your first code. All in the browser with nothing to install, about{' '}
         {roundedTotal} minutes in total.
+        {BEGINNER_ACCOUNTS.length > 0 &&
+          ` You'll need ${BEGINNER_ACCOUNTS.length === 1 ? `a ${BEGINNER_ACCOUNTS[0]} account` : `${BEGINNER_ACCOUNTS.map((account) => `a ${account}`).join(' and ')} account`}.`}
       </p>
       <ol className="mt-6 flex flex-col gap-3">
         {BEGINNER_STEPS.map((step, stepIndex) => (
