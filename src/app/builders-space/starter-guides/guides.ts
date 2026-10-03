@@ -31,15 +31,17 @@ export type StarterGuideGroup = 'no-code' | 'ai' | 'web' | 'mobile';
 export interface StarterGuideGroupInfo {
   id: StarterGuideGroup;
   label: string;
-  // Full class name so Tailwind generates it.
+  // Full class names so Tailwind generates them: the card's top border, and the dot beside the
+  // group in the sidebar.
   borderClass: string;
+  dotClass: string;
 }
 
 export const STARTER_GUIDE_GROUPS: StarterGuideGroupInfo[] = [
-  { id: 'no-code', label: 'Prototype without code', borderClass: 'border-t-google-green' },
-  { id: 'ai', label: 'Build with Gemini and agents', borderClass: 'border-t-google-blue' },
-  { id: 'web', label: 'Web and cloud', borderClass: 'border-t-google-yellow' },
-  { id: 'mobile', label: 'Mobile', borderClass: 'border-t-google-red' },
+  { id: 'no-code', label: 'Prototype without code', borderClass: 'border-t-google-green', dotClass: 'bg-google-green' },
+  { id: 'ai', label: 'Build with Gemini and agents', borderClass: 'border-t-google-blue', dotClass: 'bg-google-blue' },
+  { id: 'web', label: 'Web and cloud', borderClass: 'border-t-google-yellow', dotClass: 'bg-google-yellow' },
+  { id: 'mobile', label: 'Mobile', borderClass: 'border-t-google-red', dotClass: 'bg-google-red' },
 ];
 
 // The setup tag: "Needs <needs>", else "<optional> optional", else "No install needed".

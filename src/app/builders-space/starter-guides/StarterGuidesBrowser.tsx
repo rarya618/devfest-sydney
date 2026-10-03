@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import {
   STARTER_GUIDES,
@@ -8,9 +8,12 @@ import {
   STARTER_GUIDE_CODING_LABELS,
   starterGuideSetupLabel,
   type StarterGuide,
+  type StarterGuideGroup,
 } from './guides';
 
 const GROUP_LABELS = Object.fromEntries(STARTER_GUIDE_GROUPS.map((groupInfo) => [groupInfo.id, groupInfo.label]));
+type GroupFilter = StarterGuideGroup | 'all';
+
 const GROUP_ORDER = Object.fromEntries(STARTER_GUIDE_GROUPS.map((groupInfo, groupIndex) => [groupInfo.id, groupIndex]));
 const GROUP_BORDER_CLASSES = Object.fromEntries(STARTER_GUIDE_GROUPS.map((groupInfo) => [groupInfo.id, groupInfo.borderClass]));
 
@@ -39,7 +42,7 @@ function GuideCard({ guide, borderClass }: { guide: StarterGuide; borderClass: s
   const setupLabel = starterGuideSetupLabel(guide);
 
   return (
-    <li className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+    <li>
       <a
         href={guide.href}
         target="_blank"
@@ -77,26 +80,72 @@ function GuideCard({ guide, borderClass }: { guide: StarterGuide; borderClass: s
   );
 }
 
+// Cards sit in a grid beside the sidebar: two columns where the sidebar leaves room for them,
+// three on wide screens.
+const CARD_GRID_CLASSES = 'grid gap-6 sm:grid-cols-2 xl:grid-cols-3';
+
 export default function StarterGuidesBrowser() {
   const [query, setQuery] = useState('');
+  const [selectedGroup, setSelectedGroup] = useState<GroupFilter>('all');
+  const browserTopRef = useRef<HTMLDivElement>(null);
+  const scrollToTopAfterRenderRef = useRef(false);
 
+  // Picking a group can shrink the page a lot, which would leave someone scrolled down past the
+  // list they just asked for. Bring the top of the guides back into view if it is above the fold.
+  // Done after the render: a smooth scroll started in the click handler is cut short when the
+  // page shrinks underneath it.
+  function selectGroup(groupFilter: GroupFilter) {
+    scrollToTopAfterRenderRef.current = true;
+    setSelectedGroup(groupFilter);
+  }
+
+  useEffect(() => {
+    if (!scrollToTopAfterRenderRef.current) return;
+    scrollToTopAfterRenderRef.current = false;
+    const browserTop = browserTopRef.current;
+    if (browserTop && browserTop.getBoundingClientRect().top < 0) {
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      browserTop.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
+    }
+  }, [selectedGroup]);
+
+  // Search first, so the sidebar can count matches per group whichever group is selected.
   // In group order, then list order within a group, so related results sit together.
-  const matchingGuides = STARTER_GUIDES.filter((guide) => matchesQuery(guide, query)).sort(
+  const searchMatches = STARTER_GUIDES.filter((guide) => matchesQuery(guide, query)).sort(
     (firstGuide, secondGuide) => GROUP_ORDER[firstGuide.group] - GROUP_ORDER[secondGuide.group],
   );
-  const visibleGroups = STARTER_GUIDE_GROUPS.map((groupInfo) => ({
-    ...groupInfo,
-    guides: STARTER_GUIDES.filter((guide) => guide.group === groupInfo.id),
-  })).filter((groupInfo) => groupInfo.guides.length > 0);
+  const matchingGuides =
+    selectedGroup === 'all' ? searchMatches : searchMatches.filter((guide) => guide.group === selectedGroup);
+
+  const sidebarEntries: { id: GroupFilter; label: string; dotClass?: string; count: number }[] = [
+    { id: 'all', label: 'All guides', count: searchMatches.length },
+    ...STARTER_GUIDE_GROUPS.map((groupInfo) => ({
+      id: groupInfo.id,
+      label: groupInfo.label,
+      dotClass: groupInfo.dotClass,
+      count: searchMatches.filter((guide) => guide.group === groupInfo.id).length,
+    })),
+  ];
 
   const isSearching = query.trim() !== '';
-  const resultSummary = isSearching
-    ? `${matchingGuides.length} ${matchingGuides.length === 1 ? 'guide matches' : 'guides match'} your search`
-    : `${STARTER_GUIDES.length} guides`;
+  const selectedGroupLabel = selectedGroup === 'all' ? null : GROUP_LABELS[selectedGroup];
+  const isSingleResult = matchingGuides.length === 1;
+  const resultSummary = `${matchingGuides.length} ${isSingleResult ? 'guide' : 'guides'}${
+    selectedGroupLabel ? ` in ${selectedGroupLabel}` : ''
+  }${isSearching ? ` ${isSingleResult ? 'matches' : 'match'} your search` : ''}`;
+
+  // Group headings only help when browsing everything. A search or a single group is one list.
+  const showGroupHeadings = selectedGroup === 'all' && !isSearching;
+  const groupedGuides = STARTER_GUIDE_GROUPS.map((groupInfo) => ({
+    ...groupInfo,
+    guides: matchingGuides.filter((guide) => guide.group === groupInfo.id),
+  })).filter((groupInfo) => groupInfo.guides.length > 0);
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="max-w-xl mx-auto mb-14">
+    // scroll-mt clears the fixed navbar when selectGroup scrolls back up to here.
+    <div ref={browserTopRef} className="max-w-6xl mx-auto scroll-mt-32 lg:grid lg:grid-cols-[15rem_1fr] lg:gap-12">
+      {/* Sticky below the fixed navbar on wide screens; stacked above the cards on narrow ones. */}
+      <aside className="mb-10 lg:mb-0 lg:sticky lg:top-32 lg:self-start">
         <label htmlFor="starter-guide-search" className="sr-only">
           Search starter guides
         </label>
@@ -109,49 +158,106 @@ export default function StarterGuidesBrowser() {
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search guides, e.g. Gemini, no code, npm"
+            placeholder="Search guides"
             aria-label="Search starter guides by name, topic, or what they need"
             className="w-full h-12 rounded-full border border-white/35 bg-transparent pl-12 pr-5 text-base text-white placeholder:text-white/50 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
           />
         </div>
-        {/* Shown while searching; screen readers hear it change either way. */}
-        <p className={isSearching ? 'mt-4 text-center font-mono text-sm text-white/55' : 'sr-only'} aria-live="polite">
+
+        <nav aria-label="Guide groups" className="mt-6">
+          <p className="mb-3 font-mono text-xs text-white/55">Groups</p>
+          {/* Wrapping chips on narrow screens, a vertical list beside the cards on wide ones. */}
+          <ul className="flex flex-wrap gap-2 lg:flex-col lg:gap-1">
+            {sidebarEntries.map((entry) => {
+              const isSelected = selectedGroup === entry.id;
+              return (
+                <li key={entry.id}>
+                  <button
+                    type="button"
+                    onClick={() => selectGroup(entry.id)}
+                    aria-pressed={isSelected}
+                    aria-label={`Show ${entry.id === 'all' ? 'all guides' : `${entry.label} guides`}, ${entry.count} ${entry.count === 1 ? 'guide' : 'guides'}`}
+                    className={`flex w-full items-center gap-3 rounded-full border px-4 py-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue lg:rounded-lg lg:border-transparent lg:px-3 ${
+                      isSelected
+                        ? 'border-white/35 bg-white/10 font-bold text-white'
+                        : 'border-white/15 text-white/70 hover:bg-white/5 hover:text-white'
+                    }`}
+                  >
+                    {entry.dotClass ? (
+                      <span className={`h-2 w-2 shrink-0 rounded-full ${entry.dotClass}`} aria-hidden="true" />
+                    ) : (
+                      <span className="h-2 w-2 shrink-0 rounded-full border border-white/55" aria-hidden="true" />
+                    )}
+                    <span className="flex-1">{entry.label}</span>
+                    <span className="font-mono text-xs text-white/55" aria-hidden="true">
+                      {entry.count}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+
+        {/* Visible once something narrows the list; screen readers hear it change either way. */}
+        <p
+          className={isSearching || selectedGroupLabel ? 'mt-6 font-mono text-sm text-white/55' : 'sr-only'}
+          aria-live="polite"
+        >
           {resultSummary}
         </p>
-      </div>
+      </aside>
 
-      {matchingGuides.length === 0 ? (
-        <div className="max-w-xl mx-auto bg-white/[0.025] border border-white/10 rounded-2xl p-12 text-center">
-          <h2 className="text-lg font-bold text-white/70 mb-3">No guides match &ldquo;{query.trim()}&rdquo;</h2>
-          <p className="text-sm text-white/55 leading-relaxed">
-            Try a product name like Gemini or Flutter, or a tag like &ldquo;no code&rdquo;.
-          </p>
-        </div>
-      ) : isSearching ? (
-        // One flat list while searching: group headings only break up a short list of results.
-        // Each card keeps its group's border colour.
-        <ul className="flex flex-wrap justify-center gap-6">
-          {matchingGuides.map((guide) => (
-            <GuideCard key={guide.href} guide={guide} borderClass={GROUP_BORDER_CLASSES[guide.group]} />
-          ))}
-        </ul>
-      ) : (
-        <div className="flex flex-col gap-16">
-          {visibleGroups.map((groupInfo) => (
-            <section key={groupInfo.id} aria-labelledby={`starter-guide-group-${groupInfo.id}`}>
-              <h2 id={`starter-guide-group-${groupInfo.id}`} className="mb-6 text-2xl font-bold text-white text-center">
-                {groupInfo.label}
-              </h2>
-              {/* Centred wrapping row rather than a grid, so one or two guides don't sit off to the left. */}
-              <ul className="flex flex-wrap justify-center gap-6">
-                {groupInfo.guides.map((guide) => (
-                  <GuideCard key={guide.href} guide={guide} borderClass={groupInfo.borderClass} />
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
-      )}
+      <div>
+        {matchingGuides.length === 0 ? (
+          <div className="bg-white/[0.025] border border-white/10 rounded-2xl p-12 text-center">
+            <h2 className="text-lg font-bold text-white/70 mb-3">
+              No {selectedGroupLabel ? `${selectedGroupLabel} ` : ''}guides match &ldquo;{query.trim()}&rdquo;
+            </h2>
+            <p className="text-sm text-white/55 leading-relaxed">
+              {selectedGroup !== 'all' && searchMatches.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => selectGroup('all')}
+                  aria-label={`Show all ${searchMatches.length} matching guides from every group`}
+                  className="underline underline-offset-2 hover:text-white transition-colors"
+                >
+                  {searchMatches.length} {searchMatches.length === 1 ? 'guide matches' : 'guides match'} in other groups
+                </button>
+              ) : (
+                <>Try a product name like Gemini or Flutter, or a tag like &ldquo;no code&rdquo;.</>
+              )}
+            </p>
+          </div>
+        ) : showGroupHeadings ? (
+          <div className="flex flex-col gap-16">
+            {groupedGuides.map((groupInfo) => (
+              <section key={groupInfo.id} aria-labelledby={`starter-guide-group-${groupInfo.id}`}>
+                <h2 id={`starter-guide-group-${groupInfo.id}`} className="mb-6 text-2xl font-bold text-white">
+                  {groupInfo.label}
+                </h2>
+                <ul className={CARD_GRID_CLASSES}>
+                  {groupInfo.guides.map((guide) => (
+                    <GuideCard key={guide.href} guide={guide} borderClass={groupInfo.borderClass} />
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        ) : (
+          // One list for a search or a single group. Each card keeps its group's border colour.
+          <>
+            <h2 className={selectedGroupLabel ? 'mb-6 text-2xl font-bold text-white' : 'sr-only'}>
+              {selectedGroupLabel ?? 'Search results'}
+            </h2>
+            <ul className={CARD_GRID_CLASSES}>
+              {matchingGuides.map((guide) => (
+                <GuideCard key={guide.href} guide={guide} borderClass={GROUP_BORDER_CLASSES[guide.group]} />
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
     </div>
   );
 }
