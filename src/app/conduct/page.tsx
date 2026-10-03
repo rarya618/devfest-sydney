@@ -3,7 +3,7 @@ import { buildPageMetadata } from '@/lib/metadata';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { areTicketsOpen } from '@/lib/tickets';
-import { CodeOfConductMobileNav, CodeOfConductSidebar } from './CodeOfConductNav';
+import { SectionMobileNav, SectionSidebar } from '@/components/SectionNav';
 
 // The navbar ticket CTA follows the on-sale date, so this page is rendered per request
 // rather than prerendered: see the note in `src/app/page.tsx`.
@@ -100,12 +100,12 @@ export default function CodeOfConduct() {
         </div>
       </section>
 
-      <CodeOfConductMobileNav sections={sections} />
+      <SectionMobileNav sections={sections} />
 
       <section className="pt-8 lg:pt-0 pb-28 px-6">
         <div className="max-w-5xl mx-auto lg:flex lg:items-start lg:gap-12 gap-y-10">
           {/* Sidebar — desktop only */}
-          <CodeOfConductSidebar sections={sections} />
+          <SectionSidebar sections={sections} />
 
           {/* Main content */}
           <div className="max-w-3xl space-y-14">

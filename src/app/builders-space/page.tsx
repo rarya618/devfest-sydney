@@ -82,13 +82,13 @@ export default function BuildersSpace() {
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-5">
-            <a
-              href="#what-its-for"
+            <Link
+              href="/builders-space/starter-guides"
               className="inline-flex items-center px-7 py-2 bg-transparent text-white text-base font-bold rounded border border-white/40 transition-colors hover:border-white animate-slide-up"
               style={{ animationDelay: '0.25s' }}
             >
-              What it&apos;s for
-            </a>
+              Starter guides
+            </Link>
             {ticketsOpen && (
               <TicketsLink
                 source="builders-space-hero"

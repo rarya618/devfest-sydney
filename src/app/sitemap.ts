@@ -58,7 +58,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: isShowcaseOpen() ? 0.8 : 0.4,
     },
     ...(isBuildersSpaceRevealed()
-      ? [{ url: `${siteUrl}/builders-space`, changeFrequency: 'monthly' as const, priority: 0.6 }]
+      ? [
+          { url: `${siteUrl}/builders-space`, changeFrequency: 'monthly' as const, priority: 0.6 },
+          { url: `${siteUrl}/builders-space/starter-guides`, changeFrequency: 'weekly' as const, priority: 0.5 },
+        ]
       : []),
     {
       url: `${siteUrl}/volunteer`,

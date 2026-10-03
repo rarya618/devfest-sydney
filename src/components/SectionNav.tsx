@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from 'react';
 
+// Sticky in-page section nav for long single-page documents: a horizontal strip below `lg`,
+// a sidebar from `lg` up, both highlighting the section in view. Used by /conduct and the
+// Builder's Space starter guides.
 interface Section {
   slug: string;
   title: string;
 }
 
-export function CodeOfConductMobileNav({ sections }: { sections: Section[] }) {
+export function SectionMobileNav({ sections }: { sections: Section[] }) {
   const [activeSection, setActiveSection] = useState<string>(sections[0]?.slug ?? '');
 
   useEffect(() => {
@@ -54,7 +57,7 @@ export function CodeOfConductMobileNav({ sections }: { sections: Section[] }) {
   );
 }
 
-export function CodeOfConductSidebar({ sections }: { sections: Section[] }) {
+export function SectionSidebar({ sections }: { sections: Section[] }) {
   const [activeSection, setActiveSection] = useState<string>(sections[0]?.slug ?? '');
 
   useEffect(() => {
