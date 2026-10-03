@@ -79,8 +79,11 @@ export default function StarterGuides() {
                     )}
                     <h2 className="text-xl font-bold text-white">{guide.title}</h2>
                     <p className="flex-1 text-base text-white/75 leading-relaxed">{guide.summary}</p>
-                    <span className="mt-2 text-sm font-bold text-white" aria-hidden="true">
-                      Open guide <span className="inline-block transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">↗</span>
+                    <span className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-white" aria-hidden="true">
+                      Open guide
+                      <span className="material-symbols-outlined text-sm leading-none transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                        arrow_outward
+                      </span>
                     </span>
                   </a>
                 </li>
