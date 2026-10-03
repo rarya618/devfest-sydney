@@ -11,6 +11,8 @@ import {
 } from './guides';
 
 const GROUP_LABELS = Object.fromEntries(STARTER_GUIDE_GROUPS.map((groupInfo) => [groupInfo.id, groupInfo.label]));
+const GROUP_ORDER = Object.fromEntries(STARTER_GUIDE_GROUPS.map((groupInfo, groupIndex) => [groupInfo.id, groupIndex]));
+const GROUP_BORDER_CLASSES = Object.fromEntries(STARTER_GUIDE_GROUPS.map((groupInfo) => [groupInfo.id, groupInfo.borderClass]));
 
 // Everything a search can match on: what the card shows, plus the name of its group.
 function searchableText(guide: StarterGuide): string {
@@ -78,10 +80,13 @@ function GuideCard({ guide, borderClass }: { guide: StarterGuide; borderClass: s
 export default function StarterGuidesBrowser() {
   const [query, setQuery] = useState('');
 
-  const matchingGuides = STARTER_GUIDES.filter((guide) => matchesQuery(guide, query));
+  // In group order, then list order within a group, so related results sit together.
+  const matchingGuides = STARTER_GUIDES.filter((guide) => matchesQuery(guide, query)).sort(
+    (firstGuide, secondGuide) => GROUP_ORDER[firstGuide.group] - GROUP_ORDER[secondGuide.group],
+  );
   const visibleGroups = STARTER_GUIDE_GROUPS.map((groupInfo) => ({
     ...groupInfo,
-    guides: matchingGuides.filter((guide) => guide.group === groupInfo.id),
+    guides: STARTER_GUIDES.filter((guide) => guide.group === groupInfo.id),
   })).filter((groupInfo) => groupInfo.guides.length > 0);
 
   const isSearching = query.trim() !== '';
@@ -91,34 +96,45 @@ export default function StarterGuidesBrowser() {
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="relative max-w-xl mx-auto mb-14">
+      <div className="max-w-xl mx-auto mb-14">
         <label htmlFor="starter-guide-search" className="sr-only">
           Search starter guides
         </label>
-        <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xl leading-none text-white/55" aria-hidden="true">
-          search
-        </span>
-        <input
-          id="starter-guide-search"
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search guides, e.g. Gemini, no code, npm"
-          aria-label="Search starter guides by name, topic, or what they need"
-          className="w-full h-12 rounded-full border border-white/35 bg-transparent pl-12 pr-5 text-base text-white placeholder:text-white/50 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
-        />
-        <p className="sr-only" aria-live="polite">
+        <div className="relative">
+          <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xl leading-none text-white/55" aria-hidden="true">
+            search
+          </span>
+          <input
+            id="starter-guide-search"
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search guides, e.g. Gemini, no code, npm"
+            aria-label="Search starter guides by name, topic, or what they need"
+            className="w-full h-12 rounded-full border border-white/35 bg-transparent pl-12 pr-5 text-base text-white placeholder:text-white/50 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
+          />
+        </div>
+        {/* Shown while searching; screen readers hear it change either way. */}
+        <p className={isSearching ? 'mt-4 text-center font-mono text-sm text-white/55' : 'sr-only'} aria-live="polite">
           {resultSummary}
         </p>
       </div>
 
-      {visibleGroups.length === 0 ? (
+      {matchingGuides.length === 0 ? (
         <div className="max-w-xl mx-auto bg-white/[0.025] border border-white/10 rounded-2xl p-12 text-center">
           <h2 className="text-lg font-bold text-white/70 mb-3">No guides match &ldquo;{query.trim()}&rdquo;</h2>
           <p className="text-sm text-white/55 leading-relaxed">
             Try a product name like Gemini or Flutter, or a tag like &ldquo;no code&rdquo;.
           </p>
         </div>
+      ) : isSearching ? (
+        // One flat list while searching: group headings only break up a short list of results.
+        // Each card keeps its group's border colour.
+        <ul className="flex flex-wrap justify-center gap-6">
+          {matchingGuides.map((guide) => (
+            <GuideCard key={guide.href} guide={guide} borderClass={GROUP_BORDER_CLASSES[guide.group]} />
+          ))}
+        </ul>
       ) : (
         <div className="flex flex-col gap-16">
           {visibleGroups.map((groupInfo) => (
