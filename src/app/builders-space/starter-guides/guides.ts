@@ -470,4 +470,54 @@ export const STARTER_GUIDES: StarterGuide[] = [
       height: 300,
     },
   },
+  {
+    title: 'Deploy a Vercel template',
+    href: 'https://vercel.com/templates',
+    group: 'web',
+    summary:
+      "Pick a starter for Next.js, Astro, SvelteKit or more and deploy it with one click: Vercel copies it into a new repo of yours and puts it live on the free Hobby plan.",
+    coding: 'no-code',
+    // The white Vercel triangle from vercel.com/geist/brands, rendered and trimmed. Mark only, as
+    // Vercel shows it. Links to the templates gallery: deploying one is the starter.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/vercel.png',
+      alt: 'Vercel',
+      width: 457,
+      height: 400,
+    },
+  },
+  {
+    title: 'Build with Gemini using the AI SDK',
+    href: 'https://ai-sdk.dev/providers/ai-sdk-providers/google',
+    group: 'ai',
+    summary:
+      "Use Vercel's open-source AI SDK with Gemini through its Google provider and a free API key from Google AI Studio, in any JavaScript or TypeScript app.",
+    coding: 'coding',
+    needs: 'npm',
+    // Links the Google provider page rather than the SDK's getting-started guides, which default
+    // to Vercel's AI Gateway (its own key) and a non-Google model. Vercel's mark: the AI SDK has no
+    // logo of its own.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/vercel.png',
+      alt: 'Vercel',
+      width: 457,
+      height: 400,
+    },
+  },
+  {
+    title: 'Learn Next.js',
+    href: 'https://nextjs.org/learn/dashboard-app',
+    group: 'web',
+    summary:
+      "Vercel's free course: build a full-stack dashboard with login, a database and pages for managing invoices. A whole course rather than a quick start, so pick a chapter.",
+    coding: 'coding',
+    needs: 'npm',
+    // The white Next.js logotype from vercel.com/geist/brands, rendered and trimmed.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/nextjs.png',
+      alt: 'Next.js',
+      width: 1200,
+      height: 242,
+    },
+  },
 ];
