@@ -26,7 +26,7 @@ export const STARTER_GUIDE_CODING_LABELS: Record<StarterGuideCoding, string> = {
 
 // The sections the page is split into, in the order they appear. Each takes a brand colour
 // for its cards' top border: green and blue match the Builder and Developer tracks.
-export type StarterGuideGroup = 'no-code' | 'ai' | 'web' | 'mobile';
+export type StarterGuideGroup = 'prototype' | 'ai' | 'web' | 'mobile';
 
 export interface StarterGuideGroupInfo {
   id: StarterGuideGroup;
@@ -38,7 +38,7 @@ export interface StarterGuideGroupInfo {
 }
 
 export const STARTER_GUIDE_GROUPS: StarterGuideGroupInfo[] = [
-  { id: 'no-code', label: 'Prototype without code', borderClass: 'border-t-google-green', dotClass: 'bg-google-green' },
+  { id: 'prototype', label: 'Prototype and automate', borderClass: 'border-t-google-green', dotClass: 'bg-google-green' },
   { id: 'ai', label: 'Build with Gemini and agents', borderClass: 'border-t-google-blue', dotClass: 'bg-google-blue' },
   { id: 'web', label: 'Web and cloud', borderClass: 'border-t-google-yellow', dotClass: 'bg-google-yellow' },
   { id: 'mobile', label: 'Mobile', borderClass: 'border-t-google-red', dotClass: 'bg-google-red' },
@@ -109,7 +109,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     href: 'https://ai.google.dev/gemini-api/docs/aistudio-build-mode',
     summary:
       'Describe the app you want in plain English and let Build mode write and run it for you, with no code and nothing to install.',
-    group: 'no-code',
+    group: 'prototype',
     coding: 'no-code',
     // The AI Studio product mark from gstatic (productlogos/ai_studio, 512dp), trimmed. Mark
     // only: no wordmark lockup is published, and the card title names it.
@@ -272,7 +272,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     href: 'https://stitch.withgoogle.com/',
     summary:
       'Describe an app or upload a sketch and Stitch, from Google Labs, designs the screens for you, ready to take into Figma or code.',
-    group: 'no-code',
+    group: 'prototype',
     coding: 'no-code',
     // Stitch's 512px app icon (gstatic.com/labs-code/stitch/favicon-512x512.png). Links to the
     // tool itself: Stitch has no separate starter guide.
@@ -304,7 +304,7 @@ export const STARTER_GUIDES: StarterGuide[] = [
     href: 'https://developers.google.com/opal/quickstart',
     summary:
       'Remix a demo from the Opal gallery into your own AI mini app, built by describing each step in plain English.',
-    group: 'no-code',
+    group: 'prototype',
     coding: 'no-code',
     // Opal publishes no logo file, so this is the wordmark cut from its share card
     // (opal.google/images/share-card-prod.png) and set to white on transparent.
@@ -313,6 +313,53 @@ export const STARTER_GUIDES: StarterGuide[] = [
       alt: 'Opal',
       width: 273,
       height: 121,
+    },
+  },
+  {
+    title: 'Automate Google Sheets with Apps Script',
+    href: 'https://developers.google.com/apps-script/quickstart/custom-functions',
+    group: 'prototype',
+    summary:
+      'Paste a short script into a Google Sheet to make your own spreadsheet function, then build from there to automate Sheets, Docs and Gmail.',
+    coding: 'coding',
+    // The Apps Script product logo from gstatic (productlogos/apps_script, 512dp), trimmed.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/apps-script.png',
+      alt: 'Apps Script',
+      width: 456,
+      height: 360,
+    },
+  },
+  {
+    title: 'Hand a task to Jules',
+    href: 'https://jules.google/docs',
+    group: 'ai',
+    summary:
+      "Connect a GitHub repo and give Google's coding agent a task, like fixing a bug or writing docs. It works in the cloud and comes back with a change for you to review.",
+    coding: 'coding',
+    // The light purple octopus from the Jules docs (docs/_astro/logo), the one that reads on a
+    // dark background. Rendered and trimmed.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/jules.png',
+      alt: 'Jules',
+      width: 486,
+      height: 512,
+    },
+  },
+  {
+    title: 'Add Gemini to your app with Firebase AI Logic',
+    href: 'https://firebase.google.com/docs/ai-logic/get-started',
+    group: 'mobile',
+    summary:
+      'Call Gemini straight from an Android, iOS, Flutter or web app with the Firebase AI Logic SDKs, on the no-cost Gemini Developer API.',
+    coding: 'coding',
+    needs: 'Android Studio, Xcode or Flutter SDK',
+    // Same Firebase lockup as the Firebase for web card.
+    logo: {
+      url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/guide-logos/firebase.png',
+      alt: 'Firebase',
+      width: 1600,
+      height: 422,
     },
   },
 ];
