@@ -55,6 +55,7 @@ function toPublicSlot(item: ScheduleItem, confirmedSpeakersById: Map<string, Pub
     id: item.id,
     kind: item.kind,
     title: takesSpeakerTitle ? leadSpeaker.talkTitle : item.title,
+    talkTitle: item.kind === 'plenary' && speakers.length === 1 ? leadSpeaker.talkTitle : null,
     speakers: speakers.map((speaker) => ({ name: speaker.name, slug: speaker.slug, photoUrl: speaker.photoUrl })),
     hasUnannouncedSpeaker: speakers.length < item.speakerIds.length,
     track: takesSpeakerTitle ? leadSpeaker.track : null,

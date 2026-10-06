@@ -42,6 +42,25 @@ function TimeRange({ slot }: { slot: PublicScheduleSlot }) {
   );
 }
 
+function SpeakerList({ speakers }: { speakers: PublicScheduleSlot['speakers'] }) {
+  return (
+    <ul className="space-y-2">
+      {speakers.map((speaker) => (
+        <li key={speaker.slug} className="flex items-center gap-2">
+          {/* 20px is too small for legible initials, so a speaker without a photo gets a plain
+              circle instead. */}
+          <span className="w-5 h-5 rounded-full overflow-hidden bg-white/10 shrink-0" aria-hidden="true">
+            {speaker.photoUrl && (
+              <Image src={speaker.photoUrl} alt="" width={20} height={20} className="w-full h-full object-cover" />
+            )}
+          </span>
+          <span className="text-sm font-medium text-white/85 leading-snug">{speaker.name}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 // A talk or workshop in one room. showRoom is for the mobile list, where there is no
 // column heading to say which room it is in.
 function SessionCard({ slot, showRoom }: { slot: PublicScheduleSlot; showRoom: boolean }) {
@@ -77,20 +96,7 @@ function SessionCard({ slot, showRoom }: { slot: PublicScheduleSlot; showRoom: b
 
       <div className="mt-auto space-y-2">
         {slot.speakers.length > 0 ? (
-          <ul className="space-y-2">
-            {slot.speakers.map((speaker) => (
-              <li key={speaker.slug} className="flex items-center gap-2">
-                {/* 20px is too small for legible initials, so a speaker without a photo gets a plain
-                    circle instead. */}
-                <span className="w-5 h-5 rounded-full overflow-hidden bg-white/10 shrink-0" aria-hidden="true">
-                  {speaker.photoUrl && (
-                    <Image src={speaker.photoUrl} alt="" width={20} height={20} className="w-full h-full object-cover" />
-                  )}
-                </span>
-                <span className="text-sm font-medium text-white/85 leading-snug">{speaker.name}</span>
-              </li>
-            ))}
-          </ul>
+          <SpeakerList speakers={slot.speakers} />
         ) : (
           slot.hasUnannouncedSpeaker && <p className="text-sm text-white/55">Speaker to be announced</p>
         )}
@@ -106,19 +112,40 @@ function SessionCard({ slot, showRoom }: { slot: PublicScheduleSlot; showRoom: b
 }
 
 // Registration, lunch, the keynotes: one row across every room. A plenary also says which
-// room it is in, since the row itself no longer does.
+// room it is in, since the row itself no longer does, and a keynote given by a confirmed
+// speaker names its talk and speaker under the slot title.
 function SharedBlock({ slot }: { slot: PublicScheduleSlot }) {
   const isPlenary = slot.kind === 'plenary';
+  const keynoteSpeaker = slot.talkTitle ? slot.speakers[0] : undefined;
   return (
     <article
       className={`h-full rounded-xl px-5 py-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-1 ${
         isPlenary ? 'bg-surface border border-white/15' : 'bg-white/[0.03]'
       }`}
     >
-      <div className="flex items-center gap-3">
-        <h3 className={`font-bold ${isPlenary ? 'text-lg text-white' : 'text-base text-white/75'}`}>{slot.title}</h3>
-        {slot.isTentative && <TentativeChip />}
-      </div>
+      {keynoteSpeaker && slot.talkTitle ? (
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <p className="text-xs font-bold text-white/70">{slot.title}</p>
+            {slot.isTentative && <TentativeChip />}
+          </div>
+          <h3 className="text-lg font-bold text-white leading-snug">
+            <Link
+              href={`/speakers/${keynoteSpeaker.slug}`}
+              aria-label={`${slot.talkTitle}, by ${keynoteSpeaker.name}`}
+              className="hover:text-white/80 transition-colors"
+            >
+              {slot.talkTitle}
+            </Link>
+          </h3>
+          <SpeakerList speakers={slot.speakers} />
+        </div>
+      ) : (
+        <div className="flex items-center gap-3">
+          <h3 className={`font-bold ${isPlenary ? 'text-lg text-white' : 'text-base text-white/75'}`}>{slot.title}</h3>
+          {slot.isTentative && <TentativeChip />}
+        </div>
+      )}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
         {slot.room !== 'all' && <p className="text-sm font-bold text-white/70">{SCHEDULE_ROOM_LABELS[slot.room].name}</p>}
         <TimeRange slot={slot} />

@@ -339,6 +339,9 @@ export interface PublicScheduleSlot {
   id: string;
   kind: ScheduleKind;
   title: string;
+  // A plenary given by one confirmed speaker (the welcome keynote) keeps its own title as
+  // a label and carries the talk here. Null otherwise.
+  talkTitle: string | null;
   speakers: ScheduleSpeaker[];
   // True when a speaker is assigned but has not confirmed, so the slot can say a speaker
   // is coming without naming them. False for a slot nobody has been given yet.
