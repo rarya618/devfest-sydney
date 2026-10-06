@@ -57,7 +57,7 @@ const SLOTS = [
   { start: '10:00', end: '10:15', room: 'auditorium', kind: 'plenary', title: 'Welcome from GDG Sydney' },
   { start: '10:15', end: '10:50', room: 'auditorium', kind: 'plenary', title: 'Welcome keynote', speakers: ['Brett Morgan'] },
 
-  { start: '10:50', end: '11:35', room: 'auditorium', kind: 'session', title: 'To be announced', isTentative: true },
+  { start: '10:50', end: '11:35', room: 'auditorium', kind: 'session', title: 'Talk', speakers: ['Yash Mehta'] },
   { start: '10:50', end: '11:35', room: 'developer', kind: 'session', title: 'Talk', speakers: ['Michael Dausmann'] },
   { start: '10:50', end: '11:35', room: 'builder', kind: 'session', title: 'Talk', speakers: ['Suesi Tran'] },
   { start: '10:50', end: '12:20', room: 'workshops', kind: 'session', title: 'Workshop', speakers: ['Kartik Arora'] },

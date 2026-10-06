@@ -274,11 +274,13 @@ Two follow-ups worth deciding on:
 
 **Welcome keynote settled 2026-10-06:** Brett Morgan's talk moved from 10:50 in the Auditorium to the welcome keynote (10:15 to 10:50), after a 10:00 to 10:15 "Welcome from GDG Sydney" plenary in the Auditorium, and the 10:50 Auditorium slot is now a "To be announced" placeholder (TBC). A plenary given by one confirmed speaker now carries `talkTitle` on `PublicScheduleSlot`, and the full-width keynote row on `/schedule` shows "Welcome keynote" as a label above the talk title (linked to the speaker page) and the speaker. Brett's speaker page reads 10:15 to 10:50 am automatically. If his calendar invite was already sent, `/admin/speakers` will show "Schedule changed" on his card: send the update from there.
 
+**Yash Mehta in the 10:50 Auditorium slot 2026-10-07:** a late Spotlight addition (proposal entered by an admin, promoted 2026-10-06). Confirmed directly with an organiser rather than through `/speaker/confirm`, so his submission has `speakerConfirmedAt` and `speakerTicketEmailSentAt` set by hand with a reviewer note, and no acceptance email was ever sent: don't click the envelope on his card unless he should get one. His talk, "You built an Agent. What next?", fills the slot that was "To be announced". The calendar invite has not been sent.
+
 **Showcase acceptance emails 2026-09-30:** see the Builder Showcase Flow above. Verified in dev: types and lint clean; `/builder-showcase/confirm` renders the demo card for a real accepted entry (GET only, nothing confirmed) and "This link isn't working" for a pending entry, a tampered token and no token; a sample email rendered and checked for escaping. **Exercised in production 2026-10-01:** a throwaway accepted entry addressed to an organiser inbox was sent from the `/admin/showcase` envelope button and confirmed through the emailed link, which proves the production `SHOWCASE_CONFIRM_SECRET` signs and verifies. The document recorded both the send and the confirmation and has been deleted.
 
 **Rolled out 2026-10-01** (`3a2c4da`): `/schedule`, the Spotlight track, showcase acceptance emails, organiser areas, and `VOLUNTEER_CONFIRM_SECRET` / `SHOWCASE_CONFIRM_SECRET` are live.
 
 **Next task:**
-1. Program the closing keynote and the 10:50 Auditorium slot, then edit `SLOTS` in `scripts/seed-schedule.mjs` and rerun it.
+1. Program the closing keynote, then edit `SLOTS` in `scripts/seed-schedule.mjs` and rerun it.
 
 Otherwise: Milestone 9 — Polish & launch.
