@@ -54,7 +54,8 @@ const EVENT_OFFSET = '+11:00';
 // speakers: names as they appear in the `speakers` collection.
 const SLOTS = [
   { start: '09:00', end: '10:00', room: 'all', kind: 'break', title: 'Registration' },
-  { start: '10:00', end: '10:50', room: 'auditorium', kind: 'plenary', title: 'Welcome keynote', speakers: ['Brett Morgan'] },
+  { start: '10:00', end: '10:15', room: 'auditorium', kind: 'plenary', title: 'Welcome from GDG Sydney' },
+  { start: '10:15', end: '10:50', room: 'auditorium', kind: 'plenary', title: 'Welcome keynote', speakers: ['Brett Morgan'] },
 
   { start: '10:50', end: '11:35', room: 'auditorium', kind: 'session', title: 'To be announced', isTentative: true },
   { start: '10:50', end: '11:35', room: 'developer', kind: 'session', title: 'Talk', speakers: ['Michael Dausmann'] },
