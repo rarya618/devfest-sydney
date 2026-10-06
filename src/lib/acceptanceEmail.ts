@@ -27,6 +27,7 @@ const FORMAT_LABELS: Record<TalkFormat, string> = {
 };
 
 const TRACK_LABELS: Record<Track, string> = {
+  keynote: 'Keynote',
   spotlight: 'Spotlight Track',
   developer: 'Developer Track',
   builder: 'Builder Track',
@@ -35,6 +36,7 @@ const TRACK_LABELS: Record<Track, string> = {
 };
 
 const TRACK_DOT_COLOR: Record<Track, string> = {
+  keynote: '#ffffff',
   spotlight: '#EA4335',
   developer: '#4285F4',
   builder: '#34A853',

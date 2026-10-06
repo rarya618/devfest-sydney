@@ -1137,11 +1137,12 @@ type SortOption = 'newest' | 'oldest' | 'track' | 'submitter';
 const REJECTION_EMAIL_SPACING_MS = 600;
 
 const TRACK_SORT_ORDER: Record<Track, number> = {
-  spotlight: 0,
-  developer: 1,
-  builder: 2,
-  workshop: 3,
-  showcase: 4,
+  keynote: 0,
+  spotlight: 1,
+  developer: 2,
+  builder: 3,
+  workshop: 4,
+  showcase: 5,
 };
 
 const SORT_LABELS: Record<SortOption, string> = {
@@ -1284,6 +1285,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
   };
 
   const trackCounts: Record<Track, number> = {
+    keynote: 0,
     spotlight: 0,
     developer: 0,
     builder: 0,

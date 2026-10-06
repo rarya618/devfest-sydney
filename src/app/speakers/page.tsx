@@ -26,9 +26,10 @@ export const metadata: Metadata = buildPageMetadata({ title, description, path: 
 
 // Display order for the track groups. Showcase is not a speaking track, so any speaker
 // filed under it is listed last.
-const TRACK_ORDER: Track[] = ['spotlight', 'developer', 'builder', 'workshop', 'showcase'];
+const TRACK_ORDER: Track[] = ['keynote', 'spotlight', 'developer', 'builder', 'workshop', 'showcase'];
 
 const TRACK_DESCRIPTIONS: Record<Track, string> = {
+  keynote: 'Keynotes on the main stage in the Auditorium.',
   spotlight: 'Headline sessions on the main stage in the Auditorium.',
   developer: 'Technical sessions for professional engineers.',
   builder: 'For product managers, designers, founders, and anyone building with AI.',

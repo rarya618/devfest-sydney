@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return buildPageMetadata({
     title: speaker.name,
-    description: `${speaker.talkTitle}. ${FORMAT_LABELS[speaker.format]} in the ${TRACK_LABELS[speaker.track]} track at DevFest Sydney 2026, Saturday 10 October at Torrens University, Surry Hills.`,
+    description: `${speaker.talkTitle}. ${speaker.track === 'keynote' ? 'Keynote' : `${FORMAT_LABELS[speaker.format]} in the ${TRACK_LABELS[speaker.track]} track`} at DevFest Sydney 2026, Saturday 10 October at Torrens University, Surry Hills.`,
     path: `/speakers/${speaker.slug}`,
     ogType: 'profile',
   });
@@ -133,7 +133,8 @@ export default async function SpeakerPage({ params }: PageProps) {
                 style={{ animationDelay: '0.05s' }}
               >
                 <span className={`w-1.5 h-1.5 rounded-full ${TRACK_DOT_COLORS[speaker.track]}`} aria-hidden="true" />
-                {TRACK_LABELS[speaker.track]} track
+                {/* A keynote is not one of the event's tracks, so it is not called one. */}
+                {speaker.track === 'keynote' ? TRACK_LABELS.keynote : `${TRACK_LABELS[speaker.track]} track`}
               </p>
               <h1
                 className="text-4xl md:text-5xl font-bold leading-[1.05] tracking-tight text-white mb-3 animate-slide-up"

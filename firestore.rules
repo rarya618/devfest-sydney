@@ -27,7 +27,7 @@ rules_version='2';
 //   - talkTitle: string (required, 1–150 chars)
 //   - abstract: string (required, 1–2000 chars)
 //   - format: string (required) — 'talk' | 'lightning-talk' | 'workshop'
-//   - track: string (required) — 'spotlight' | 'developer' | 'builder' | 'workshop' | 'showcase'
+//   - track: string (required) — 'keynote' | 'spotlight' | 'developer' | 'builder' | 'workshop' | 'showcase'
 //   - experienceLevel: string (required) — 'beginner' | 'intermediate' | 'advanced'
 //   - linkedinUrl: string (optional, max 500 chars, may be empty)
 //   - githubUrl: string (optional, max 500 chars, may be empty)
@@ -288,7 +288,7 @@ service cloud.firestore {
 
     function isValidSpeaker(data) {
       let allowedFormats = ['talk', 'lightning-talk', 'workshop'];
-      let allowedTracks = ['spotlight', 'developer', 'builder', 'workshop', 'showcase'];
+      let allowedTracks = ['keynote', 'spotlight', 'developer', 'builder', 'workshop', 'showcase'];
       let allowedLevels = ['beginner', 'intermediate', 'advanced'];
       return data.keys().hasOnly(['name', 'email', 'talkTitle', 'abstract', 'format',
                                    'track', 'experienceLevel', 'linkedinUrl', 'githubUrl',

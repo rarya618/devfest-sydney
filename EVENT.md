@@ -23,6 +23,9 @@ The role of the professional developer is evolving — from writing code to revi
 ### Spotlight Track
 Headline talks on the main stage in the Auditorium, for developers and builders alike. Added 2026-09-23 when the schedule was set: no one proposed into it through the CfS; organisers move speakers onto it.
 
+### Keynotes
+Not a track: the welcome keynote (Brett Morgan, 10:15) and the closing keynote, in the Auditorium. Keynote speakers are filed under a "Keynote" label on the site rather than under Spotlight (changed 2026-10-07).
+
 ### 1. Developer Track
 Technical sessions for professional engineers.
 

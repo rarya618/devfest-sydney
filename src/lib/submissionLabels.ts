@@ -15,6 +15,7 @@ export const STATUS_LABELS: Record<SubmissionStatus, string> = {
 };
 
 export const TRACK_LABELS: Record<Track, string> = {
+  keynote: 'Keynote',
   spotlight: 'Spotlight',
   developer: 'Developer',
   builder: 'Builder',
@@ -23,6 +24,9 @@ export const TRACK_LABELS: Record<Track, string> = {
 };
 
 export const TRACK_COLORS: Record<Track, string> = {
+  // Keynotes are not one of the event's tracks and every core colour is taken, so they
+  // stay neutral rather than borrow a track's colour.
+  keynote: 'text-white',
   // Core red text fails AA on the dark page (see BRANDING.md), so Spotlight uses Red 300.
   spotlight: 'text-google-red-light',
   developer: 'text-google-blue',
@@ -41,6 +45,7 @@ export const TRACK_CHIP_COLORS: Record<Track, string> = {
 };
 
 export const TRACK_BORDER_COLORS: Record<Track, string> = {
+  keynote: 'border-l-white',
   spotlight: 'border-l-google-red',
   developer: 'border-l-google-blue',
   builder: 'border-l-google-green',
@@ -49,6 +54,7 @@ export const TRACK_BORDER_COLORS: Record<Track, string> = {
 };
 
 export const TRACK_DOT_COLORS: Record<Track, string> = {
+  keynote: 'bg-white',
   spotlight: 'bg-google-red',
   developer: 'bg-google-blue',
   builder: 'bg-google-green',

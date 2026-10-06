@@ -2,7 +2,7 @@ export type TalkFormat = 'talk' | 'lightning-talk' | 'workshop';
 export type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced';
 // Spotlight is the Auditorium's track. Nobody proposes into it (the CfS offers only the
 // first three); an organiser moves a speaker onto it from /admin/speakers.
-export type Track = 'spotlight' | 'developer' | 'builder' | 'workshop' | 'showcase';
+export type Track = 'keynote' | 'spotlight' | 'developer' | 'builder' | 'workshop' | 'showcase';
 export type SubmissionStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
 export type SponsorTier = 'platinum' | 'gold' | 'silver' | 'community';
 // The last two are roster-only: an admin assigns them on /admin/crew, and the signup form
