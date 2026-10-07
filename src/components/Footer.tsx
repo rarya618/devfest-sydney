@@ -22,7 +22,6 @@ const COLUMNS: { heading: string; links: { label: string; href: string; external
       { label: 'Builder Showcase', href: '/builder-showcase' },
       // A surprise on the day: see src/lib/buildersSpace.ts.
       { label: "Builder's Space", href: '/builders-space', hidden: () => !isBuildersSpaceRevealed() },
-      { label: 'Job board', href: '/jobs' },
       { label: 'Volunteer', href: '/volunteer' },
       { label: 'Crew', href: '/crew' },
       { label: 'FAQ', href: '/faq' },
