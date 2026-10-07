@@ -354,3 +354,76 @@ export interface PublicScheduleSlot {
   room: ScheduleRoom;
   isTentative: boolean;
 }
+
+// The job board (/jobs). Two collections, both written only by their /api routes and
+// reviewed on /admin/jobs before anything is public: `jobListings` (roles an employer is
+// hiring for) and `jobSeekers` (attendees looking for work).
+export type JobType = 'full-time' | 'part-time' | 'contract' | 'internship' | 'graduate';
+export type WorkArrangement = 'on-site' | 'hybrid' | 'remote';
+// 'approved' rather than 'accepted': nothing is being accepted onto a programme, a post is
+// just cleared to appear on the board.
+export type JobBoardStatus = 'pending' | 'approved' | 'rejected' | 'archived';
+
+export interface JobListing {
+  id: string;
+  companyName: string;
+  contactName: string;
+  contactEmail: string; // never shown publicly
+  roleTitle: string;
+  location: string;
+  workArrangement: WorkArrangement;
+  jobType: JobType;
+  description: string;
+  // A link to the job ad, or an email address applicants should write to.
+  howToApply: string;
+  // Set by an admin, never by the employer: the id of a `sponsors` document. Sponsor
+  // listings sort first on /jobs, by tier. Empty for everyone else.
+  sponsorId: string;
+  submittedAt: string; // ISO date string
+  approvedAt: string | null; // ISO date string; what /jobs sorts by within a tier
+  status: JobBoardStatus;
+}
+
+export interface JobSeeker {
+  id: string;
+  name: string;
+  email: string; // never shown publicly
+  headline: string;
+  about: string;
+  lookingFor: string;
+  location: string;
+  workArrangements: WorkArrangement[];
+  // The public way to get in touch: the board never publishes an email address.
+  linkedinUrl: string;
+  portfolioUrl: string;
+  submittedAt: string; // ISO date string
+  approvedAt: string | null; // ISO date string
+  status: JobBoardStatus;
+}
+
+// What /jobs renders. No contact email, no status.
+export interface PublicJobListing {
+  id: string;
+  companyName: string;
+  roleTitle: string;
+  location: string;
+  workArrangement: WorkArrangement;
+  jobType: JobType;
+  description: string;
+  // Already resolved to a link: an email address arrives here as mailto:.
+  applyHref: string;
+  sponsor: { name: string; tier: SponsorTier; logoUrl: string } | null;
+}
+
+// What /jobs/people renders. No email.
+export interface PublicJobSeeker {
+  id: string;
+  name: string;
+  headline: string;
+  about: string;
+  lookingFor: string;
+  location: string;
+  workArrangements: WorkArrangement[];
+  linkedinUrl: string;
+  portfolioUrl: string;
+}

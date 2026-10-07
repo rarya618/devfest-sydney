@@ -27,6 +27,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: '/admin', label: 'Submissions' },
       { href: '/admin/volunteers', label: 'Volunteers' },
       { href: '/admin/showcase', label: 'Showcase' },
+      { href: '/admin/jobs', label: 'Job board' },
     ],
   },
   {

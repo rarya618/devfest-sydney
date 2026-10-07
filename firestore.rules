@@ -144,6 +144,22 @@ rules_version='2';
 //   - organiserRole: string (max 80 chars) - free text, e.g. 'Lead organiser'
 //   - linkedinUrl: string (optional, max 500 chars) - shown on / and /crew
 //
+// Collections: jobListings, jobSeekers
+// Document ID: auto-generated
+// The job board (/jobs, /jobs/people). Written only by /api/submit-job and
+// /api/submit-job-seeker through the Admin SDK, and read only server-side, so there is no
+// match block below: with none, Firestore denies every client read and write by default.
+// Both hold a private contact email, which is the reason there is no public read either.
+// jobListings fields: companyName, contactName, contactEmail (PII), roleTitle, location,
+//   workArrangement ('on-site' | 'hybrid' | 'remote'), jobType ('full-time' | 'part-time' |
+//   'contract' | 'internship' | 'graduate'), description, howToApply (URL or email),
+//   sponsorId (set by an admin only; '' for none), status ('pending' | 'approved' |
+//   'rejected' | 'archived'), submittedAt, approvedAt
+// jobSeekers fields: name, email (PII), headline, about, lookingFor, location,
+//   workArrangements (list), linkedinUrl, portfolioUrl, consentToPublish (always true),
+//   status, submittedAt, approvedAt
+// Limits live in JOB_LIMITS (src/lib/jobBoardLabels.ts).
+//
 // Collection: showcase
 // Document ID: auto-generated
 // Builder Showcase entries: five-minute attendee demos, reviewed like CfS submissions.

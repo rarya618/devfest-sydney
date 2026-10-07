@@ -50,6 +50,9 @@ timetable separate from the Call for Speakers.
 ### Builder's Space
 Dedicated room, open throughout the day, for attendees to build on their own projects. **Unstaffed** (confirmed 2026-10-03): no mentors or GDEs are stationed in it, so nothing on the site should promise help on hand. There will be starter guides for people exploring something new: online only, as cards on `/builders-space/starter-guides` linking out to official guides, with no handouts in the room (confirmed 2026-10-03). Public page at `/builders-space`, live but not promoted until the day (changed 2026-10-03 from a 404 until then): its footer link and sitemap entry stay hidden until midnight on 10 October (`isBuildersSpaceRevealed()` in `src/lib/buildersSpace.ts`), so it is reached only by direct link before then. The one-line card in the ticket section of `/` and `/tickets` stays up by choice.
 
+### Job Board
+Online at `/jobs` (roles) and `/jobs/people` (attendees open to work), announced to the audience on the day (added 2026-10-07; DevFest Melbourne ran one). Free to post; every post is approved by an organiser first. Sponsors' roles are listed first, at no charge. Taken down, and profiles deleted, after the event.
+
 ### Speaker Dinner
 Held the evening before the event, Friday 9 October 2026, for the speakers and the organising team. Venue, time and RSVP are not settled yet; the speaker confirmation screen tells confirmed speakers it is happening and that details will follow by email.
 

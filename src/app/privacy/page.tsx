@@ -34,6 +34,13 @@ This may include your name, email address, phone number, talk or session details
     ],
   },
   {
+    slug: 'job-board',
+    title: 'Job Board',
+    content: `If you post a role or a profile to the job board, an organiser reviews it before it appears. Your email address is never shown publicly: it is only used to contact you about your post.
+
+Profiles from people looking for work are shown only with your consent, are kept out of search engines, and can be changed or removed at any time by emailing hello@gdgsydney.com. We take the job board down, and delete the profiles on it, after the event.`,
+  },
+  {
     slug: 'third-party-services',
     title: 'Third-Party Services',
     content: `We use a small number of trusted third parties to run this website and event:`,

@@ -63,6 +63,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           { url: `${siteUrl}/builders-space/starter-guides`, changeFrequency: 'weekly' as const, priority: 0.5 },
         ]
       : []),
+    // /jobs/people is deliberately left out: it is noindex, see its page.
+    {
+      url: `${siteUrl}/jobs`,
+      changeFrequency: 'daily',
+      priority: 0.6,
+    },
+    {
+      url: `${siteUrl}/jobs/post`,
+      changeFrequency: 'monthly',
+      priority: 0.5,
+    },
     {
       url: `${siteUrl}/volunteer`,
       changeFrequency: 'daily',
