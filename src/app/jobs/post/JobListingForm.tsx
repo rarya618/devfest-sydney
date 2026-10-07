@@ -130,7 +130,14 @@ export default function JobListingForm() {
           <button
             type="button"
             onClick={() => {
-              setFields(EMPTY_FIELDS);
+              // An employer posting several roles is the same company and the same person
+              // each time, so only the role itself starts blank.
+              setFields((previous) => ({
+                ...EMPTY_FIELDS,
+                companyName: previous.companyName,
+                contactName: previous.contactName,
+                contactEmail: previous.contactEmail,
+              }));
               setSubmitState('idle');
             }}
             aria-label="Post another role"
