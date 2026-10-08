@@ -41,14 +41,20 @@ export async function sendCalendarInvite(speakerId: string): Promise<{ error?: s
 
   const speakerRef = adminDb.collection('speakers').doc(speakerId);
   let speaker: FirebaseFirestore.DocumentData;
+  // The session's own record: the speaker's, or for a co-speaker the lead's, which holds
+  // the talk title and the proposal whose confirmation decides whether it is going ahead.
+  let sessionOwner: FirebaseFirestore.DocumentData | undefined;
   let submission: FirebaseFirestore.DocumentData | undefined;
   let session: SpeakerSessionTime | null;
   try {
     const speakerSnap = await speakerRef.get();
     if (!speakerSnap.exists) return { error: 'This speaker is no longer in the lineup.' };
     speaker = speakerSnap.data()!;
-    if (speaker.submissionId) {
-      submission = (await adminDb.collection('submissions').doc(speaker.submissionId).get()).data();
+    sessionOwner = speaker.coSpeakerOf
+      ? (await adminDb.collection('speakers').doc(speaker.coSpeakerOf).get()).data()
+      : speaker;
+    if (sessionOwner?.submissionId) {
+      submission = (await adminDb.collection('submissions').doc(sessionOwner.submissionId).get()).data();
     }
     session = (await fetchSessionTimesBySpeakerId())[speakerId] ?? null;
   } catch {
@@ -65,7 +71,7 @@ export async function sendCalendarInvite(speakerId: string): Promise<{ error?: s
     return { error: 'This speaker\'s email address doesn\'t look right. Fix it with Edit before sending.' };
   }
 
-  const talkTitle = String(speaker.talkTitle ?? '');
+  const talkTitle = String(sessionOwner?.talkTitle ?? '');
   const sentSlot = (speaker.calendarInviteSlot ?? null) as CalendarInviteSlot | null;
   const status = calendarInviteStatus(sentSlot, session, talkTitle);
   if (status === 'unscheduled') {

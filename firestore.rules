@@ -311,18 +311,25 @@ service cloud.firestore {
                                    'websiteUrl', 'submissionId', 'promotedAt', 'bio',
                                    'tagline', 'photoUrl', 'previousSlugs',
                                    'calendarInviteSentAt', 'calendarInviteSentBy',
-                                   'calendarInviteSequence', 'calendarInviteSlot']) &&
+                                   'calendarInviteSequence', 'calendarInviteSlot',
+                                   'coSpeakerOf', 'speakerTicketEmailSentAt',
+                                   'speakerTicketEmailSentBy']) &&
         data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
         data.email is string && isValidEmail(data.email) &&
-        data.talkTitle is string && data.talkTitle.size() >= 1 && data.talkTitle.size() <= 150 &&
-        data.abstract is string && data.abstract.size() >= 1 && data.abstract.size() <= 2000 &&
-        data.format in allowedFormats &&
-        data.track in allowedTracks &&
-        data.experienceLevel in allowedLevels &&
+        // A co-speaker holds only their profile: the session, and the proposal it came
+        // from, are read from the lead speaker named in coSpeakerOf.
+        (('coSpeakerOf' in data && data.coSpeakerOf is string && data.coSpeakerOf.size() >= 1 &&
+          !('talkTitle' in data) && !('submissionId' in data)) ||
+         (!('coSpeakerOf' in data) &&
+          data.talkTitle is string && data.talkTitle.size() >= 1 && data.talkTitle.size() <= 150 &&
+          data.abstract is string && data.abstract.size() >= 1 && data.abstract.size() <= 2000 &&
+          data.format in allowedFormats &&
+          data.track in allowedTracks &&
+          data.experienceLevel in allowedLevels &&
+          data.submissionId is string && data.submissionId.size() >= 1)) &&
         isValidBlankableString('linkedinUrl', 500) &&
         isValidBlankableString('githubUrl', 500) &&
         isValidBlankableString('websiteUrl', 500) &&
-        data.submissionId is string && data.submissionId.size() >= 1 &&
         data.promotedAt is timestamp &&
         isValidBlankableString('bio', 1000) &&
         isValidBlankableString('tagline', 200) &&

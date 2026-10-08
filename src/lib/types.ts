@@ -260,6 +260,16 @@ export interface Speaker {
   calendarInviteSentAt: string | null; // ISO date string
   calendarInviteSentBy: string | null;
   calendarInviteSlot: CalendarInviteSlot | null;
+  // Set on a co-speaker: someone presenting another speaker's session with them. Their
+  // document holds only their own profile; the talk, track and confirmation are read from
+  // this lead speaker, so the session lives in one place. Null on everyone else.
+  coSpeakerOf: string | null;
+}
+
+// Someone else presenting the same session, as the public pages link to them.
+export interface SessionPartner {
+  name: string;
+  slug: string;
 }
 
 // What /speakers renders. Deliberately a subset of Speaker: no email, no submission id,
@@ -280,6 +290,10 @@ export interface PublicSpeaker {
   tagline: string;
   photoUrl: string;
   previousSlugs: string[];
+  // The lead speaker's id on a co-speaker, null otherwise (see Speaker.coSpeakerOf).
+  coSpeakerOf: string | null;
+  // Everyone else presenting this session, lead first, then co-speakers by name.
+  sessionPartners: SessionPartner[];
 }
 
 // The rooms the day runs in. 'all' is a break that happens everywhere at once (registration,
@@ -343,6 +357,9 @@ export interface PublicScheduleSlot {
   // a label and carries the talk here. Null otherwise.
   talkTitle: string | null;
   speakers: ScheduleSpeaker[];
+  // The speaker page the session title links to: the lead speaker's, when the slot is one
+  // session (one speaker, or a lead and their co-speakers). Null for a shared block.
+  sessionSlug: string | null;
   // True when a speaker is assigned but has not confirmed, so the slot can say a speaker
   // is coming without naming them. False for a slot nobody has been given yet.
   hasUnannouncedSpeaker: boolean;

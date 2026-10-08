@@ -415,9 +415,15 @@ export async function undoPromotion(submissionId: string): Promise<{ error?: str
       .collection('speakers')
       .where('submissionId', '==', submissionId)
       .get();
+    // Anyone co-presenting the session goes with it, or they would be left pointing at a
+    // lead who no longer exists.
+    const coSpeakerSnaps = await Promise.all(
+      speakersSnap.docs.map((doc) => adminDb.collection('speakers').where('coSpeakerOf', '==', doc.id).get())
+    );
 
     const batch = adminDb.batch();
     speakersSnap.docs.forEach((doc) => batch.delete(doc.ref));
+    coSpeakerSnaps.forEach((snap) => snap.docs.forEach((doc) => batch.delete(doc.ref)));
     batch.update(adminDb.collection('submissions').doc(submissionId), { status: 'pending' });
     await batch.commit();
 
@@ -681,6 +687,71 @@ export async function sendSpeakerTicketEmail(submissionId: string): Promise<{ er
   }
 
   revalidatePath('/admin');
+  revalidatePath('/admin/speakers');
+  return {};
+}
+
+// The same ticket for a co-speaker, who has no proposal of their own: the gate is their
+// lead's confirmation, and the send is recorded on the co-speaker's document.
+export async function sendCoSpeakerTicketEmail(speakerId: string): Promise<{ error?: string }> {
+  let senderEmail: string;
+  try {
+    ({ email: senderEmail } = await verifyAdminSession());
+  } catch {
+    return { error: 'Your session has expired. Please sign in again.' };
+  }
+
+  const ticketUrl = process.env.SPEAKER_TICKET_URL?.trim();
+  if (!ticketUrl) {
+    return { error: 'The speaker ticket link isn\'t configured on the server, so this email can\'t be sent yet.' };
+  }
+
+  const coSpeakerRef = adminDb.collection('speakers').doc(speakerId);
+  let coSpeaker: FirebaseFirestore.DocumentData;
+  let leadSubmission: FirebaseFirestore.DocumentData | undefined;
+  try {
+    const coSpeakerSnap = await coSpeakerRef.get();
+    if (!coSpeakerSnap.exists) return { error: 'This co-speaker is no longer in the lineup.' };
+    coSpeaker = coSpeakerSnap.data()!;
+    if (!coSpeaker.coSpeakerOf) return { error: 'This speaker isn\'t a co-speaker. Send their ticket from their own card.' };
+    const leadSubmissionId = (await adminDb.collection('speakers').doc(coSpeaker.coSpeakerOf).get()).data()?.submissionId;
+    if (leadSubmissionId) leadSubmission = (await adminDb.collection('submissions').doc(leadSubmissionId).get()).data();
+  } catch {
+    return { error: 'Could not load this co-speaker. Please try again.' };
+  }
+
+  if (!leadSubmission?.speakerConfirmedAt) {
+    return { error: 'The lead speaker hasn\'t confirmed this session yet, so the ticket can\'t be sent.' };
+  }
+  const email = String(coSpeaker.email ?? '').trim();
+  if (!EMAIL_PATTERN.test(email)) {
+    return { error: 'This co-speaker\'s email address doesn\'t look right. Fix it with Edit before sending.' };
+  }
+
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: `GDG Sydney <${process.env.RESEND_FROM_EMAIL}>`,
+      to: email,
+      bcc: 'hello@gdgsydney.com',
+      replyTo: 'hello@gdgsydney.com',
+      subject: speakerTicketEmailSubject(),
+      html: buildSpeakerTicketEmail({ name: String(coSpeaker.name ?? ''), ticketUrl }),
+    });
+  } catch (err) {
+    console.error('Speaker ticket email failed for co-speaker:', speakerId, err);
+    return { error: 'We couldn\'t send the speaker ticket email. Please try again in a moment.' };
+  }
+
+  try {
+    await coSpeakerRef.update({
+      speakerTicketEmailSentAt: Timestamp.now(),
+      speakerTicketEmailSentBy: senderEmail,
+    });
+  } catch {
+    return { error: 'The ticket email was sent, but we couldn\'t record it. Please refresh before sending again.' };
+  }
+
   revalidatePath('/admin/speakers');
   return {};
 }

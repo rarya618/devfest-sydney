@@ -93,7 +93,9 @@ export default async function SpeakerPage({ params }: PageProps) {
   const cfsCloseDate = process.env.CFS_CLOSE_DATE;
   const ticketsOnSale = areTicketsOpen();
   const hasLinks = Boolean(speaker.linkedinUrl || speaker.githubUrl || speaker.websiteUrl);
-  const otherSpeakers = allSpeakers.filter((other) => other.id !== speaker.id).slice(0, 4);
+  // Anyone presenting this session with them is already linked from the session card.
+  const partnerSlugs = new Set(speaker.sessionPartners.map((partner) => partner.slug));
+  const otherSpeakers = allSpeakers.filter((other) => other.id !== speaker.id && !partnerSlugs.has(other.slug)).slice(0, 4);
   const firstName = speaker.name.split(' ')[0];
 
   return (
@@ -194,6 +196,22 @@ export default async function SpeakerPage({ params }: PageProps) {
                   )}
                 </p>
                 <h2 className="text-2xl md:text-3xl font-bold tracking-tight leading-snug mb-3">{speaker.talkTitle}</h2>
+                {speaker.sessionPartners.length > 0 && (
+                  <p className="text-white/70 mb-4">
+                    With{' '}
+                    {speaker.sessionPartners.map((partner, index) => (
+                      <span key={partner.slug}>
+                        {index > 0 && (index === speaker.sessionPartners.length - 1 ? ' and ' : ', ')}
+                        <Link
+                          href={`/speakers/${partner.slug}`}
+                          className="font-bold text-white underline underline-offset-2 decoration-white/30 hover:decoration-white transition-colors"
+                        >
+                          {partner.name}
+                        </Link>
+                      </span>
+                    ))}
+                  </p>
+                )}
                 <p className="text-white/70 leading-relaxed whitespace-pre-wrap">{speaker.abstract}</p>
               </article>
             </Reveal>

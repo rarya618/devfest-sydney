@@ -1,5 +1,5 @@
 import { adminDb } from '@/lib/firebase-admin';
-import { fetchPublicSpeakers } from '@/lib/speakers';
+import { fetchPublicSpeakers, sessionLeadId } from '@/lib/speakers';
 import type { PublicScheduleSlot, PublicSpeaker, ScheduleItem, ScheduleKind, ScheduleRoom, SpeakerSessionTime } from '@/lib/types';
 import { SCHEDULE_ROOMS } from '@/lib/scheduleLabels';
 
@@ -39,25 +39,34 @@ async function fetchScheduleItems(): Promise<ScheduleItem[]> {
   });
 }
 
-function toPublicSlot(item: ScheduleItem, confirmedSpeakersById: Map<string, PublicSpeaker>): PublicScheduleSlot {
+function toPublicSlot(item: ScheduleItem, confirmedSpeakers: PublicSpeaker[]): PublicScheduleSlot {
   const endTime = new Date(new Date(item.startTime).getTime() + item.durationMinutes * 60_000).toISOString();
   // An unconfirmed speaker simply drops out, the same rule /speakers applies. A session
-  // left with nobody keeps its placeholder title and shows no speaker.
-  const speakers = item.speakerIds
-    .map((speakerId) => confirmedSpeakersById.get(speakerId))
+  // left with nobody keeps its placeholder title and shows no speaker. Co-speakers are not
+  // listed on the slot: they come along with their lead, so adding one never needs the
+  // schedule reseeding.
+  const listedSpeakers = item.speakerIds
+    .map((speakerId) => confirmedSpeakers.find((speaker) => speaker.id === speakerId))
     .filter((speaker): speaker is PublicSpeaker => Boolean(speaker));
-  const leadSpeaker = speakers[0];
-  // A single speaker's talk is titled by the talk. A block shared by several (lightning
-  // talks) keeps its own title, since no one talk names it.
-  const takesSpeakerTitle = item.kind === 'session' && speakers.length === 1;
+  const speakers = listedSpeakers.flatMap((listed) => [
+    listed,
+    ...confirmedSpeakers.filter((speaker) => speaker.coSpeakerOf === listed.id),
+  ]);
+  const leadSpeaker = listedSpeakers[0];
+  // One session (a single speaker, or a lead with their co-speakers) is titled by the
+  // talk. A block shared by several sessions (lightning talks) keeps its own title, since
+  // no one talk names it.
+  const isOneSession = speakers.length > 0 && speakers.every((speaker) => sessionLeadId(speaker) === sessionLeadId(leadSpeaker));
+  const takesSpeakerTitle = item.kind === 'session' && isOneSession;
 
   return {
     id: item.id,
     kind: item.kind,
     title: takesSpeakerTitle ? leadSpeaker.talkTitle : item.title,
-    talkTitle: item.kind === 'plenary' && speakers.length === 1 ? leadSpeaker.talkTitle : null,
+    talkTitle: item.kind === 'plenary' && isOneSession ? leadSpeaker.talkTitle : null,
     speakers: speakers.map((speaker) => ({ name: speaker.name, slug: speaker.slug, photoUrl: speaker.photoUrl })),
-    hasUnannouncedSpeaker: speakers.length < item.speakerIds.length,
+    sessionSlug: isOneSession ? leadSpeaker.slug : null,
+    hasUnannouncedSpeaker: listedSpeakers.length < item.speakerIds.length,
     track: takesSpeakerTitle ? leadSpeaker.track : null,
     format: takesSpeakerTitle ? leadSpeaker.format : null,
     startTime: item.startTime,
@@ -72,8 +81,7 @@ function toPublicSlot(item: ScheduleItem, confirmedSpeakersById: Map<string, Pub
 export async function fetchPublicSchedule(): Promise<PublicScheduleSlot[]> {
   try {
     const [items, speakers] = await Promise.all([fetchScheduleItems(), fetchPublicSpeakers()]);
-    const confirmedSpeakersById = new Map(speakers.map((speaker) => [speaker.id, speaker]));
-    return items.map((item) => toPublicSlot(item, confirmedSpeakersById));
+    return items.map((item) => toPublicSlot(item, speakers));
   } catch {
     return [];
   }
@@ -87,11 +95,20 @@ function toSessionTime(item: ScheduleItem): SpeakerSessionTime {
 // Every scheduled speaker's slot, keyed by speaker id. Throws on a failed read: callers
 // that act on the answer (sending an invite or a cancellation) must not mistake "could
 // not read the schedule" for "not on the schedule".
+// A co-speaker shares their lead's slot without being listed on it, so they are given it
+// here, confirmed or not: the dashboard and the invite action apply their own gates.
 export async function fetchSessionTimesBySpeakerId(): Promise<Record<string, SpeakerSessionTime>> {
-  const items = await fetchScheduleItems();
+  const [items, coSpeakerSnapshot] = await Promise.all([
+    fetchScheduleItems(),
+    adminDb.collection('speakers').where('coSpeakerOf', '!=', '').get(),
+  ]);
   const sessionTimes: Record<string, SpeakerSessionTime> = {};
   for (const item of items) {
     for (const speakerId of item.speakerIds) sessionTimes[speakerId] = toSessionTime(item);
+  }
+  for (const coSpeaker of coSpeakerSnapshot.docs) {
+    const leadSession = sessionTimes[coSpeaker.data().coSpeakerOf as string];
+    if (leadSession) sessionTimes[coSpeaker.id] = leadSession;
   }
   return sessionTimes;
 }

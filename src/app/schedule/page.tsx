@@ -64,8 +64,8 @@ function SpeakerList({ speakers }: { speakers: PublicScheduleSlot['speakers'] })
 // A talk or workshop in one room. showRoom is for the mobile list, where there is no
 // column heading to say which room it is in.
 function SessionCard({ slot, showRoom }: { slot: PublicScheduleSlot; showRoom: boolean }) {
-  const leadSpeaker = slot.speakers[0];
   const room = SCHEDULE_ROOM_LABELS[slot.room];
+  const speakerNames = slot.speakers.map((speaker) => speaker.name).join(' and ');
 
   return (
     <article className="h-full bg-surface rounded-xl p-4 flex flex-col gap-3">
@@ -81,10 +81,10 @@ function SessionCard({ slot, showRoom }: { slot: PublicScheduleSlot; showRoom: b
       </div>
 
       <h3 className="text-base font-bold text-white leading-snug">
-        {leadSpeaker && slot.speakers.length === 1 ? (
+        {slot.sessionSlug ? (
           <Link
-            href={`/speakers/${leadSpeaker.slug}`}
-            aria-label={`${slot.title}, by ${leadSpeaker.name}`}
+            href={`/speakers/${slot.sessionSlug}`}
+            aria-label={`${slot.title}, by ${speakerNames}`}
             className="hover:text-white/80 transition-colors"
           >
             {slot.title}

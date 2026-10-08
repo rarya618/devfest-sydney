@@ -10,6 +10,8 @@ import type { Speaker } from '@/lib/types';
 
 interface Props {
   speaker: Speaker;
+  // Set for a co-speaker: their session is the lead's and is edited on the lead's card.
+  leadSpeakerName?: string;
   onClose: () => void;
   onError: (message: string) => void;
 }
@@ -37,7 +39,8 @@ const inputClasses =
 const labelClasses = 'block text-xs font-semibold text-white/50 mb-1';
 const sectionHeadingClasses = 'text-[11px] font-bold uppercase tracking-wider text-white/50';
 
-export default function EditSpeakerModal({ speaker, onClose, onError }: Props) {
+export default function EditSpeakerModal({ speaker, leadSpeakerName, onClose, onError }: Props) {
+  const isCoSpeaker = Boolean(speaker.coSpeakerOf);
   const [fields, setFields] = useState<SpeakerEditableFields>(() => toEditableFields(speaker));
   const [isPending, startTransition] = useTransition();
   const [isUploadingPhoto, startPhotoTransition] = useTransition();
@@ -100,7 +103,7 @@ export default function EditSpeakerModal({ speaker, onClose, onError }: Props) {
       <div className="w-full max-w-xl bg-[#2d2e31] rounded-2xl shadow-xl my-8">
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-            <h2 className="text-lg font-bold text-white">Edit speaker</h2>
+            <h2 className="text-lg font-bold text-white">{isCoSpeaker ? 'Edit co-speaker' : 'Edit speaker'}</h2>
             <button
               type="button"
               onClick={onClose}
@@ -116,7 +119,9 @@ export default function EditSpeakerModal({ speaker, onClose, onError }: Props) {
 
           <div className="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
             <p className="text-xs text-white/50">
-              This is what the public speakers section shows. Changes here don&apos;t touch the original proposal.
+              {isCoSpeaker
+                ? `This is what the public speakers section shows. The session is ${leadSpeakerName ?? 'the lead speaker'}'s: edit the talk on their card.`
+                : 'This is what the public speakers section shows. Changes here don\'t touch the original proposal.'}
             </p>
 
             <div className="space-y-4">
@@ -257,75 +262,77 @@ export default function EditSpeakerModal({ speaker, onClose, onError }: Props) {
               </div>
             </div>
 
-            <div className="space-y-4 pt-4 border-t border-white/10">
-              <h3 className={sectionHeadingClasses}>Session</h3>
+            {!isCoSpeaker && (
+              <div className="space-y-4 pt-4 border-t border-white/10">
+                <h3 className={sectionHeadingClasses}>Session</h3>
 
-              <div>
-                <label className={labelClasses} htmlFor="speaker-talk-title">Talk title</label>
-                <input
-                  id="speaker-talk-title"
-                  className={inputClasses}
-                  value={fields.talkTitle}
-                  onChange={(event) => update('talkTitle', event.target.value)}
-                  maxLength={150}
-                  required
-                />
-              </div>
+                <div>
+                  <label className={labelClasses} htmlFor="speaker-talk-title">Talk title</label>
+                  <input
+                    id="speaker-talk-title"
+                    className={inputClasses}
+                    value={fields.talkTitle}
+                    onChange={(event) => update('talkTitle', event.target.value)}
+                    maxLength={150}
+                    required
+                  />
+                </div>
 
-              <div>
-                <label className={labelClasses} htmlFor="speaker-abstract">Abstract</label>
-                <textarea
-                  id="speaker-abstract"
-                  className={`${inputClasses} min-h-[120px]`}
-                  value={fields.abstract}
-                  onChange={(event) => update('abstract', event.target.value)}
-                  maxLength={2000}
-                  required
-                />
-              </div>
+                <div>
+                  <label className={labelClasses} htmlFor="speaker-abstract">Abstract</label>
+                  <textarea
+                    id="speaker-abstract"
+                    className={`${inputClasses} min-h-[120px]`}
+                    value={fields.abstract}
+                    onChange={(event) => update('abstract', event.target.value)}
+                    maxLength={2000}
+                    required
+                  />
+                </div>
 
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className={labelClasses} htmlFor="speaker-track">Track</label>
-                  <select
-                    id="speaker-track"
-                    className={inputClasses}
-                    value={fields.track}
-                    onChange={(event) => update('track', event.target.value as SpeakerEditableFields['track'])}
-                  >
-                    {Object.entries(TRACK_LABELS).map(([value, label]) => (
-                      <option key={value} value={value}>{label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className={labelClasses} htmlFor="speaker-format">Format</label>
-                  <select
-                    id="speaker-format"
-                    className={inputClasses}
-                    value={fields.format}
-                    onChange={(event) => update('format', event.target.value as SpeakerEditableFields['format'])}
-                  >
-                    {Object.entries(FORMAT_LABELS).map(([value, label]) => (
-                      <option key={value} value={value}>{label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className={labelClasses} htmlFor="speaker-experience">Level</label>
-                  <select
-                    id="speaker-experience"
-                    className={inputClasses}
-                    value={fields.experienceLevel}
-                    onChange={(event) => update('experienceLevel', event.target.value as SpeakerEditableFields['experienceLevel'])}
-                  >
-                    {Object.entries(EXPERIENCE_LABELS).map(([value, label]) => (
-                      <option key={value} value={value}>{label}</option>
-                    ))}
-                  </select>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className={labelClasses} htmlFor="speaker-track">Track</label>
+                    <select
+                      id="speaker-track"
+                      className={inputClasses}
+                      value={fields.track}
+                      onChange={(event) => update('track', event.target.value as SpeakerEditableFields['track'])}
+                    >
+                      {Object.entries(TRACK_LABELS).map(([value, label]) => (
+                        <option key={value} value={value}>{label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={labelClasses} htmlFor="speaker-format">Format</label>
+                    <select
+                      id="speaker-format"
+                      className={inputClasses}
+                      value={fields.format}
+                      onChange={(event) => update('format', event.target.value as SpeakerEditableFields['format'])}
+                    >
+                      {Object.entries(FORMAT_LABELS).map(([value, label]) => (
+                        <option key={value} value={value}>{label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={labelClasses} htmlFor="speaker-experience">Level</label>
+                    <select
+                      id="speaker-experience"
+                      className={inputClasses}
+                      value={fields.experienceLevel}
+                      onChange={(event) => update('experienceLevel', event.target.value as SpeakerEditableFields['experienceLevel'])}
+                    >
+                      {Object.entries(EXPERIENCE_LABELS).map(([value, label]) => (
+                        <option key={value} value={value}>{label}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-white/10">

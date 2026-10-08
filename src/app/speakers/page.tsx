@@ -37,83 +37,109 @@ const TRACK_DESCRIPTIONS: Record<Track, string> = {
   showcase: 'Five-minute demos from the community.',
 };
 
-function groupByTrack(speakers: PublicSpeaker[]): { track: Track; speakers: PublicSpeaker[] }[] {
-  return TRACK_ORDER.map((track) => ({
-    track,
-    speakers: speakers.filter((speaker) => speaker.track === track),
-  })).filter((group) => group.speakers.length > 0);
+// One entry per session: the lead speaker, then anyone presenting it with them. The page
+// lists sessions rather than people, so a co-presented talk is one card, not two copies.
+function groupIntoSessions(speakers: PublicSpeaker[]): PublicSpeaker[][] {
+  const publicIds = new Set(speakers.map((speaker) => speaker.id));
+  return speakers
+    .filter((speaker) => !speaker.coSpeakerOf || !publicIds.has(speaker.coSpeakerOf))
+    .map((lead) => [lead, ...speakers.filter((speaker) => speaker.coSpeakerOf === lead.id)]);
 }
 
-function SpeakerCard({ speaker, delay }: { speaker: PublicSpeaker; delay: number }) {
+function groupByTrack(speakers: PublicSpeaker[]): { track: Track; sessions: PublicSpeaker[][] }[] {
+  const sessions = groupIntoSessions(speakers);
+  return TRACK_ORDER.map((track) => ({
+    track,
+    sessions: sessions.filter((presenters) => presenters[0].track === track),
+  })).filter((group) => group.sessions.length > 0);
+}
+
+function PresenterHeader({ speaker }: { speaker: PublicSpeaker }) {
   const hasLinks = Boolean(speaker.linkedinUrl || speaker.githubUrl || speaker.websiteUrl);
 
   return (
+    <div className="flex items-start gap-4">
+      <div className="w-16 h-16 rounded-full overflow-hidden bg-white/5 shrink-0">
+        {speaker.photoUrl ? (
+          <Image src={speaker.photoUrl} alt={speaker.name} width={64} height={64} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-white/50 text-lg font-bold" aria-hidden="true">
+            {getInitials(speaker.name)}
+          </div>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <h3 className="text-lg font-bold text-white leading-snug">
+          <Link href={`/speakers/${speaker.slug}`} className="hover:text-white/80 transition-colors">
+            {speaker.name}
+          </Link>
+        </h3>
+        {speaker.tagline && (
+          <p className="mt-0.5 text-sm text-white/60 leading-snug line-clamp-3" title={speaker.tagline}>
+            {speaker.tagline}
+          </p>
+        )}
+        {hasLinks && (
+          <div className="mt-2 flex items-center gap-3">
+            {speaker.linkedinUrl && (
+              <a
+                href={speaker.linkedinUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${speaker.name} on LinkedIn`}
+                className="text-white/50 hover:text-white/80 transition-colors"
+              >
+                <LinkedInIcon />
+              </a>
+            )}
+            {speaker.githubUrl && (
+              <a
+                href={speaker.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${speaker.name} on GitHub`}
+                className="text-white/50 hover:text-white/80 transition-colors"
+              >
+                <GitHubIcon />
+              </a>
+            )}
+            {speaker.websiteUrl && (
+              <a
+                href={speaker.websiteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${speaker.name}'s website`}
+                className="text-white/50 hover:text-white/80 transition-colors"
+              >
+                <WebsiteIcon />
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// A session card: every presenter at the top, then the talk. The talk fields are the
+// lead's, which co-speakers share.
+function SessionCard({ presenters, delay }: { presenters: PublicSpeaker[]; delay: number }) {
+  const lead = presenters[0];
+  const presenterNames = presenters.map((speaker) => speaker.name).join(' and ');
+  const isSolo = presenters.length === 1;
+
+  return (
     <Reveal delay={delay} className="card-hover-lift bg-surface rounded-2xl p-6 md:p-7 flex flex-col">
-      <div className="flex items-start gap-4 mb-5">
-        <div className="w-16 h-16 rounded-full overflow-hidden bg-white/5 shrink-0">
-          {speaker.photoUrl ? (
-            <Image src={speaker.photoUrl} alt={speaker.name} width={64} height={64} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-white/50 text-lg font-bold" aria-hidden="true">
-              {getInitials(speaker.name)}
-            </div>
-          )}
-        </div>
-        <div className="min-w-0 flex-1">
-          <h3 className="text-lg font-bold text-white leading-snug">
-            <Link href={`/speakers/${speaker.slug}`} className="hover:text-white/80 transition-colors">
-              {speaker.name}
-            </Link>
-          </h3>
-          {speaker.tagline && (
-            <p className="mt-0.5 text-sm text-white/60 leading-snug line-clamp-3" title={speaker.tagline}>
-              {speaker.tagline}
-            </p>
-          )}
-          {hasLinks && (
-            <div className="mt-2 flex items-center gap-3">
-              {speaker.linkedinUrl && (
-                <a
-                  href={speaker.linkedinUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`${speaker.name} on LinkedIn`}
-                  className="text-white/50 hover:text-white/80 transition-colors"
-                >
-                  <LinkedInIcon />
-                </a>
-              )}
-              {speaker.githubUrl && (
-                <a
-                  href={speaker.githubUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`${speaker.name} on GitHub`}
-                  className="text-white/50 hover:text-white/80 transition-colors"
-                >
-                  <GitHubIcon />
-                </a>
-              )}
-              {speaker.websiteUrl && (
-                <a
-                  href={speaker.websiteUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`${speaker.name}'s website`}
-                  className="text-white/50 hover:text-white/80 transition-colors"
-                >
-                  <WebsiteIcon />
-                </a>
-              )}
-            </div>
-          )}
-        </div>
+      <div className="space-y-4 mb-5">
+        {presenters.map((speaker) => (
+          <PresenterHeader key={speaker.id} speaker={speaker} />
+        ))}
       </div>
 
-      <p className="text-xs font-bold text-white/55 mb-2">{FORMAT_LABELS[speaker.format]}</p>
+      <p className="text-xs font-bold text-white/55 mb-2">{FORMAT_LABELS[lead.format]}</p>
       <p className="text-base font-bold text-white/90 leading-snug mb-4">
-        <Link href={`/speakers/${speaker.slug}`} className="hover:text-white/80 transition-colors">
-          {speaker.talkTitle}
+        <Link href={`/speakers/${lead.slug}`} className="hover:text-white/80 transition-colors">
+          {lead.talkTitle}
         </Link>
       </p>
 
@@ -121,7 +147,7 @@ function SpeakerCard({ speaker, delay }: { speaker: PublicSpeaker; delay: number
           enough that a wall of them per card would bury the lineup. */}
       <details className="group mt-auto">
         <summary
-          aria-label={`Read more about ${speaker.name}'s session`}
+          aria-label={`Read more about ${presenterNames}'s session`}
           className="cursor-pointer list-none inline-flex items-center gap-1.5 text-sm font-bold text-google-blue hover:underline [&::-webkit-details-marker]:hidden"
         >
           <span className="group-open:hidden">About this session</span>
@@ -131,23 +157,28 @@ function SpeakerCard({ speaker, delay }: { speaker: PublicSpeaker; delay: number
           </svg>
         </summary>
         <div className="mt-4 space-y-4">
-          <p className="text-sm text-white/65 leading-relaxed whitespace-pre-wrap">{speaker.abstract}</p>
-          {speaker.bio && (
-            <p className="text-sm text-white/65 leading-relaxed whitespace-pre-wrap border-t border-white/10 pt-4">
-              <span className="font-bold text-white/85">About {speaker.name.split(' ')[0]}: </span>
-              {speaker.bio}
-            </p>
+          <p className="text-sm text-white/65 leading-relaxed whitespace-pre-wrap">{lead.abstract}</p>
+          {presenters
+            .filter((speaker) => speaker.bio)
+            .map((speaker) => (
+              <p key={speaker.id} className="text-sm text-white/65 leading-relaxed whitespace-pre-wrap border-t border-white/10 pt-4">
+                <span className="font-bold text-white/85">About {speaker.name.split(' ')[0]}: </span>
+                {speaker.bio}
+              </p>
+            ))}
+          {/* With several presenters, each name above already links to their page. */}
+          {isSolo && (
+            <Link
+              href={`/speakers/${lead.slug}`}
+              aria-label={`Open ${lead.name}'s speaker page`}
+              className="inline-flex items-center gap-1.5 text-sm font-bold text-white/70 hover:text-white transition-colors"
+            >
+              Speaker page
+              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 8h10M9 4l4 4-4 4" />
+              </svg>
+            </Link>
           )}
-          <Link
-            href={`/speakers/${speaker.slug}`}
-            aria-label={`Open ${speaker.name}'s speaker page`}
-            className="inline-flex items-center gap-1.5 text-sm font-bold text-white/70 hover:text-white transition-colors"
-          >
-            Speaker page
-            <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 8h10M9 4l4 4-4 4" />
-            </svg>
-          </Link>
         </div>
       </details>
     </Reveal>
@@ -202,8 +233,8 @@ export default async function SpeakersPage() {
                   <p className="mt-2 text-white/55">{TRACK_DESCRIPTIONS[group.track]}</p>
                 </Reveal>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
-                  {group.speakers.map((speaker, index) => (
-                    <SpeakerCard key={speaker.id} speaker={speaker} delay={Math.min(index, 5) * 0.08} />
+                  {group.sessions.map((presenters, index) => (
+                    <SessionCard key={presenters[0].id} presenters={presenters} delay={Math.min(index, 5) * 0.08} />
                   ))}
                 </div>
               </section>

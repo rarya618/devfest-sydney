@@ -3,9 +3,10 @@
 import { useState, useTransition, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { removeSpeaker } from './speakerActions';
-import { sendAcceptanceEmail, sendSpeakerTicketEmail } from './actions';
+import { sendAcceptanceEmail, sendCoSpeakerTicketEmail, sendSpeakerTicketEmail } from './actions';
 import { sendCalendarInvite } from './calendarInviteActions';
 import EditSpeakerModal from './EditSpeakerModal';
+import AddCoSpeakerModal from './AddCoSpeakerModal';
 import Alert from '@/components/Alert';
 import { formatDate, getInitials } from '@/lib/format';
 import {
@@ -154,15 +155,21 @@ function ProfileLink({ href, label }: ProfileLinkProps) {
 
 interface SpeakerCardProps {
   speaker: Speaker;
+  // On a co-speaker, the speaker whose session they present. Undefined otherwise.
+  leadSpeaker?: Speaker;
+  // On a lead, anyone presenting their session with them.
+  coSpeakers: Speaker[];
   session: SpeakerSessionTime | null;
   inviteStatus: CalendarInviteStatus | null;
   onError: (message: string) => void;
 }
 
-function SpeakerCard({ speaker, session, inviteStatus, onError }: SpeakerCardProps) {
+function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, onError }: SpeakerCardProps) {
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [addingCoSpeaker, setAddingCoSpeaker] = useState(false);
+  const isCoSpeaker = Boolean(speaker.coSpeakerOf);
   const [confirmingRemove, setConfirmingRemove] = useState(false);
   const confirmation = CONFIRMATION_CHIP[speaker.confirmation];
   const missing = missingProfileParts(speaker);
@@ -194,10 +201,11 @@ function SpeakerCard({ speaker, session, inviteStatus, onError }: SpeakerCardPro
   }
 
   // The ticket link unlocks a free ticket, so it is only offered once the speaker has
-  // confirmed: the same rule the action enforces on the server.
+  // confirmed: the same rule the action enforces on the server. A co-speaker has no
+  // proposal, so theirs is sent against their own document.
   function handleSendSpeakerTicket() {
     startTransition(async () => {
-      const result = await sendSpeakerTicketEmail(speaker.submissionId);
+      const result = isCoSpeaker ? await sendCoSpeakerTicketEmail(speaker.id) : await sendSpeakerTicketEmail(speaker.submissionId);
       if (result.error) onError(result.error);
     });
   }
@@ -210,7 +218,8 @@ function SpeakerCard({ speaker, session, inviteStatus, onError }: SpeakerCardPro
   }
 
   const alreadyEmailed = Boolean(speaker.acceptanceEmailSentAt);
-  const canEmail = speaker.confirmation !== 'unknown';
+  // A co-speaker was never sent an acceptance: the lead answered for the session.
+  const canEmail = !isCoSpeaker && speaker.confirmation !== 'unknown';
   const canSendTicket = speaker.confirmation === 'confirmed';
   const ticketSent = Boolean(speaker.speakerTicketEmailSentAt);
   // Confirmed only, as the action enforces: an invite announces a slot the speaker has
@@ -244,6 +253,16 @@ function SpeakerCard({ speaker, session, inviteStatus, onError }: SpeakerCardPro
               {confirmation.label}
             </span>
           </div>
+          {isCoSpeaker && (
+            <p className="mt-0.5 text-xs font-bold text-google-blue-light">
+              Co-speaker with {leadSpeaker?.name ?? 'a speaker no longer in the lineup'}
+            </p>
+          )}
+          {coSpeakers.length > 0 && (
+            <p className="mt-0.5 text-xs font-bold text-google-blue-light">
+              Presenting with {coSpeakers.map((coSpeaker) => coSpeaker.name).join(' and ')}
+            </p>
+          )}
           {speaker.tagline ? (
             <p className="mt-0.5 text-sm text-white/65">{speaker.tagline}</p>
           ) : (
@@ -337,6 +356,20 @@ function SpeakerCard({ speaker, session, inviteStatus, onError }: SpeakerCardPro
             </svg>
           </button>
 
+          {!isCoSpeaker && (
+            <button
+              onClick={() => setAddingCoSpeaker(true)}
+              aria-label={`Add a co-speaker to ${speaker.name}'s session`}
+              title="Add co-speaker"
+              className="inline-flex items-center justify-center w-9 h-9 rounded-full text-white/70 hover:text-white hover:bg-white/[0.08] transition-colors"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                <circle cx="6.5" cy="5" r="2.5" />
+                <path strokeLinecap="round" d="M1.5 13.5c.4-2.6 2.4-4 5-4s4.6 1.4 5 4M12.5 4.5v4M10.5 6.5h4" />
+              </svg>
+            </button>
+          )}
+
           {canEmail && (
             <button
               onClick={handleSendAcceptanceEmail}
@@ -397,7 +430,11 @@ function SpeakerCard({ speaker, session, inviteStatus, onError }: SpeakerCardPro
           {confirmingRemove ? (
             <div role="group" aria-label={`Confirm removing ${speaker.name}`} className="flex flex-col items-end gap-1.5 bg-[#2d2e31] border border-white/10 rounded-xl px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.45)] w-52">
               <p className="text-xs text-white/70 leading-snug text-left w-full">
-                Remove from the lineup and return the proposal to pending?
+                {isCoSpeaker
+                  ? 'Remove this co-speaker from the lineup?'
+                  : coSpeakers.length > 0
+                    ? `Remove from the lineup with ${coSpeakers.map((coSpeaker) => coSpeaker.name.split(' ')[0]).join(' and ')}, and return the proposal to pending?`
+                    : 'Remove from the lineup and return the proposal to pending?'}
               </p>
               <div className="flex items-center gap-1.5">
                 <button
@@ -434,9 +471,21 @@ function SpeakerCard({ speaker, session, inviteStatus, onError }: SpeakerCardPro
       {editing && (
         <EditSpeakerModal
           speaker={speaker}
+          leadSpeakerName={leadSpeaker?.name}
           onClose={() => setEditing(false)}
           onError={(message) => {
             setEditing(false);
+            onError(message);
+          }}
+        />
+      )}
+
+      {addingCoSpeaker && (
+        <AddCoSpeakerModal
+          lead={speaker}
+          onClose={() => setAddingCoSpeaker(false)}
+          onError={(message) => {
+            setAddingCoSpeaker(false);
             onError(message);
           }}
         />
@@ -562,7 +611,8 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
     unknown: speakers.filter((speaker) => speaker.confirmation === 'unknown').length,
   };
   const confirmedCount = confirmationCounts.confirmed;
-  const notEmailedCount = confirmationCounts['not-emailed'];
+  // A co-speaker shares their lead's status but is never emailed an acceptance themselves.
+  const notEmailedCount = speakers.filter((speaker) => !speaker.coSpeakerOf && speaker.confirmation === 'not-emailed').length;
   const incompleteCount = speakers.filter((speaker) => missingProfileParts(speaker).length > 0).length;
   const awaitingTicketCount = speakers.filter(
     (speaker) => speaker.confirmation === 'confirmed' && !speaker.speakerTicketEmailSentAt
@@ -609,8 +659,20 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
     });
   }
 
+  // Each co-speaker sits straight after their lead, so a shared session reads as a pair.
+  const speakersById = new Map(speakers.map((speaker) => [speaker.id, speaker]));
+  const coSpeakersByLead = new Map<string, Speaker[]>();
+  for (const speaker of speakers) {
+    if (speaker.coSpeakerOf && speakersById.has(speaker.coSpeakerOf)) {
+      coSpeakersByLead.set(speaker.coSpeakerOf, [...(coSpeakersByLead.get(speaker.coSpeakerOf) ?? []), speaker]);
+    }
+  }
+  const orderedSpeakers = speakers
+    .filter((speaker) => !speaker.coSpeakerOf || !speakersById.has(speaker.coSpeakerOf))
+    .flatMap((speaker) => [speaker, ...(coSpeakersByLead.get(speaker.id) ?? [])]);
+
   const query = search.trim().toLowerCase();
-  const filtered = speakers
+  const filtered = orderedSpeakers
     .filter((speaker) => filter === 'all' || speaker.track === filter)
     .filter((speaker) => confirmationFilter === 'all' || speaker.confirmation === confirmationFilter)
     .filter(
@@ -867,6 +929,8 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
               <SpeakerCard
                 key={speaker.id}
                 speaker={speaker}
+                leadSpeaker={speaker.coSpeakerOf ? speakersById.get(speaker.coSpeakerOf) : undefined}
+                coSpeakers={coSpeakersByLead.get(speaker.id) ?? []}
                 session={sessionTimes?.[speaker.id] ?? null}
                 inviteStatus={inviteStatuses.get(speaker.id) ?? null}
                 onError={setAlertMessage}

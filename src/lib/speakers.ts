@@ -74,7 +74,7 @@ export async function fetchSpeakers(): Promise<Speaker[]> {
     }
   });
 
-  return snapshot.docs.map((doc) => {
+  const speakers = snapshot.docs.map((doc) => {
     const data = doc.data();
     const promotedAt = data.promotedAt as Timestamp | undefined;
     const submissionId: string = data.submissionId ?? '';
@@ -102,13 +102,40 @@ export async function fetchSpeakers(): Promise<Speaker[]> {
       acceptanceEmailSentBy: sourceSubmission?.acceptanceEmailSentBy ?? null,
       confirmByDate: toIsoOrNull(sourceSubmission?.confirmByDate),
       speakerConfirmedAt: toIsoOrNull(sourceSubmission?.speakerConfirmedAt),
-      speakerTicketEmailSentAt: toIsoOrNull(sourceSubmission?.speakerTicketEmailSentAt),
-      speakerTicketEmailSentBy: sourceSubmission?.speakerTicketEmailSentBy ?? null,
+      // A co-speaker has no proposal, so their ticket is recorded on their own document.
+      speakerTicketEmailSentAt: toIsoOrNull(
+        (sourceSubmission?.speakerTicketEmailSentAt ?? data.speakerTicketEmailSentAt) as Timestamp | undefined
+      ),
+      speakerTicketEmailSentBy: sourceSubmission?.speakerTicketEmailSentBy ?? data.speakerTicketEmailSentBy ?? null,
       calendarInviteSentAt: toIsoOrNull(data.calendarInviteSentAt as Timestamp | undefined),
       calendarInviteSentBy: data.calendarInviteSentBy ?? null,
       calendarInviteSlot: toCalendarInviteSlot(data.calendarInviteSlot),
+      coSpeakerOf: typeof data.coSpeakerOf === 'string' && data.coSpeakerOf ? data.coSpeakerOf : null,
     } satisfies Speaker;
   });
+
+  return speakers.map((speaker) => (speaker.coSpeakerOf ? withLeadSession(speaker, speakers) : speaker));
+}
+
+// A co-speaker's document holds only their profile. The session and whether it is going
+// ahead belong to the lead, so both are copied across here and every reader sees one
+// session. A co-speaker whose lead has gone reads as "No proposal" and stays off the
+// public pages.
+function withLeadSession(coSpeaker: Speaker, speakers: Speaker[]): Speaker {
+  const lead = speakers.find((candidate) => candidate.id === coSpeaker.coSpeakerOf && !candidate.coSpeakerOf);
+  if (!lead) return { ...coSpeaker, confirmation: 'unknown' };
+  return {
+    ...coSpeaker,
+    talkTitle: lead.talkTitle,
+    abstract: lead.abstract,
+    format: lead.format,
+    track: lead.track,
+    experienceLevel: lead.experienceLevel,
+    confirmation: lead.confirmation,
+    // The acceptance email and confirm deadline were the lead's, so they are not repeated
+    // on the co-speaker's card; the confirmation is what decides whether they appear.
+    speakerConfirmedAt: lead.speakerConfirmedAt,
+  };
 }
 
 // "Brett Morgan" -> "brett-morgan". Names that collapse to nothing (all symbols) fall
@@ -125,13 +152,31 @@ export function toSpeakerSlug(name: string): string {
 
 // Two confirmed speakers with the same name get "-2", "-3" and so on, in name order, so
 // every slug is unique for a given lineup.
-function assignUniqueSlugs(speakers: Omit<PublicSpeaker, 'slug'>[]): PublicSpeaker[] {
+function assignUniqueSlugs(speakers: Omit<PublicSpeaker, 'slug' | 'sessionPartners'>[]): Omit<PublicSpeaker, 'sessionPartners'>[] {
   const seen = new Map<string, number>();
   return speakers.map((speaker) => {
     const base = toSpeakerSlug(speaker.name);
     const count = (seen.get(base) ?? 0) + 1;
     seen.set(base, count);
     return { ...speaker, slug: count === 1 ? base : `${base}-${count}` };
+  });
+}
+
+// The id that names a session: the lead speaker's, shared by their co-speakers.
+export function sessionLeadId(speaker: Pick<PublicSpeaker, 'id' | 'coSpeakerOf'>): string {
+  return speaker.coSpeakerOf ?? speaker.id;
+}
+
+// Everyone else on each speaker's session, lead first and then co-speakers by name (the
+// list is already in name order).
+function attachSessionPartners(speakers: Omit<PublicSpeaker, 'sessionPartners'>[]): PublicSpeaker[] {
+  return speakers.map((speaker) => {
+    const sessionId = sessionLeadId(speaker);
+    const partners = speakers
+      .filter((other) => other.id !== speaker.id && sessionLeadId(other) === sessionId)
+      .sort((first, second) => Number(Boolean(first.coSpeakerOf)) - Number(Boolean(second.coSpeakerOf)))
+      .map((other) => ({ name: other.name, slug: other.slug }));
+    return { ...speaker, sessionPartners: partners };
   });
 }
 
@@ -158,8 +203,9 @@ export async function fetchPublicSpeakers(): Promise<PublicSpeaker[]> {
         tagline: speaker.tagline,
         photoUrl: speaker.photoUrl,
         previousSlugs: speaker.previousSlugs,
+        coSpeakerOf: speaker.coSpeakerOf,
       }));
-    return assignUniqueSlugs(confirmed);
+    return attachSessionPartners(assignUniqueSlugs(confirmed));
   } catch {
     return [];
   }
