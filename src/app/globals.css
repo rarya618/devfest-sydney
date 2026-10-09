@@ -176,6 +176,17 @@ body {
   animation: marquee 40s linear infinite;
 }
 
+/* Vertical loop for the /jobs/display columns. The duration is set inline from the
+   content height, so it is only a fallback here. */
+@keyframes marquee-up {
+  from { transform: translateY(0); }
+  to { transform: translateY(-50%); }
+}
+
+.animate-marquee-up {
+  animation: marquee-up 60s linear infinite;
+}
+
 /* Compositor-friendly hover lift: transform is compositable, box-shadow is not,
    so the shadow lives on a separate absolutely-positioned layer that only ever
    transitions opacity — animating box-shadow directly forces a repaint every
@@ -216,7 +227,8 @@ body {
 
   .animate-fade-in,
   .animate-slide-up,
-  .animate-marquee {
+  .animate-marquee,
+  .animate-marquee-up {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
