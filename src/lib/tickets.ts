@@ -56,7 +56,7 @@ export const TICKET_INCLUSIONS: { title: string; description: string; color: str
   },
   {
     title: 'The Builder Showcase',
-    description: 'Five-minute demos from fellow attendees, with the room voting on the winner.',
+    description: 'Five-minute demos of what fellow attendees have built.',
     color: 'google-yellow',
   },
   {

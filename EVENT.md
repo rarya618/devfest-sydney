@@ -40,7 +40,7 @@ Topics: Prototyping with AI, automation, no-code and low-code tooling
 Hands-on sessions where attendees build alongside the speaker. Open to any topic or audience, from either the Developer or Builder track.
 
 ### 4. Builder Showcase
-Mid-afternoon session where attendees present 5-minute demos, with audience voting.
+Mid-afternoon session where attendees present 5-minute demos (4 minutes of demo, 1 of Q&A). There is no audience vote or winner (confirmed 2026-10-09).
 
 Entries come in through the call for demos at `/builder-showcase`, which runs on its own
 timetable separate from the Call for Speakers.

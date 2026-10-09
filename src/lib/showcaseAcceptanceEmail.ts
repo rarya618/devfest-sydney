@@ -110,7 +110,7 @@ export function buildShowcaseAcceptanceEmail(details: ShowcaseAcceptanceEmailDet
               <!-- The showcase -->
               <h3 style="margin:0 0 12px;${sectionHeading}">How the showcase works</h3>
               <p style="margin:0 0 16px;${bodyText}">
-                You get five minutes on the main stage in the Auditorium, mid-afternoon, and the room votes on its favourite. Slides are optional: the audience would rather see the thing working.
+                You get five minutes on the main stage in the Auditorium, mid-afternoon. Slides are optional: the audience would rather see the thing working.
               </p>
               <p style="margin:0 0 32px;${bodyText}">
                 DevFest Sydney is on Saturday 10 October at Torrens University, Surry Hills. Closer to the day we'll send you the running order and when to be at the stage for a quick tech check. If there's anything you need for your demo that you didn't mention when you entered, just reply and tell us.

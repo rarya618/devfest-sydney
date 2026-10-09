@@ -13,7 +13,7 @@ import ShowcaseFaq, { type ShowcaseFaqItem } from './ShowcaseFaq';
 export const dynamic = 'force-dynamic';
 
 const title = 'Builder Showcase';
-const description = 'Enter the Builder Showcase at DevFest Sydney 2026. Five minutes on stage to demo what you built, with the room voting on the winner.';
+const description = 'Enter the Builder Showcase at DevFest Sydney 2026. Five minutes on stage to demo what you built, in front of the whole room.';
 
 export const metadata: Metadata = buildPageMetadata({ title, description, path: '/builder-showcase' });
 
@@ -34,8 +34,8 @@ const HOW_IT_WORKS = [
     color: 'google-yellow',
   },
   {
-    title: 'The room votes',
-    desc: 'Every attendee votes on their favourite demo, and we crown a winner before the day is out.',
+    title: 'Meet the room',
+    desc: 'Stick around afterwards: the people who just watched your demo are the ones to talk to.',
     color: 'google-red',
   },
 ];
@@ -60,10 +60,6 @@ const SHOWCASE_FAQS: ShowcaseFaqItem[] = [
   {
     q: 'What if my demo needs sound or internet?',
     a: 'Tell us in the "Anything you need to demo?" field on the entry form. A screen and a mic come as standard, so flag anything beyond that, such as audio, a stable connection, or a physical device on stage, and we will work it out with you before the day.',
-  },
-  {
-    q: 'How is the winner decided?',
-    a: 'The room votes. Every attendee picks their favourite demo once the presentations are done, and we announce the winner before the day is out.',
   },
   {
     q: 'When will I hear back?',

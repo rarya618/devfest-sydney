@@ -193,7 +193,7 @@ function buildConfirmationEmail(entry: ShowcasePayload): string {
               <!-- What happens next -->
               <div style="margin-top:40px;">
                 <p style="margin:0 0 8px;${font}font-size:24px;font-weight:700;color:#ffffff;line-height:1.5;">What happens next</p>
-                <p style="margin:0;${font}font-size:20px;font-weight:400;color:#ffffff;line-height:1.5;">If your demo is picked you'll get five minutes on stage in the mid-afternoon showcase, and the room votes on the winner.</p>
+                <p style="margin:0;${font}font-size:20px;font-weight:400;color:#ffffff;line-height:1.5;">If your demo is picked you'll get five minutes on stage in the mid-afternoon showcase.</p>
               </div>
 
               <!-- Questions -->
