@@ -18,7 +18,7 @@ export default function AddJobSeekerPage() {
     <div className="bg-[#010103] text-white min-h-screen">
       <Navbar areTicketsOpen={areTicketsOpen()} />
 
-      <JobFormHero backHref="/jobs/people" backLabel="Back to the people open to work" title="Add your profile">
+      <JobFormHero activeForm="seeking" backHref="/jobs/people" backLabel="Back to the people open to work" title="Add your profile">
         <p>
           A short profile so the teams at DevFest can find you. We never show your email: employers reach you
           through LinkedIn. To change or remove your profile, email{' '}

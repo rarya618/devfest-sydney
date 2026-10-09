@@ -19,7 +19,7 @@ export default function PostJobPage() {
     <div className="bg-[#010103] text-white min-h-screen">
       <Navbar areTicketsOpen={areTicketsOpen()} />
 
-      <JobFormHero backHref="/jobs" backLabel="Back to the job board" title="Post a role">
+      <JobFormHero activeForm="hiring" backHref="/jobs" backLabel="Back to the job board" title="Post a role">
         <p>
           Free for any team. An organiser checks every role before it goes up, and DevFest sponsors&apos;
           roles are listed first. Questions? Email{' '}
