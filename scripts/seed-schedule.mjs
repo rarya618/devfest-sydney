@@ -77,8 +77,9 @@ const SLOTS = [
   { start: '14:00', end: '14:45', room: 'developer', kind: 'session', title: 'Talk', speakers: ['Olga Mirensky'] },
   { start: '14:00', end: '14:45', room: 'builder', kind: 'session', title: 'Talk', speakers: ['Finn Middleton'] },
   { start: '14:00', end: '15:00', room: 'workshops', kind: 'session', title: 'Workshop', speakers: ['Shang Yi Lim'] },
-  { start: '15:00', end: '15:15', room: 'workshops', kind: 'session', title: 'Lightning talk', speakers: ['Akshay'] },
-  { start: '15:15', end: '15:30', room: 'workshops', kind: 'session', title: 'Lightning talk', speakers: ['Natalia Tapia'] },
+  { start: '15:00', end: '15:10', room: 'workshops', kind: 'session', title: 'Lightning talk', speakers: ['Akshay'] },
+  { start: '15:10', end: '15:20', room: 'workshops', kind: 'session', title: 'Lightning talk', speakers: ['Natalia Tapia'] },
+  { start: '15:20', end: '15:30', room: 'workshops', kind: 'session', title: 'To be announced', isTentative: true },
 
   { start: '14:45', end: '15:30', room: 'auditorium', kind: 'session', title: 'Talk', speakers: ['Phil Nash'] },
   { start: '14:45', end: '15:30', room: 'developer', kind: 'session', title: 'Talk', speakers: ['Isaac Udy'] },
