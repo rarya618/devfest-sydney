@@ -44,7 +44,7 @@ function JobCard({ listing }: { listing: PublicJobListing }) {
         </div>
         {listing.sponsor?.logoUrl && (
           <div className="relative h-10 w-28 shrink-0">
-            <Image src={listing.sponsor.logoUrl} alt={listing.sponsor.name} fill sizes="112px" className="object-contain object-right" />
+            <Image src={listing.sponsor.logoUrl} alt={listing.sponsor.name} fill sizes="112px" className="object-contain object-right brightness-0 invert" />
           </div>
         )}
       </div>
