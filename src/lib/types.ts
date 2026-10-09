@@ -444,3 +444,33 @@ export interface PublicJobSeeker {
   linkedinUrl: string;
   portfolioUrl: string;
 }
+
+// The post-event survey (/feedback). Written only by /api/submit-feedback and read only on
+// /admin/feedback, so `feedback` has no block in firestore.rules. Anonymous unless the
+// attendee leaves an email to hear back.
+export type FeedbackRole = 'developer' | 'builder' | 'student' | 'other';
+export type FeedbackAspect = 'talks' | 'workshops' | 'venue' | 'food' | 'organisation' | 'networking';
+export type FeedbackActivity = 'keynotes' | 'spotlight' | 'developer' | 'builder' | 'workshops' | 'showcase' | 'builders-space' | 'job-board';
+export type FeedbackReturnIntent = 'yes' | 'maybe' | 'no';
+
+export interface FeedbackResponse {
+  id: string;
+  overallRating: number; // 1 to 5
+  recommendScore: number; // 0 to 10, for an NPS
+  // 1 to 5 for each aspect the attendee rated. Missing means they skipped it, which is
+  // different from a low score (someone who left before lunch has no view on the food).
+  aspectRatings: Partial<Record<FeedbackAspect, number>>;
+  activities: FeedbackActivity[];
+  // The schedule slot id, and its title as it read when they answered, so a later
+  // schedule edit doesn't rewrite what they picked. Empty when they skipped it.
+  favouriteSessionId: string;
+  favouriteSessionTitle: string;
+  enjoyedMost: string;
+  improve: string;
+  topicsNextYear: string;
+  role: FeedbackRole | '';
+  isFirstDevFest: boolean | null;
+  returnIntent: FeedbackReturnIntent | '';
+  email: string; // optional, only for a reply
+  submittedAt: string; // ISO date string
+}

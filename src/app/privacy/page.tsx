@@ -41,6 +41,11 @@ This may include your name, email address, phone number, talk or session details
 Profiles from people looking for work are shown only with your consent, are kept out of search engines, and can be changed or removed at any time by emailing hello@gdgsydney.com. We take the job board down, and delete the profiles on it, after the event.`,
   },
   {
+    slug: 'feedback',
+    title: 'Event Feedback',
+    content: `Our post-event survey is anonymous unless you choose to give your email address, which we use only to reply to something you wrote. Answers are read by the organising team to plan future events and are never published alongside your email.`,
+  },
+  {
     slug: 'third-party-services',
     title: 'Third-Party Services',
     content: `We use a small number of trusted third parties to run this website and event:`,

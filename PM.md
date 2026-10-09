@@ -41,6 +41,8 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 - `/admin/crew` — Manage accepted volunteers (assign area and shift, upload photo, opt in to `/crew`, remove from crew), add organisers directly, and export the filtered roster as CSV
 - `/admin/showcase` — Review Builder Showcase entries (accept, reject, restore, archive)
 - `/admin/jobs` — Review job board roles and profiles (Roles / Open to work tabs via `?tab=people`): approve, reject, take down, back to pending, delete for good (for removal requests), and link a role to a sponsor
+- `/feedback` — Post-event survey (added 2026-10-10). Two required questions (overall 1 to 5, recommend 0 to 10 for an NPS), the rest optional: what they got to, a 1 to 5 rating per part (talks, workshops, venue, food, organisation, meeting people), favourite session (picked from the live schedule; the server looks the title up rather than trusting the form), three free-text answers, role, first DevFest, coming back, and an optional email for a reply only. Anonymous otherwise, and no confirmation email. Written by `/api/submit-feedback` to `feedback` (Admin SDK only, no rules block, like the job board). No open/closed switch. `noindex`, out of the sitemap and unlinked from the nav and footer: shared by link and QR on the day
+- `/admin/feedback` — Survey results (Insights in the sidebar): response count, average overall, NPS, a breakdown per question, the written answers filterable by question, CSV export, and delete (for spam or removal requests)
 - `/admin/admins` — Manage authorised admin emails
 - `/admin/analytics` — Submission stats and trends
 - `/admin/links` — Generate UTM-tagged tracking links
