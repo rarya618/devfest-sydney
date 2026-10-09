@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import CfsLink from './CfsLink';
-import ShowcaseLink from './ShowcaseLink';
 import TicketsLink from './TicketsLink';
 
 type Accent = 'blue' | 'green' | 'red' | 'yellow';
@@ -22,21 +21,12 @@ const ACCENT_CLASSES: Record<Accent, string> = {
 // not scroll the page you are on. About and Tracks stay reachable from the footer.
 // Kept short. /tickets is reached from the CTA button beside these links, from the
 // landing page's ticket section, and from the footer, so a nav item for it would only
-// repeat the CTA sitting next to it.
-//
-// /builder-showcase is not gated on whether entries are open, for the same reason the
-// footer's /tickets link is permanent: the page has its own closed state, and Navbar is a
-// client component that cannot read the server-only SHOWCASE_OPEN anyway.
-
-// Matched against so the showcase item renders as a ShowcaseLink, which tags the click
-// with its own ref the way the tickets and CfS CTAs do.
-const SHOWCASE_HREF = '/builder-showcase';
-
+// repeat the CTA sitting next to it. /builder-showcase left the nav on 2026-10-10, once
+// demos were settled for the day; it is still in the footer's Support column.
 const NAV_LINKS = [
   { href: '/speakers', label: 'Speakers' },
   { href: '/schedule', label: 'Schedule' },
   { href: '/partners', label: 'Partners' },
-  { href: SHOWCASE_HREF, label: 'Builder Showcase' },
 ];
 
 export default function Navbar({
@@ -126,19 +116,13 @@ export default function Navbar({
           </Link>
 
           <div className="flex items-center gap-6 lg:gap-8">
-            {/* Links: tighter spacing below lg so four items and the CTA fit beside the logo at 768px */}
+            {/* Links: tighter spacing below lg so the items and the CTA fit beside the logo at 768px */}
             <div className="hidden md:flex items-center gap-5 lg:gap-8 text-sm font-bold text-white whitespace-nowrap">
-              {NAV_LINKS.map((link) =>
-                link.href === SHOWCASE_HREF ? (
-                  <ShowcaseLink key={link.href} source="navbar" className="hover:text-white/80 transition-colors">
-                    {link.label}
-                  </ShowcaseLink>
-                ) : (
-                  <Link key={link.href} href={link.href} className="hover:text-white/80 transition-colors">
-                    {link.label}
-                  </Link>
-                )
-              )}
+              {NAV_LINKS.map((link) => (
+                <Link key={link.href} href={link.href} className="hover:text-white/80 transition-colors">
+                  {link.label}
+                </Link>
+              ))}
             </div>
 
             {/* CTA: tickets are the primary conversion once they are on sale */}
@@ -185,27 +169,16 @@ export default function Navbar({
           }`}
         >
           <div className="px-4 sm:px-6 py-6 flex flex-col gap-5">
-            {NAV_LINKS.map((link) =>
-              link.href === SHOWCASE_HREF ? (
-                <ShowcaseLink
-                  key={link.href}
-                  source="navbar-mobile"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-base font-bold text-white hover:text-white/80 transition-colors"
-                >
-                  {link.label}
-                </ShowcaseLink>
-              ) : (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-base font-bold text-white hover:text-white/80 transition-colors"
-                >
-                  {link.label}
-                </Link>
-              )
-            )}
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-base font-bold text-white hover:text-white/80 transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
             {areTicketsOpen ? (
               <TicketsLink
                 source="navbar-mobile"
