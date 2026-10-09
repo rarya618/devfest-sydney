@@ -49,14 +49,14 @@ export default function VerticalMarquee({ children, pixelsPerSecond = 30 }: Prop
         className={isRolling ? 'animate-marquee-up' : undefined}
         style={isRolling ? { animationDuration: `${loopHeight / pixelsPerSecond}s` } : undefined}
       >
-        {/* While rolling, pb-6 matches the gap between cards, so the last card and the repeat
+        {/* While rolling, pb-4 matches the gap between cards, so the last card and the repeat
             of the first are spaced like any other pair. Only then: a list that just fits
             would otherwise be pushed over the edge by its own padding. */}
-        <div ref={contentRef} className={isRolling ? 'pb-6' : undefined}>
+        <div ref={contentRef} className={isRolling ? 'pb-4' : undefined}>
           {children}
         </div>
         {isRolling && (
-          <div className="pb-6" aria-hidden="true">
+          <div className="pb-4" aria-hidden="true">
             {children}
           </div>
         )}
