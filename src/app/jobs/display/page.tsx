@@ -31,7 +31,7 @@ const postUrlLabel = postUrl.replace(/^https?:\/\//, '');
 function RoleCard({ listing }: { listing: PublicJobListing }) {
   return (
     <li
-      className={`h-full bg-surface rounded-xl p-5 border-l-4 ${
+      className={`h-full bg-surface rounded-xl p-4 border-l-4 ${
         listing.sponsor ? 'border-google-blue' : 'border-white/10'
       }`}
     >
@@ -42,41 +42,41 @@ function RoleCard({ listing }: { listing: PublicJobListing }) {
               {TIER_LABELS[listing.sponsor.tier]} sponsor
             </p>
           )}
-          <h3 className="text-2xl font-bold text-white leading-tight">{listing.roleTitle}</h3>
-          <p className="mt-1 text-lg text-white/80">{listing.companyName}</p>
+          <h3 className="text-xl font-bold text-white leading-tight">{listing.roleTitle}</h3>
+          <p className="mt-0.5 text-base text-white/80">{listing.companyName}</p>
         </div>
         {listing.sponsor?.logoUrl && (
-          <div className="relative h-10 w-28 shrink-0">
-            <Image src={listing.sponsor.logoUrl} alt={listing.sponsor.name} fill sizes="112px" className="object-contain object-right brightness-0 invert" />
+          <div className="relative h-9 w-24 shrink-0">
+            <Image src={listing.sponsor.logoUrl} alt={listing.sponsor.name} fill sizes="96px" className="object-contain object-right brightness-0 invert" />
           </div>
         )}
       </div>
 
-      <ul className="mt-3 flex flex-wrap gap-2 font-mono text-sm text-white/75" aria-label="Role details">
+      <ul className="mt-2.5 flex flex-wrap gap-2 font-mono text-sm text-white/75" aria-label="Role details">
         <li className="px-2.5 py-0.5 rounded-full bg-white/[0.08]">{listing.location}</li>
         <li className="px-2.5 py-0.5 rounded-full bg-white/[0.08]">{WORK_ARRANGEMENT_LABELS[listing.workArrangement]}</li>
         <li className="px-2.5 py-0.5 rounded-full bg-white/[0.08]">{JOB_TYPE_LABELS[listing.jobType]}</li>
       </ul>
 
-      <p className="mt-3 text-base text-white/80 leading-relaxed line-clamp-3">{listing.description}</p>
+      <p className="mt-2.5 text-base text-white/80 leading-relaxed line-clamp-3">{listing.description}</p>
     </li>
   );
 }
 
 function SeekerCard({ seeker }: { seeker: PublicJobSeeker }) {
   return (
-    <li className="bg-surface rounded-xl p-5 border-l-4 border-google-green">
-      <h3 className="text-xl font-bold text-white leading-tight">{seeker.name}</h3>
+    <li className="bg-surface rounded-xl p-4 border-l-4 border-google-green">
+      <h3 className="text-lg font-bold text-white leading-tight">{seeker.name}</h3>
       <p className="mt-1 text-base text-white/80">{seeker.headline}</p>
 
-      <ul className="mt-3 flex flex-wrap gap-2 font-mono text-sm text-white/75" aria-label="Location and ways of working">
+      <ul className="mt-2.5 flex flex-wrap gap-2 font-mono text-sm text-white/75" aria-label="Location and ways of working">
         <li className="px-2.5 py-0.5 rounded-full bg-white/[0.08]">{seeker.location}</li>
         {seeker.workArrangements.map((arrangement) => (
           <li key={arrangement} className="px-2.5 py-0.5 rounded-full bg-white/[0.08]">{WORK_ARRANGEMENT_LABELS[arrangement]}</li>
         ))}
       </ul>
 
-      <p className="mt-3 text-base text-white/80 leading-relaxed line-clamp-2">
+      <p className="mt-2.5 text-base text-white/80 leading-relaxed line-clamp-2">
         <span className="font-bold text-white">Looking for:</span> {seeker.lookingFor}
       </p>
     </li>
@@ -100,25 +100,25 @@ export default async function JobBoardDisplayPage() {
 
   return (
     // Fixed to the viewport with nothing to scroll: the columns roll themselves instead.
-    <div className="h-screen overflow-hidden bg-[#010103] text-white flex flex-col px-8 py-5 gap-5">
+    <div className="h-screen overflow-hidden bg-[#010103] text-white flex flex-col px-7 py-4 gap-4">
       <AutoRefresh intervalSeconds={REFRESH_INTERVAL_SECONDS} />
 
       <header className="flex items-center justify-between gap-10 shrink-0">
         {/* One line, so the header is no taller than the QR code beside it. */}
         <div className="flex items-center gap-6">
-          <Image src="/logo-wordmark.png" alt="DevFest Sydney" width={1331} height={240} priority className="h-8 w-auto object-contain" />
-          <span className="h-9 w-px bg-white/25" aria-hidden="true" />
-          <h1 className="text-4xl font-bold tracking-tight leading-none">Job board</h1>
+          <Image src="/logo-wordmark.png" alt="DevFest Sydney" width={1331} height={240} priority className="h-7 w-auto object-contain" />
+          <span className="h-8 w-px bg-white/25" aria-hidden="true" />
+          <h1 className="text-3xl font-bold tracking-tight leading-none">Job board</h1>
         </div>
         <div className="flex items-center gap-6">
           <div className="text-right">
-            <p className="text-xl font-bold">Scan to post a role or add your profile</p>
-            <p className="font-mono text-base text-white/70 mt-1">{postUrlLabel}</p>
+            <p className="text-lg font-bold">Scan to post a role or add your profile</p>
+            <p className="font-mono text-sm text-white/70 mt-0.5">{postUrlLabel}</p>
           </div>
           <div
             role="img"
             aria-label={`QR code linking to ${postUrlLabel}`}
-            className="size-20 shrink-0 rounded-lg bg-white p-1.5 [&>svg]:size-full"
+            className="size-[72px] shrink-0 rounded-lg bg-white p-1.5 [&>svg]:size-full"
             dangerouslySetInnerHTML={{ __html: qrSvg }}
           />
         </div>
@@ -126,9 +126,9 @@ export default async function JobBoardDisplayPage() {
 
       <main className="flex-1 min-h-0 grid grid-cols-[3fr_2fr] gap-6">
         <section aria-labelledby="display-roles-heading" className="min-h-0 flex flex-col">
-          <h2 id="display-roles-heading" className="shrink-0 mb-2 flex items-baseline gap-3 text-2xl font-bold">
+          <h2 id="display-roles-heading" className="shrink-0 mb-2 flex items-baseline gap-3 text-xl font-bold">
             Roles
-            <span className="font-mono text-base font-normal text-white/60">{listings.length}</span>
+            <span className="font-mono text-sm font-normal text-white/60">{listings.length}</span>
           </h2>
           <div className="flex-1 min-h-0">
             {listings.length > 0 ? (
@@ -147,9 +147,9 @@ export default async function JobBoardDisplayPage() {
         </section>
 
         <section aria-labelledby="display-people-heading" className="min-h-0 flex flex-col">
-          <h2 id="display-people-heading" className="shrink-0 mb-2 flex items-baseline gap-3 text-2xl font-bold">
+          <h2 id="display-people-heading" className="shrink-0 mb-2 flex items-baseline gap-3 text-xl font-bold">
             Open to work
-            <span className="font-mono text-base font-normal text-white/60">{seekers.length}</span>
+            <span className="font-mono text-sm font-normal text-white/60">{seekers.length}</span>
           </h2>
           <div className="flex-1 min-h-0">
             {seekers.length > 0 ? (
