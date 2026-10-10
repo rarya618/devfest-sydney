@@ -46,6 +46,11 @@ Profiles from people looking for work are shown only with your consent, are kept
     content: `Our post-event survey is anonymous unless you choose to give your email address, which we use only to reply to something you wrote. Answers are read by the organising team to plan future events and are never published alongside your email.`,
   },
   {
+    slug: 'workshop-credits',
+    title: 'Workshop Credits',
+    content: `If you request credits for a workshop, we keep your name, email address and the workshop you were in, and use them only to send you those credits. We delete the list once the credits have been sent.`,
+  },
+  {
     slug: 'third-party-services',
     title: 'Third-Party Services',
     content: `We use a small number of trusted third parties to run this website and event:`,

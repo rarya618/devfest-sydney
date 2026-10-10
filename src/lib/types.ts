@@ -474,3 +474,19 @@ export interface FeedbackResponse {
   email: string; // optional, only for a reply
   submittedAt: string; // ISO date string
 }
+
+// Credit requests (/credits), for attendees of a workshop that couldn't run as planned on
+// the day: they leave a name and email and the organisers send credits later. Written
+// only by /api/submit-credit-request and read only on /admin/credits, so `creditRequests`
+// has no block in firestore.rules.
+export interface CreditRequest {
+  id: string;
+  name: string;
+  email: string;
+  // The schedule slot id, and the workshop as it read when they asked, so a later
+  // schedule edit doesn't rewrite what they picked.
+  workshopSlotId: string;
+  workshopTitle: string;
+  note: string; // optional
+  submittedAt: string; // ISO date string
+}
