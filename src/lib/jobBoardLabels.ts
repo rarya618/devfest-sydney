@@ -40,7 +40,7 @@ export const JOB_LIMITS = {
   contactName: 100,
   roleTitle: 120,
   location: 100,
-  description: 1500,
+  description: 5000,
   howToApply: 500,
   name: 100,
   headline: 120,

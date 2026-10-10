@@ -22,9 +22,11 @@ export const metadata: Metadata = {
 const REFRESH_INTERVAL_SECONDS = 30;
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://devfest.gdgsydney.com';
-const boardUrl = `${siteUrl}/jobs`;
+// The QR code opens the forms rather than the board: the screen already shows the board.
+// /jobs/post has a switcher to the open-to-work form, so both kinds of post start here.
+const postUrl = `${siteUrl}/jobs/post`;
 // Printed under the QR code for anyone who would rather type it.
-const boardUrlLabel = boardUrl.replace(/^https?:\/\//, '');
+const postUrlLabel = postUrl.replace(/^https?:\/\//, '');
 
 function RoleCard({ listing }: { listing: PublicJobListing }) {
   return (
@@ -93,7 +95,7 @@ export default async function JobBoardDisplayPage() {
   const [listings, seekers, qrSvg] = await Promise.all([
     fetchPublicJobListings(),
     fetchPublicJobSeekers(),
-    QRCode.toString(boardUrl, { type: 'svg', margin: 0, color: { dark: '#1e1e1e', light: '#ffffff' } }),
+    QRCode.toString(postUrl, { type: 'svg', margin: 0, color: { dark: '#1e1e1e', light: '#ffffff' } }),
   ]);
 
   return (
@@ -110,12 +112,12 @@ export default async function JobBoardDisplayPage() {
         </div>
         <div className="flex items-center gap-6">
           <div className="text-right">
-            <p className="text-xl font-bold">Scan to apply, post a role or add your profile</p>
-            <p className="font-mono text-base text-white/70 mt-1">{boardUrlLabel}</p>
+            <p className="text-xl font-bold">Scan to post a role or add your profile</p>
+            <p className="font-mono text-base text-white/70 mt-1">{postUrlLabel}</p>
           </div>
           <div
             role="img"
-            aria-label={`QR code linking to ${boardUrlLabel}`}
+            aria-label={`QR code linking to ${postUrlLabel}`}
             className="size-20 shrink-0 rounded-lg bg-white p-1.5 [&>svg]:size-full"
             dangerouslySetInnerHTML={{ __html: qrSvg }}
           />

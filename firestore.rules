@@ -64,7 +64,7 @@ rules_version='2';
 // Document ID: auto-generated
 // Fields:
 //   - name: string (required, 1–100 chars)
-//   - tier: string (required) — 'platinum' | 'gold' | 'silver' | 'community'
+//   - tier: string (required) — 'diamond' | 'platinum' | 'gold' | 'silver' | 'community'
 //   - logoUrl: string (required, valid https URL, max 500 chars)
 //   - website: string (required, valid https URL, max 500 chars)
 //   - order: number (required), sort position within the tier
@@ -361,7 +361,7 @@ service cloud.firestore {
     }
 
     function isValidSponsor(data) {
-      let allowedTiers = ['platinum', 'gold', 'silver', 'community'];
+      let allowedTiers = ['diamond', 'platinum', 'gold', 'silver', 'community'];
       return data.keys().hasOnly(['name', 'tier', 'logoUrl', 'website', 'order', 'description', 'hidden']) &&
         data.tier in allowedTiers &&
         (!('hidden' in data) || data.hidden is bool) &&

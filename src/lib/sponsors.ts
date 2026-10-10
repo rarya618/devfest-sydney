@@ -1,9 +1,10 @@
 import { adminDb } from '@/lib/firebase-admin';
 import type { CommunityPartner, Sponsor, SponsorTier } from '@/lib/types';
 
-export const TIER_ORDER: SponsorTier[] = ['platinum', 'gold', 'silver', 'community'];
+export const TIER_ORDER: SponsorTier[] = ['diamond', 'platinum', 'gold', 'silver', 'community'];
 
 export const TIER_LABELS: Record<SponsorTier, string> = {
+  diamond: 'Diamond',
   platinum: 'Platinum',
   gold: 'Gold',
   silver: 'Silver',
@@ -16,7 +17,7 @@ export const TIER_LABELS: Record<SponsorTier, string> = {
 export const LANDING_LOGO_BOXES = {
   diamond: 'h-16 w-52',
   venue: 'h-14 w-44',
-  tiers: { platinum: 'h-12 w-40', gold: 'h-11 w-36', silver: 'h-10 w-32', community: 'h-9 w-28' } satisfies Record<SponsorTier, string>,
+  tiers: { diamond: 'h-16 w-52', platinum: 'h-12 w-40', gold: 'h-11 w-36', silver: 'h-10 w-32', community: 'h-9 w-28' } satisfies Record<SponsorTier, string>,
 };
 
 // Both scales step down from the Venue sponsor's box on `/partners` (`h-16 w-44`), which in
@@ -24,6 +25,7 @@ export const LANDING_LOGO_BOXES = {
 // The row boxes are one step under their own tier's card, since a logo with no blurb beside
 // it reads larger at the same measurements.
 export const PARTNERS_CARD_LOGO_BOXES: Record<SponsorTier, string> = {
+  diamond: 'h-16 w-48',
   platinum: 'h-14 w-40',
   gold: 'h-13 w-36',
   silver: 'h-12 w-32',
@@ -31,6 +33,7 @@ export const PARTNERS_CARD_LOGO_BOXES: Record<SponsorTier, string> = {
 };
 
 export const PARTNERS_ROW_LOGO_BOXES: Record<SponsorTier, string> = {
+  diamond: 'h-14 w-40',
   platinum: 'h-12 w-36',
   gold: 'h-11 w-32',
   silver: 'h-10 w-28',
@@ -61,8 +64,11 @@ export async function fetchCommunityPartners(): Promise<CommunityPartner[]> {
   }
 }
 
+// Diamond is left out: the Diamond sponsor (Google) already sits above every tier on `/` and
+// `/partners`, from settings/site. Its `sponsors` document exists so a role can be linked to
+// it on the job board, where it ranks first.
 export function groupSponsorsByTier(sponsors: Sponsor[]): { tier: SponsorTier; sponsors: Sponsor[] }[] {
-  return TIER_ORDER.map((tier) => ({
+  return TIER_ORDER.filter((tier) => tier !== 'diamond').map((tier) => ({
     tier,
     sponsors: sponsors.filter((sponsor) => sponsor.tier === tier),
   })).filter((group) => group.sponsors.length > 0);
