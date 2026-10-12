@@ -64,10 +64,21 @@ export function findSpeakerGiftErrors(fields: SpeakerGiftFormFields, emailPatter
     for (const [key, message] of required) {
       if (!String(fields[key]).trim()) errors[key] = message;
     }
+    // A bare house number got through once ("15"), so the street line has to name the
+    // street too. Any letter will do, which still lets "PO Box 15" through.
+    if (!errors.addressLine1 && !/\p{L}/u.test(fields.addressLine1)) {
+      errors.addressLine1 = 'Please include the street name as well as the number.';
+    }
+    // State and postcode stay optional overseas, since not every country has them, but
+    // every Australian address does.
+    if (/^(australia|au)$/i.test(fields.country.trim())) {
+      if (!fields.region.trim()) errors.region = 'Please enter your state or territory.';
+      if (!/^\d{4}$/.test(fields.postcode.trim())) errors.postcode = 'Please enter your 4-digit postcode.';
+    }
     for (const key of ['recipientName', 'addressLine1', 'addressLine2', 'city', 'region', 'country'] as const) {
       if (!errors[key] && fields[key].trim().length > SPEAKER_GIFT_TEXT_LIMIT) errors[key] = tooLong(SPEAKER_GIFT_TEXT_LIMIT);
     }
-    if (fields.postcode.trim().length > SPEAKER_GIFT_POSTCODE_LIMIT) errors.postcode = tooLong(SPEAKER_GIFT_POSTCODE_LIMIT);
+    if (!errors.postcode && fields.postcode.trim().length > SPEAKER_GIFT_POSTCODE_LIMIT) errors.postcode = tooLong(SPEAKER_GIFT_POSTCODE_LIMIT);
     if (!errors.phone && fields.phone.trim().length > SPEAKER_GIFT_PHONE_LIMIT) errors.phone = tooLong(SPEAKER_GIFT_PHONE_LIMIT);
   }
 

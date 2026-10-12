@@ -21,11 +21,11 @@ const checkboxClass = 'mt-0.5 w-5 h-5 shrink-0 accent-google-blue focus:outline-
 // address formats; region and postcode are optional because not everywhere has them.
 const ADDRESS_FIELDS: { key: TextFieldKey; label: string; autoComplete: string; required: boolean; hint?: string; type?: string }[] = [
   { key: 'recipientName', label: 'Name for the parcel', autoComplete: 'shipping name', required: true },
-  { key: 'addressLine1', label: 'Street address', autoComplete: 'shipping address-line1', required: true },
+  { key: 'addressLine1', label: 'Street address', autoComplete: 'shipping address-line1', required: true, hint: 'Number and street name, e.g. 37 Foveaux St.' },
   { key: 'addressLine2', label: 'Apartment, unit or company', autoComplete: 'shipping address-line2', required: false, hint: 'Optional.' },
   { key: 'city', label: 'City or suburb', autoComplete: 'shipping address-level2', required: true },
-  { key: 'region', label: 'State or region', autoComplete: 'shipping address-level1', required: false, hint: 'If your country uses one.' },
-  { key: 'postcode', label: 'Postcode', autoComplete: 'shipping postal-code', required: false, hint: 'If your country uses one.' },
+  { key: 'region', label: 'State or region', autoComplete: 'shipping address-level1', required: false, hint: 'Required in Australia. Elsewhere, if your country uses one.' },
+  { key: 'postcode', label: 'Postcode', autoComplete: 'shipping postal-code', required: false, hint: 'Required in Australia. Elsewhere, if your country uses one.' },
   { key: 'country', label: 'Country', autoComplete: 'shipping country-name', required: true },
   {
     key: 'phone',

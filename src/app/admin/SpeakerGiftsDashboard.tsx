@@ -60,7 +60,7 @@ function GiftRow({ gift, onError }: { gift: SpeakerGift; onError: (message: stri
           <p className="text-[11px] font-mono uppercase tracking-[0.12em] text-white/50 mb-1">Mug</p>
           {gift.wantsMug ? (
             <address className="not-italic text-sm text-white/85 leading-relaxed">
-              {postalAddress(gift).map((line) => <span key={line} className="block">{line}</span>)}
+              {postalAddress(gift).map((line, index) => <span key={index} className="block">{line}</span>)}
               <span className="block font-mono text-xs text-white/60 mt-1">{gift.phone}</span>
             </address>
           ) : (
