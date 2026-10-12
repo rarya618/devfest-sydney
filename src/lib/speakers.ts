@@ -110,6 +110,8 @@ export async function fetchSpeakers(): Promise<Speaker[]> {
       calendarInviteSentAt: toIsoOrNull(data.calendarInviteSentAt as Timestamp | undefined),
       calendarInviteSentBy: data.calendarInviteSentBy ?? null,
       calendarInviteSlot: toCalendarInviteSlot(data.calendarInviteSlot),
+      thanksEmailSentAt: toIsoOrNull(data.thanksEmailSentAt as Timestamp | undefined),
+      thanksEmailSentBy: data.thanksEmailSentBy ?? null,
       coSpeakerOf: typeof data.coSpeakerOf === 'string' && data.coSpeakerOf ? data.coSpeakerOf : null,
     } satisfies Speaker;
   });

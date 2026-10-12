@@ -1,3 +1,5 @@
+import type { SpeakerGiftFormFields } from './speakerGiftLabels';
+
 export type TalkFormat = 'talk' | 'lightning-talk' | 'workshop';
 export type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced';
 // Spotlight is the Auditorium's track. Nobody proposes into it (the CfS offers only the
@@ -260,6 +262,10 @@ export interface Speaker {
   calendarInviteSentAt: string | null; // ISO date string
   calendarInviteSentBy: string | null;
   calendarInviteSlot: CalendarInviteSlot | null;
+  // The post-event thank-you (photos, mug, Asana trial), recorded on the speaker document
+  // since co-speakers get their own. Null until it is sent.
+  thanksEmailSentAt: string | null; // ISO date string
+  thanksEmailSentBy: string | null;
   // Set on a co-speaker: someone presenting another speaker's session with them. Their
   // document holds only their own profile; the talk, track and confirmation are read from
   // this lead speaker, so the session lives in one place. Null on everyone else.
@@ -489,4 +495,15 @@ export interface CreditRequest {
   workshopTitle: string;
   note: string; // optional
   submittedAt: string; // ISO date string
+}
+
+// A speaker's answer to the post-event thank-you, from /speaker/thanks. Keyed by speaker
+// id, so a second visit edits the same answer. Admin SDK only: it holds a home address.
+// /privacy commits us to deleting these once the mugs have shipped and the Asana list has
+// gone over.
+export interface SpeakerGift extends SpeakerGiftFormFields {
+  id: string; // the speaker id
+  speakerName: string;
+  speakerEmail: string; // the address on file, for a reply about delivery
+  submittedAt: string; // ISO date string, the latest save
 }

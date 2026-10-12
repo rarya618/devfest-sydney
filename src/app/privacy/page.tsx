@@ -51,6 +51,11 @@ Profiles from people looking for work are shown only with your consent, are kept
     content: `If you request credits for a workshop, we keep your name, email address and the workshop you were in, and use them only to send you those credits. We delete the list once the credits have been sent.`,
   },
   {
+    slug: 'speaker-gifts',
+    title: 'Speaker Gifts',
+    content: `After the event we offer our speakers a mug and an Asana Enterprise trial. If you ask for the mug, we keep the postal address and phone number you give us and use them only to post it, sharing them with the courier or postal service that delivers it. If you ask for the trial, we share your name and work email with Asana, only with your agreement, so they can set it up; from then on Asana's own privacy policy applies to what they hold. We delete the addresses and work emails once the mugs have shipped and the list has gone to Asana.`,
+  },
+  {
     slug: 'third-party-services',
     title: 'Third-Party Services',
     content: `We use a small number of trusted third parties to run this website and event:`,

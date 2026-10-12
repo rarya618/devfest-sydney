@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { removeSpeaker } from './speakerActions';
 import { sendAcceptanceEmail, sendCoSpeakerTicketEmail, sendSpeakerTicketEmail } from './actions';
 import { sendCalendarInvite } from './calendarInviteActions';
+import { sendSpeakerThanksEmail } from './speakerThanksActions';
 import EditSpeakerModal from './EditSpeakerModal';
 import AddCoSpeakerModal from './AddCoSpeakerModal';
 import Alert from '@/components/Alert';
@@ -45,6 +46,10 @@ function speakerHistoryRows(speaker: Speaker): HistoryRow[] {
 
   if (speaker.calendarInviteSentAt) {
     rows.push({ label: 'Calendar invite', value: stampedOn(formatDate(speaker.calendarInviteSentAt), speaker.calendarInviteSentBy) });
+  }
+
+  if (speaker.thanksEmailSentAt) {
+    rows.push({ label: 'Thank-you sent', value: stampedOn(formatDate(speaker.thanksEmailSentAt), speaker.thanksEmailSentBy) });
   }
 
   return rows;
@@ -217,11 +222,19 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
     });
   }
 
+  function handleSendThanks() {
+    startTransition(async () => {
+      const result = await sendSpeakerThanksEmail(speaker.id);
+      if (result.error) onError(result.error);
+    });
+  }
+
   const alreadyEmailed = Boolean(speaker.acceptanceEmailSentAt);
   // A co-speaker was never sent an acceptance: the lead answered for the session.
   const canEmail = !isCoSpeaker && speaker.confirmation !== 'unknown';
   const canSendTicket = speaker.confirmation === 'confirmed';
   const ticketSent = Boolean(speaker.speakerTicketEmailSentAt);
+  const thanksSent = Boolean(speaker.thanksEmailSentAt);
   // Confirmed only, as the action enforces: an invite announces a slot the speaker has
   // agreed to turn up for.
   const inviteAction = canSendTicket && inviteStatus && inviteStatus !== 'unscheduled' ? inviteStatus : null;
@@ -427,6 +440,24 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
             </button>
           )}
 
+          {canSendTicket && (
+            <button
+              onClick={handleSendThanks}
+              disabled={isPending}
+              aria-label={`${thanksSent ? 'Resend' : 'Send'} the thank-you email with photos, mug and Asana trial to ${speaker.name}`}
+              title={thanksSent ? 'Resend thank-you' : 'Send thank-you'}
+              className={`inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                thanksSent
+                  ? 'text-white/55 hover:text-white hover:bg-white/[0.08]'
+                  : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
+              }`}
+            >
+              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                <path strokeLinejoin="round" d="M8 13.5S1.75 9.75 1.75 5.75A3 3 0 018 4a3 3 0 016.25 1.75C14.25 9.75 8 13.5 8 13.5z" />
+              </svg>
+            </button>
+          )}
+
           {confirmingRemove ? (
             <div role="group" aria-label={`Confirm removing ${speaker.name}`} className="flex flex-col items-end gap-1.5 bg-[#2d2e31] border border-white/10 rounded-xl px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.45)] w-52">
               <p className="text-xs text-white/70 leading-snug text-left w-full">
@@ -502,15 +533,35 @@ interface Props {
 
 // Resend rate limits sends per second, so a bulk send goes one at a time with this gap,
 // the same spacing the rejection emails use on /admin.
-const CALENDAR_INVITE_SPACING_MS = 600;
+const BULK_SEND_SPACING_MS = 600;
+
+// The two emails the header can send to everyone who needs one.
+type BulkKind = 'invites' | 'thanks';
+
+const BULK_COPY: Record<BulkKind, { singular: string; plural: string; buttonClass: string; confirmClass: string; title: string }> = {
+  invites: {
+    singular: 'calendar invite',
+    plural: 'calendar invites',
+    buttonClass: 'bg-google-yellow/15 text-google-yellow hover:bg-google-yellow hover:text-black-02',
+    confirmClass: 'bg-google-yellow text-black-02',
+    title: 'Sends first invites and updates. Cancellations are sent from each card.',
+  },
+  thanks: {
+    singular: 'thank-you',
+    plural: 'thank-yous',
+    buttonClass: 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white',
+    confirmClass: 'bg-google-green-deep text-white',
+    title: 'Sends the thank-you with the photos and the mug and Asana link to every confirmed speaker and co-speaker who hasn\'t had it.',
+  },
+};
 
 export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
   const mobileBarHidden = useMobileBarHidden();
   const [alertMessage, setAlertMessage] = useState<string | null>(
     sessionTimes ? null : 'The schedule couldn\'t be loaded, so calendar invites are hidden for now. Refresh the page to try again.'
   );
-  const [isConfirmingInvites, setIsConfirmingInvites] = useState(false);
-  const [inviteProgress, setInviteProgress] = useState<{ sent: number; total: number } | null>(null);
+  const [confirmingBulk, setConfirmingBulk] = useState<BulkKind | null>(null);
+  const [bulkProgress, setBulkProgress] = useState<{ kind: BulkKind; sent: number; total: number } | null>(null);
   const [isBulkPending, startBulkTransition] = useTransition();
   const [filter, setFilter] = useState<FilterTrack>('all');
   const [confirmationFilter, setConfirmationFilter] = useState<FilterConfirmation>('all');
@@ -625,35 +676,44 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
     return speaker.confirmation === 'confirmed' && (status === 'not-sent' || status === 'changed');
   });
 
-  function handleBulkSendInvites() {
-    const targets = bulkInviteTargets;
-    setIsConfirmingInvites(false);
+  // Thank-yous go to every confirmed speaker and co-speaker once.
+  const bulkThanksTargets = speakers.filter((speaker) => speaker.confirmation === 'confirmed' && !speaker.thanksEmailSentAt);
+  const bulkTargets: Record<BulkKind, Speaker[]> = { invites: bulkInviteTargets, thanks: bulkThanksTargets };
+  const bulkSenders: Record<BulkKind, (speakerId: string) => Promise<{ error?: string; emailSent?: boolean }>> = {
+    invites: sendCalendarInvite,
+    thanks: sendSpeakerThanksEmail,
+  };
+
+  function handleBulkSend(kind: BulkKind) {
+    const targets = bulkTargets[kind];
+    const { singular, plural } = BULK_COPY[kind];
+    setConfirmingBulk(null);
     if (targets.length === 0) return;
 
     startBulkTransition(async () => {
       let sendFailures = 0;
       let recordFailures = 0;
-      setInviteProgress({ sent: 0, total: targets.length });
+      setBulkProgress({ kind, sent: 0, total: targets.length });
 
       for (const [index, target] of targets.entries()) {
-        if (index > 0) await new Promise((resolve) => setTimeout(resolve, CALENDAR_INVITE_SPACING_MS));
-        const result = await sendCalendarInvite(target.id);
+        if (index > 0) await new Promise((resolve) => setTimeout(resolve, BULK_SEND_SPACING_MS));
+        const result = await bulkSenders[kind](target.id);
         if (result.error) {
           if (result.emailSent) recordFailures += 1;
           else sendFailures += 1;
         }
-        setInviteProgress({ sent: index + 1, total: targets.length });
+        setBulkProgress({ kind, sent: index + 1, total: targets.length });
       }
 
-      setInviteProgress(null);
+      setBulkProgress(null);
 
       if (recordFailures > 0) {
         setAlertMessage(
-          `${recordFailures} calendar ${recordFailures === 1 ? 'invite was' : 'invites were'} sent but couldn't be recorded, so those cards may still ask for one. Refresh the page before sending again so nobody gets a duplicate.`
+          `${recordFailures} ${recordFailures === 1 ? `${singular} was` : `${plural} were`} sent but couldn't be recorded, so those cards may still ask for one. Refresh the page before sending again so nobody gets a duplicate.`
         );
       } else if (sendFailures > 0) {
         setAlertMessage(
-          `${sendFailures} of ${targets.length} calendar invites couldn't be sent. Those cards still ask for one, so you can send them again.`
+          `${sendFailures} of ${targets.length} ${plural} couldn't be sent. Those cards still ask for one, so you can send them again.`
         );
       }
     });
@@ -713,51 +773,61 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
               {notEmailedCount > 0 && <> &middot; {notEmailedCount} not emailed</>}
               {awaitingTicketCount > 0 && <> &middot; {awaitingTicketCount} without a ticket</>}
               {bulkInviteTargets.length > 0 && <> &middot; {bulkInviteTargets.length} calendar {bulkInviteTargets.length === 1 ? 'invite' : 'invites'} to send</>}
+              {bulkThanksTargets.length > 0 && <> &middot; {bulkThanksTargets.length} without a thank-you</>}
               {incompleteCount > 0 && <> &middot; {incompleteCount} with profile gaps</>}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 min-w-0">
-            {inviteProgress ? (
+            {bulkProgress ? (
               <p role="status" className="shrink-0 h-10 inline-flex items-center px-4 rounded-full bg-white/[0.06] text-sm font-bold text-white/70">
-                Sending invites {inviteProgress.sent} of {inviteProgress.total}
+                Sending {BULK_COPY[bulkProgress.kind].plural} {bulkProgress.sent} of {bulkProgress.total}
               </p>
-            ) : isConfirmingInvites ? (
-              <div role="group" aria-label="Confirm sending calendar invites" className="shrink-0 flex items-center gap-2 h-10 pl-4 pr-1.5 rounded-full bg-[#2d2e31] border border-white/10">
+            ) : confirmingBulk ? (
+              <div role="group" aria-label={`Confirm sending ${BULK_COPY[confirmingBulk].plural}`} className="shrink-0 flex items-center gap-2 h-10 pl-4 pr-1.5 rounded-full bg-[#2d2e31] border border-white/10">
                 <span className="text-sm text-white/70">
-                  Email {bulkInviteTargets.length} {bulkInviteTargets.length === 1 ? 'speaker' : 'speakers'}?
+                  Email {bulkTargets[confirmingBulk].length} {bulkTargets[confirmingBulk].length === 1 ? 'speaker' : 'speakers'}?
                 </span>
                 <button
-                  onClick={() => setIsConfirmingInvites(false)}
-                  aria-label="Cancel sending calendar invites"
+                  onClick={() => setConfirmingBulk(null)}
+                  aria-label={`Cancel sending ${BULK_COPY[confirmingBulk].plural}`}
                   className="text-xs px-2.5 py-1 rounded-full border border-white/40 text-white/60 hover:border-white/60 hover:text-white transition-colors"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={handleBulkSendInvites}
-                  aria-label={`Send calendar invites to ${bulkInviteTargets.length} speakers`}
-                  className="text-xs px-2.5 py-1 rounded-full bg-google-yellow text-black-02 font-bold hover:opacity-90 transition-opacity"
+                  onClick={() => handleBulkSend(confirmingBulk)}
+                  aria-label={`Send ${BULK_COPY[confirmingBulk].plural} to ${bulkTargets[confirmingBulk].length} speakers`}
+                  className={`text-xs px-2.5 py-1 rounded-full font-bold hover:opacity-90 transition-opacity ${BULK_COPY[confirmingBulk].confirmClass}`}
                 >
                   Send
                 </button>
               </div>
             ) : (
-              bulkInviteTargets.length > 0 && (
-                <button
-                  onClick={() => setIsConfirmingInvites(true)}
-                  disabled={isBulkPending}
-                  aria-label={`Send calendar invites to the ${bulkInviteTargets.length} confirmed speakers who need one`}
-                  title="Sends first invites and updates. Cancellations are sent from each card."
-                  className="shrink-0 inline-flex items-center gap-2 h-10 text-sm px-4 rounded-full font-bold bg-google-yellow/15 text-google-yellow hover:bg-google-yellow hover:text-black-02 transition-colors disabled:opacity-50"
-                >
-                  <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                    <rect x="2" y="3" width="12" height="11" rx="1.5" />
-                    <path strokeLinecap="round" d="M2 6.5h12M5.5 1.75v2.5M10.5 1.75v2.5" />
-                  </svg>
-                  Send {bulkInviteTargets.length} {bulkInviteTargets.length === 1 ? 'invite' : 'invites'}
-                </button>
-              )
+              (['thanks', 'invites'] as const)
+                .filter((kind) => bulkTargets[kind].length > 0)
+                .map((kind) => (
+                  <button
+                    key={kind}
+                    onClick={() => setConfirmingBulk(kind)}
+                    disabled={isBulkPending}
+                    aria-label={`Send ${BULK_COPY[kind].plural} to the ${bulkTargets[kind].length} confirmed speakers who need one`}
+                    title={BULK_COPY[kind].title}
+                    className={`shrink-0 inline-flex items-center gap-2 h-10 text-sm px-4 rounded-full font-bold transition-colors disabled:opacity-50 ${BULK_COPY[kind].buttonClass}`}
+                  >
+                    {kind === 'invites' ? (
+                      <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                        <rect x="2" y="3" width="12" height="11" rx="1.5" />
+                        <path strokeLinecap="round" d="M2 6.5h12M5.5 1.75v2.5M10.5 1.75v2.5" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                        <path strokeLinejoin="round" d="M8 13.5S1.75 9.75 1.75 5.75A3 3 0 018 4a3 3 0 016.25 1.75C14.25 9.75 8 13.5 8 13.5z" />
+                      </svg>
+                    )}
+                    Send {bulkTargets[kind].length} {bulkTargets[kind].length === 1 ? BULK_COPY[kind].singular : BULK_COPY[kind].plural}
+                  </button>
+                ))
             )}
 
             <div
