@@ -192,6 +192,45 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 measurement ID (`src/components/GoogleAnalytics.tsx`, `src/lib/gtag.ts`); page load + client-side route change tracking |
 | `NEXT_PUBLIC_SITE_URL` | Canonical site URL for metadata, sitemap, and robots.txt; defaults to `https://devfest.gdgsydney.com` |
 
+## Post-2026 Plan: One GDG Sydney Site (agreed 2026-11-02)
+
+**Goal:** use what was built for DevFest across the whole year for GDG Sydney, not just for one event. DevFest becomes a section of the main website, and this app becomes the back office for both.
+
+**Not started.** Nothing here is built yet. No deadline before DevFest 2027 planning begins; do it in a quiet stretch, after the 2026 clean-up below.
+
+### The split: built ahead of time vs. needs a server
+
+The line is drawn by what can be built ahead of time and what can't, not by public vs. admin.
+
+- **`gdg-sydney` (Astro, static on Firebase Hosting, `gdgsydney.com`)** holds every content page. Today that is the chapter homepage, meetups, team and sponsors from Bevy (`gdg.community.dev`, fetched in the browser), `/speak` and the code of conduct. It gains DevFest's content pages: the event landing page, speakers, each speaker's page, schedule, partners, tickets, FAQ and privacy. It stays static, with no server and no Firebase credentials. Astro was chosen for the main site by preference: it suits a content site.
+- **This app (Next.js on App Hosting, moving to something like `app.gdgsydney.com`)** keeps everything that needs a server: `/admin`, every form endpoint, the token pages (`/speaker/confirm`, `/speaker/thanks`, `/volunteer/confirm`, `/builder-showcase/confirm`), the job board and `/jobs/display`, `/feedback` and `/credits`. It serves meetups as well as DevFest: `/speak` stops posting to a Google Sheet and goes through the same review, emails and analytics as the CfS.
+
+Ruled out:
+- **DevFest moved into Astro wholesale.** Its pages read Firestore per request and its token pages need server actions and secrets, so it would have meant Astro running as a server on Cloud Run, i.e. two server apps in two frameworks.
+- **`gdg-sydney` moved into Next.** It is the cheaper move (about 3,200 lines), but Astro is the preferred framework for the main site.
+
+### How the two connect
+
+- **A read-only public API in this app** (e.g. `/api/public/speakers`, `/api/public/schedule`, `/api/public/sponsors`, `/api/public/status`), returning only what the public pages show today (the `PublicSpeaker`-style projections, never emails). Astro fetches it at build time, the same way it reads Bevy. The API also sends the labels and colours for tracks, formats and levels, so they live in one codebase rather than two.
+- **Rebuild on change:** saving a speaker, schedule slot or sponsor in `/admin` triggers an Astro rebuild (e.g. a GitHub Actions `repository_dispatch` on `gdg-sydney`). Speakers and schedule change rarely, so a rebuild taking a minute or two is fine.
+- **Forms on Astro pages post across domains** to this app's endpoints: CORS for `gdgsydney.com` only, and check that App Check still covers them.
+
+### Open decisions
+
+- **States that flip by date** (tickets on sale, CfS and showcase deadlines, the Builder's Space reveal) can't be frozen into a static page. This is the same problem that broke caching on 2026-08-30. The options are a small island that asks `/api/public/status` in the browser, or a scheduled rebuild at each deadline. Pick one for each state deliberately.
+- **Firebase project:** `devfest-sydney-2026` would become GDG Sydney's data store for the year. Decide on a GDG-wide project before more data builds up here, since moving later is harder.
+- **What Bevy keeps:** Bevy already supplies events, team and sponsors to `gdgsydney.com`. Don't copy those into Firestore unless Bevy can't do something that's needed. Speakers (profiles that last across events), volunteers and the job board are what this app adds.
+- **Who maintains it:** two frameworks to keep up for good. Fine while one person runs both, but worth writing down if other organisers join.
+
+### Stages
+
+0. **Finish the 2026 clean-up** promised on `/privacy`: take down the job board and delete the `jobSeekers` profiles, and delete everything in `speakerGifts` once the mugs have shipped and the list has gone to Asana. Delete the workshop credit requests once credits are sent.
+1. **Public API** in this app, plus the rebuild trigger from admin saves.
+2. **DevFest pages in Astro**, e.g. at `gdgsydney.com/devfest` for the current edition and `/devfest/2026` kept as an archive, built from the API. Reuse the React components as islands where they're interactive; the server components here become Astro pages.
+3. **Domains and redirects:** this app moves to its own subdomain. `devfest.gdgsydney.com` becomes a permanent redirect: content paths go to the Astro pages, and token paths (`/speaker/thanks`, the confirm pages) go to the app, so links in emails already sent keep working. Update `NEXT_PUBLIC_SITE_URL`, the sitemap and robots on both sides.
+4. **An `events` model:** an `events` collection holding dates, venue, deadlines, open/closed switches and ticket URLs, replacing the 14 event-only env vars (`CFS_OPEN`, `CFS_CLOSE_DATE`, `TICKETS_ON_SALE_DATE`, `SPEAKER_TICKET_URL` and the rest; the signing secrets stay env vars). Submissions, schedule slots, feedback and the rest gain an `eventId`, and speakers and volunteers belong to GDG Sydney with a record of the events they took part in. About 87 of the 184 files in `src/` mention DevFest, 2026, the date or the venue, mostly email templates, metadata and copy; those read from the event instead. DevFest 2026 is event #1. Without this stage, DevFest 2027 means copying 2026's code and editing it.
+5. **Meetups through the pipeline:** `/speak` posts to a meetup proposal endpoint, reviewed in `/admin` with an event filter.
+
 ## Current Status
 
 **Active milestone:** 8 — Speaker & schedule pages. Speakers are done (`/speakers`, `/speakers/[slug]`, landing section, `/admin/speakers` with photo upload), and `/schedule` shipped 2026-09-23 (see below). What remains is settling the TBC slots. Also shipped on 2026-09-06 outside the milestone list: `/partners` and a site-wide `not-found.tsx`. Milestone 7 (SEO) is complete for every public page, each with its own metadata, canonical and OG image, and all in the sitemap.
@@ -306,7 +345,6 @@ Two follow-ups worth deciding on:
 
 **Job board built 2026-10-07 (not yet deployed):** `/jobs`, `/jobs/people`, `/jobs/post`, `/jobs/people/add`, `/api/submit-job`, `/api/submit-job-seeker`, `/admin/jobs`. Collections `jobListings` and `jobSeekers`, written and read only through the Admin SDK, so they have no match block in `firestore.rules` and clients are denied by default (both hold a private email). Shared validation in `src/lib/jobBoard.ts`, browser-safe labels and limits in `src/lib/jobBoardLabels.ts`. Every post gets a confirmation email bcc'd to hello@gdgsydney.com, which is how organisers learn there is something to review. No open/closed switch: a post only goes public through an admin. Linked from the admin sidebar (Review) only: no footer or navbar link (footer link removed at the user's request the same day), so the public reach it by the link announced on the day. None of the four pages is in the sitemap. A "Job Board" section was added to `/privacy`, which commits us to **taking the board down and deleting the profiles after the event**. Verified in dev: validation 400s, sponsor role sorting above a newer general one, mailto vs link apply buttons, private emails absent from both pages' HTML and RSC payload, `noindex` on `/jobs/people`, with three throwaway approved docs (since deleted). **Not verified:** a real submission (it emails hello@gdgsydney.com), and `/admin/jobs` in the browser (needs a signed-in session).
 
-**Next task:**
-1. Program the closing keynote, then edit `SLOTS` in `scripts/seed-schedule.mjs` and rerun it.
-
-Otherwise: Milestone 9 — Polish & launch.
+**Next task (updated 2026-11-02, DevFest 2026 is over):**
+1. The 2026 clean-up: stage 0 of the Post-2026 Plan above.
+2. Then the Post-2026 Plan, starting with the open decisions (Firebase project, how the date-based states work).
