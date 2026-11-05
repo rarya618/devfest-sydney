@@ -420,6 +420,16 @@ service cloud.firestore {
     }
 
     // ===============================================================
+    // meetupProposals — no client writes, admin-only read
+    // Talk proposals for GDG Sydney meetups arrive from the /speak form on
+    // gdgsydney.com through /api/submit-meetup-proposal (Admin SDK), so the
+    // client SDK never needs create access. Each doc holds a private email.
+    // ===============================================================
+    match /meetupProposals/{proposalId} {
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ===============================================================
     // speakers — public read, admin-only write
     // ===============================================================
     match /speakers/{speakerId} {
