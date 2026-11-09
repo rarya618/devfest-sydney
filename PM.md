@@ -196,6 +196,8 @@ You are the project manager and lead developer for the DevFest Sydney website. Y
 
 **Goal:** use what was built for DevFest across the whole year for GDG Sydney, not just for one event. DevFest becomes a section of the main website, and this app becomes the back office for both.
 
+**The admin is for all of GDG Sydney, not just DevFest (confirmed 2026-11-10).** DevFest is one event inside it. "All of GDG" stops at what Bevy already does (see What Bevy keeps below): the admin owns speakers across events, proposals for DevFest and meetups, volunteers, the job board, feedback and event-day tooling.
+
 **Not started.** Nothing here is built yet. No deadline before DevFest 2027 planning begins; do it in a quiet stretch, after the 2026 clean-up below.
 
 ### The split: built ahead of time vs. needs a server
@@ -215,10 +217,14 @@ Ruled out:
 - **Rebuild on change:** saving a speaker, schedule slot or sponsor in `/admin` triggers an Astro rebuild (e.g. a GitHub Actions `repository_dispatch` on `gdg-sydney`). Speakers and schedule change rarely, so a rebuild taking a minute or two is fine.
 - **Forms on Astro pages post across domains** to this app's endpoints: CORS for `gdgsydney.com` only, and check that App Check still covers them.
 
+### Decided
+
+- **Firebase project: keep `devfest-sydney-2026` as the GDG-wide project (decided 2026-11-10).** It is already GDG Sydney's project in all but its ID: its display name is "GDG Sydney", and the Astro site (`gdg-sydney/.firebaserc`) already deploys `gdgsydney.com` to it. The ID can't be changed, and moving to a new project would mean copying Firestore, copying Storage and rewriting every stored photo and logo URL, moving Auth users, recreating the Secret Manager secrets, and setting up App Hosting, Hosting, App Check, the reCAPTCHA key and OAuth again, all for an ID people rarely see. Where it does show: Google sign-in names `devfest-sydney-2026.firebaseapp.com`, so point Auth at a custom domain (e.g. `auth.gdgsydney.com`) before speakers sign in (stage 6); Storage URLs name the bucket, which can be served through our own domain if it matters. Explain the ID in the README for future organisers. If a new project is ever made after all, name it `gdg-sydney` or `gdgsydney`, not `gdg-sydney-admin`: the ID is permanent and the project holds far more than the admin.
+
 ### Open decisions
 
+- **The other GDG projects:** `gdg-calendar` and `gdg-syd-check-in` are separate Firebase projects. Decide whether each joins `devfest-sydney-2026` or stays on its own.
 - **States that flip by date** (tickets on sale, CfS and showcase deadlines, the Builder's Space reveal) can't be frozen into a static page. This is the same problem that broke caching on 2026-08-30. The options are a small island that asks `/api/public/status` in the browser, or a scheduled rebuild at each deadline. Pick one for each state deliberately.
-- **Firebase project:** `devfest-sydney-2026` would become GDG Sydney's data store for the year. Decide on a GDG-wide project before more data builds up here, since moving later is harder.
 - **What Bevy keeps:** Bevy already supplies events, team and sponsors to `gdgsydney.com`. Don't copy those into Firestore unless Bevy can't do something that's needed. Speakers (profiles that last across events), volunteers and the job board are what this app adds.
 - **Who maintains it:** two frameworks to keep up for good. Fine while one person runs both, but worth writing down if other organisers join.
 
@@ -230,6 +236,7 @@ Ruled out:
 3. **Domains and redirects:** this app moves to its own subdomain. `devfest.gdgsydney.com` becomes a permanent redirect: content paths go to the Astro pages, and token paths (`/speaker/thanks`, the confirm pages) go to the app, so links in emails already sent keep working. Update `NEXT_PUBLIC_SITE_URL`, the sitemap and robots on both sides.
 4. **An `events` model:** an `events` collection holding dates, venue, deadlines, open/closed switches and ticket URLs, replacing the 14 event-only env vars (`CFS_OPEN`, `CFS_CLOSE_DATE`, `TICKETS_ON_SALE_DATE`, `SPEAKER_TICKET_URL` and the rest; the signing secrets stay env vars). Submissions, schedule slots, feedback and the rest gain an `eventId`, and speakers and volunteers belong to GDG Sydney with a record of the events they took part in. About 87 of the 184 files in `src/` mention DevFest, 2026, the date or the venue, mostly email templates, metadata and copy; those read from the event instead. DevFest 2026 is event #1. Without this stage, DevFest 2027 means copying 2026's code and editing it.
 5. **Meetups through the pipeline:** `/speak` posts to a meetup proposal endpoint, reviewed in `/admin` with an event filter.
+6. **Speaker portal (added 2026-11-10):** speakers sign in to keep one profile (bio, photo, links), see their past and upcoming talks, and propose to DevFest or a meetup from the same place. Needs stage 4 first, since today a speaker belongs to one DevFest 2026 proposal. Its own area (e.g. `/speaker` or `/portal`), not inside `/admin`: admin actions are guarded by `verifyAdminSession()` and the `admins` collection, and sharing that session with a second role means one missed role check exposes other people's proposals and emails. Speakers sign in with magic links or Firebase email-link sign-in rather than Google sign-in, following the signed-link pattern of `/speaker/confirm` and `/speaker/thanks`. If speakers emailing bios and photos becomes a pain before then, a signed-link "edit your profile" page in the style of `/speaker/thanks` covers it and folds into the portal later.
 
 ## Current Status
 
@@ -345,6 +352,6 @@ Two follow-ups worth deciding on:
 
 **Job board built 2026-10-07 (not yet deployed):** `/jobs`, `/jobs/people`, `/jobs/post`, `/jobs/people/add`, `/api/submit-job`, `/api/submit-job-seeker`, `/admin/jobs`. Collections `jobListings` and `jobSeekers`, written and read only through the Admin SDK, so they have no match block in `firestore.rules` and clients are denied by default (both hold a private email). Shared validation in `src/lib/jobBoard.ts`, browser-safe labels and limits in `src/lib/jobBoardLabels.ts`. Every post gets a confirmation email bcc'd to hello@gdgsydney.com, which is how organisers learn there is something to review. No open/closed switch: a post only goes public through an admin. Linked from the admin sidebar (Review) only: no footer or navbar link (footer link removed at the user's request the same day), so the public reach it by the link announced on the day. None of the four pages is in the sitemap. A "Job Board" section was added to `/privacy`, which commits us to **taking the board down and deleting the profiles after the event**. Verified in dev: validation 400s, sponsor role sorting above a newer general one, mailto vs link apply buttons, private emails absent from both pages' HTML and RSC payload, `noindex` on `/jobs/people`, with three throwaway approved docs (since deleted). **Not verified:** a real submission (it emails hello@gdgsydney.com), and `/admin/jobs` in the browser (needs a signed-in session).
 
-**Next task (updated 2026-11-02, DevFest 2026 is over):**
+**Next task (updated 2026-11-10, DevFest 2026 is over):**
 1. The 2026 clean-up: stage 0 of the Post-2026 Plan above.
-2. Then the Post-2026 Plan, starting with the open decisions (Firebase project, how the date-based states work).
+2. Then the Post-2026 Plan, starting with the open decisions (the other GDG Firebase projects, how the date-based states work). The Firebase project itself is decided: stay on `devfest-sydney-2026`.
