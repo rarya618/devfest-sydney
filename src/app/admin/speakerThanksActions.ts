@@ -5,7 +5,7 @@ import { Resend } from 'resend';
 import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 import { verifyAdminSession } from '@/lib/adminSession';
-import { EMAIL_PATTERN } from '@/lib/jobBoardLabels';
+import { EMAIL_PATTERN } from '@/lib/emailPattern';
 import { fetchSpeakerPhotosUrl, loadThanksRecipient, thanksUrl, type ThanksRecipient } from '@/lib/speakerThanks';
 import { buildSpeakerThanksEmail, speakerThanksEmailSubject } from '@/lib/speakerThanksEmail';
 

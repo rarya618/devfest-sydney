@@ -1,7 +1,7 @@
 import { adminDb } from '@/lib/firebase-admin';
 import type { Timestamp } from 'firebase-admin/firestore';
 import { fetchPublicSchedule, formatScheduleTime } from '@/lib/schedule';
-import { EMAIL_PATTERN } from '@/lib/jobBoardLabels';
+import { EMAIL_PATTERN } from '@/lib/emailPattern';
 import {
   FEEDBACK_ACTIVITIES,
   FEEDBACK_ASPECTS,

@@ -2,14 +2,14 @@
 
 import { useCallback, useState, type FormEvent, type ReactNode } from 'react';
 import Alert from '@/components/Alert';
-import { EMAIL_PATTERN } from '@/lib/jobBoardLabels';
+import { EMAIL_PATTERN } from '@/lib/emailPattern';
 import {
   ASANA_CONSENT_LABEL,
   findSpeakerGiftErrors,
   type SpeakerGiftErrors,
   type SpeakerGiftFormFields,
 } from '@/lib/speakerGiftLabels';
-import { errorClass, hintClass, inputError, inputNormal, labelClass, submitClass } from '../../jobs/formStyles';
+import { errorClass, hintClass, inputError, inputNormal, labelClass, submitClass } from '@/lib/formStyles';
 
 type SubmitState = 'idle' | 'submitting' | 'success';
 type TextFieldKey = { [Key in keyof SpeakerGiftFormFields]: SpeakerGiftFormFields[Key] extends string ? Key : never }[keyof SpeakerGiftFormFields];

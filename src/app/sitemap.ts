@@ -63,8 +63,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           { url: `${siteUrl}/builders-space/starter-guides`, changeFrequency: 'weekly' as const, priority: 0.5 },
         ]
       : []),
-    // The job board (/jobs and everything under it) is deliberately left out: it is reached
-    // only by the link announced on the day.
     {
       url: `${siteUrl}/volunteer`,
       changeFrequency: 'daily',

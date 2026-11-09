@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useState, type FormEvent, type ReactNode } from 'react';
 import Alert from '@/components/Alert';
-import { EMAIL_PATTERN } from '@/lib/jobBoardLabels';
+import { EMAIL_PATTERN } from '@/lib/emailPattern';
 import {
   FEEDBACK_ACTIVITIES,
   FEEDBACK_ACTIVITY_LABELS,
@@ -17,7 +17,7 @@ import {
   type FeedbackSessionOption,
 } from '@/lib/feedbackLabels';
 import type { FeedbackActivity, FeedbackAspect, FeedbackReturnIntent, FeedbackRole } from '@/lib/types';
-import { errorClass, hintClass, inputError, inputNormal, labelClass, optionButtonClass, submitClass } from '../jobs/formStyles';
+import { errorClass, hintClass, inputError, inputNormal, labelClass, optionButtonClass, submitClass } from '@/lib/formStyles';
 
 type SubmitState = 'idle' | 'submitting' | 'success';
 

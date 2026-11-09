@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { adminDb } from '@/lib/firebase-admin';
 import type { Timestamp } from 'firebase-admin/firestore';
 import { fetchPublicSchedule, formatScheduleTime } from '@/lib/schedule';
-import { EMAIL_PATTERN } from '@/lib/jobBoardLabels';
+import { EMAIL_PATTERN } from '@/lib/emailPattern';
 import {
   CREDIT_REQUEST_NAME_LIMIT,
   CREDIT_REQUEST_NOTE_LIMIT,

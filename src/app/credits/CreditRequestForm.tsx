@@ -3,9 +3,9 @@
 import Link from 'next/link';
 import { useCallback, useState, type FormEvent } from 'react';
 import Alert from '@/components/Alert';
-import { EMAIL_PATTERN } from '@/lib/jobBoardLabels';
+import { EMAIL_PATTERN } from '@/lib/emailPattern';
 import { CREDIT_REQUEST_NAME_LIMIT, CREDIT_REQUEST_NOTE_LIMIT, type CreditWorkshopOption } from '@/lib/creditRequestLabels';
-import { errorClass, hintClass, inputError, inputNormal, labelClass, submitClass } from '../jobs/formStyles';
+import { errorClass, hintClass, inputError, inputNormal, labelClass, submitClass } from '@/lib/formStyles';
 
 type SubmitState = 'idle' | 'submitting' | 'success';
 

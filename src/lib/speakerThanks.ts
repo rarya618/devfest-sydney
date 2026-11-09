@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 import type { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
-import { EMAIL_PATTERN } from '@/lib/jobBoardLabels';
+import { EMAIL_PATTERN } from '@/lib/emailPattern';
 import {
   EMPTY_SPEAKER_GIFT_FIELDS,
   findSpeakerGiftErrors,

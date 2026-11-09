@@ -1,5 +1,5 @@
-// Shared by the two job board forms. Same input treatment as the other public forms, with
-// the blue focus the BRANDING.md interactive-states note asks for.
+// Shared input, label and button classes for the public forms (feedback, credits, speaker
+// thank-you), with the blue focus the BRANDING.md interactive-states note asks for.
 const inputBase =
   'w-full bg-white/[0.05] border rounded-lg px-5 py-2.5 text-white text-base placeholder-white/60 outline-none transition-colors focus:bg-white/[0.08] focus:border-google-blue focus:ring-2 focus:ring-google-blue/40';
 
