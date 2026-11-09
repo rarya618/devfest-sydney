@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { areTicketsOpen } from '@/lib/tickets';
 import { isShowcaseOpen } from '@/lib/showcase';
+import { hasEventEnded } from '@/lib/eventJsonLd';
 import { formatCloseDateTime } from '@/lib/format';
 import ShowcaseForm from './ShowcaseForm';
 import ShowcaseFaq, { type ShowcaseFaqItem } from './ShowcaseFaq';
@@ -78,6 +79,7 @@ const STEP_BORDER: Record<string, string> = {
 
 export default async function BuilderShowcase() {
   const showcaseOpen = isShowcaseOpen();
+  const eventEnded = hasEventEnded();
   const closeDate = process.env.SHOWCASE_CLOSE_DATE;
 
   return (
@@ -169,10 +171,13 @@ export default async function BuilderShowcase() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-white/70 mb-3">Builder Showcase entries are not open</h3>
+              <h3 className="text-lg font-bold text-white/70 mb-3">
+                {eventEnded ? 'Builder Showcase entries have closed' : 'Builder Showcase entries are not open'}
+              </h3>
               <p className="text-sm text-white/55 leading-relaxed max-w-sm mx-auto">
-                We&apos;re not taking demos for the DevFest Sydney 2026 Builder Showcase right now.
-                Check back closer to the event.
+                {eventEnded
+                  ? 'DevFest Sydney 2026 has wrapped up. Thank you to everyone who demoed what they built on stage.'
+                  : "We're not taking demos for the DevFest Sydney 2026 Builder Showcase right now. Check back closer to the event."}
               </p>
               <a
                 href="mailto:hello@gdgsydney.com"

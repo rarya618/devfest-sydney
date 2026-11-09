@@ -10,6 +10,13 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://devfest.gdgsydney.c
 export const EVENT_START = '2026-10-10T09:00:00+11:00';
 export const EVENT_END = '2026-10-10T17:00:00+11:00';
 
+// True once the day is over. The closed states on /tickets, /volunteer and /builder-showcase
+// were written for before the event ("check back closer to the event"), so they read this to
+// say it has wrapped up instead. Evaluated per request, like the other open/closed checks.
+export function hasEventEnded(now: Date = new Date()): boolean {
+  return now.getTime() >= Date.parse(EVENT_END);
+}
+
 export const EVENT_LOCATION = {
   '@type': 'Place',
   name: 'Torrens University, Surry Hills',
@@ -36,7 +43,9 @@ function buildPriceFields() {
 }
 
 function buildOffers() {
-  if (!TICKETS_URL) return undefined;
+  // Once the event is over there is nothing to offer: "PreOrder" would claim tickets are
+  // still coming.
+  if (!TICKETS_URL || hasEventEnded()) return undefined;
   const onSaleDate = process.env.TICKETS_ON_SALE_DATE;
   return {
     '@type': 'Offer',

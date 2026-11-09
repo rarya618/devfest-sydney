@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { areTicketsOpen } from '@/lib/tickets';
+import { hasEventEnded } from '@/lib/eventJsonLd';
 import VolunteerForm from './VolunteerForm';
 import { adminDb } from '@/lib/firebase-admin';
 
@@ -39,6 +40,7 @@ async function fetchVolunteerHeroImageUrl(): Promise<string | null> {
 
 export default async function Volunteer() {
   const volunteerOpen = isVolunteerOpen();
+  const eventEnded = hasEventEnded();
   const heroImageUrl = await fetchVolunteerHeroImageUrl();
 
   return (
@@ -135,9 +137,13 @@ export default async function Volunteer() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-white/70 mb-3">Volunteer signups are not yet open</h3>
+              <h3 className="text-lg font-bold text-white/70 mb-3">
+                {eventEnded ? 'Volunteer signups have closed' : 'Volunteer signups are not yet open'}
+              </h3>
               <p className="text-sm text-white/55 leading-relaxed max-w-sm mx-auto">
-                We&apos;re not taking volunteer signups just yet for DevFest Sydney 2026. Check back closer to the event.
+                {eventEnded
+                  ? 'DevFest Sydney 2026 has wrapped up. Thank you to everyone who volunteered and helped make the day happen.'
+                  : "We're not taking volunteer signups just yet for DevFest Sydney 2026. Check back closer to the event."}
               </p>
               <a
                 href="mailto:hello@gdgsydney.com"

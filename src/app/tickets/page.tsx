@@ -7,6 +7,7 @@ import EventDateVenue from '@/components/EventDateVenue';
 import Reveal from '@/components/Reveal';
 import TicketsLink from '@/components/TicketsLink';
 import { areTicketsOpen, TICKET_INCLUSIONS, TICKET_INCLUSION_DOT } from '@/lib/tickets';
+import { hasEventEnded } from '@/lib/eventJsonLd';
 
 // Same reason as `/`: the on-sale flip has to happen without a deploy.
 export const dynamic = 'force-dynamic';
@@ -49,6 +50,7 @@ const DOT: Record<string, string> = {
 
 export default function Tickets() {
   const ticketsOnSale = areTicketsOpen();
+  const eventEnded = hasEventEnded();
 
   return (
     <div className="bg-[#010103] text-white min-h-screen">
@@ -74,7 +76,9 @@ export default function Tickets() {
           >
             {ticketsOnSale
               ? 'One ticket, one full day of talks, workshops, and building together. Move between tracks as you like.'
-              : "Tickets aren't on sale just yet. We'll announce them through the GDG Sydney community first, so you'll hear about it there."}
+              : eventEnded
+                ? "DevFest Sydney 2026 has wrapped up, so tickets are no longer on sale. Thanks to everyone who came. Follow GDG Sydney to hear about our meetups and the next DevFest."
+                : "Tickets aren't on sale just yet. We'll announce them through the GDG Sydney community first, so you'll hear about it there."}
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-5">
@@ -99,11 +103,11 @@ export default function Tickets() {
             ) : (
               <>
                 <Link
-                  href="/#tracks"
+                  href={eventEnded ? '/schedule' : '/#tracks'}
                   className="inline-flex items-center px-7 py-2 bg-transparent text-white text-base font-bold rounded border border-white/40 transition-colors hover:border-white animate-slide-up"
                   style={{ animationDelay: '0.25s' }}
                 >
-                  See the tracks
+                  {eventEnded ? 'See what ran on the day' : 'See the tracks'}
                 </Link>
                 <a
                   href="https://gdg.community.dev/gdg-sydney/"
@@ -111,9 +115,13 @@ export default function Tickets() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2.5 px-7 py-2 bg-google-blue-deep text-white text-base font-bold rounded border border-google-blue-deep transition-opacity hover:opacity-80 animate-slide-up"
                   style={{ animationDelay: '0.3s' }}
-                  aria-label="Join the GDG Sydney community page to hear when tickets go on sale"
+                  aria-label={
+                    eventEnded
+                      ? 'Follow GDG Sydney on its community page to hear about meetups and the next DevFest (opens in a new tab)'
+                      : 'Join the GDG Sydney community page to hear when tickets go on sale'
+                  }
                 >
-                  Get notified
+                  {eventEnded ? 'Follow GDG Sydney' : 'Get notified'}
                 </a>
               </>
             )}
