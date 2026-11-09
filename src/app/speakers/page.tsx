@@ -11,7 +11,7 @@ import { isCfsOpen } from '@/lib/cfs';
 import { fetchPublicSpeakers } from '@/lib/speakers';
 import { getInitials } from '@/lib/format';
 import { LinkedInIcon, GitHubIcon, WebsiteIcon } from '@/components/SocialIcons';
-import { FORMAT_LABELS, TRACK_LABELS, TRACK_DOT_COLORS } from '@/lib/submissionLabels';
+import { FORMAT_LABELS, TRACK_LABELS, TRACK_DOT_COLORS, TRACK_ORDER } from '@/lib/submissionLabels';
 import type { PublicSpeaker, Track } from '@/lib/types';
 
 // The lineup changes as speakers confirm, and the navbar ticket CTA follows the on-sale
@@ -26,7 +26,6 @@ export const metadata: Metadata = buildPageMetadata({ title, description, path: 
 
 // Display order for the track groups. Showcase is not a speaking track, so any speaker
 // filed under it is listed last.
-const TRACK_ORDER: Track[] = ['keynote', 'spotlight', 'developer', 'builder', 'workshop', 'showcase'];
 
 const TRACK_DESCRIPTIONS: Record<Track, string> = {
   keynote: 'Keynotes on the main stage in the Auditorium.',

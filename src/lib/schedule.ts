@@ -1,5 +1,5 @@
 import { adminDb } from '@/lib/firebase-admin';
-import { fetchPublicSpeakers, sessionLeadId } from '@/lib/speakers';
+import { loadPublicSpeakers, sessionLeadId } from '@/lib/speakers';
 import type { PublicScheduleSlot, PublicSpeaker, ScheduleItem, ScheduleKind, ScheduleRoom, SpeakerSessionTime } from '@/lib/types';
 import { SCHEDULE_ROOMS } from '@/lib/scheduleLabels';
 
@@ -76,12 +76,17 @@ function toPublicSlot(item: ScheduleItem, confirmedSpeakers: PublicSpeaker[]): P
   };
 }
 
-// The public schedule, in start order. Returns an empty list rather than throwing so the
-// page can show its "being finalised" state.
+// The public schedule, in start order. Throws on a failed read (of the schedule or of the
+// speakers it names), for /api/public/schedule, where an empty answer would be published.
+export async function loadPublicSchedule(): Promise<PublicScheduleSlot[]> {
+  const [items, speakers] = await Promise.all([fetchScheduleItems(), loadPublicSpeakers()]);
+  return items.map((item) => toPublicSlot(item, speakers));
+}
+
+// The same schedule for /schedule, which shows its "being finalised" state on a failed read.
 export async function fetchPublicSchedule(): Promise<PublicScheduleSlot[]> {
   try {
-    const [items, speakers] = await Promise.all([fetchScheduleItems(), fetchPublicSpeakers()]);
-    return items.map((item) => toPublicSlot(item, speakers));
+    return await loadPublicSchedule();
   } catch {
     return [];
   }

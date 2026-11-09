@@ -4,6 +4,7 @@ import { Resend } from 'resend';
 import { adminDb } from '@/lib/firebase-admin';
 import { escapeHtml } from '@/lib/escapeHtml';
 import { normaliseProfileUrl } from '@/lib/speakers';
+import { gdgSiteCorsHeaders } from '@/lib/gdgSiteOrigins';
 
 // Talk proposals for GDG Sydney's monthly meetups, from the /speak form on gdgsydney.com
 // (a separate, static Astro site). Stage 5 of the "One GDG Sydney Site" plan in PM.md:
@@ -48,26 +49,8 @@ const LIMITS = {
   notes: 1000,
 } as const;
 
-// Origins allowed to post. Override with MEETUP_FORM_ALLOWED_ORIGINS (comma-separated)
-// when the site moves or a preview domain needs access.
-const DEFAULT_ALLOWED_ORIGINS = ['https://gdgsydney.com', 'https://www.gdgsydney.com', 'http://localhost:4321'];
-
-function allowedOrigins(): string[] {
-  const fromEnv = process.env.MEETUP_FORM_ALLOWED_ORIGINS;
-  return fromEnv
-    ? fromEnv.split(',').map((origin) => origin.trim()).filter(Boolean)
-    : DEFAULT_ALLOWED_ORIGINS;
-}
-
 function corsHeaders(origin: string | null): Record<string, string> {
-  if (!origin || !allowedOrigins().includes(origin)) return {};
-  return {
-    'Access-Control-Allow-Origin': origin,
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Max-Age': '86400',
-    Vary: 'Origin',
-  };
+  return gdgSiteCorsHeaders(origin, 'POST, OPTIONS');
 }
 
 function requiredText(body: Record<string, unknown>, key: keyof typeof LIMITS, label: string): string {

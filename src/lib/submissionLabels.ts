@@ -62,6 +62,22 @@ export const TRACK_DOT_COLORS: Record<Track, string> = {
   showcase: 'bg-google-yellow',
 };
 
+// The same track colours as hex values, for the public API: gdgsydney.com builds its own
+// pages from /api/public/labels and can't read this app's Tailwind classes. `accent` is for
+// borders, dots and other non-text marks; `text` is for the label itself on the dark page,
+// which is why Spotlight's is Red 300 (see BRANDING.md). Keep in step with the maps above.
+export const TRACK_HEX_COLORS: Record<Track, { accent: string; text: string }> = {
+  keynote: { accent: '#ffffff', text: '#ffffff' },
+  spotlight: { accent: '#ea4335', text: '#f28b82' },
+  developer: { accent: '#4285f4', text: '#4285f4' },
+  builder: { accent: '#34a853', text: '#34a853' },
+  workshop: { accent: '#f9ab00', text: '#f9ab00' },
+  showcase: { accent: '#f9ab00', text: '#f9ab00' },
+};
+
+// The order tracks are listed in on /speakers and in the admin filters.
+export const TRACK_ORDER: Track[] = ['keynote', 'spotlight', 'developer', 'builder', 'workshop', 'showcase'];
+
 export const FORMAT_LABELS: Record<TalkFormat, string> = {
   talk: 'Talk',
   'lightning-talk': 'Lightning',

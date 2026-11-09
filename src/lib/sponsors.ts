@@ -40,25 +40,35 @@ export const PARTNERS_ROW_LOGO_BOXES: Record<SponsorTier, string> = {
   community: 'h-9 w-24',
 };
 
-// Every fetch here returns an empty value rather than throwing, so a Firestore blip
-// leaves a page without its sponsors rather than without itself.
+// Each load* throws on a failed read, for the public API: a static build of gdgsydney.com
+// that took a failed read for "no sponsors" would publish the partners page without them.
+// Each fetch* wraps it and returns an empty value instead, so a Firestore blip leaves one of
+// this app's pages without its sponsors rather than without itself.
+export async function loadSponsors(): Promise<Sponsor[]> {
+  const snapshot = await adminDb.collection('sponsors').orderBy('order').get();
+  // Filtered here rather than in the query: a `where('hidden', '!=', true)` would drop
+  // every document without the field, which is most of them.
+  return snapshot.docs
+    .map((doc) => ({ id: doc.id, ...doc.data() } as Sponsor))
+    .filter((sponsor) => !sponsor.hidden);
+}
+
 export async function fetchSponsors(): Promise<Sponsor[]> {
   try {
-    const snapshot = await adminDb.collection('sponsors').orderBy('order').get();
-    // Filtered here rather than in the query: a `where('hidden', '!=', true)` would drop
-    // every document without the field, which is most of them.
-    return snapshot.docs
-      .map((doc) => ({ id: doc.id, ...doc.data() } as Sponsor))
-      .filter((sponsor) => !sponsor.hidden);
+    return await loadSponsors();
   } catch {
     return [];
   }
 }
 
+export async function loadCommunityPartners(): Promise<CommunityPartner[]> {
+  const snapshot = await adminDb.collection('partners').orderBy('order').get();
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as CommunityPartner));
+}
+
 export async function fetchCommunityPartners(): Promise<CommunityPartner[]> {
   try {
-    const snapshot = await adminDb.collection('partners').orderBy('order').get();
-    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as CommunityPartner));
+    return await loadCommunityPartners();
   } catch {
     return [];
   }
@@ -82,15 +92,19 @@ export interface PartnerAssets {
 
 // The Diamond and Venue sponsor logos and the prospectus PDF all live on the
 // settings/site document, so one read covers the lot.
+export async function loadPartnerAssets(): Promise<PartnerAssets> {
+  const doc = await adminDb.collection('settings').doc('site').get();
+  const data = doc.data() ?? {};
+  return {
+    sponsorshipProspectusUrl: (data.sponsorshipProspectusUrl as string | undefined) ?? null,
+    googleLogoUrl: (data.googleLogoUrl as string | undefined) ?? null,
+    torrensLogoUrl: (data.torrensLogoUrl as string | undefined) ?? null,
+  };
+}
+
 export async function fetchPartnerAssets(): Promise<PartnerAssets> {
   try {
-    const doc = await adminDb.collection('settings').doc('site').get();
-    const data = doc.data() ?? {};
-    return {
-      sponsorshipProspectusUrl: (data.sponsorshipProspectusUrl as string | undefined) ?? null,
-      googleLogoUrl: (data.googleLogoUrl as string | undefined) ?? null,
-      torrensLogoUrl: (data.torrensLogoUrl as string | undefined) ?? null,
-    };
+    return await loadPartnerAssets();
   } catch {
     return { sponsorshipProspectusUrl: null, googleLogoUrl: null, torrensLogoUrl: null };
   }

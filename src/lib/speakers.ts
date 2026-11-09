@@ -184,11 +184,11 @@ function attachSessionPartners(speakers: Omit<PublicSpeaker, 'sessionPartners'>[
 
 // The public lineup. Only speakers who have confirmed through /speaker/confirm appear:
 // a promoted speaker who has not been emailed yet, or has not answered, is not announced.
-// Returns an empty list rather than throwing so the page can show its "coming soon" state.
-export async function fetchPublicSpeakers(): Promise<PublicSpeaker[]> {
-  try {
-    const speakers = await fetchSpeakers();
-    const confirmed = speakers
+// Throws on a failed read, for /api/public/speakers: a static build that took a failed
+// read for an empty lineup would publish a page with no speakers on it.
+export async function loadPublicSpeakers(): Promise<PublicSpeaker[]> {
+  const speakers = await fetchSpeakers();
+  const confirmed = speakers
       .filter((speaker) => speaker.confirmation === 'confirmed')
       .sort((first, second) => first.name.localeCompare(second.name))
       .map((speaker) => ({
@@ -207,7 +207,14 @@ export async function fetchPublicSpeakers(): Promise<PublicSpeaker[]> {
         previousSlugs: speaker.previousSlugs,
         coSpeakerOf: speaker.coSpeakerOf,
       }));
-    return attachSessionPartners(assignUniqueSlugs(confirmed));
+  return attachSessionPartners(assignUniqueSlugs(confirmed));
+}
+
+// The same lineup for this app's own pages, which show their "coming soon" state on a
+// failed read rather than an error.
+export async function fetchPublicSpeakers(): Promise<PublicSpeaker[]> {
+  try {
+    return await loadPublicSpeakers();
   } catch {
     return [];
   }
