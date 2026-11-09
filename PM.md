@@ -216,10 +216,10 @@ Ruled out:
 ### Decided
 
 - **Firebase project: keep `devfest-sydney-2026` as the GDG-wide project (decided 2026-11-10).** It is already GDG Sydney's project in all but its ID: its display name is "GDG Sydney", and the Astro site (`gdg-sydney/.firebaserc`) already deploys `gdgsydney.com` to it. The ID can't be changed, and moving to a new project would mean copying Firestore, copying Storage and rewriting every stored photo and logo URL, moving Auth users, recreating the Secret Manager secrets, and setting up App Hosting, Hosting, App Check, the reCAPTCHA key and OAuth again, all for an ID people rarely see. Where it does show: Google sign-in names `devfest-sydney-2026.firebaseapp.com`, so point Auth at a custom domain (e.g. `auth.gdgsydney.com`) before speakers sign in (stage 6); Storage URLs name the bucket, which can be served through our own domain if it matters. Explain the ID in the README for future organisers. If a new project is ever made after all, name it `gdg-sydney` or `gdgsydney`, not `gdg-sydney-admin`: the ID is permanent and the project holds far more than the admin.
+- **`gdg-calendar` and `gdg-syd-check-in` stay separate Firebase projects (decided 2026-11-10).** They don't join `devfest-sydney-2026`. If either ever needs this app's data (speakers, volunteers, the schedule), it reads it through the public API (stage 1) rather than sharing a Firestore database.
 
 ### Open decisions
 
-- **The other GDG projects:** `gdg-calendar` and `gdg-syd-check-in` are separate Firebase projects. Decide whether each joins `devfest-sydney-2026` or stays on its own.
 - **States that flip by date** (tickets on sale, CfS and showcase deadlines, the Builder's Space reveal) can't be frozen into a static page. This is the same problem that broke caching on 2026-08-30. The options are a small island that asks `/api/public/status` in the browser, or a scheduled rebuild at each deadline. Pick one for each state deliberately.
 - **What Bevy keeps:** Bevy already supplies events, team and sponsors to `gdgsydney.com`. Don't copy those into Firestore unless Bevy can't do something that's needed. Speakers (profiles that last across events) and volunteers are what this app adds.
 - **Who maintains it:** two frameworks to keep up for good. Fine while one person runs both, but worth writing down if other organisers join.
@@ -358,4 +358,4 @@ Two follow-ups worth deciding on:
    - **`speakerGifts`** (10 replies from the 23 speakers thanked, 3 with an Asana work email): waiting on the mugs shipping and the Asana list being sent to Asana. Delete with "Delete all" on `/admin/speaker-gifts`.
    - **`creditRequests`** (16 requests): waiting on the workshop credits being sent. Delete on `/admin/credits`.
    Once all three are done, reword the matching `/privacy` sections to say the data has been deleted.
-2. Then the Post-2026 Plan, starting with the open decisions (the other GDG Firebase projects, how the date-based states work). The Firebase project itself is decided: stay on `devfest-sydney-2026`.
+2. Then the Post-2026 Plan, starting with the open decision on how the date-based states work. The Firebase projects are decided: stay on `devfest-sydney-2026`, with `gdg-calendar` and `gdg-syd-check-in` kept separate.
