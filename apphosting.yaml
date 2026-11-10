@@ -50,6 +50,23 @@ env:
       - BUILD
       - RUNTIME
 
+  # This app's own host (stage 3 of the plan in PM.md). APP_ORIGIN switches on the redirect
+  # of every non-API path on devfest.gdgsydney.com to it, query string included, so links in
+  # emails already sent keep working (src/lib/siteRedirects.ts). BUILD because redirects are
+  # fixed at build time. NEXT_PUBLIC_SITE_URL is what new emails, canonicals, the sitemap and
+  # robots.txt link to. Set 2026-11-10, once app.gdgsydney.com was connected and allowed in
+  # Firebase Auth and the reCAPTCHA key.
+  - variable: APP_ORIGIN
+    value: https://app.gdgsydney.com
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_SITE_URL
+    value: https://app.gdgsydney.com
+    availability:
+      - BUILD
+      - RUNTIME
+
   # Call for Speakers toggle
   - variable: CFS_OPEN
     value: "true"
