@@ -42,13 +42,26 @@ const CONTENT_MOVES: { source: string; destination: string }[] = [
 //   /builder-showcase/confirm), and, until they are ported to Astro, /builders-space,
 //   /builders-space/starter-guides, /guides and /crew.
 
+// Which hostname a request was made to. Behind App Hosting's CDN the request reaches Next
+// with Host set to the backend's own address and the visitor's hostname in
+// X-Forwarded-Host (the 2026-11-10 deploy matched on Host alone, and production served
+// every page as before). A `has` list is all-of, so each rule is emitted once per header
+// to mean either: X-Forwarded-Host in production, Host when nothing is in front.
+function forEachHostHeader(hostPattern: string, rule: Omit<Redirect, 'has'>): Redirect[] {
+  return [
+    { ...rule, has: [{ type: 'header', key: 'x-forwarded-host', value: hostPattern }] },
+    { ...rule, has: [{ type: 'host', value: hostPattern }] },
+  ] as Redirect[];
+}
+
 export function siteRedirects(): Redirect[] {
-  const contentRedirects: Redirect[] = CONTENT_MOVES.map(({ source, destination }) => ({
-    source,
-    destination: `${GDG_SITE}${destination}`,
-    has: [{ type: 'host', value: PRODUCTION_HOSTS }],
-    permanent: true,
-  }));
+  const contentRedirects: Redirect[] = CONTENT_MOVES.flatMap(({ source, destination }) =>
+    forEachHostHeader(PRODUCTION_HOSTS, {
+      source,
+      destination: `${GDG_SITE}${destination}`,
+      permanent: true,
+    })
+  );
 
   // Everything still served here moves from devfest.gdgsydney.com to the app's own host,
   // query string included, so a confirm or thank-you link in an email already sent keeps
@@ -59,14 +72,11 @@ export function siteRedirects(): Redirect[] {
   // answer on both hosts. /_next is left alone for pages a browser already has open.
   const appOrigin = process.env.APP_ORIGIN?.replace(/\/+$/, '');
   const appRedirects: Redirect[] = appOrigin
-    ? [
-        {
-          source: '/:path((?!api/|_next/).*)',
-          destination: `${appOrigin}/:path`,
-          has: [{ type: 'host', value: OLD_HOST }],
-          permanent: true,
-        },
-      ]
+    ? forEachHostHeader(OLD_HOST, {
+        source: '/:path((?!api/|_next/).*)',
+        destination: `${appOrigin}/:path`,
+        permanent: true,
+      })
     : [];
 
   return [...contentRedirects, ...appRedirects];
