@@ -34,13 +34,18 @@ const CONTENT_MOVES: { source: string; destination: string }[] = [
   { source: '/call-for-speakers', destination: '/devfest' },
   { source: '/volunteer', destination: '/devfest' },
   { source: '/builder-showcase', destination: '/devfest' },
+  // Ported to gdgsydney.com on 2026-11-10. The starter guides became a year-round page at
+  // /guides (so the short link printed in the room still works), the room itself a section
+  // of the archive, and /crew the archive's organisers and volunteers.
+  { source: '/builders-space/starter-guides', destination: '/guides' },
+  { source: '/builders-space', destination: '/devfest/2026#builders-space' },
+  { source: '/guides', destination: '/guides' },
+  { source: '/crew', destination: '/devfest/2026#crew' },
 ];
 
-// Not moved, and so served by this app on either host until the app move below:
-//   /admin, /api, /privacy (covers the data this app holds), /feedback, /credits, the token
-//   pages from emails (/speaker/confirm, /speaker/thanks, /volunteer/confirm,
-//   /builder-showcase/confirm), and, until they are ported to Astro, /builders-space,
-//   /builders-space/starter-guides, /guides and /crew.
+// Not moved, and so served by this app: /admin, /api, /privacy (covers the data this app
+//   holds), /feedback, /credits, and the token pages from emails (/speaker/confirm,
+//   /speaker/thanks, /volunteer/confirm, /builder-showcase/confirm).
 
 // Which hostname a request was made to. Behind App Hosting's CDN the request reaches Next
 // with Host set to the backend's own address and the visitor's hostname in
