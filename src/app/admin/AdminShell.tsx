@@ -27,10 +27,46 @@ interface NavGroup {
   label: string;
   items: NavItem[];
   hasDevfestPicker?: boolean;
+  // The heading is a toggle that hides the group's items. Open on its own while one of its
+  // pages is the current one, like a dropdown.
+  isCollapsible?: boolean;
 }
 
 function isDropdown(item: NavItem): item is NavDropdownItem {
   return 'children' in item;
+}
+
+function groupHrefs(group: NavGroup): string[] {
+  return group.items.flatMap((item) => (isDropdown(item) ? item.children.map((child) => child.href) : [item.href]));
+}
+
+function toDomId(label: string): string {
+  return label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+}
+
+function Chevron({ isOpen }: { isOpen: boolean }) {
+  return (
+    <svg
+      className={`w-3 h-3 shrink-0 text-white/55 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+      viewBox="0 0 12 12"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      aria-hidden="true"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
+    </svg>
+  );
+}
+
+// Opens while one of the given pages is current; otherwise starts closed. Arriving on one of
+// those pages from a link elsewhere opens it; it is never closed for you.
+function useOpenOnActivePage(containsActivePage: boolean) {
+  const [isOpen, setIsOpen] = useState(containsActivePage);
+  useEffect(() => {
+    if (containsActivePage) setIsOpen(true);
+  }, [containsActivePage]);
+  return [isOpen, setIsOpen] as const;
 }
 
 // DevFest and general events are kept apart (stage 4b, PM.md). The DevFest group shows one
@@ -40,6 +76,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'DevFest',
     hasDevfestPicker: true,
+    isCollapsible: true,
     items: [
       // Everything that arrives through one of DevFest's public forms, in one place.
       {
@@ -168,14 +205,9 @@ interface NavDropdownProps {
 
 function NavDropdown({ item, pathname, onNavigate, rounded }: NavDropdownProps) {
   const containsActivePage = item.children.some((child) => isActive(child.href, pathname));
-  const [isOpen, setIsOpen] = useState(containsActivePage);
+  const [isOpen, setIsOpen] = useOpenOnActivePage(containsActivePage);
 
-  // Arriving on one of its pages (from a link elsewhere) opens it; it is never closed for you.
-  useEffect(() => {
-    if (containsActivePage) setIsOpen(true);
-  }, [containsActivePage]);
-
-  const listId = `nav-dropdown-${item.label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${rounded ? 'sidebar' : 'menu'}`;
+  const listId = `nav-dropdown-${toDomId(item.label)}-${rounded ? 'sidebar' : 'menu'}`;
   return (
     <li>
       <button
@@ -191,16 +223,7 @@ function NavDropdown({ item, pathname, onNavigate, rounded }: NavDropdownProps) 
         }`}
       >
         {item.label}
-        <svg
-          className={`w-3 h-3 text-white/55 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-          viewBox="0 0 12 12"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={1.75}
-          aria-hidden="true"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
-        </svg>
+        <Chevron isOpen={isOpen} />
       </button>
       {isOpen && (
         <ul id={listId} className={rounded ? 'mt-0.5 space-y-0.5' : undefined}>
@@ -225,36 +248,72 @@ function NavDropdown({ item, pathname, onNavigate, rounded }: NavDropdownProps) 
   );
 }
 
-function NavLinks({ pathname, onNavigate, rounded, devfestPicker }: NavLinksProps) {
+interface NavGroupSectionProps extends NavLinksProps {
+  group: NavGroup;
+}
+
+function NavGroupSection({ group, pathname, onNavigate, rounded, devfestPicker }: NavGroupSectionProps) {
+  const containsActivePage = groupHrefs(group).some((href) => isActive(href, pathname));
+  const [isOpen, setIsOpen] = useOpenOnActivePage(containsActivePage);
+  const showItems = !group.isCollapsible || isOpen;
+  const listId = `nav-group-${toDomId(group.label)}-${rounded ? 'sidebar' : 'menu'}`;
+  const labelClasses = 'font-mono text-[11px] uppercase tracking-[0.12em]';
+
   return (
-    <nav aria-label="Admin sections" className={rounded ? 'space-y-5' : 'space-y-2'}>
+    <div>
+      <div className={`flex items-center px-4 ${rounded ? 'mb-1.5' : 'pt-1 pb-1'}`}>
+        {group.isCollapsible ? (
+          // Collapsed while you are on one of its pages, the heading stays bright, so it still
+          // says where you are.
+          <button
+            type="button"
+            onClick={() => setIsOpen((open) => !open)}
+            aria-expanded={isOpen}
+            aria-controls={listId}
+            aria-label={`${isOpen ? 'Hide' : 'Show'} the ${group.label} sections`}
+            className={`-my-1 py-1 flex items-center gap-1.5 rounded transition-colors hover:text-white ${labelClasses} ${
+              containsActivePage && !isOpen ? 'text-white' : 'text-white/50'
+            }`}
+          >
+            {group.label}
+            <Chevron isOpen={isOpen} />
+          </button>
+        ) : (
+          <p className={`${labelClasses} text-white/50`}>{group.label}</p>
+        )}
+        {group.hasDevfestPicker && devfestPicker}
+      </div>
+      {showItems && (
+        <ul id={listId} className={rounded ? 'space-y-0.5' : undefined}>
+          {group.items.map((item) => {
+            if (isDropdown(item)) {
+              return <NavDropdown key={item.label} item={item} pathname={pathname} onNavigate={onNavigate} rounded={rounded} />;
+            }
+            const active = isActive(item.href, pathname);
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  onClick={onNavigate}
+                  aria-current={active ? 'page' : undefined}
+                  className={navLinkClasses(active, rounded)}
+                >
+                  {item.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function NavLinks(props: NavLinksProps) {
+  return (
+    <nav aria-label="Admin sections" className={props.rounded ? 'space-y-5' : 'space-y-2'}>
       {NAV_GROUPS.map((group) => (
-        <div key={group.label}>
-          <div className={`flex items-center px-4 ${rounded ? 'mb-1.5' : 'pt-1 pb-1'}`}>
-            <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-white/50">{group.label}</p>
-            {group.hasDevfestPicker && devfestPicker}
-          </div>
-          <ul className={rounded ? 'space-y-0.5' : undefined}>
-            {group.items.map((item) => {
-              if (isDropdown(item)) {
-                return <NavDropdown key={item.label} item={item} pathname={pathname} onNavigate={onNavigate} rounded={rounded} />;
-              }
-              const active = isActive(item.href, pathname);
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    onClick={onNavigate}
-                    aria-current={active ? 'page' : undefined}
-                    className={navLinkClasses(active, rounded)}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+        <NavGroupSection key={group.label} group={group} {...props} />
       ))}
     </nav>
   );
