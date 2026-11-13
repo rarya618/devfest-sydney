@@ -418,11 +418,10 @@ export default function AdminShell({ adminEmail, adminName, devfests, selectedDe
   }
 
   // GDG Sydney's logo (the admin covers every event, not only DevFest), the same file the
-  // speaker portal and emails use, with "Admin" beside it so it reads as the back office.
+  // speaker portal and emails use.
   const wordmark = (
-    <Link href="/admin" className="inline-flex items-center gap-2.5 rounded hover:opacity-85 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue" aria-label="GDG Sydney admin, home">
-      <Image src="https://gdgsydney.com/gdg-logo-dark.png" alt="" width={1700} height={215} className="h-5 w-auto" />
-      <span className="text-xs font-bold text-white/60">Admin</span>
+    <Link href="/admin" className="inline-flex items-center rounded hover:opacity-85 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue" aria-label="GDG Sydney admin, home">
+      <Image src="https://gdgsydney.com/gdg-logo-dark.png" alt="" width={1700} height={215} className="h-6 w-auto" />
     </Link>
   );
 
