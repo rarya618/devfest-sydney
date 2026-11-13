@@ -98,7 +98,7 @@
 }
 
 :root {
-  --bg: #010103;
+  --bg: #1e1e1e; /* Black 02: the page under every screen, overscroll included */
   --google-blue: #4285F4;
   --google-red: #EA4335;
   --google-yellow: #f9ab00;
@@ -206,9 +206,12 @@ body {
 }
 
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--color-black-02) 18%, transparent); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--color-black-02) 30%, transparent); }
+/* Transparent track, so a scrolling sidebar, modal or card shows its own fill rather than a
+   page-coloured strip (it was the old near-black page colour, which read as black patches on
+   the grey treatment). A light thumb, since the page is dark. */
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgb(255 255 255 / 0.18); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgb(255 255 255 / 0.3); }
 
 @media (prefers-reduced-motion: reduce) {
   html {

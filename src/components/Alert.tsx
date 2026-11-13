@@ -34,7 +34,7 @@ export default function Alert({ message, onDismiss }: AlertProps) {
       role="alert"
       aria-live="assertive"
       className={`fixed bottom-6 left-6 z-50 flex items-start gap-3 max-w-sm w-full
-        bg-[#1a0a09] border border-google-red/30 rounded-xl px-4 py-3 shadow-xl
+        bg-surface-raised border border-google-red/40 rounded-xl px-4 py-3 shadow-xl
         transition-all duration-300
         ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}
     >
