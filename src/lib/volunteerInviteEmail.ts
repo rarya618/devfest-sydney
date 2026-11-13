@@ -11,6 +11,8 @@ export interface VolunteerInviteEmailDetails {
   eventDate: string;
   venueName: string;
   joinUrl: string;
+  // "Stop inviting me": the pool works like a mailing list, so every send carries a way off it.
+  optOutUrl: string;
 }
 
 const FONT = "font-family:'Google Sans',Roboto,sans-serif;letter-spacing:-0.01em;";
@@ -66,6 +68,10 @@ export function buildVolunteerInviteEmail(details: VolunteerInviteEmailDetails):
               <p style="margin:0 0 8px;${FONT}font-size:14px;color:rgba(255,255,255,0.6);line-height:1.6;">
                 Can&rsquo;t make it this time? No need to reply. Questions? Write to
                 <a href="mailto:hello@gdgsydney.com" style="color:#34A853;">hello@gdgsydney.com</a>.
+              </p>
+              <p style="margin:16px 0 0;${FONT}font-size:12px;color:rgba(255,255,255,0.5);line-height:1.6;">
+                You&rsquo;re getting this because you signed up to volunteer with GDG Sydney.
+                <a href="${escapeHtml(details.optOutUrl)}" style="color:rgba(255,255,255,0.6);">Don&rsquo;t invite me again</a>.
               </p>
             </td>
           </tr>

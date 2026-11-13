@@ -7,6 +7,7 @@ import { formatDate } from '@/lib/format';
 import type { InvitablePastVolunteer } from '@/lib/volunteerInvite';
 
 interface Props {
+  eventId: string;
   eventName: string;
   people: InvitablePastVolunteer[];
   onClose: () => void;
@@ -19,7 +20,7 @@ const SEND_SPACING_MS = 600;
 
 // "Invite past volunteers" on /admin/crew (stage 4d-2, PM.md): everyone who crewed an earlier
 // event and hasn't signed up for this one, ticked by default unless already invited.
-export default function InvitePastVolunteersModal({ eventName, people, onClose, onError }: Props) {
+export default function InvitePastVolunteersModal({ eventId, eventName, people, onClose, onError }: Props) {
   const [selected, setSelected] = useState<Set<string>>(
     () => new Set(people.filter((person) => !person.invitedAt).map((person) => person.profileId))
   );
@@ -44,7 +45,7 @@ export default function InvitePastVolunteersModal({ eventName, people, onClose, 
       setProgress({ sent: 0, total: targets.length });
       for (const [index, target] of targets.entries()) {
         if (index > 0) await new Promise((resolve) => setTimeout(resolve, SEND_SPACING_MS));
-        const result = await sendVolunteerInvite(target.profileId);
+        const result = await sendVolunteerInvite(target.profileId, eventId);
         if (result.error) {
           if (result.emailSent) recordFailures += 1;
           else sendFailures += 1;

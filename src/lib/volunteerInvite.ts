@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 import { adminDb } from '@/lib/firebase-admin';
-import { hasEventEnded, loadEvent } from '@/lib/events';
+import { hasEventEnded, loadEvent, toGdgEvent } from '@/lib/events';
 import { withProfile } from '@/lib/volunteerProfiles';
 import type { GdgEvent } from '@/lib/types';
 
@@ -134,7 +134,8 @@ export async function fetchInvitablePastVolunteers(eventId: string): Promise<Inv
   const profiles = await adminDb.getAll(...candidateIds.map((id) => adminDb.collection('volunteerProfiles').doc(id)));
 
   return profiles
-    .filter((profile) => profile.exists)
+    // Anyone who asked not to be invited again is left off.
+    .filter((profile) => profile.exists && !profile.data()?.inviteOptOut)
     .map((profile) => {
       const data = profile.data()!;
       const sentAt = data.volunteerInvites?.[eventId]?.sentAt as FirebaseFirestore.Timestamp | undefined;
@@ -147,4 +148,101 @@ export async function fetchInvitablePastVolunteers(eventId: string): Promise<Inv
       };
     })
     .sort((first, second) => first.name.localeCompare(second.name));
+}
+
+// "Don't invite me again", the link at the foot of every invite. Signed over the profile alone
+// with its own purpose prefix, so it can't be turned into an invite or a confirm token.
+const OPT_OUT_PURPOSE = 'volunteer-opt-out:';
+
+function optOutSignature(profileId: string): string {
+  const secret = process.env.VOLUNTEER_CONFIRM_SECRET;
+  if (!secret) throw new Error('VOLUNTEER_CONFIRM_SECRET is not set.');
+  return createHmac('sha256', secret).update(`${OPT_OUT_PURPOSE}${profileId}`).digest('base64url');
+}
+
+export function volunteerOptOutUrl(profileId: string): string {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://devfest.gdgsydney.com';
+  const token = `${Buffer.from(profileId).toString('base64url')}${TOKEN_SEPARATOR}${optOutSignature(profileId)}`;
+  return `${siteUrl.replace(/\/$/, '')}/volunteer/unsubscribe?token=${token}`;
+}
+
+export function verifyVolunteerOptOutToken(token: string): string | null {
+  const [encodedId, providedSignature] = token.split(TOKEN_SEPARATOR);
+  if (!encodedId || !providedSignature) return null;
+  const profileId = Buffer.from(encodedId, 'base64url').toString('utf8');
+  if (!profileId) return null;
+  const expected = Buffer.from(optOutSignature(profileId));
+  const provided = Buffer.from(providedSignature);
+  if (expected.length !== provided.length) return null;
+  return timingSafeEqual(expected, provided) ? profileId : null;
+}
+
+// One person in the volunteer pool (/admin/volunteer-pool): everyone with a volunteer
+// profile, which works like a mailing list for invites. Per event: whether they signed up
+// (and how that went) and when they were invited.
+export interface VolunteerPoolMember {
+  profileId: string;
+  name: string;
+  email: string;
+  crewedEventNames: string[]; // events they were accepted onto the crew of
+  hasBeenOrganiser: boolean;
+  signupStatusByEvent: Record<string, string>;
+  invitedAtByEvent: Record<string, string>;
+  optedOut: boolean;
+}
+
+export interface VolunteerPoolEvent {
+  id: string;
+  name: string;
+  type: GdgEvent['type'];
+  startAt: string;
+}
+
+// The pool, and the events it can be invited to (taking volunteers and not over yet,
+// soonest first). Reads every profile and signup: a few hundred documents a year at most.
+export async function fetchVolunteerPool(): Promise<{ members: VolunteerPoolMember[]; events: VolunteerPoolEvent[] }> {
+  const [profiles, signups, eventDocs] = await Promise.all([
+    adminDb.collection('volunteerProfiles').get(),
+    adminDb.collection('volunteers').get(),
+    adminDb.collection('events').get(),
+  ]);
+  const events = eventDocs.docs.map((doc) => toGdgEvent(doc.id, doc.data()));
+  const eventNames = new Map(events.map((event) => [event.id, event.name]));
+
+  const signupsByProfile = new Map<string, FirebaseFirestore.DocumentData[]>();
+  for (const signup of signups.docs) {
+    const profileId = signup.data().profileId;
+    if (typeof profileId === 'string' && profileId) {
+      signupsByProfile.set(profileId, [...(signupsByProfile.get(profileId) ?? []), signup.data()]);
+    }
+  }
+
+  const members = profiles.docs
+    .map((profile): VolunteerPoolMember => {
+      const data = profile.data();
+      const own = signupsByProfile.get(profile.id) ?? [];
+      const invites = (data.volunteerInvites ?? {}) as Record<string, { sentAt?: FirebaseFirestore.Timestamp }>;
+      return {
+        profileId: profile.id,
+        name: String(data.name ?? ''),
+        email: String(data.email ?? ''),
+        crewedEventNames: [...new Set(own.filter((signup) => signup.status === 'accepted').map((signup) => eventNames.get(signup.eventId) ?? String(signup.eventId)))],
+        hasBeenOrganiser: own.some((signup) => signup.isOrganiser),
+        signupStatusByEvent: Object.fromEntries(own.map((signup) => [String(signup.eventId), String(signup.status ?? 'pending')])),
+        invitedAtByEvent: Object.fromEntries(
+          Object.entries(invites)
+            .filter(([, invite]) => invite?.sentAt)
+            .map(([eventId, invite]) => [eventId, invite.sentAt!.toDate().toISOString()])
+        ),
+        optedOut: data.inviteOptOut === true,
+      };
+    })
+    .sort((first, second) => first.name.localeCompare(second.name));
+
+  const openEvents = events
+    .filter((event) => inviteClosedReason(event) === null)
+    .sort((first, second) => first.startAt.localeCompare(second.startAt))
+    .map((event) => ({ id: event.id, name: event.name, type: event.type, startAt: event.startAt }));
+
+  return { members, events: openEvents };
 }

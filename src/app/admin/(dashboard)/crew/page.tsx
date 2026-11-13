@@ -26,6 +26,7 @@ export default async function CrewPage() {
     <CrewDashboard
       crew={crew}
       invites={{
+        eventId,
         eventName: selectedDevfest?.name ?? '',
         people: invitable,
         closedReason: inviteClosedReason(selectedDevfest),

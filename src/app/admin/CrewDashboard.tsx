@@ -402,7 +402,7 @@ function CrewCard({ member, onError }: CrewCardProps) {
 interface Props {
   crew: VolunteerSubmission[];
   // "Invite past volunteers" (stage 4d-2). people is null when the list couldn't be read.
-  invites: { eventName: string; people: InvitablePastVolunteer[] | null; closedReason: string | null };
+  invites: { eventId: string; eventName: string; people: InvitablePastVolunteer[] | null; closedReason: string | null };
 }
 
 export default function CrewDashboard({ crew, invites }: Props) {
@@ -800,6 +800,7 @@ export default function CrewDashboard({ crew, invites }: Props) {
 
       {invitingPast && invites.people && (
         <InvitePastVolunteersModal
+          eventId={invites.eventId}
           eventName={invites.eventName}
           people={invites.people}
           onClose={() => setInvitingPast(false)}

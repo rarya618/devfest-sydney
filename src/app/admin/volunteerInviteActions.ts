@@ -2,21 +2,21 @@
 
 import { revalidatePath } from 'next/cache';
 import { Resend } from 'resend';
-import { Timestamp } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 import { verifyAdminSession } from '@/lib/adminSession';
-import { getAdminDevfestId } from '@/lib/adminEvent';
 import { loadEvent } from '@/lib/events';
 import { EMAIL_PATTERN } from '@/lib/emailPattern';
-import { inviteClosedReason, volunteerInviteUrl } from '@/lib/volunteerInvite';
+import { inviteClosedReason, volunteerInviteUrl, volunteerOptOutUrl } from '@/lib/volunteerInvite';
 import { buildVolunteerInviteEmail, volunteerInviteEmailSubject } from '@/lib/volunteerInviteEmail';
 
-// Emails one past volunteer an invite to crew the DevFest selected in the sidebar (stage
-// 4d-2, PM.md). Recorded on their profile as volunteerInvites.<eventId>, so the list on
-// /admin/crew shows who has been asked. A second send is allowed, for someone who lost the
+// Emails one person from the volunteer pool an invite to crew an event, a DevFest or a general
+// one (stage 4d-2, PM.md). Sent from /admin/volunteer-pool, and from /admin/crew for the
+// selected DevFest. Recorded on their profile as volunteerInvites.<eventId>, so both lists
+// show who has been asked. Someone who has used the "stop inviting me" link is refused. A second send is allowed, for someone who lost the
 // first. `emailSent` is set on the one failure where the email did go out, so the bulk send
 // can tell the admin not to retry that person.
-export async function sendVolunteerInvite(profileId: string): Promise<{ error?: string; emailSent?: boolean }> {
+export async function sendVolunteerInvite(profileId: string, eventId: string): Promise<{ error?: string; emailSent?: boolean }> {
   let senderEmail: string;
   try {
     ({ email: senderEmail } = await verifyAdminSession());
@@ -24,7 +24,6 @@ export async function sendVolunteerInvite(profileId: string): Promise<{ error?: 
     return { error: 'Your session has expired. Please sign in again.' };
   }
 
-  const eventId = await getAdminDevfestId();
   const profileRef = adminDb.collection('volunteerProfiles').doc(profileId);
   let profile: FirebaseFirestore.DocumentData;
   let event;
@@ -35,8 +34,9 @@ export async function sendVolunteerInvite(profileId: string): Promise<{ error?: 
       adminDb.collection('volunteers').where('profileId', '==', profileId).where('eventId', '==', eventId).limit(1).get(),
     ]);
     if (!profileSnapshot.exists) return { error: 'This volunteer\'s profile no longer exists.' };
-    if (!existing.empty) return { error: 'This person has already signed up for this DevFest.' };
+    if (!existing.empty) return { error: 'This person has already signed up for this event.' };
     profile = profileSnapshot.data()!;
+    if (profile.inviteOptOut) return { error: `${profile.name ?? 'This person'} has asked not to be invited again.` };
     event = loadedEvent;
   } catch {
     return { error: 'Could not load this volunteer. Please try again.' };
@@ -48,8 +48,10 @@ export async function sendVolunteerInvite(profileId: string): Promise<{ error?: 
   if (!EMAIL_PATTERN.test(email)) return { error: `The email address on file for ${profile.name ?? 'this volunteer'} doesn't look right.` };
 
   let joinUrl: string;
+  let optOutUrl: string;
   try {
     joinUrl = volunteerInviteUrl(profileId, event.id);
+    optOutUrl = volunteerOptOutUrl(profileId);
   } catch {
     return { error: 'The volunteer link secret isn\'t configured on the server, so invites can\'t be sent yet.' };
   }
@@ -73,6 +75,7 @@ export async function sendVolunteerInvite(profileId: string): Promise<{ error?: 
         }),
         venueName: event.venue?.name ?? '',
         joinUrl,
+        optOutUrl,
       }),
     });
     if (error) throw new Error(error.message);
@@ -89,6 +92,27 @@ export async function sendVolunteerInvite(profileId: string): Promise<{ error?: 
     return { error: 'The invite was sent, but we couldn\'t record it. Refresh before sending again.', emailSent: true };
   }
 
+  revalidatePath('/admin/crew');
+  revalidatePath('/admin/volunteer-pool');
+  return {};
+}
+
+// Puts someone who used "Don't invite me again" back on the list, for when they ask to be.
+export async function restoreVolunteerInvites(profileId: string): Promise<{ error?: string }> {
+  try {
+    await verifyAdminSession();
+  } catch {
+    return { error: 'Your session has expired. Please sign in again.' };
+  }
+  try {
+    await adminDb.collection('volunteerProfiles').doc(profileId).update({
+      inviteOptOut: FieldValue.delete(),
+      inviteOptOutAt: FieldValue.delete(),
+    });
+  } catch {
+    return { error: 'Could not put this person back on the list. Please try again.' };
+  }
+  revalidatePath('/admin/volunteer-pool');
   revalidatePath('/admin/crew');
   return {};
 }
