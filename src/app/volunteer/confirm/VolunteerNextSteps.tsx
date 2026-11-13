@@ -1,10 +1,10 @@
 export interface VolunteerLinks {
-  // The Humanitix link carrying the volunteer access code. Null when VOLUNTEER_TICKET_URL
-  // isn't configured, or when an admin has marked this volunteer's ticket as already sent
+  // The Humanitix link carrying the volunteer access code. Null when the event has no
+  // volunteer ticket link set, or when an admin has marked this volunteer's ticket as already sent
   // from /admin/crew; ticketAlreadySent tells the two apart.
   ticketUrl: string | null;
   ticketAlreadySent: boolean;
-  // The volunteer WhatsApp group invite, or null when VOLUNTEER_WHATSAPP_URL isn't set.
+  // The volunteer WhatsApp group invite, or null when the event has none set.
   whatsappUrl: string | null;
 }
 
@@ -53,7 +53,7 @@ export default function VolunteerNextSteps({ ticketUrl, ticketAlreadySent, whats
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Join the DevFest Sydney volunteer WhatsApp group, opens in a new tab"
+            aria-label="Join the volunteer WhatsApp group, opens in a new tab"
             className="mt-4 inline-flex items-center px-7 py-2 bg-transparent text-white text-base font-bold rounded border border-white/40 transition-colors hover:border-white"
           >
             Join the WhatsApp group

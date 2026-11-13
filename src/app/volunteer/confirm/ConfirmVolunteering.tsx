@@ -8,13 +8,14 @@ import VolunteerNextSteps, { type VolunteerLinks } from './VolunteerNextSteps';
 interface ConfirmVolunteeringProps {
   token: string;
   name: string;
+  eventName: string;
   // Rendered here rather than on the page so it disappears along with the button: a
   // "we need to hear from you by the 10th" line left standing under a confirmation reads
   // as though the click didn't take.
   intro: string;
 }
 
-export default function ConfirmVolunteering({ token, name, intro }: ConfirmVolunteeringProps) {
+export default function ConfirmVolunteering({ token, name, eventName, intro }: ConfirmVolunteeringProps) {
   const [isPending, startTransition] = useTransition();
   const [links, setLinks] = useState<VolunteerLinks | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -54,7 +55,7 @@ export default function ConfirmVolunteering({ token, name, intro }: ConfirmVolun
       <button
         onClick={handleConfirm}
         disabled={isPending}
-        aria-label={`Confirm you will be volunteering at DevFest Sydney 2026 as ${name}`}
+        aria-label={`Confirm you will be volunteering at ${eventName} as ${name}`}
         className="inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-green-deep text-white text-base font-bold rounded
           border border-google-green-deep transition-opacity hover:opacity-80
           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-google-green-deep disabled:hover:text-white"

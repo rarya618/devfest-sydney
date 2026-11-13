@@ -131,6 +131,19 @@ export async function fetchCurrentDevfestLink(key: EventPrivateLinkKey): Promise
   }
 }
 
+// One private link of a given event, or null when it is unset, the event is gone, or the
+// read fails. For the confirm pages, which hand a person the links of the event they signed
+// up for rather than whichever DevFest is current (stage 4e).
+export async function fetchEventLink(eventId: string, key: EventPrivateLinkKey): Promise<string | null> {
+  if (!eventId) return null;
+  try {
+    return (await loadEventPrivateLinks(eventId))[key] || null;
+  } catch (error) {
+    console.error(`Could not read ${key} for ${eventId}:`, error);
+    return null;
+  }
+}
+
 // The same, for an admin about to email the link: tells them which of the three things went
 // wrong, since each has a different fix.
 export async function requireCurrentDevfestLink(

@@ -18,8 +18,8 @@ interface Props {
 
 // General events > Volunteers: the same review queue as DevFest's, for one general event at a
 // time, chosen in the page (?event=<id>, so a view can be bookmarked). Signups arrive from the
-// volunteer pool's invites. The acceptance email is left out until stage 4e makes it follow
-// the event; roster, tickets and the confirm link stay DevFest-only.
+// volunteer pool's invites. The acceptance email and /volunteer/confirm read the event (stage
+// 4e), so they work here too; the roster and ticket marks live on DevFest > Crew only.
 export default async function EventVolunteersPage({ searchParams }: Props) {
   const [, { event: requestedId }, events] = await Promise.all([getVerifiedSession(), searchParams, loadEvents()]);
 

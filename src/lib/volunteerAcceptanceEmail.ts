@@ -2,6 +2,7 @@ import { formatDeadlineDate } from '@/lib/format';
 import { VOLUNTEER_AREA_LABELS, VOLUNTEER_SHIFT_LABELS } from '@/lib/volunteerLabels';
 import type { VolunteerArea, VolunteerShift } from '@/lib/types';
 import { escapeHtml } from '@/lib/escapeHtml';
+import { formatEventWhen, isDevfest, type EventCopy } from '@/lib/eventCopy';
 
 // Same table-based construction and escaping as acceptanceEmail.ts: email clients strip
 // stylesheets, and several still ignore flexbox and CSS variables entirely. Green rather
@@ -16,6 +17,8 @@ export interface VolunteerAcceptanceEmailDetails {
   assignedShift: VolunteerShift;
   confirmUrl: string;
   confirmByIso: string;
+  // The event they're crewing (stage 4e): its name, date and venue fill the copy.
+  event: EventCopy;
 }
 
 const FONT = "font-family:'Google Sans',Roboto,sans-serif;letter-spacing:-0.01em;";
@@ -37,8 +40,8 @@ function card(innerHtml: string): string {
     </table>`;
 }
 
-export function volunteerAcceptanceEmailSubject(): string {
-  return 'You’re on the DevFest Sydney 2026 volunteer crew';
+export function volunteerAcceptanceEmailSubject(event: EventCopy): string {
+  return `You’re on the ${event.name} volunteer crew`;
 }
 
 export function buildVolunteerAcceptanceEmail(details: VolunteerAcceptanceEmailDetails): string {
@@ -55,6 +58,17 @@ export function buildVolunteerAcceptanceEmail(details: VolunteerAcceptanceEmailD
 
   // Only rendered once there is a roster to render. Before that the email says the role
   // is still being worked out, which is true and reads better than an empty card.
+  const eventName = escapeHtml(details.event.name);
+  const when = escapeHtml(formatEventWhen(details.event));
+  // A DevFest is a big day with a run sheet; a general event is an evening or a workshop,
+  // where "who to find when you get there" is most of what a volunteer needs.
+  const dayParagraphs = isDevfest(details.event)
+    ? `${eventName} is on ${when}. It's a big day, and the crew is what makes a day that size work.`
+    : `${eventName} is on ${when}. Thanks for helping make it happen.`;
+  const beforeTheDay = isDevfest(details.event)
+    ? "Closer to the day we'll send you the run sheet, your arrival time, and who to find when you get there. If you have anything on that morning that we should know about, just reply and tell us."
+    : "Closer to the day we'll let you know when to arrive and who to find when you get there. If anything changes for you, just reply and tell us.";
+
   const roleCard = indicators
     ? card(`
         <p style="margin:0 0 18px;${FONT}font-size:18px;font-weight:700;color:#ffffff;line-height:1.5;text-align:center;">Where we'd love your help</p>
@@ -70,7 +84,7 @@ export function buildVolunteerAcceptanceEmail(details: VolunteerAcceptanceEmailD
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>You're on the DevFest Sydney 2026 volunteer crew</title>
+  <title>${escapeHtml(volunteerAcceptanceEmailSubject(details.event))}</title>
 </head>
 <body style="margin:0;padding:0;background:#202124;${FONT}color:#ffffff;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#202124;padding:48px 16px;">
@@ -91,7 +105,7 @@ export function buildVolunteerAcceptanceEmail(details: VolunteerAcceptanceEmailD
                 ${escapeHtml(firstName)}
               </h2>
               <p style="margin:0 0 32px;${FONT}font-size:20px;font-weight:400;color:#ffffff;line-height:1.6;text-align:center;">
-                We'd love to have you on the volunteer crew for DevFest Sydney 2026
+                We'd love to have you on the volunteer crew for ${eventName}
               </p>
 
               <!-- Role -->
@@ -116,10 +130,10 @@ export function buildVolunteerAcceptanceEmail(details: VolunteerAcceptanceEmailD
                    place to invent it. Add it here once the organisers have decided. -->
               <h3 style="margin:0 0 12px;${sectionHeading}">The day itself</h3>
               <p style="margin:0 0 16px;${bodyText}">
-                DevFest Sydney is on Saturday 10 October at Torrens University, Surry Hills. We're expecting 200+ attendees across 4 tracks, and the crew is what makes a day that size work.
+                ${dayParagraphs}
               </p>
               <p style="margin:0 0 32px;${bodyText}">
-                Closer to the day we'll send you the run sheet, your arrival time, and who to find when you get there. If you have anything on that morning that we should know about, just reply and tell us.
+                ${beforeTheDay}
               </p>
 
               <!-- Questions -->
@@ -148,6 +162,7 @@ export interface VolunteerConfirmationNoticeDetails {
   assignedArea: VolunteerArea | '';
   assignedShift: VolunteerShift;
   confirmedAtIso: string;
+  eventName: string;
 }
 
 // Sent to the organisers when a volunteer confirms. Plainer than the volunteer-facing
@@ -188,7 +203,7 @@ export function buildVolunteerConfirmedNotice(details: VolunteerConfirmationNoti
               <img src="${WORDMARK_URL}" alt="DevFest Sydney" width="177" height="32" style="display:block;margin:0 0 32px;" />
 
               <h1 style="margin:0 0 8px;${FONT}font-size:28px;font-weight:700;color:#34A853;line-height:1.4;">Volunteer confirmed</h1>
-              <p style="margin:0 0 24px;${bodyText}">${escapeHtml(details.name)} has confirmed they'll be on the crew at DevFest Sydney 2026.</p>
+              <p style="margin:0 0 24px;${bodyText}">${escapeHtml(details.name)} has confirmed they'll be on the crew at ${escapeHtml(details.eventName)}.</p>
 
               ${card(`<table cellpadding="0" cellspacing="0" width="100%">
                 ${row('Area', details.assignedArea ? VOLUNTEER_AREA_LABELS[details.assignedArea] : 'Not assigned yet')}

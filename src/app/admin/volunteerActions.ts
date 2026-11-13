@@ -12,6 +12,7 @@ import {
 import { volunteerConfirmDeadlineFrom, volunteerConfirmUrl } from '@/lib/volunteerConfirm';
 import { loadVolunteerRecord } from '@/lib/volunteerProfiles';
 import { loadEvent } from '@/lib/events';
+import { toEventCopy } from '@/lib/eventCopy';
 
 // Accepting or un-accepting a signup moves it on and off /admin/crew, so both pages are
 // revalidated wherever the status changes.
@@ -150,16 +151,15 @@ export async function sendVolunteerAcceptanceEmail(volunteerId: string): Promise
   if (volunteer.isOrganiser) {
     return { error: 'Organisers are added to the crew directly, so there is no acceptance email to send them.' };
   }
-  // The email and /volunteer/confirm are written for DevFest until stage 4e makes them follow
-  // the event, so a general event's volunteers are told some other way for now.
+  // The signup's own event names the email (stage 4e), so a DevFest or a general event's
+  // volunteers each read about the right day.
+  let event;
   try {
-    const event = await loadEvent(String(volunteer.eventId ?? ''));
-    if (event?.type !== 'devfest') {
-      return { error: 'The acceptance email is written for DevFest, so it can\'t be sent for a general event yet. Email them directly for now.' };
-    }
+    event = await loadEvent(String(volunteer.eventId ?? ''));
   } catch {
     return { error: 'Could not check which event this signup is for. Please try again.' };
   }
+  if (!event) return { error: 'This signup isn\'t filed under an event that still exists, so the email can\'t say where to come.' };
 
   const sentAt = new Date();
   const confirmBy = volunteerConfirmDeadlineFrom(sentAt);
@@ -180,13 +180,14 @@ export async function sendVolunteerAcceptanceEmail(volunteerId: string): Promise
       to: volunteer.email,
       bcc: 'hello@gdgsydney.com',
       replyTo: 'hello@gdgsydney.com',
-      subject: volunteerAcceptanceEmailSubject(),
+      subject: volunteerAcceptanceEmailSubject(toEventCopy(event)),
       html: buildVolunteerAcceptanceEmail({
         name: volunteer.name,
         assignedArea: volunteer.assignedArea ?? '',
         assignedShift: volunteer.assignedShift ?? '',
         confirmUrl: confirmLink,
         confirmByIso: confirmBy.toISOString(),
+        event: toEventCopy(event),
       }),
     });
   } catch (err) {

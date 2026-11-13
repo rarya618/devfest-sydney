@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
-import { currentDevfestFlowState } from '@/lib/events';
+import { currentDevfestFlowState, loadCurrentDevfest } from '@/lib/events';
 import { Resend } from 'resend';
 import { FieldValue } from 'firebase-admin/firestore';
 import { escapeHtml } from '@/lib/escapeHtml';
@@ -105,7 +105,7 @@ function validatePayload(body: unknown): VolunteerPayload {
 
 const AREA_DOT_COLORS = ['#34A853', '#F9AB00', '#4285F4', '#EA4335'];
 
-function buildConfirmationEmail(volunteer: VolunteerPayload): string {
+function buildConfirmationEmail(volunteer: VolunteerPayload, eventName: string): string {
   const font = "font-family:'Google Sans',Roboto,sans-serif;letter-spacing:-0.01em;";
 
   const dot = (color: string, label: string) => `
@@ -122,7 +122,7 @@ function buildConfirmationEmail(volunteer: VolunteerPayload): string {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Volunteer signup received: DevFest Sydney 2026</title>
+  <title>Volunteer signup received: ${escapeHtml(eventName)}</title>
 </head>
 <body style="margin:0;padding:0;background:#202124;${font}color:#ffffff;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#202124;padding:48px 16px;">
@@ -143,7 +143,7 @@ function buildConfirmationEmail(volunteer: VolunteerPayload): string {
                 ${escapeHtml(volunteer.name.split(' ')[0])}
               </h2>
               <p style="margin:0 0 40px;${font}font-size:24px;font-weight:400;color:#ffffff;line-height:1.75;">
-                Thanks for offering to volunteer at DevFest Sydney. We'll be in touch via email with next steps.
+                Thanks for offering to volunteer at ${escapeHtml(eventName)}. We'll be in touch via email with next steps.
               </p>
 
               <!-- Signup recap card -->
@@ -227,14 +227,17 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    // The event the signup was filed under (stage 4e). Read once per request already, when the
+    // form was checked as open.
+    const eventName = (await loadCurrentDevfest())?.name ?? 'GDG Sydney';
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
       from: `GDG Sydney <${process.env.RESEND_FROM_EMAIL}>`,
       to: volunteer.email,
       bcc: 'hello@gdgsydney.com',
       replyTo: 'hello@gdgsydney.com',
-      subject: `We've got your DevFest Sydney 2026 volunteer application`,
-      html: buildConfirmationEmail(volunteer),
+      subject: `We've got your ${eventName} volunteer application`,
+      html: buildConfirmationEmail(volunteer, eventName),
     });
   } catch {
     // Email failure is non-fatal: signup is already saved.

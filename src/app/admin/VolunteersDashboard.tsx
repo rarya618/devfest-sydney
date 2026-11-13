@@ -91,12 +91,9 @@ function ReviewerNotesPanel({ volunteerId, notes, onError }: ReviewerNotesPanelP
 interface VolunteerRowProps {
   volunteer: VolunteerSubmission;
   onError: (message: string) => void;
-  // False on a general event's page: the acceptance email and /volunteer/confirm are written
-  // for DevFest until stage 4e, so the envelope and the Not emailed chip are left out.
-  showsAcceptanceEmail: boolean;
 }
 
-function VolunteerRow({ volunteer, onError, showsAcceptanceEmail }: VolunteerRowProps) {
+function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
   const [isPending, startTransition] = useTransition();
   const [notesOpen, setNotesOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -154,9 +151,8 @@ function VolunteerRow({ volunteer, onError, showsAcceptanceEmail }: VolunteerRow
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
         <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{volunteer.name}</h3>
         {/* Only on accepted signups: "Not emailed" against a pending one would read as a
-            task, when the thing to do first is decide. Not on general events, which have no
-            acceptance email yet. */}
-        {showsAcceptanceEmail && volunteer.status === 'accepted' && (
+            task, when the thing to do first is decide. */}
+        {volunteer.status === 'accepted' && (
           <span
             title={VOLUNTEER_CONFIRMATION_CHIPS[volunteer.confirmation].title}
             className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${VOLUNTEER_CONFIRMATION_CHIPS[volunteer.confirmation].className}`}
@@ -318,7 +314,7 @@ function VolunteerRow({ volunteer, onError, showsAcceptanceEmail }: VolunteerRow
           )}
           {/* The same send this volunteer's card offers on /admin/crew, so an organiser
               working through the review queue doesn't have to change pages to tell someone. */}
-          {showsAcceptanceEmail && volunteer.status === 'accepted' && (
+          {volunteer.status === 'accepted' && (
             <button
               onClick={() => handleAction(sendVolunteerAcceptanceEmail)}
               disabled={isPending}
@@ -423,7 +419,6 @@ type FilterArea = 'all' | VolunteerArea;
 
 export default function VolunteersDashboard({ volunteers, generalEvents }: Props) {
   const router = useRouter();
-  const showsAcceptanceEmail = !generalEvents;
   const mobileBarHidden = useMobileBarHidden();
   const [filter, setFilter] = useState<FilterStatus>('all');
   const [areaFilter, setAreaFilter] = useState<FilterArea>('all');
@@ -547,7 +542,7 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
             <h1 className="text-xl font-bold text-white tracking-tight">Volunteers</h1>
             <p className="mt-0.5 text-sm text-white/55">
               {counts.all} total &middot; {counts.pending} pending review
-              {showsAcceptanceEmail && notEmailedCount > 0 && <> &middot; {notEmailedCount} accepted, not emailed</>}
+              {notEmailedCount > 0 && <> &middot; {notEmailedCount} accepted, not emailed</>}
             </p>
           </div>
 
@@ -716,7 +711,7 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
         ) : (
           <div className="grid grid-cols-1 gap-5 items-start">
             {filtered.map((volunteer) => (
-              <VolunteerRow key={volunteer.id} volunteer={volunteer} onError={setAlertMessage} showsAcceptanceEmail={showsAcceptanceEmail} />
+              <VolunteerRow key={volunteer.id} volunteer={volunteer} onError={setAlertMessage} />
             ))}
           </div>
         )}

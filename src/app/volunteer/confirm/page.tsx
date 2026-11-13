@@ -7,7 +7,8 @@ import { VOLUNTEER_AREA_LABELS, VOLUNTEER_SHIFT_LABELS } from '@/lib/volunteerLa
 import type { VolunteerArea, VolunteerShift } from '@/lib/types';
 import ConfirmVolunteering from './ConfirmVolunteering';
 import VolunteerNextSteps from './VolunteerNextSteps';
-import { fetchCurrentDevfestLink } from '@/lib/events';
+import { fetchEventLink, loadEvent } from '@/lib/events';
+import { formatEventWhen, toEventCopy, type EventCopy } from '@/lib/eventCopy';
 import { loadVolunteerRecord } from '@/lib/volunteerProfiles';
 
 // Reached only from a link in an acceptance email, and the answer depends on a Firestore
@@ -31,6 +32,8 @@ interface AcceptedVolunteer {
   confirmByIso: string | null;
   alreadyConfirmed: boolean;
   ticketAlreadySent: boolean;
+  eventId: string;
+  event: EventCopy | null;
 }
 
 async function loadAcceptedVolunteer(token: string): Promise<AcceptedVolunteer | null> {
@@ -46,7 +49,11 @@ async function loadAcceptedVolunteer(token: string): Promise<AcceptedVolunteer |
   if (volunteer.status !== 'accepted') return null;
 
   const confirmByDate = volunteer.confirmByDate as Timestamp | undefined;
+  const eventId = String(volunteer.eventId ?? '');
+  const event = await loadEvent(eventId).catch(() => null);
   return {
+    eventId,
+    event: event ? toEventCopy(event) : null,
     name: volunteer.name ?? '',
     assignedArea: volunteer.assignedArea ?? '',
     assignedShift: volunteer.assignedShift ?? '',
@@ -136,9 +143,9 @@ export default async function VolunteerConfirmPage({ searchParams }: ConfirmPage
                 </p>
                 {/* Rendered only on this branch: the links belong to someone who has said yes. */}
                 <VolunteerNextSteps
-                  ticketUrl={volunteer.ticketAlreadySent ? null : await fetchCurrentDevfestLink('volunteerTicketUrl')}
+                  ticketUrl={volunteer.ticketAlreadySent ? null : await fetchEventLink(volunteer.eventId, 'volunteerTicketUrl')}
                   ticketAlreadySent={volunteer.ticketAlreadySent}
-                  whatsappUrl={await fetchCurrentDevfestLink('volunteerWhatsappUrl')}
+                  whatsappUrl={await fetchEventLink(volunteer.eventId, 'volunteerWhatsappUrl')}
                 />
               </>
             ) : (
@@ -146,7 +153,8 @@ export default async function VolunteerConfirmPage({ searchParams }: ConfirmPage
                 <ConfirmVolunteering
                   token={token!}
                   name={volunteer.name}
-                  intro={`Let us know you can still join us on Saturday 10 October at Torrens University, Surry Hills.${
+                  eventName={volunteer.event?.name ?? 'the event'}
+                  intro={`Let us know you can still join us${volunteer.event ? ` on ${formatEventWhen(volunteer.event)}` : ''}.${
                     volunteer.confirmByIso
                       ? ` We need to hear from you by ${formatDeadlineDate(volunteer.confirmByIso)}, as we will need to offer the spot to someone else.`
                       : ''

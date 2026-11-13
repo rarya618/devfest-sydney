@@ -5,7 +5,7 @@ import { Resend } from 'resend';
 import { buildVolunteerConfirmedNotice } from '@/lib/volunteerAcceptanceEmail';
 import { verifyVolunteerConfirmToken } from '@/lib/volunteerConfirm';
 import type { VolunteerLinks } from './VolunteerNextSteps';
-import { fetchCurrentDevfestLink } from '@/lib/events';
+import { fetchEventLink, loadEvent } from '@/lib/events';
 import { loadVolunteerRecord } from '@/lib/volunteerProfiles';
 
 const ORGANISER_INBOX = 'hello@gdgsydney.com';
@@ -14,9 +14,10 @@ const ORGANISER_INBOX = 'hello@gdgsydney.com';
 // surfaced: the volunteer has already done their part, and an email problem is ours.
 async function notifyOrganisers(volunteer: FirebaseFirestore.DocumentData, confirmedAt: Date) {
   try {
+    const event = await loadEvent(String(volunteer.eventId ?? '')).catch(() => null);
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
-      from: `DevFest Sydney <${process.env.RESEND_FROM_EMAIL}>`,
+      from: `GDG Sydney <${process.env.RESEND_FROM_EMAIL}>`,
       to: ORGANISER_INBOX,
       // So an organiser can reply straight to the volunteer from the notification.
       replyTo: volunteer.email,
@@ -28,6 +29,7 @@ async function notifyOrganisers(volunteer: FirebaseFirestore.DocumentData, confi
         assignedArea: volunteer.assignedArea ?? '',
         assignedShift: volunteer.assignedShift ?? '',
         confirmedAtIso: confirmedAt.toISOString(),
+        eventName: event?.name ?? 'the event',
       }),
     });
   } catch (err) {
@@ -69,11 +71,13 @@ export async function confirmVolunteering(token: string): Promise<ConfirmResult>
 
     // Marked by an admin on /admin/crew once the ticket has gone out some other way.
     const ticketAlreadySent = Boolean(record.data.ticketSentAt);
+    // The links of the event they signed up for (stage 4e), not whichever DevFest is current.
+    const eventId = String(record.data.eventId ?? '');
     return {
       links: {
-        ticketUrl: ticketAlreadySent ? null : await fetchCurrentDevfestLink('volunteerTicketUrl'),
+        ticketUrl: ticketAlreadySent ? null : await fetchEventLink(eventId, 'volunteerTicketUrl'),
         ticketAlreadySent,
-        whatsappUrl: await fetchCurrentDevfestLink('volunteerWhatsappUrl'),
+        whatsappUrl: await fetchEventLink(eventId, 'volunteerWhatsappUrl'),
       },
     };
   } catch {
