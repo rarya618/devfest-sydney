@@ -37,7 +37,7 @@ This may include your name, email address, phone number, talk or session details
     title: 'Speaker Portal',
     content: `Speakers can sign in to our speaker portal with a link we email them. To send it, we keep the address you sign in with for as long as the link is valid (30 minutes), and a one-way fingerprint of it for an hour so we can stop the form being used to flood someone's inbox. While you are signed in, we keep a record of your session for up to 30 days, or until you sign out.
 
-In the portal you can see the talks and proposals filed under your email address and edit your speaker profile. You can also keep talks there to propose later: these saved talks are private to you, are not seen by our organisers until you send one as a proposal, and are deleted when you delete them. Changes to your bio, tagline, links and photo are published straight away wherever we show our speakers, and our organisers are told about each change.`,
+In the portal you can see the talks and proposals filed under your email address and edit your speaker profile. You can also keep talks there to propose later: these saved talks are private to you, are not seen by our organisers until you send one as a proposal, and are deleted when you delete them. Changes to your bio, tagline, links and photo are published straight away wherever we show our speakers.`,
   },
   {
     slug: 'job-board',

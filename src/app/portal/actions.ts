@@ -3,10 +3,8 @@
 import { redirect } from 'next/navigation';
 import { FieldValue } from 'firebase-admin/firestore';
 import { revalidatePath } from 'next/cache';
-import { Resend } from 'resend';
 import { adminDb } from '@/lib/firebase-admin';
 import { EMAIL_PATTERN } from '@/lib/emailPattern';
-import { escapeHtml } from '@/lib/escapeHtml';
 import { currentDevfestFlowState, loadCurrentDevfest } from '@/lib/events';
 import { clearSpeakerPhoto, replaceSpeakerPhoto } from '@/lib/people';
 import { endPortalSession, getPortalSession, requestSignInLink, signInWithLink } from '@/lib/portalAuth';
@@ -23,7 +21,6 @@ import { loadOwnedSavedTalk } from '@/lib/portalSavedTalks';
 import { fileDevfestProposal, fileMeetupProposal, validateDevfestProposal, validateMeetupProposal } from '@/lib/proposalFiling';
 import { normaliseProfileUrl } from '@/lib/speakers';
 
-const ORGANISER_INBOX = 'hello@gdgsydney.com';
 const SESSION_EXPIRED = 'You have been signed out. Please sign in again to carry on.';
 
 // ---------------------------------------------------------------------------------------
@@ -99,40 +96,8 @@ function validateProfile(fields: PortalProfileFields): { error: string } | { val
   return { values: { tagline, bio, ...links } };
 }
 
-// Edits go live straight away (decided 2026-11-14) and hello@ hears about each one, so an
-// organiser can catch anything that shouldn't be on a public page. Never fails the save.
-async function notifyProfileChange(speakerName: string, speakerEmail: string, changes: { label: string; before: string; after: string }[]) {
-  if (changes.length === 0) return;
-  const font = "font-family:'Google Sans',Roboto,sans-serif;";
-  const rows = changes
-    .map(
-      (change) => `
-      <tr><td style="padding:16px 0;border-top:1px solid #3c4043;">
-        <p style="margin:0 0 6px;${font}font-size:13px;font-weight:700;color:#9aa0a6;">${escapeHtml(change.label)}</p>
-        <p style="margin:0 0 4px;${font}font-size:14px;color:#9aa0a6;text-decoration:line-through;white-space:pre-wrap;">${escapeHtml(change.before || '(empty)')}</p>
-        <p style="margin:0;${font}font-size:15px;color:#f0f0f0;white-space:pre-wrap;">${escapeHtml(change.after || '(empty)')}</p>
-      </td></tr>`
-    )
-    .join('');
-  try {
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.send({
-      from: `GDG Sydney <${process.env.RESEND_FROM_EMAIL}>`,
-      to: ORGANISER_INBOX,
-      replyTo: speakerEmail,
-      subject: `Speaker profile updated: ${speakerName}`,
-      html: `<!DOCTYPE html><html lang="en"><body style="margin:0;padding:32px 16px;background:#1e1e1e;${font}color:#f0f0f0;">
-        <table width="560" cellpadding="0" cellspacing="0" align="center"><tr><td>
-          <p style="margin:0 0 20px;${font}font-size:16px;line-height:1.6;color:#f0f0f0;">${escapeHtml(speakerName)} changed their profile in the speaker portal. The change is already live in the public API. Reply to reach them.</p>
-          <table width="100%" cellpadding="0" cellspacing="0">${rows}</table>
-        </td></tr></table>
-      </body></html>`,
-    });
-  } catch (error) {
-    console.error('Profile change notice failed for', speakerEmail, error);
-  }
-}
-
+// Edits go live straight away (decided 2026-11-14). Organisers are not emailed about them
+// (decided the same day: too much mail); they see the result in /admin/people.
 export async function updatePortalProfile(speakerId: string, fields: PortalProfileFields): Promise<{ error?: string }> {
   const validated = validateProfile(fields);
   if ('error' in validated) return validated;
@@ -143,13 +108,12 @@ export async function updatePortalProfile(speakerId: string, fields: PortalProfi
     const profile = await loadOwnedProfile(session.email, speakerId);
     if (!profile) return { error: "We couldn't find this profile under your email address." };
 
-    const changes = (Object.keys(validated.values) as (keyof PortalProfileFields)[])
-      .filter((key) => validated.values[key] !== profile[key])
-      .map((key) => ({ label: PORTAL_PROFILE_FIELD_LABELS[key], before: profile[key], after: validated.values[key] }));
-    if (changes.length === 0) return {};
+    const hasChanges = (Object.keys(validated.values) as (keyof PortalProfileFields)[]).some(
+      (key) => validated.values[key] !== profile[key]
+    );
+    if (!hasChanges) return {};
 
     await adminDb.collection('speakers').doc(speakerId).update({ ...validated.values });
-    await notifyProfileChange(profile.name, session.email, changes);
     revalidatePath('/portal', 'layout');
     revalidatePath('/admin/people');
     revalidatePath('/admin/speakers');
@@ -169,7 +133,6 @@ export async function uploadPortalPhoto(speakerId: string, formData: FormData): 
 
     const result = await replaceSpeakerPhoto(speakerId, formData.get('photo'));
     if ('error' in result) return result;
-    await notifyProfileChange(profile.name, session.email, [{ label: 'Photo', before: profile.photoUrl, after: result.photoUrl }]);
     revalidatePath('/portal', 'layout');
     revalidatePath('/admin/people');
     revalidatePath('/admin/speakers');
@@ -189,7 +152,6 @@ export async function removePortalPhoto(speakerId: string): Promise<{ error?: st
 
     const failure = await clearSpeakerPhoto(speakerId);
     if (failure) return failure;
-    await notifyProfileChange(profile.name, session.email, [{ label: 'Photo', before: profile.photoUrl, after: '' }]);
     revalidatePath('/portal', 'layout');
     revalidatePath('/admin/people');
     revalidatePath('/admin/speakers');
