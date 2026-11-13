@@ -17,7 +17,8 @@ import type { SpeakerGift } from '@/lib/types';
 // Secret Manager entry to forget before a rollout. The HMAC covers a purpose prefix as
 // well as the id, so a confirm token can never pass as a thanks token or the other way
 // round. It signs the speaker id, not the submission id, because co-speakers have no
-// submission and each gets a mug of their own.
+// submission and each gets a mug of their own. Since stage 4c the speaker id is the person's,
+// which is the same id these links were issued for.
 const TOKEN_SEPARATOR = '.';
 const TOKEN_PURPOSE = 'speaker-thanks:';
 
@@ -65,22 +66,22 @@ export interface ThanksRecipient {
   email: string;
 }
 
-// The speaker behind a thanks link, or null if they are gone from the lineup or their
-// session was never confirmed. A co-speaker counts as confirmed when their lead is, the
-// same rule the public pages use. Throws on a failed read, so a caller can tell "not
-// eligible" apart from "couldn't check".
+// The speaker behind a thanks link, or null if they are gone or never gave a confirmed talk.
+// Since stage 4c the speaker is the person, so this asks whether any talk they are on has
+// a confirmed proposal; a co-speaker counts when their talk's lead confirmed, the same rule
+// the public pages use. Throws on a failed read, so a caller can tell "not eligible" apart
+// from "couldn't check".
 export async function loadThanksRecipient(speakerId: string): Promise<ThanksRecipient | null> {
   const speakerSnap = await adminDb.collection('speakers').doc(speakerId).get();
   if (!speakerSnap.exists) return null;
   const speaker = speakerSnap.data()!;
 
-  const sessionOwner = speaker.coSpeakerOf
-    ? (await adminDb.collection('speakers').doc(String(speaker.coSpeakerOf)).get()).data()
-    : speaker;
-  const submissionId = sessionOwner?.submissionId;
-  if (!submissionId) return null;
-  const submission = (await adminDb.collection('submissions').doc(String(submissionId)).get()).data();
-  if (!submission?.speakerConfirmedAt) return null;
+  const talks = await adminDb.collection('talks').where('speakerIds', 'array-contains', speakerId).get();
+  const submissionIds = talks.docs.map((talk) => talk.data().submissionId).filter(Boolean) as string[];
+  const submissions = submissionIds.length > 0
+    ? await adminDb.getAll(...submissionIds.map((id) => adminDb.collection('submissions').doc(String(id))))
+    : [];
+  if (!submissions.some((submission) => submission.exists && submission.data()?.speakerConfirmedAt)) return null;
 
   return { speakerId, name: String(speaker.name ?? ''), email: String(speaker.email ?? '').trim() };
 }

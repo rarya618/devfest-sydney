@@ -1,7 +1,7 @@
 import { SITE_OG_IMAGE } from '@/lib/metadata';
 import { getVerifiedSession } from '@/lib/adminSession';
 import { fetchSpeakers } from '@/lib/speakers';
-import { fetchSessionTimesBySpeakerId } from '@/lib/schedule';
+import { fetchSessionTimesByTalkId } from '@/lib/schedule';
 import SpeakersDashboard from '../../SpeakersDashboard';
 import { getAdminDevfestId } from '@/lib/adminEvent';
 
@@ -18,7 +18,7 @@ export default async function SpeakersPage() {
   const [, speakers, sessionTimes] = await Promise.all([
     getVerifiedSession(),
     fetchSpeakers(eventId),
-    fetchSessionTimesBySpeakerId(eventId).catch(() => null),
+    fetchSessionTimesByTalkId(eventId).catch(() => null),
   ]);
 
   return <SpeakersDashboard speakers={speakers} sessionTimes={sessionTimes} />;

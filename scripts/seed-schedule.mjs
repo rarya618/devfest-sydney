@@ -6,9 +6,9 @@
 //   node scripts/seed-schedule.mjs            # write
 //   node scripts/seed-schedule.mjs --dry-run  # print what would be written
 //
-// Sessions name their speaker, which is matched (case-insensitively) against the `speakers`
-// collection and stored as an id. The run stops if any name fails to match, rather than
-// writing a session with nobody in it.
+// Sessions name their lead speaker, which is matched (case-insensitively) against the leads of
+// this event's talks and stored as the talk's id. The run stops if any name fails to match,
+// rather than writing a session with nobody in it.
 
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
@@ -101,10 +101,15 @@ function toDate(wallClock) {
   return new Date(`${EVENT_DATE}T${wallClock}:00${EVENT_OFFSET}`);
 }
 
-// Only this event's speakers, so a name that recurs across years resolves to the right one.
-const speakerSnapshot = await db.collection('speakers').where('eventId', '==', EVENT_ID).get();
-const speakerIdsByName = new Map(
-  speakerSnapshot.docs.map((doc) => [String(doc.data().name ?? '').trim().toLowerCase(), doc.id])
+// Each name is the lead speaker of one of this event's talks (stage 4c: the slot stores the
+// talk, which brings its co-speakers with it). Matched within the event, so a name that
+// recurs across years resolves to that year's talk.
+const talkSnapshot = await db.collection('talks').where('eventId', '==', EVENT_ID).get();
+const leadIds = talkSnapshot.docs.map((doc) => (doc.data().speakerIds ?? [])[0]).filter(Boolean);
+const leadSnapshots = leadIds.length > 0 ? await db.getAll(...leadIds.map((id) => db.collection('speakers').doc(id))) : [];
+const leadNamesById = new Map(leadSnapshots.filter((snap) => snap.exists).map((snap) => [snap.id, String(snap.data().name ?? '').trim().toLowerCase()]));
+const talkIdsByLeadName = new Map(
+  talkSnapshot.docs.map((doc) => [leadNamesById.get((doc.data().speakerIds ?? [])[0]) ?? '', doc.id])
 );
 
 const unmatchedNames = [];
@@ -113,10 +118,10 @@ const documents = SLOTS.map((slot) => {
   const durationMinutes = (toDate(slot.end).getTime() - startDate.getTime()) / 60_000;
   if (!(durationMinutes > 0)) throw new Error(`${slot.start}-${slot.end} in ${slot.room} ends before it starts`);
 
-  const speakerIds = (slot.speakers ?? []).map((name) => {
-    const speakerId = speakerIdsByName.get(name.toLowerCase());
-    if (!speakerId) unmatchedNames.push(name);
-    return speakerId;
+  const talkIds = (slot.speakers ?? []).map((name) => {
+    const talkId = talkIdsByLeadName.get(name.toLowerCase());
+    if (!talkId) unmatchedNames.push(name);
+    return talkId;
   });
 
   return {
@@ -126,7 +131,7 @@ const documents = SLOTS.map((slot) => {
       eventId: EVENT_ID,
       kind: slot.kind,
       title: slot.title,
-      speakerIds,
+      talkIds,
       startTime: Timestamp.fromDate(startDate),
       durationMinutes,
       room: slot.room,
@@ -136,7 +141,7 @@ const documents = SLOTS.map((slot) => {
 });
 
 if (unmatchedNames.length > 0) {
-  console.error(`No speaker record matches: ${unmatchedNames.join(', ')}. Nothing was written.`);
+  console.error(`No talk led by: ${unmatchedNames.join(', ')}. Nothing was written.`);
   process.exit(1);
 }
 

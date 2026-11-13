@@ -1,6 +1,6 @@
 import { adminDb } from '@/lib/firebase-admin';
 import { loadEventDocs } from '@/lib/eventScope';
-import type { CalendarInviteSlot, PublicSpeaker, ScheduleRoom, Speaker, SpeakerConfirmation } from '@/lib/types';
+import type { CalendarInviteSlot, PublicSpeaker, ScheduleRoom, Speaker, SpeakerConfirmation, TalkPresenterState } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
 
 interface SubmissionConfirmationFields {
@@ -54,94 +54,100 @@ export function normaliseProfileUrl(rawUrl: string): string {
   }
 }
 
-// Speakers are the public lineup, but whether each one has actually confirmed lives on
-// the submission they were promoted from, so the two are joined here.
+function toPresenterState(value: unknown): TalkPresenterState {
+  const state = (value ?? {}) as Record<string, unknown>;
+  const stamp = (key: string) => toIsoOrNull(state[key] as Timestamp | undefined);
+  const text = (key: string) => (typeof state[key] === 'string' ? (state[key] as string) : null);
+  return {
+    ticketEmailSentAt: stamp('ticketEmailSentAt'),
+    ticketEmailSentBy: text('ticketEmailSentBy'),
+    calendarInviteSentAt: stamp('calendarInviteSentAt'),
+    calendarInviteSentBy: text('calendarInviteSentBy'),
+    calendarInviteSequence: typeof state.calendarInviteSequence === 'number' ? state.calendarInviteSequence : null,
+    calendarInviteUid: text('calendarInviteUid'),
+    calendarInviteSlot: toCalendarInviteSlot(state.calendarInviteSlot),
+    thanksEmailSentAt: stamp('thanksEmailSentAt'),
+    thanksEmailSentBy: text('thanksEmailSentBy'),
+  };
+}
+
+// The selected DevFest's lineup as /admin/speakers lists it: a row per presenter per talk,
+// newest promotion first, each talk's lead before its co-speakers. Since stage 4c the talk
+// (`talks`) and the person (`speakers`) are joined here, and whether the talk is going ahead
+// is read off the proposal it came from, which is where the acceptance email and
+// /speaker/confirm record it. A presenter whose person document is missing is skipped.
 export async function fetchSpeakers(eventId: string): Promise<Speaker[]> {
-  // Newest promotion first. Each speaker document carries its event since stage 4b; in 4c the
-  // talk will, and the speaker document becomes the person.
-  const speakerDocs = (await loadEventDocs('speakers', eventId)).sort(
+  const talkDocs = (await loadEventDocs('talks', eventId)).sort(
     (first, second) =>
       ((second.data().promotedAt as Timestamp | undefined)?.toMillis() ?? 0) -
       ((first.data().promotedAt as Timestamp | undefined)?.toMillis() ?? 0)
   );
 
-  const submissionIds = speakerDocs
-    .map((doc) => doc.data().submissionId as string | undefined)
-    .filter((submissionId): submissionId is string => Boolean(submissionId));
+  const speakerIds = [...new Set(talkDocs.flatMap((doc) => (doc.data().speakerIds ?? []) as string[]))];
+  const submissionIds = [...new Set(talkDocs.map((doc) => doc.data().submissionId as string | undefined).filter(Boolean))] as string[];
+  const [personSnapshots, submissionSnapshots] = await Promise.all([
+    speakerIds.length > 0 ? adminDb.getAll(...speakerIds.map((id) => adminDb.collection('speakers').doc(id))) : [],
+    submissionIds.length > 0 ? adminDb.getAll(...submissionIds.map((id) => adminDb.collection('submissions').doc(id))) : [],
+  ]);
+  const peopleById = new Map(personSnapshots.filter((snap) => snap.exists).map((snap) => [snap.id, snap.data()!]));
+  const submissionsById = new Map(
+    submissionSnapshots.filter((snap) => snap.exists).map((snap) => [snap.id, snap.data() as SubmissionConfirmationFields])
+  );
 
-  const submissionRefs = submissionIds.map((submissionId) => adminDb.collection('submissions').doc(submissionId));
-  const submissionSnapshots = submissionRefs.length > 0 ? await adminDb.getAll(...submissionRefs) : [];
-  const submissionsById = new Map<string, SubmissionConfirmationFields>();
-  submissionSnapshots.forEach((submissionSnapshot) => {
-    if (submissionSnapshot.exists) {
-      submissionsById.set(submissionSnapshot.id, submissionSnapshot.data() as SubmissionConfirmationFields);
-    }
+  return talkDocs.flatMap((talkDoc) => {
+    const talk = talkDoc.data();
+    const talkSpeakerIds = (talk.speakerIds ?? []) as string[];
+    const leadId = talkSpeakerIds[0];
+    const submission = submissionsById.get(String(talk.submissionId ?? ''));
+    const promotedAt = talk.promotedAt as Timestamp | undefined;
+    const states = (talk.speakerState ?? {}) as Record<string, unknown>;
+
+    return talkSpeakerIds.flatMap((speakerId): Speaker[] => {
+      const person = peopleById.get(speakerId);
+      if (!person) return [];
+      const isLead = speakerId === leadId;
+      const state = toPresenterState(states[speakerId]);
+      return [
+        {
+          id: speakerId,
+          talkId: talkDoc.id,
+          rowId: `${talkDoc.id}:${speakerId}`,
+          name: person.name ?? '',
+          email: person.email ?? '',
+          talkTitle: talk.talkTitle ?? '',
+          abstract: talk.abstract ?? '',
+          format: talk.format ?? 'talk',
+          track: talk.track ?? 'developer',
+          experienceLevel: talk.experienceLevel ?? 'beginner',
+          linkedinUrl: normaliseProfileUrl(person.linkedinUrl ?? ''),
+          githubUrl: normaliseProfileUrl(person.githubUrl ?? ''),
+          websiteUrl: normaliseProfileUrl(person.websiteUrl ?? ''),
+          bio: person.bio ?? '',
+          tagline: person.tagline ?? '',
+          photoUrl: person.photoUrl ?? '',
+          previousSlugs: Array.isArray(person.previousSlugs) ? (person.previousSlugs as string[]) : [],
+          submissionId: String(talk.submissionId ?? ''),
+          promotedAt: promotedAt ? promotedAt.toDate().toISOString() : new Date().toISOString(),
+          confirmation: toConfirmation(submission),
+          // The acceptance email and its deadline went to the lead, who answered for the
+          // session, so they aren't repeated on a co-speaker's card.
+          acceptanceEmailSentAt: isLead ? toIsoOrNull(submission?.acceptanceEmailSentAt) : null,
+          acceptanceEmailSentBy: isLead ? submission?.acceptanceEmailSentBy ?? null : null,
+          confirmByDate: isLead ? toIsoOrNull(submission?.confirmByDate) : null,
+          speakerConfirmedAt: toIsoOrNull(submission?.speakerConfirmedAt),
+          // A lead's ticket is recorded on the proposal; a co-speaker's on the talk.
+          speakerTicketEmailSentAt: isLead ? toIsoOrNull(submission?.speakerTicketEmailSentAt) : state.ticketEmailSentAt,
+          speakerTicketEmailSentBy: isLead ? submission?.speakerTicketEmailSentBy ?? null : state.ticketEmailSentBy,
+          calendarInviteSentAt: state.calendarInviteSentAt,
+          calendarInviteSentBy: state.calendarInviteSentBy,
+          calendarInviteSlot: state.calendarInviteSlot,
+          thanksEmailSentAt: state.thanksEmailSentAt,
+          thanksEmailSentBy: state.thanksEmailSentBy,
+          coSpeakerOf: isLead ? null : leadId,
+        } satisfies Speaker,
+      ];
+    });
   });
-
-  const speakers = speakerDocs.map((doc) => {
-    const data = doc.data();
-    const promotedAt = data.promotedAt as Timestamp | undefined;
-    const submissionId: string = data.submissionId ?? '';
-    const sourceSubmission = submissionsById.get(submissionId);
-    return {
-      id: doc.id,
-      name: data.name ?? '',
-      email: data.email ?? '',
-      talkTitle: data.talkTitle ?? '',
-      abstract: data.abstract ?? '',
-      format: data.format ?? 'talk',
-      track: data.track ?? 'developer',
-      experienceLevel: data.experienceLevel ?? 'beginner',
-      linkedinUrl: normaliseProfileUrl(data.linkedinUrl ?? ''),
-      githubUrl: normaliseProfileUrl(data.githubUrl ?? ''),
-      websiteUrl: normaliseProfileUrl(data.websiteUrl ?? ''),
-      bio: data.bio ?? '',
-      tagline: data.tagline ?? '',
-      photoUrl: data.photoUrl ?? '',
-      previousSlugs: Array.isArray(data.previousSlugs) ? (data.previousSlugs as string[]) : [],
-      submissionId,
-      promotedAt: promotedAt ? promotedAt.toDate().toISOString() : new Date().toISOString(),
-      confirmation: toConfirmation(sourceSubmission),
-      acceptanceEmailSentAt: toIsoOrNull(sourceSubmission?.acceptanceEmailSentAt),
-      acceptanceEmailSentBy: sourceSubmission?.acceptanceEmailSentBy ?? null,
-      confirmByDate: toIsoOrNull(sourceSubmission?.confirmByDate),
-      speakerConfirmedAt: toIsoOrNull(sourceSubmission?.speakerConfirmedAt),
-      // A co-speaker has no proposal, so their ticket is recorded on their own document.
-      speakerTicketEmailSentAt: toIsoOrNull(
-        (sourceSubmission?.speakerTicketEmailSentAt ?? data.speakerTicketEmailSentAt) as Timestamp | undefined
-      ),
-      speakerTicketEmailSentBy: sourceSubmission?.speakerTicketEmailSentBy ?? data.speakerTicketEmailSentBy ?? null,
-      calendarInviteSentAt: toIsoOrNull(data.calendarInviteSentAt as Timestamp | undefined),
-      calendarInviteSentBy: data.calendarInviteSentBy ?? null,
-      calendarInviteSlot: toCalendarInviteSlot(data.calendarInviteSlot),
-      thanksEmailSentAt: toIsoOrNull(data.thanksEmailSentAt as Timestamp | undefined),
-      thanksEmailSentBy: data.thanksEmailSentBy ?? null,
-      coSpeakerOf: typeof data.coSpeakerOf === 'string' && data.coSpeakerOf ? data.coSpeakerOf : null,
-    } satisfies Speaker;
-  });
-
-  return speakers.map((speaker) => (speaker.coSpeakerOf ? withLeadSession(speaker, speakers) : speaker));
-}
-
-// A co-speaker's document holds only their profile. The session and whether it is going
-// ahead belong to the lead, so both are copied across here and every reader sees one
-// session. A co-speaker whose lead has gone reads as "No proposal" and stays off the
-// public pages.
-function withLeadSession(coSpeaker: Speaker, speakers: Speaker[]): Speaker {
-  const lead = speakers.find((candidate) => candidate.id === coSpeaker.coSpeakerOf && !candidate.coSpeakerOf);
-  if (!lead) return { ...coSpeaker, confirmation: 'unknown' };
-  return {
-    ...coSpeaker,
-    talkTitle: lead.talkTitle,
-    abstract: lead.abstract,
-    format: lead.format,
-    track: lead.track,
-    experienceLevel: lead.experienceLevel,
-    confirmation: lead.confirmation,
-    // The acceptance email and confirm deadline were the lead's, so they are not repeated
-    // on the co-speaker's card; the confirmation is what decides whether they appear.
-    speakerConfirmedAt: lead.speakerConfirmedAt,
-  };
 }
 
 // "Brett Morgan" -> "brett-morgan". Names that collapse to nothing (all symbols) fall
@@ -186,30 +192,38 @@ function attachSessionPartners(speakers: Omit<PublicSpeaker, 'sessionPartners'>[
   });
 }
 
-// The public lineup. Only speakers who have confirmed through /speaker/confirm appear:
-// a promoted speaker who has not been emailed yet, or has not answered, is not announced.
-// Throws on a failed read, for /api/public/speakers: a static build that took a failed
-// read for an empty lineup would publish a page with no speakers on it.
+// The public lineup from the admin rows, with the talk each entry belongs to, which the
+// schedule uses to put presenters on their slot. Only confirmed talks appear: a promoted
+// speaker who has not been emailed yet, or has not answered, is not announced.
+export function toPublicLineup(rows: Speaker[]): { talkId: string; speaker: PublicSpeaker }[] {
+  const confirmed = rows
+    .filter((row) => row.confirmation === 'confirmed')
+    .sort((first, second) => first.name.localeCompare(second.name));
+  const publicSpeakers = attachSessionPartners(
+    assignUniqueSlugs(
+      confirmed.map((row) => ({
+        id: row.id,
+        name: row.name,
+        talkTitle: row.talkTitle,
+        abstract: row.abstract,
+        format: row.format,
+        track: row.track,
+        linkedinUrl: row.linkedinUrl,
+        githubUrl: row.githubUrl,
+        websiteUrl: row.websiteUrl,
+        bio: row.bio,
+        tagline: row.tagline,
+        photoUrl: row.photoUrl,
+        previousSlugs: row.previousSlugs,
+        coSpeakerOf: row.coSpeakerOf,
+      }))
+    )
+  );
+  return publicSpeakers.map((speaker, index) => ({ talkId: confirmed[index].talkId, speaker }));
+}
+
+// Throws on a failed read, for /api/public/speakers: a static build that took a failed read
+// for an empty lineup would publish a page with no speakers on it.
 export async function loadPublicSpeakers(eventId: string): Promise<PublicSpeaker[]> {
-  const speakers = await fetchSpeakers(eventId);
-  const confirmed = speakers
-      .filter((speaker) => speaker.confirmation === 'confirmed')
-      .sort((first, second) => first.name.localeCompare(second.name))
-      .map((speaker) => ({
-        id: speaker.id,
-        name: speaker.name,
-        talkTitle: speaker.talkTitle,
-        abstract: speaker.abstract,
-        format: speaker.format,
-        track: speaker.track,
-        linkedinUrl: speaker.linkedinUrl,
-        githubUrl: speaker.githubUrl,
-        websiteUrl: speaker.websiteUrl,
-        bio: speaker.bio,
-        tagline: speaker.tagline,
-        photoUrl: speaker.photoUrl,
-        previousSlugs: speaker.previousSlugs,
-        coSpeakerOf: speaker.coSpeakerOf,
-      }));
-  return attachSessionPartners(assignUniqueSlugs(confirmed));
+  return toPublicLineup(await fetchSpeakers(eventId)).map((entry) => entry.speaker);
 }

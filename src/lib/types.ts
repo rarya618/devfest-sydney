@@ -280,8 +280,15 @@ export interface MeetupProposal {
 // Derived from the source submission, since that is where the acceptance email is recorded.
 export type SpeakerConfirmation = 'not-emailed' | 'awaiting' | 'confirmed' | 'unknown';
 
+// One presenter on one talk: what /admin/speakers lists, a row per (talk, speaker) for the
+// selected DevFest. Since stage 4c the person (`speakers/{id}`, GDG-wide) and the talk
+// (`talks/{talkId}`, one event) are separate documents, joined here. The profile fields
+// (name to photoUrl, previousSlugs) are the person's; the talk fields and the sends are this
+// talk's. Someone giving two talks at one event appears twice, with different rowIds.
 export interface Speaker {
-  id: string;
+  id: string; // the person: speakers/{id}
+  talkId: string; // the talk: talks/{talkId}, which is also its proposal's id
+  rowId: string; // `${talkId}:${id}`, unique per row
   name: string;
   email: string;
   talkTitle: string;
@@ -320,10 +327,25 @@ export interface Speaker {
   // since co-speakers get their own. Null until it is sent.
   thanksEmailSentAt: string | null; // ISO date string
   thanksEmailSentBy: string | null;
-  // Set on a co-speaker: someone presenting another speaker's session with them. Their
-  // document holds only their own profile; the talk, track and confirmation are read from
-  // this lead speaker, so the session lives in one place. Null on everyone else.
+  // On a co-speaker, the id of the talk's lead (the first of its speakerIds), whose proposal
+  // carries the confirmation for the session. Null on the lead.
   coSpeakerOf: string | null;
+}
+
+// `talks/{talkId}`, stage 4c: a talk at one event, given by one or more people. The id is
+// the proposal's (submissions/{id}), so a /speaker/confirm token still finds it.
+export interface TalkPresenterState {
+  // A co-speaker's ticket. A lead's is recorded on the submission, as before 4c.
+  ticketEmailSentAt: string | null;
+  ticketEmailSentBy: string | null;
+  calendarInviteSentAt: string | null;
+  calendarInviteSentBy: string | null;
+  calendarInviteSequence: number | null;
+  // The invite's UID, fixed at the first send so updates replace it in the calendar.
+  calendarInviteUid: string | null;
+  calendarInviteSlot: CalendarInviteSlot | null;
+  thanksEmailSentAt: string | null;
+  thanksEmailSentBy: string | null;
 }
 
 // Someone else presenting the same session, as the public pages link to them.
@@ -371,9 +393,10 @@ export interface ScheduleItem {
   // For a session, the fallback shown until its speaker has confirmed ("Workshop",
   // "Lightning talks"); for a break or plenary, the title itself.
   title: string;
-  // Ids in the `speakers` collection. References rather than names, so a speaker renamed
-  // in /admin/speakers is renamed here too, and an unconfirmed one is never shown.
-  speakerIds: string[];
+  // Ids in the `talks` collection (stage 4c; speakerIds before). A talk brings all its
+  // presenters, so adding a co-speaker never needs the schedule reseeding, and an
+  // unconfirmed talk is never shown.
+  talkIds: string[];
   startTime: string; // ISO date string (serialized from Firestore Timestamp)
   durationMinutes: number;
   room: ScheduleRoom;

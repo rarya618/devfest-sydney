@@ -59,7 +59,7 @@ function speakerHistoryRows(speaker: Speaker): HistoryRow[] {
 // guessing, since a wrong "off the schedule" would offer a cancellation.
 function inviteStatusFor(speaker: Speaker, sessionTimes: Record<string, SpeakerSessionTime> | null): CalendarInviteStatus | null {
   if (!sessionTimes) return null;
-  return calendarInviteStatus(speaker.calendarInviteSlot, sessionTimes[speaker.id] ?? null, speaker.talkTitle);
+  return calendarInviteStatus(speaker.calendarInviteSlot, sessionTimes[speaker.talkId] ?? null, speaker.talkTitle);
 }
 
 // The statuses that still need something sent. Bulk sends only the first two:
@@ -191,7 +191,7 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
   function handleRemove() {
     setConfirmingRemove(false);
     startTransition(async () => {
-      const result = await removeSpeaker(speaker.id);
+      const result = await removeSpeaker(speaker.talkId, speaker.id);
       if (result.error) onError(result.error);
     });
   }
@@ -210,21 +210,21 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
   // proposal, so theirs is sent against their own document.
   function handleSendSpeakerTicket() {
     startTransition(async () => {
-      const result = isCoSpeaker ? await sendCoSpeakerTicketEmail(speaker.id) : await sendSpeakerTicketEmail(speaker.submissionId);
+      const result = isCoSpeaker ? await sendCoSpeakerTicketEmail(speaker.talkId, speaker.id) : await sendSpeakerTicketEmail(speaker.submissionId);
       if (result.error) onError(result.error);
     });
   }
 
   function handleSendCalendarInvite() {
     startTransition(async () => {
-      const result = await sendCalendarInvite(speaker.id);
+      const result = await sendCalendarInvite(speaker.talkId, speaker.id);
       if (result.error) onError(result.error);
     });
   }
 
   function handleSendThanks() {
     startTransition(async () => {
-      const result = await sendSpeakerThanksEmail(speaker.id);
+      const result = await sendSpeakerThanksEmail(speaker.talkId, speaker.id);
       if (result.error) onError(result.error);
     });
   }
@@ -668,18 +668,18 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
   const awaitingTicketCount = speakers.filter(
     (speaker) => speaker.confirmation === 'confirmed' && !speaker.speakerTicketEmailSentAt
   ).length;
-  const inviteStatuses = new Map(speakers.map((speaker) => [speaker.id, inviteStatusFor(speaker, sessionTimes)]));
+  const inviteStatuses = new Map(speakers.map((speaker) => [speaker.rowId, inviteStatusFor(speaker, sessionTimes)]));
   // First invites and updates. Cancellations are left to each card: removing an event from
   // someone's calendar should be a decision made about that one person.
   const bulkInviteTargets = speakers.filter((speaker) => {
-    const status = inviteStatuses.get(speaker.id);
+    const status = inviteStatuses.get(speaker.rowId);
     return speaker.confirmation === 'confirmed' && (status === 'not-sent' || status === 'changed');
   });
 
   // Thank-yous go to every confirmed speaker and co-speaker once.
   const bulkThanksTargets = speakers.filter((speaker) => speaker.confirmation === 'confirmed' && !speaker.thanksEmailSentAt);
   const bulkTargets: Record<BulkKind, Speaker[]> = { invites: bulkInviteTargets, thanks: bulkThanksTargets };
-  const bulkSenders: Record<BulkKind, (speakerId: string) => Promise<{ error?: string; emailSent?: boolean }>> = {
+  const bulkSenders: Record<BulkKind, (talkId: string, speakerId: string) => Promise<{ error?: string; emailSent?: boolean }>> = {
     invites: sendCalendarInvite,
     thanks: sendSpeakerThanksEmail,
   };
@@ -697,7 +697,7 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
 
       for (const [index, target] of targets.entries()) {
         if (index > 0) await new Promise((resolve) => setTimeout(resolve, BULK_SEND_SPACING_MS));
-        const result = await bulkSenders[kind](target.id);
+        const result = await bulkSenders[kind](target.talkId, target.id);
         if (result.error) {
           if (result.emailSent) recordFailures += 1;
           else sendFailures += 1;
@@ -719,17 +719,15 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
     });
   }
 
-  // Each co-speaker sits straight after their lead, so a shared session reads as a pair.
-  const speakersById = new Map(speakers.map((speaker) => [speaker.id, speaker]));
-  const coSpeakersByLead = new Map<string, Speaker[]>();
+  // Rows arrive a talk at a time, lead first, so a shared session already reads as a group.
+  // Grouped by talk (stage 4c) rather than by speaker id, since one person can give two
+  // talks at the same event.
+  const leadByTalk = new Map(speakers.filter((speaker) => !speaker.coSpeakerOf).map((speaker) => [speaker.talkId, speaker]));
+  const coSpeakersByTalk = new Map<string, Speaker[]>();
   for (const speaker of speakers) {
-    if (speaker.coSpeakerOf && speakersById.has(speaker.coSpeakerOf)) {
-      coSpeakersByLead.set(speaker.coSpeakerOf, [...(coSpeakersByLead.get(speaker.coSpeakerOf) ?? []), speaker]);
-    }
+    if (speaker.coSpeakerOf) coSpeakersByTalk.set(speaker.talkId, [...(coSpeakersByTalk.get(speaker.talkId) ?? []), speaker]);
   }
-  const orderedSpeakers = speakers
-    .filter((speaker) => !speaker.coSpeakerOf || !speakersById.has(speaker.coSpeakerOf))
-    .flatMap((speaker) => [speaker, ...(coSpeakersByLead.get(speaker.id) ?? [])]);
+  const orderedSpeakers = speakers;
 
   const query = search.trim().toLowerCase();
   const filtered = orderedSpeakers
@@ -997,12 +995,12 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
           <div className="grid grid-cols-1 gap-5 items-start">
             {filtered.map((speaker) => (
               <SpeakerCard
-                key={speaker.id}
+                key={speaker.rowId}
                 speaker={speaker}
-                leadSpeaker={speaker.coSpeakerOf ? speakersById.get(speaker.coSpeakerOf) : undefined}
-                coSpeakers={coSpeakersByLead.get(speaker.id) ?? []}
-                session={sessionTimes?.[speaker.id] ?? null}
-                inviteStatus={inviteStatuses.get(speaker.id) ?? null}
+                leadSpeaker={speaker.coSpeakerOf ? leadByTalk.get(speaker.talkId) : undefined}
+                coSpeakers={speaker.coSpeakerOf ? [] : coSpeakersByTalk.get(speaker.talkId) ?? []}
+                session={sessionTimes?.[speaker.talkId] ?? null}
+                inviteStatus={inviteStatuses.get(speaker.rowId) ?? null}
                 onError={setAlertMessage}
               />
             ))}

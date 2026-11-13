@@ -5,7 +5,8 @@ import { escapeHtml } from '@/lib/escapeHtml';
 // what makes Gmail and Outlook treat it as an invitation (added to the calendar, with
 // Yes / Maybe / No) rather than a file to download.
 //
-// Every invite for one speaker shares a UID and carries a rising SEQUENCE, so a later send
+// Every invite for one presenter on one talk shares a UID and carries a rising SEQUENCE, so a
+// later send
 // replaces the event already in their calendar instead of adding a second one, and a
 // METHOD:CANCEL with the same UID removes it.
 
@@ -19,7 +20,9 @@ export type CalendarInviteKind = 'invite' | 'update' | 'cancel';
 
 export interface CalendarInviteDetails {
   kind: CalendarInviteKind;
-  speakerId: string;
+  // Fixed at the first send and stored on the talk (speakerState.<id>.calendarInviteUid). The
+  // 2026 invites keep the speaker-session-<speakerId>@devfest.gdgsydney.com they went out with.
+  uid: string;
   speakerName: string;
   speakerEmail: string;
   talkTitle: string;
@@ -85,7 +88,7 @@ export function buildSessionIcs(details: CalendarInviteDetails): string {
     'CALSCALE:GREGORIAN',
     `METHOD:${isCancel ? 'CANCEL' : 'REQUEST'}`,
     'BEGIN:VEVENT',
-    `UID:speaker-session-${details.speakerId}@devfest.gdgsydney.com`,
+    `UID:${details.uid}`,
     `DTSTAMP:${toIcsUtc(new Date().toISOString())}`,
     `SEQUENCE:${details.sequence}`,
     `DTSTART:${toIcsUtc(details.startTime)}`,

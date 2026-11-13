@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { FieldValue } from 'firebase-admin/firestore';
 import { adminDb, adminStorage } from '@/lib/firebase-admin';
 import { normaliseProfileUrl, toSpeakerSlug } from '@/lib/speakers';
+import { deleteManagedPhoto, findOrCreatePerson, removePeopleWithoutTalks } from '@/lib/people';
 import { verifyAdminSession } from '@/lib/adminSession';
 import type { ExperienceLevel, TalkFormat, Track } from '@/lib/types';
 
@@ -99,10 +100,24 @@ function validateSpeakerFields(fields: SpeakerEditableFields): { error: string }
   };
 }
 
-// Adds someone presenting a speaker's session with them. Only the profile is stored: the
-// talk, track and confirmation stay on the lead, so the session can't drift apart between
-// the two. A co-speaker can't have co-speakers of their own; they are added to the lead.
-export async function addCoSpeaker(leadSpeakerId: string, fields: SpeakerProfileFields): Promise<{ error?: string }> {
+// The talk half of a speaker's fields, split out so a co-speaker's edit can't touch it.
+type TalkFields = Pick<SpeakerEditableFields, 'talkTitle' | 'abstract' | 'format' | 'track' | 'experienceLevel'>;
+
+function talkFieldsOf(values: SpeakerEditableFields): TalkFields {
+  const { talkTitle, abstract, format, track, experienceLevel } = values;
+  return { talkTitle, abstract, format, track, experienceLevel };
+}
+
+function profileFieldsOf(values: SpeakerProfileFields): SpeakerProfileFields {
+  const { name, email, linkedinUrl, githubUrl, websiteUrl, bio, tagline, photoUrl } = values;
+  return { name, email, linkedinUrl, githubUrl, websiteUrl, bio, tagline, photoUrl };
+}
+
+// Adds someone presenting a talk with its lead. Since stage 4c a co-speaker is a person
+// (`speakers`) listed second or later on the talk's speakerIds; the talk, track and
+// confirmation are the talk's, so the session lives in one place. An existing person with
+// the same email AND name is reused rather than duplicated (see findOrCreatePerson).
+export async function addCoSpeaker(talkId: string, fields: SpeakerProfileFields): Promise<{ error?: string }> {
   try {
     await verifyAdminSession();
   } catch {
@@ -113,20 +128,15 @@ export async function addCoSpeaker(leadSpeakerId: string, fields: SpeakerProfile
   if ('error' in validated) return { error: validated.error };
 
   try {
-    const leadSnapshot = await adminDb.collection('speakers').doc(leadSpeakerId).get();
-    if (!leadSnapshot.exists) return { error: 'The speaker you\'re adding a co-speaker to is no longer in the lineup.' };
-    if (leadSnapshot.data()?.coSpeakerOf) {
-      return { error: 'This person is already a co-speaker. Add the new co-speaker from the lead speaker\'s card instead.' };
-    }
+    const talkRef = adminDb.collection('talks').doc(talkId);
+    const talkSnapshot = await talkRef.get();
+    if (!talkSnapshot.exists) return { error: 'The talk you\'re adding a co-speaker to is no longer in the lineup.' };
 
-    await adminDb.collection('speakers').add({
-      ...validated.values,
-      coSpeakerOf: leadSpeakerId,
-      // The lead's event (stage 4b): a co-speaker presents the same session.
-      eventId: leadSnapshot.data()?.eventId ?? '',
-      previousSlugs: [],
-      promotedAt: FieldValue.serverTimestamp(),
-    });
+    const personId = await findOrCreatePerson(validated.values);
+    const speakerIds = (talkSnapshot.data()?.speakerIds ?? []) as string[];
+    if (speakerIds.includes(personId)) return { error: 'This person is already presenting this talk.' };
+
+    await talkRef.update({ speakerIds: FieldValue.arrayUnion(personId) });
     revalidateLineup();
     return {};
   } catch {
@@ -136,12 +146,13 @@ export async function addCoSpeaker(leadSpeakerId: string, fields: SpeakerProfile
 
 function revalidateLineup() {
   revalidatePath('/admin/speakers');
-  revalidatePath('/');
-  revalidatePath('/speakers');
-  revalidatePath('/schedule');
+  revalidatePath('/admin/people');
 }
 
-export async function updateSpeaker(speakerId: string, fields: SpeakerEditableFields): Promise<{ error?: string }> {
+// Saves a row from /admin/speakers. The profile goes to the person, so it changes on every
+// talk they give; the talk fields go to the talk, and only from its lead's row: on a
+// co-speaker the modal sends the talk's own values back, and they are ignored.
+export async function updateSpeaker(talkId: string, speakerId: string, fields: SpeakerEditableFields): Promise<{ error?: string }> {
   try {
     await verifyAdminSession();
   } catch {
@@ -149,29 +160,17 @@ export async function updateSpeaker(speakerId: string, fields: SpeakerEditableFi
   }
 
   try {
-    const speakerRef = adminDb.collection('speakers').doc(speakerId);
-    const snapshot = await speakerRef.get();
-    if (!snapshot.exists) return { error: 'Speaker not found.' };
+    const talkSnapshot = await adminDb.collection('talks').doc(talkId).get();
+    if (!talkSnapshot.exists) return { error: 'This talk is no longer in the lineup.' };
+    const isLead = ((talkSnapshot.data()?.speakerIds ?? []) as string[])[0] === speakerId;
 
-    // A co-speaker's session is the lead's, so only their profile is written. The talk
-    // fields the modal sends back are the lead's copies and are ignored.
-    const isCoSpeaker = Boolean(snapshot.data()?.coSpeakerOf);
-    const validated = isCoSpeaker ? validateProfileFields(fields) : validateSpeakerFields(fields);
+    const validated = isLead ? validateSpeakerFields(fields) : validateProfileFields(fields);
     if ('error' in validated) return { error: validated.error };
 
-    // Slugs are derived from the name, so a rename moves the public page. The slug the page
-    // was at is remembered so /speakers/<old> can redirect; if the name goes back, the slug
-    // is live again and comes out of the history so a live slug is never also a redirect.
-    const existing = snapshot.data() ?? {};
-    const previousSlug = toSpeakerSlug((existing.name as string | undefined) ?? '');
-    const nextSlug = toSpeakerSlug(validated.values.name);
-    const storedSlugs: string[] = Array.isArray(existing.previousSlugs) ? existing.previousSlugs : [];
-    const previousSlugs =
-      previousSlug === nextSlug
-        ? storedSlugs
-        : Array.from(new Set([...storedSlugs, previousSlug])).filter((slug) => slug !== nextSlug);
+    const profileError = await saveProfile(speakerId, validated.values);
+    if (profileError) return profileError;
+    if (isLead) await talkSnapshot.ref.update({ ...talkFieldsOf(validated.values as SpeakerEditableFields) });
 
-    await speakerRef.update({ ...validated.values, previousSlugs });
     revalidateLineup();
     return {};
   } catch {
@@ -179,11 +178,53 @@ export async function updateSpeaker(speakerId: string, fields: SpeakerEditableFi
   }
 }
 
-// Takes the speaker off the lineup and puts the source proposal back to pending, the same
-// as Undo on the submissions dashboard, so the two entry points can't disagree. Their
-// co-speakers go with them, since the session they shared is gone. A co-speaker on their
-// own has no proposal, so removing one only deletes them.
-export async function removeSpeaker(speakerId: string): Promise<{ error?: string }> {
+// The person's half of a save, shared with /admin/people.
+export async function updateSpeakerProfile(speakerId: string, fields: SpeakerProfileFields): Promise<{ error?: string }> {
+  try {
+    await verifyAdminSession();
+  } catch {
+    return { error: 'Your session has expired. Please sign in again.' };
+  }
+
+  const validated = validateProfileFields(fields);
+  if ('error' in validated) return { error: validated.error };
+
+  try {
+    const profileError = await saveProfile(speakerId, validated.values);
+    if (profileError) return profileError;
+    revalidateLineup();
+    return {};
+  } catch {
+    return { error: 'Could not save this speaker. Please try again.' };
+  }
+}
+
+async function saveProfile(speakerId: string, values: SpeakerProfileFields): Promise<{ error: string } | null> {
+  const speakerRef = adminDb.collection('speakers').doc(speakerId);
+  const snapshot = await speakerRef.get();
+  if (!snapshot.exists) return { error: 'Speaker not found.' };
+
+  // Slugs are derived from the name, so a rename moves the public page. The slug the page
+  // was at is remembered so /speakers/<old> can redirect; if the name goes back, the slug
+  // is live again and comes out of the history so a live slug is never also a redirect.
+  const existing = snapshot.data() ?? {};
+  const previousSlug = toSpeakerSlug((existing.name as string | undefined) ?? '');
+  const nextSlug = toSpeakerSlug(values.name);
+  const storedSlugs: string[] = Array.isArray(existing.previousSlugs) ? existing.previousSlugs : [];
+  const previousSlugs =
+    previousSlug === nextSlug
+      ? storedSlugs
+      : Array.from(new Set([...storedSlugs, previousSlug])).filter((slug) => slug !== nextSlug);
+
+  await speakerRef.update({ ...profileFieldsOf(values), emailNormalised: values.email.toLowerCase(), previousSlugs });
+  return null;
+}
+
+// Takes someone off a talk. Removing the lead removes the talk and puts its proposal back to
+// pending, the same as Undo on the submissions dashboard, so the two can't disagree; its
+// co-speakers go with it. Removing a co-speaker only takes them off the talk. Either way, a
+// person left with no talks at all is deleted (see removePeopleWithoutTalks).
+export async function removeSpeaker(talkId: string, speakerId: string): Promise<{ error?: string }> {
   try {
     await verifyAdminSession();
   } catch {
@@ -191,26 +232,31 @@ export async function removeSpeaker(speakerId: string): Promise<{ error?: string
   }
 
   try {
-    const speakerRef = adminDb.collection('speakers').doc(speakerId);
-    const snapshot = await speakerRef.get();
-    if (!snapshot.exists) return { error: 'Speaker not found.' };
+    const talkRef = adminDb.collection('talks').doc(talkId);
+    const talkSnapshot = await talkRef.get();
+    if (!talkSnapshot.exists) return { error: 'This talk is no longer in the lineup.' };
+    const speakerIds = (talkSnapshot.data()?.speakerIds ?? []) as string[];
 
-    const submissionId = snapshot.data()?.submissionId as string | undefined;
-    const coSpeakers = await adminDb.collection('speakers').where('coSpeakerOf', '==', speakerId).get();
-    const batch = adminDb.batch();
-    batch.delete(speakerRef);
-    coSpeakers.docs.forEach((coSpeaker) => batch.delete(coSpeaker.ref));
-    if (submissionId) {
-      const submissionRef = adminDb.collection('submissions').doc(submissionId);
-      const submissionSnapshot = await submissionRef.get();
-      if (submissionSnapshot.exists) batch.update(submissionRef, { status: 'pending' });
+    if (speakerIds[0] === speakerId) {
+      const submissionId = talkSnapshot.data()?.submissionId as string | undefined;
+      const batch = adminDb.batch();
+      batch.delete(talkRef);
+      if (submissionId) {
+        const submissionRef = adminDb.collection('submissions').doc(submissionId);
+        if ((await submissionRef.get()).exists) batch.update(submissionRef, { status: 'pending' });
+      }
+      await batch.commit();
+      await removePeopleWithoutTalks(speakerIds);
+      revalidatePath('/admin');
+    } else {
+      await talkRef.update({
+        speakerIds: FieldValue.arrayRemove(speakerId),
+        [`speakerState.${speakerId}`]: FieldValue.delete(),
+      });
+      await removePeopleWithoutTalks([speakerId]);
     }
-    await batch.commit();
-    await deleteManagedPhoto(snapshot.data()?.photoUrl as string | undefined);
-    for (const coSpeaker of coSpeakers.docs) await deleteManagedPhoto(coSpeaker.data().photoUrl as string | undefined);
 
     revalidateLineup();
-    revalidatePath('/admin');
     return {};
   } catch {
     return { error: 'Could not remove this speaker. Please try again.' };
@@ -267,8 +313,7 @@ export async function uploadSpeakerPhoto(speakerId: string, formData: FormData):
     const previousPhotoUrl = snapshot.data()?.photoUrl as string | undefined;
     await deleteManagedPhoto(previousPhotoUrl);
 
-    revalidatePath('/admin/speakers');
-    revalidatePath('/');
+    revalidateLineup();
     return { photoUrl };
   } catch {
     return { error: 'Could not upload this photo. Please try again.' };
@@ -290,26 +335,9 @@ export async function removeSpeakerPhoto(speakerId: string): Promise<{ error?: s
     await speakerRef.update({ photoUrl: '' });
     await deleteManagedPhoto(snapshot.data()?.photoUrl as string | undefined);
 
-    revalidatePath('/admin/speakers');
-    revalidatePath('/');
+    revalidateLineup();
     return {};
   } catch {
     return { error: 'Could not remove this photo. Please try again.' };
-  }
-}
-
-// Only deletes objects this page uploaded (under speaker-photos/). A photoUrl pasted by
-// hand could point at any shared asset, and those are left alone. Deletion failures are
-// swallowed: an orphaned file in the bucket is far cheaper than a failed replacement.
-async function deleteManagedPhoto(photoUrl: string | undefined): Promise<void> {
-  if (!photoUrl) return;
-  const bucket = adminStorage.bucket();
-  const prefix = `https://storage.googleapis.com/${bucket.name}/speaker-photos/`;
-  if (!photoUrl.startsWith(prefix)) return;
-  const objectPath = decodeURIComponent(photoUrl.slice(`https://storage.googleapis.com/${bucket.name}/`.length));
-  try {
-    await bucket.file(objectPath).delete({ ignoreNotFound: true });
-  } catch {
-    // Orphaned object; nothing the admin can act on.
   }
 }

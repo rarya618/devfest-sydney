@@ -3,20 +3,26 @@
 import { useRef, useState, useTransition, type ChangeEvent, type FormEvent } from 'react';
 import Image from 'next/image';
 import { createPortal } from 'react-dom';
-import { removeSpeakerPhoto, updateSpeaker, uploadSpeakerPhoto, type SpeakerEditableFields } from './speakerActions';
+import { removeSpeakerPhoto, updateSpeaker, updateSpeakerProfile, uploadSpeakerPhoto, type SpeakerEditableFields } from './speakerActions';
 import { getInitials } from '@/lib/format';
 import { TRACK_LABELS, FORMAT_LABELS, EXPERIENCE_LABELS } from '@/lib/submissionLabels';
 import type { Speaker } from '@/lib/types';
 
+// What the modal edits: the person, and on /admin/speakers the talk too. /admin/people passes
+// a person with blank talk fields and profileOnly.
+export type EditSpeakerTarget = Pick<Speaker, 'id' | 'talkId' | 'coSpeakerOf'> & SpeakerEditableFields;
+
 interface Props {
-  speaker: Speaker;
+  speaker: EditSpeakerTarget;
   // Set for a co-speaker: their session is the lead's and is edited on the lead's card.
   leadSpeakerName?: string;
+  // From /admin/people: the profile only, saved to the person, with no talk to edit.
+  profileOnly?: boolean;
   onClose: () => void;
   onError: (message: string) => void;
 }
 
-function toEditableFields(speaker: Speaker): SpeakerEditableFields {
+function toEditableFields(speaker: EditSpeakerTarget): SpeakerEditableFields {
   return {
     name: speaker.name,
     email: speaker.email,
@@ -39,8 +45,9 @@ const inputClasses =
 const labelClasses = 'block text-xs font-semibold text-white/50 mb-1';
 const sectionHeadingClasses = 'text-[11px] font-bold uppercase tracking-wider text-white/50';
 
-export default function EditSpeakerModal({ speaker, leadSpeakerName, onClose, onError }: Props) {
+export default function EditSpeakerModal({ speaker, leadSpeakerName, profileOnly = false, onClose, onError }: Props) {
   const isCoSpeaker = Boolean(speaker.coSpeakerOf);
+  const showsSession = !isCoSpeaker && !profileOnly;
   const [fields, setFields] = useState<SpeakerEditableFields>(() => toEditableFields(speaker));
   const [isPending, startTransition] = useTransition();
   const [isUploadingPhoto, startPhotoTransition] = useTransition();
@@ -84,7 +91,9 @@ export default function EditSpeakerModal({ speaker, leadSpeakerName, onClose, on
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
     startTransition(async () => {
-      const result = await updateSpeaker(speaker.id, fields);
+      const result = profileOnly
+        ? await updateSpeakerProfile(speaker.id, fields)
+        : await updateSpeaker(speaker.talkId, speaker.id, fields);
       if (result.error) {
         onError(result.error);
         return;
@@ -103,7 +112,7 @@ export default function EditSpeakerModal({ speaker, leadSpeakerName, onClose, on
       <div className="w-full max-w-xl bg-[#2d2e31] rounded-2xl shadow-xl my-8">
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-            <h2 className="text-lg font-bold text-white">{isCoSpeaker ? 'Edit co-speaker' : 'Edit speaker'}</h2>
+            <h2 className="text-lg font-bold text-white">{profileOnly ? 'Edit profile' : isCoSpeaker ? 'Edit co-speaker' : 'Edit speaker'}</h2>
             <button
               type="button"
               onClick={onClose}
@@ -119,9 +128,11 @@ export default function EditSpeakerModal({ speaker, leadSpeakerName, onClose, on
 
           <div className="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
             <p className="text-xs text-white/50">
-              {isCoSpeaker
-                ? `This is what the public speakers section shows. The session is ${leadSpeakerName ?? 'the lead speaker'}'s: edit the talk on their card.`
-                : 'This is what the public speakers section shows. Changes here don\'t touch the original proposal.'}
+              {profileOnly
+                ? 'This profile is shared by every talk this person gives, at any event. Talks are edited on DevFest > Speakers.'
+                : isCoSpeaker
+                  ? `This is what the public speakers section shows. The session is ${leadSpeakerName ?? 'the lead speaker'}'s: edit the talk on their card. The profile is shared by every talk they give.`
+                  : 'This is what the public speakers section shows. The profile is shared by every talk they give; the session is this talk only. Changes here don\'t touch the original proposal.'}
             </p>
 
             <div className="space-y-4">
@@ -262,7 +273,7 @@ export default function EditSpeakerModal({ speaker, leadSpeakerName, onClose, on
               </div>
             </div>
 
-            {!isCoSpeaker && (
+            {showsSession && (
               <div className="space-y-4 pt-4 border-t border-white/10">
                 <h3 className={sectionHeadingClasses}>Session</h3>
 

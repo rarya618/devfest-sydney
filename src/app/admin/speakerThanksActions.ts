@@ -10,11 +10,11 @@ import { fetchSpeakerPhotosUrl, loadThanksRecipient, thanksUrl, type ThanksRecip
 import { buildSpeakerThanksEmail, speakerThanksEmailSubject } from '@/lib/speakerThanksEmail';
 
 // The post-event thank-you: photos, plus the link to claim a mug and an Asana trial. Sent
-// to leads and co-speakers alike, each against their own speaker document, and only once
+// to leads and co-speakers alike, each recorded against them on their talk, and only once
 // their session was confirmed: someone who never said yes didn't speak. `emailSent` is set
 // on the one failure where the email did go out, so the bulk send can tell the admin not
 // to retry that speaker.
-export async function sendSpeakerThanksEmail(speakerId: string): Promise<{ error?: string; emailSent?: boolean }> {
+export async function sendSpeakerThanksEmail(talkId: string, speakerId: string): Promise<{ error?: string; emailSent?: boolean }> {
   let senderEmail: string;
   try {
     ({ email: senderEmail } = await verifyAdminSession());
@@ -56,9 +56,10 @@ export async function sendSpeakerThanksEmail(speakerId: string): Promise<{ error
   }
 
   try {
-    await adminDb.collection('speakers').doc(speakerId).update({
-      thanksEmailSentAt: Timestamp.now(),
-      thanksEmailSentBy: senderEmail,
+    // On the talk the thank-you was sent from (stage 4c), under this presenter.
+    await adminDb.collection('talks').doc(talkId).update({
+      [`speakerState.${speakerId}.thanksEmailSentAt`]: Timestamp.now(),
+      [`speakerState.${speakerId}.thanksEmailSentBy`]: senderEmail,
     });
   } catch {
     return {

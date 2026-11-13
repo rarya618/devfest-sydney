@@ -14,6 +14,7 @@ import { normaliseProfileUrl } from '@/lib/speakers';
 import type { ExperienceLevel, SubmissionStatus, TalkFormat, Track } from '@/lib/types';
 import { fetchCurrentDevfestPublicTicketUrl, requireCurrentDevfestLink } from '@/lib/events';
 import { getAdminDevfestId } from '@/lib/adminEvent';
+import { findOrCreatePerson, removePeopleWithoutTalks } from '@/lib/people';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -102,27 +103,36 @@ export async function promoteSubmission(submissionId: string): Promise<{ error?:
 
     const data = snap.data()!;
 
-    await adminDb.collection('speakers').add({
-      name: data.name,
-      email: data.email,
-      talkTitle: data.talkTitle,
-      abstract: data.abstract,
-      format: data.format,
-      track: data.track,
-      experienceLevel: data.experienceLevel,
+    // Stage 4c: the person (reused if they have spoken before, see findOrCreatePerson) and
+    // the talk, whose id is the proposal's so /speaker/confirm finds it from the token.
+    const talkRef = adminDb.collection('talks').doc(submissionId);
+    if ((await talkRef.get()).exists) return { error: 'This proposal is already in the lineup.' };
+    const personId = await findOrCreatePerson({
+      name: String(data.name ?? ''),
+      email: String(data.email ?? ''),
       linkedinUrl: normaliseProfileUrl(data.linkedinUrl ?? ''),
       githubUrl: normaliseProfileUrl(data.githubUrl ?? ''),
       websiteUrl: normaliseProfileUrl(data.websiteUrl ?? ''),
-      submissionId,
-      // The proposal's event (stage 4b). In 4c the talk carries it instead.
-      eventId: data.eventId ?? '',
-      promotedAt: FieldValue.serverTimestamp(),
       bio: data.speakerBio ?? '',
       tagline: data.speakerTagline ?? '',
       photoUrl: '',
     });
 
-    await submissionRef.update({ status: 'accepted' });
+    const batch = adminDb.batch();
+    batch.create(talkRef, {
+      eventId: data.eventId ?? '',
+      talkTitle: data.talkTitle,
+      abstract: data.abstract,
+      format: data.format,
+      track: data.track,
+      experienceLevel: data.experienceLevel,
+      speakerIds: [personId],
+      submissionId,
+      promotedAt: FieldValue.serverTimestamp(),
+      speakerState: {},
+    });
+    batch.update(submissionRef, { status: 'accepted' });
+    await batch.commit();
     revalidatePath('/admin');
     return {};
   } catch {
@@ -420,21 +430,18 @@ export async function undoPromotion(submissionId: string): Promise<{ error?: str
   }
 
   try {
-    const speakersSnap = await adminDb
-      .collection('speakers')
-      .where('submissionId', '==', submissionId)
-      .get();
-    // Anyone co-presenting the session goes with it, or they would be left pointing at a
-    // lead who no longer exists.
-    const coSpeakerSnaps = await Promise.all(
-      speakersSnap.docs.map((doc) => adminDb.collection('speakers').where('coSpeakerOf', '==', doc.id).get())
-    );
+    // The talk (id = the proposal's) goes, with everyone presenting it; anyone left giving no
+    // talk at all is deleted too (removePeopleWithoutTalks), the same as Remove on
+    // /admin/speakers.
+    const talkRef = adminDb.collection('talks').doc(submissionId);
+    const talkSnapshot = await talkRef.get();
+    const speakerIds = ((talkSnapshot.data()?.speakerIds ?? []) as string[]);
 
     const batch = adminDb.batch();
-    speakersSnap.docs.forEach((doc) => batch.delete(doc.ref));
-    coSpeakerSnaps.forEach((snap) => snap.docs.forEach((doc) => batch.delete(doc.ref)));
+    if (talkSnapshot.exists) batch.delete(talkRef);
     batch.update(adminDb.collection('submissions').doc(submissionId), { status: 'pending' });
     await batch.commit();
+    await removePeopleWithoutTalks(speakerIds);
 
     revalidatePath('/admin');
     return {};
@@ -504,18 +511,22 @@ export async function archiveSubmission(submissionId: string): Promise<{ error?:
 // purpose: a record good enough to address is good enough to quote, and mailing the edited
 // title to the address on the proposal would be the same bug twice.
 async function fetchPromotedSpeaker(submissionId: string): Promise<AcceptanceEmailSession | null> {
-  let snapshot;
+  let talk: FirebaseFirestore.DocumentData | undefined;
+  let lead: FirebaseFirestore.DocumentData | undefined;
   try {
-    snapshot = await adminDb.collection('speakers').where('submissionId', '==', submissionId).limit(1).get();
+    // Stage 4c: the talk shares the proposal's id, and its lead is the first speaker.
+    talk = (await adminDb.collection('talks').doc(submissionId).get()).data();
+    const leadId = ((talk?.speakerIds ?? []) as string[])[0];
+    if (leadId) lead = (await adminDb.collection('speakers').doc(leadId).get()).data();
   } catch {
     // The proposal is a workable fallback, so a failed lookup shouldn't block the send.
     return null;
   }
 
-  if (snapshot.empty) return null;
+  if (!talk || !lead) return null;
 
-  const speaker = snapshot.docs[0].data();
-  const { name, email, talkTitle, format, track, experienceLevel } = speaker;
+  const { name, email } = lead;
+  const { talkTitle, format, track, experienceLevel } = talk;
   if (!name || !talkTitle || !format || !track || !experienceLevel) return null;
   // An address the admin has corrected in the profile is the one to use, but only if it is
   // actually an address: a broken one would bounce the email into nowhere.
@@ -702,8 +713,8 @@ export async function sendSpeakerTicketEmail(submissionId: string): Promise<{ er
 }
 
 // The same ticket for a co-speaker, who has no proposal of their own: the gate is their
-// lead's confirmation, and the send is recorded on the co-speaker's document.
-export async function sendCoSpeakerTicketEmail(speakerId: string): Promise<{ error?: string }> {
+// lead's confirmation, and the send is recorded on the talk, under speakerState.
+export async function sendCoSpeakerTicketEmail(talkId: string, speakerId: string): Promise<{ error?: string }> {
   let senderEmail: string;
   try {
     ({ email: senderEmail } = await verifyAdminSession());
@@ -715,16 +726,20 @@ export async function sendCoSpeakerTicketEmail(speakerId: string): Promise<{ err
   if ('error' in ticketLink) return ticketLink;
   const ticketUrl = ticketLink.url;
 
-  const coSpeakerRef = adminDb.collection('speakers').doc(speakerId);
+  const talkRef = adminDb.collection('talks').doc(talkId);
   let coSpeaker: FirebaseFirestore.DocumentData;
   let leadSubmission: FirebaseFirestore.DocumentData | undefined;
   try {
-    const coSpeakerSnap = await coSpeakerRef.get();
+    const talkSnapshot = await talkRef.get();
+    if (!talkSnapshot.exists) return { error: 'This talk is no longer in the lineup.' };
+    const speakerIds = (talkSnapshot.data()?.speakerIds ?? []) as string[];
+    if (!speakerIds.includes(speakerId)) return { error: 'This co-speaker is no longer on this talk.' };
+    if (speakerIds[0] === speakerId) return { error: 'This speaker leads the talk. Send their ticket from their own card.' };
+    const coSpeakerSnap = await adminDb.collection('speakers').doc(speakerId).get();
     if (!coSpeakerSnap.exists) return { error: 'This co-speaker is no longer in the lineup.' };
     coSpeaker = coSpeakerSnap.data()!;
-    if (!coSpeaker.coSpeakerOf) return { error: 'This speaker isn\'t a co-speaker. Send their ticket from their own card.' };
-    const leadSubmissionId = (await adminDb.collection('speakers').doc(coSpeaker.coSpeakerOf).get()).data()?.submissionId;
-    if (leadSubmissionId) leadSubmission = (await adminDb.collection('submissions').doc(leadSubmissionId).get()).data();
+    const submissionId = talkSnapshot.data()?.submissionId;
+    if (submissionId) leadSubmission = (await adminDb.collection('submissions').doc(String(submissionId)).get()).data();
   } catch {
     return { error: 'Could not load this co-speaker. Please try again.' };
   }
@@ -757,9 +772,9 @@ export async function sendCoSpeakerTicketEmail(speakerId: string): Promise<{ err
   }
 
   try {
-    await coSpeakerRef.update({
-      speakerTicketEmailSentAt: Timestamp.now(),
-      speakerTicketEmailSentBy: senderEmail,
+    await talkRef.update({
+      [`speakerState.${speakerId}.ticketEmailSentAt`]: Timestamp.now(),
+      [`speakerState.${speakerId}.ticketEmailSentBy`]: senderEmail,
     });
   } catch {
     return { error: 'The ticket email was sent, but we couldn\'t record it. Please refresh before sending again.' };

@@ -1,6 +1,5 @@
-import { adminDb } from '@/lib/firebase-admin';
 import { loadEventDocs } from '@/lib/eventScope';
-import { loadPublicSpeakers, sessionLeadId } from '@/lib/speakers';
+import { fetchSpeakers, sessionLeadId, toPublicLineup } from '@/lib/speakers';
 import type { PublicScheduleSlot, PublicSpeaker, ScheduleItem, ScheduleKind, ScheduleRoom, SpeakerSessionTime } from '@/lib/types';
 import { SCHEDULE_ROOMS } from '@/lib/scheduleLabels';
 
@@ -30,7 +29,7 @@ async function fetchScheduleItems(eventId: string): Promise<ScheduleItem[]> {
         id: doc.id,
         kind,
         title: data.title ?? '',
-        speakerIds: Array.isArray(data.speakerIds) ? (data.speakerIds as string[]) : [],
+        talkIds: Array.isArray(data.talkIds) ? (data.talkIds as string[]) : [],
         startTime: startTime.toDate().toISOString(),
         durationMinutes,
         room,
@@ -41,20 +40,21 @@ async function fetchScheduleItems(eventId: string): Promise<ScheduleItem[]> {
   return items.sort((first, second) => first.startTime.localeCompare(second.startTime));
 }
 
-function toPublicSlot(item: ScheduleItem, confirmedSpeakers: PublicSpeaker[]): PublicScheduleSlot {
+function toPublicSlot(item: ScheduleItem, lineup: { talkId: string; speaker: PublicSpeaker }[]): PublicScheduleSlot {
   const endTime = new Date(new Date(item.startTime).getTime() + item.durationMinutes * 60_000).toISOString();
-  // An unconfirmed speaker simply drops out, the same rule /speakers applies. A session
-  // left with nobody keeps its placeholder title and shows no speaker. Co-speakers are not
-  // listed on the slot: they come along with their lead, so adding one never needs the
-  // schedule reseeding.
-  const listedSpeakers = item.speakerIds
-    .map((speakerId) => confirmedSpeakers.find((speaker) => speaker.id === speakerId))
-    .filter((speaker): speaker is PublicSpeaker => Boolean(speaker));
-  const speakers = listedSpeakers.flatMap((listed) => [
-    listed,
-    ...confirmedSpeakers.filter((speaker) => speaker.coSpeakerOf === listed.id),
-  ]);
-  const leadSpeaker = listedSpeakers[0];
+  // A talk that hasn't been confirmed simply drops out, the same rule /speakers applies. A
+  // session left with nobody keeps its placeholder title and shows no speaker. Each talk
+  // brings all its presenters, lead first, so adding a co-speaker never needs the schedule
+  // reseeding.
+  const speakersByTalk = item.talkIds.map((talkId) =>
+    lineup
+      .filter((entry) => entry.talkId === talkId)
+      .map((entry) => entry.speaker)
+      .sort((first, second) => Number(Boolean(first.coSpeakerOf)) - Number(Boolean(second.coSpeakerOf)))
+  );
+  const announcedTalks = speakersByTalk.filter((talkSpeakers) => talkSpeakers.length > 0);
+  const speakers = announcedTalks.flat();
+  const leadSpeaker = announcedTalks[0]?.[0];
   // One session (a single speaker, or a lead with their co-speakers) is titled by the
   // talk. A block shared by several sessions (lightning talks) keeps its own title, since
   // no one talk names it.
@@ -68,7 +68,7 @@ function toPublicSlot(item: ScheduleItem, confirmedSpeakers: PublicSpeaker[]): P
     talkTitle: item.kind === 'plenary' && isOneSession ? leadSpeaker.talkTitle : null,
     speakers: speakers.map((speaker) => ({ name: speaker.name, slug: speaker.slug, photoUrl: speaker.photoUrl })),
     sessionSlug: isOneSession ? leadSpeaker.slug : null,
-    hasUnannouncedSpeaker: listedSpeakers.length < item.speakerIds.length,
+    hasUnannouncedSpeaker: announcedTalks.length < item.talkIds.length,
     track: takesSpeakerTitle ? leadSpeaker.track : null,
     format: takesSpeakerTitle ? leadSpeaker.format : null,
     startTime: item.startTime,
@@ -81,8 +81,9 @@ function toPublicSlot(item: ScheduleItem, confirmedSpeakers: PublicSpeaker[]): P
 // The public schedule, in start order. Throws on a failed read (of the schedule or of the
 // speakers it names), for /api/public/schedule, where an empty answer would be published.
 export async function loadPublicSchedule(eventId: string): Promise<PublicScheduleSlot[]> {
-  const [items, speakers] = await Promise.all([fetchScheduleItems(eventId), loadPublicSpeakers(eventId)]);
-  return items.map((item) => toPublicSlot(item, speakers));
+  const [items, rows] = await Promise.all([fetchScheduleItems(eventId), fetchSpeakers(eventId)]);
+  const lineup = toPublicLineup(rows);
+  return items.map((item) => toPublicSlot(item, lineup));
 }
 
 // The same schedule for /schedule, which shows its "being finalised" state on a failed read.
@@ -99,23 +100,15 @@ function toSessionTime(item: ScheduleItem): SpeakerSessionTime {
   return { startTime: item.startTime, endTime, room: item.room };
 }
 
-// Every scheduled speaker's slot, keyed by speaker id. Throws on a failed read: callers
-// that act on the answer (sending an invite or a cancellation) must not mistake "could
-// not read the schedule" for "not on the schedule".
-// A co-speaker shares their lead's slot without being listed on it, so they are given it
-// here, confirmed or not: the dashboard and the invite action apply their own gates.
-export async function fetchSessionTimesBySpeakerId(eventId: string): Promise<Record<string, SpeakerSessionTime>> {
-  const [items, coSpeakerSnapshot] = await Promise.all([
-    fetchScheduleItems(eventId),
-    adminDb.collection('speakers').where('coSpeakerOf', '!=', '').get(),
-  ]);
+// Every scheduled talk's slot, keyed by talk id (stage 4c; by speaker id before), which all
+// of a talk's presenters share. Throws on a failed read: callers that act on the answer
+// (sending an invite or a cancellation) must not mistake "could not read the schedule" for
+// "not on the schedule".
+export async function fetchSessionTimesByTalkId(eventId: string): Promise<Record<string, SpeakerSessionTime>> {
+  const items = await fetchScheduleItems(eventId);
   const sessionTimes: Record<string, SpeakerSessionTime> = {};
   for (const item of items) {
-    for (const speakerId of item.speakerIds) sessionTimes[speakerId] = toSessionTime(item);
-  }
-  for (const coSpeaker of coSpeakerSnapshot.docs) {
-    const leadSession = sessionTimes[coSpeaker.data().coSpeakerOf as string];
-    if (leadSession) sessionTimes[coSpeaker.id] = leadSession;
+    for (const talkId of item.talkIds) sessionTimes[talkId] = toSessionTime(item);
   }
   return sessionTimes;
 }

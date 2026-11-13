@@ -5,7 +5,7 @@ import { Resend } from 'resend';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 import { verifyAdminSession } from '@/lib/adminSession';
-import { fetchSessionTimesBySpeakerId, SCHEDULE_ROOM_LABELS } from '@/lib/schedule';
+import { fetchSessionTimesByTalkId, SCHEDULE_ROOM_LABELS } from '@/lib/schedule';
 import { calendarInviteStatus } from '@/lib/calendarInvite';
 import {
   buildCalendarInviteEmail,
@@ -31,7 +31,7 @@ function roomName(room: ScheduleRoom): string {
 // announces a slot, which is only settled once the speaker has said they are coming.
 // `emailSent` is set on the one failure where the email did go out, so the bulk send can
 // tell the admin not to retry that speaker.
-export async function sendCalendarInvite(speakerId: string): Promise<{ error?: string; emailSent?: boolean }> {
+export async function sendCalendarInvite(talkId: string, speakerId: string): Promise<{ error?: string; emailSent?: boolean }> {
   let senderEmail: string;
   try {
     ({ email: senderEmail } = await verifyAdminSession());
@@ -39,25 +39,28 @@ export async function sendCalendarInvite(speakerId: string): Promise<{ error?: s
     return { error: 'Your session has expired. Please sign in again.' };
   }
 
-  const speakerRef = adminDb.collection('speakers').doc(speakerId);
+  // Stage 4c: the talk holds the title, its proposal (whose confirmation decides whether it
+  // is going ahead) and what was last sent to each presenter; the person holds the address.
+  const talkRef = adminDb.collection('talks').doc(talkId);
   let speaker: FirebaseFirestore.DocumentData;
-  // The session's own record: the speaker's, or for a co-speaker the lead's, which holds
-  // the talk title and the proposal whose confirmation decides whether it is going ahead.
-  let sessionOwner: FirebaseFirestore.DocumentData | undefined;
+  let talk: FirebaseFirestore.DocumentData;
   let submission: FirebaseFirestore.DocumentData | undefined;
   let session: SpeakerSessionTime | null;
   try {
-    const speakerSnap = await speakerRef.get();
+    const talkSnap = await talkRef.get();
+    if (!talkSnap.exists) return { error: 'This talk is no longer in the lineup.' };
+    talk = talkSnap.data()!;
+    if (!((talk.speakerIds ?? []) as string[]).includes(speakerId)) {
+      return { error: 'This speaker is no longer on this talk.' };
+    }
+    const speakerSnap = await adminDb.collection('speakers').doc(speakerId).get();
     if (!speakerSnap.exists) return { error: 'This speaker is no longer in the lineup.' };
     speaker = speakerSnap.data()!;
-    sessionOwner = speaker.coSpeakerOf
-      ? (await adminDb.collection('speakers').doc(speaker.coSpeakerOf).get()).data()
-      : speaker;
-    if (sessionOwner?.submissionId) {
-      submission = (await adminDb.collection('submissions').doc(sessionOwner.submissionId).get()).data();
+    if (talk.submissionId) {
+      submission = (await adminDb.collection('submissions').doc(String(talk.submissionId)).get()).data();
     }
-    // The speaker's own event, not whichever one the admin has selected.
-    session = (await fetchSessionTimesBySpeakerId(String(speaker.eventId ?? '')))[speakerId] ?? null;
+    // The talk's own event, not whichever DevFest the admin is looking at.
+    session = (await fetchSessionTimesByTalkId(String(talk.eventId ?? '')))[talkId] ?? null;
   } catch {
     // Deliberately stops here rather than treating a failed schedule read as "not on the
     // schedule", which would send a cancellation.
@@ -72,8 +75,9 @@ export async function sendCalendarInvite(speakerId: string): Promise<{ error?: s
     return { error: 'This speaker\'s email address doesn\'t look right. Fix it with Edit before sending.' };
   }
 
-  const talkTitle = String(sessionOwner?.talkTitle ?? '');
-  const sentSlot = (speaker.calendarInviteSlot ?? null) as CalendarInviteSlot | null;
+  const talkTitle = String(talk.talkTitle ?? '');
+  const state = ((talk.speakerState ?? {})[speakerId] ?? {}) as Record<string, unknown>;
+  const sentSlot = (state.calendarInviteSlot ?? null) as CalendarInviteSlot | null;
   const status = calendarInviteStatus(sentSlot, session, talkTitle);
   if (status === 'unscheduled') {
     return { error: 'This speaker isn\'t on the schedule yet, so there is no session to invite them to.' };
@@ -85,12 +89,14 @@ export async function sendCalendarInvite(speakerId: string): Promise<{ error?: s
   const slot: SpeakerSessionTime = kind === 'cancel' ? sentSlot! : session!;
   const cancelTitle = kind === 'cancel' && sentSlot?.talkTitle ? sentSlot.talkTitle : talkTitle;
   // SEQUENCE starts at 0 and rises with every send, so each one supersedes the last.
-  const sequence = typeof speaker.calendarInviteSequence === 'number' ? speaker.calendarInviteSequence + 1 : 0;
+  const sequence = typeof state.calendarInviteSequence === 'number' ? state.calendarInviteSequence + 1 : 0;
+  // Kept from the first send, so every later one replaces that calendar entry.
+  const uid = typeof state.calendarInviteUid === 'string' ? state.calendarInviteUid : `talk-${talkId}-${speakerId}@app.gdgsydney.com`;
   const organiserEmail = process.env.RESEND_FROM_EMAIL || 'hello@gdgsydney.com';
 
   const details = {
     kind,
-    speakerId,
+    uid,
     speakerName: String(speaker.name ?? ''),
     speakerEmail,
     talkTitle: cancelTitle,
@@ -126,11 +132,13 @@ export async function sendCalendarInvite(speakerId: string): Promise<{ error?: s
   }
 
   try {
-    await speakerRef.update({
-      calendarInviteSentAt: Timestamp.now(),
-      calendarInviteSentBy: senderEmail,
-      calendarInviteSequence: sequence,
-      calendarInviteSlot:
+    const prefix = `speakerState.${speakerId}`;
+    await talkRef.update({
+      [`${prefix}.calendarInviteSentAt`]: Timestamp.now(),
+      [`${prefix}.calendarInviteSentBy`]: senderEmail,
+      [`${prefix}.calendarInviteSequence`]: sequence,
+      [`${prefix}.calendarInviteUid`]: uid,
+      [`${prefix}.calendarInviteSlot`]:
         kind === 'cancel'
           ? FieldValue.delete()
           : { startTime: slot.startTime, endTime: slot.endTime, room: slot.room, talkTitle },

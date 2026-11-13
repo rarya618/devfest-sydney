@@ -40,7 +40,7 @@ export default function AddCoSpeakerModal({ lead, onClose, onError }: Props) {
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
     startTransition(async () => {
-      const result = await addCoSpeaker(lead.id, fields);
+      const result = await addCoSpeaker(lead.talkId, fields);
       if (result.error) {
         onError(result.error);
         return;
