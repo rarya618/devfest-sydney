@@ -12,7 +12,7 @@ export default async function NewSavedTalkPage() {
   const session = await requirePortalSession();
   return (
     <PortalShell email={session.email} width="narrow">
-      <Link href="/portal" aria-label="Back to your talks" className={backLink}>
+      <Link href="/speaker" aria-label="Back to your talks" className={backLink}>
         <span aria-hidden="true">←</span> Your talks
       </Link>
       <h1 className={`${pageHeading} mt-6`}>Add a talk</h1>

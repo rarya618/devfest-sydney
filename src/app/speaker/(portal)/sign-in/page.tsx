@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: 'Sign in' };
 export default async function PortalSignInPage() {
   // A failed read shows the form rather than an error: signing in again is harmless.
   const session = await getPortalSession().catch(() => null);
-  if (session) redirect('/portal');
+  if (session) redirect('/speaker');
 
   return (
     <PortalShell width="narrow">

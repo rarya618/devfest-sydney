@@ -23,7 +23,7 @@ export default async function PortalProfilePage({ params }: ProfilePageProps) {
 
   return (
     <PortalShell email={session.email}>
-      <Link href="/portal" aria-label="Back to your talks" className={backLink}>
+      <Link href="/speaker" aria-label="Back to your talks" className={backLink}>
         <span aria-hidden="true">←</span> Your talks
       </Link>
       <h1 className={`${pageHeading} mt-6`}>Your profile</h1>

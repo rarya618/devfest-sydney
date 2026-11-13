@@ -62,7 +62,7 @@ export async function completePortalSignIn(token: string): Promise<{ error: stri
     return { error: "We couldn't sign you in just now. Please try the link again in a moment." };
   }
   if (!email) return { error: 'This sign-in link has already been used or has run out. Please ask for a new one.' };
-  redirect('/portal');
+  redirect('/speaker');
 }
 
 export async function signOutOfPortal(): Promise<void> {
@@ -72,7 +72,7 @@ export async function signOutOfPortal(): Promise<void> {
     // The cookie is cleared regardless; a session document left behind runs out on its own.
     console.error('Portal sign-out could not delete the session:', error);
   }
-  redirect('/portal/sign-in');
+  redirect('/speaker/sign-in');
 }
 
 // ---------------------------------------------------------------------------------------
@@ -114,7 +114,7 @@ export async function updatePortalProfile(speakerId: string, fields: PortalProfi
     if (!hasChanges) return {};
 
     await adminDb.collection('speakers').doc(speakerId).update({ ...validated.values });
-    revalidatePath('/portal', 'layout');
+    revalidatePath('/speaker', 'layout');
     revalidatePath('/admin/people');
     revalidatePath('/admin/speakers');
     return {};
@@ -133,7 +133,7 @@ export async function uploadPortalPhoto(speakerId: string, formData: FormData): 
 
     const result = await replaceSpeakerPhoto(speakerId, formData.get('photo'));
     if ('error' in result) return result;
-    revalidatePath('/portal', 'layout');
+    revalidatePath('/speaker', 'layout');
     revalidatePath('/admin/people');
     revalidatePath('/admin/speakers');
     return { photoUrl: result.photoUrl };
@@ -152,7 +152,7 @@ export async function removePortalPhoto(speakerId: string): Promise<{ error?: st
 
     const failure = await clearSpeakerPhoto(speakerId);
     if (failure) return failure;
-    revalidatePath('/portal', 'layout');
+    revalidatePath('/speaker', 'layout');
     revalidatePath('/admin/people');
     revalidatePath('/admin/speakers');
     return {};
@@ -191,7 +191,7 @@ export async function saveTalkForLater(
       const existing = await loadOwnedSavedTalk(session.email, savedTalkId);
       if (!existing) return { error: "We couldn't find this talk among your saved talks." };
       await adminDb.collection('savedTalks').doc(savedTalkId).update({ ...values, updatedAt: FieldValue.serverTimestamp() });
-      revalidatePath('/portal', 'layout');
+      revalidatePath('/speaker', 'layout');
       return { savedTalkId };
     }
 
@@ -205,7 +205,7 @@ export async function saveTalkForLater(
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     });
-    revalidatePath('/portal', 'layout');
+    revalidatePath('/speaker', 'layout');
     return { savedTalkId: created.id };
   } catch (error) {
     console.error('Saving a talk failed:', error);
@@ -221,7 +221,7 @@ export async function deleteSavedTalk(savedTalkId: string): Promise<{ error?: st
     const existing = await loadOwnedSavedTalk(session.email, savedTalkId);
     if (!existing) return { error: "We couldn't find this talk among your saved talks." };
     await adminDb.collection('savedTalks').doc(savedTalkId).delete();
-    revalidatePath('/portal', 'layout');
+    revalidatePath('/speaker', 'layout');
     return {};
   } catch (error) {
     console.error('Deleting a saved talk failed:', error);
@@ -317,6 +317,6 @@ export async function submitPortalProposal(input: PortalProposalInput): Promise<
     }
   }
 
-  revalidatePath('/portal');
+  revalidatePath('/speaker');
   return {};
 }

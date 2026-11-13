@@ -12,7 +12,7 @@ export default function VerifySignIn({ token, email }: { token: string; email: s
 
   function handleSignIn() {
     startTransition(async () => {
-      // Redirects to /portal on success; anything returned is a problem to show.
+      // Redirects to /speaker on success; anything returned is a problem to show.
       const result = await completePortalSignIn(token);
       if (result?.error) setAlertMessage(result.error);
     });

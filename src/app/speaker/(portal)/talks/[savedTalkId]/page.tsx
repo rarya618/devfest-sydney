@@ -29,12 +29,12 @@ export default async function SavedTalkPage({ params }: SavedTalkPageProps) {
 
   return (
     <PortalShell email={session.email} width="narrow">
-      <Link href="/portal" aria-label="Back to your talks" className={backLink}>
+      <Link href="/speaker" aria-label="Back to your talks" className={backLink}>
         <span aria-hidden="true">←</span> Your talks
       </Link>
       <div className="mt-6 mb-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <h1 className={pageHeading}>Edit talk</h1>
-        <Link href={`/portal/propose?talk=${savedTalk.id}`} aria-label={`Propose ${savedTalk.talkTitle}`} className={`${primaryButton} self-start`}>
+        <Link href={`/speaker/propose?talk=${savedTalk.id}`} aria-label={`Propose ${savedTalk.talkTitle}`} className={`${primaryButton} self-start`}>
           Propose this talk
         </Link>
       </div>

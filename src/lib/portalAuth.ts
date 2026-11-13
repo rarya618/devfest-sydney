@@ -10,7 +10,7 @@ import { buildPortalSignInEmail } from '@/lib/portalSignInEmail';
 // Sign-in for the speaker portal (stage 6 of the plan in PM.md). Speakers sign in with a
 // single-use link emailed to them, not with Google and not with Firebase Auth's email link:
 //
-// - The link is used behind a button (/portal/sign-in/verify), never on page load, so a mail
+// - The link is used behind a button (/speaker/sign-in/verify), never on page load, so a mail
 //   scanner that opens it signs no one in and doesn't burn the link. Firebase's email link
 //   signs in from page-load JavaScript, which is the problem every confirm page here avoids.
 // - It is sent through Resend from hello@gdgsydney.com, like every other email the app sends,
@@ -99,7 +99,7 @@ export async function requestSignInLink(email: string): Promise<SignInLinkReques
     replyTo: 'hello@gdgsydney.com',
     subject: 'Your sign-in link for the GDG Sydney speaker portal',
     html: buildPortalSignInEmail({
-      signInUrl: `${siteUrl()}/portal/sign-in/verify?token=${token}`,
+      signInUrl: `${siteUrl()}/speaker/sign-in/verify?token=${token}`,
       validForMinutes: SIGN_IN_LINK_MINUTES,
     }),
   });
@@ -149,8 +149,9 @@ export async function signInWithLink(token: string): Promise<string | null> {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    // Sent to the portal's pages and actions only, never to /admin or the API.
-    path: '/portal',
+    // Sent under /speaker only (the portal, plus /speaker/confirm and /speaker/thanks, which
+    // ignore it), never to /admin or the API.
+    path: '/speaker',
     expires: new Date(expiresAt),
   });
   return emailNormalised;
@@ -176,7 +177,7 @@ export const getPortalSession = cache(async (): Promise<PortalSession | null> =>
 // Page-side: sends a visitor who isn't signed in to the sign-in page.
 export async function requirePortalSession(): Promise<PortalSession> {
   const session = await getPortalSession();
-  if (!session) redirect('/portal/sign-in');
+  if (!session) redirect('/speaker/sign-in');
   return session;
 }
 
@@ -185,5 +186,5 @@ export async function endPortalSession(): Promise<void> {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get(PORTAL_SESSION_COOKIE)?.value;
   if (sessionToken) await adminDb.collection(SESSIONS).doc(sha256(sessionToken)).delete();
-  cookieStore.delete({ name: PORTAL_SESSION_COOKIE, path: '/portal' });
+  cookieStore.delete({ name: PORTAL_SESSION_COOKIE, path: '/speaker' });
 }

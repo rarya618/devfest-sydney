@@ -38,7 +38,7 @@ export default function SavedTalkEditor({ savedTalkId, initialFields, proposedCo
     startTransition(async () => {
       const result = await saveTalkForLater(savedTalkId, fields);
       if ('error' in result) setAlertMessage(result.error);
-      else router.push('/portal');
+      else router.push('/speaker');
     });
   }
 
@@ -49,7 +49,7 @@ export default function SavedTalkEditor({ savedTalkId, initialFields, proposedCo
       if (result.error) {
         setAlertMessage(result.error);
         setIsConfirmingDelete(false);
-      } else router.push('/portal');
+      } else router.push('/speaker');
     });
   }
 

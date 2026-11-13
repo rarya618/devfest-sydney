@@ -64,7 +64,7 @@ function ProfileColumn({ profiles }: { profiles: PortalProfile[] }) {
               This is how you appear next to your talks on our event pages.
               {missing && <span className="block mt-1 text-google-yellow">Add {missing} to finish it.</span>}
             </p>
-            <Link href={`/portal/profile/${profile.id}`} aria-label={`Edit the speaker profile for ${profile.name}`} className={`${secondaryButton} mt-4`}>
+            <Link href={`/speaker/profile/${profile.id}`} aria-label={`Edit the speaker profile for ${profile.name}`} className={`${secondaryButton} mt-4`}>
               Edit profile
             </Link>
           </div>
@@ -182,7 +182,7 @@ function SavedTalks({ savedTalks, proposals }: { savedTalks: SavedTalk[]; propos
     <section aria-labelledby="saved-talks-heading">
       <div className="flex items-center justify-between gap-4">
         <h2 id="saved-talks-heading" className={sectionHeading}>Saved talks</h2>
-        <Link href="/portal/talks/new" aria-label="Add a talk to propose later" className={secondaryButton}>
+        <Link href="/speaker/talks/new" aria-label="Add a talk to propose later" className={secondaryButton}>
           Add a talk
         </Link>
       </div>
@@ -207,10 +207,10 @@ function SavedTalks({ savedTalks, proposals }: { savedTalks: SavedTalk[]; propos
                   </p>
                 </div>
                 <div className="flex gap-2 shrink-0">
-                  <Link href={`/portal/talks/${savedTalk.id}`} aria-label={`Edit ${savedTalk.talkTitle}`} className={secondaryButton}>
+                  <Link href={`/speaker/talks/${savedTalk.id}`} aria-label={`Edit ${savedTalk.talkTitle}`} className={secondaryButton}>
                     Edit
                   </Link>
-                  <Link href={`/portal/propose?talk=${savedTalk.id}`} aria-label={`Propose ${savedTalk.talkTitle}`} className={primaryButtonSmall}>
+                  <Link href={`/speaker/propose?talk=${savedTalk.id}`} aria-label={`Propose ${savedTalk.talkTitle}`} className={primaryButtonSmall}>
                     Propose
                   </Link>
                 </div>
@@ -246,7 +246,7 @@ export default async function PortalHomePage() {
     <PortalShell email={session.email}>
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12">
         <h1 className={pageHeading}>{firstName ? `Hi, ${firstName}.` : 'Welcome.'}</h1>
-        <Link href="/portal/propose" aria-label="Propose a talk" className={`${primaryButton} self-start sm:self-auto`}>
+        <Link href="/speaker/propose" aria-label="Propose a talk" className={`${primaryButton} self-start sm:self-auto`}>
           Propose a talk
         </Link>
       </div>

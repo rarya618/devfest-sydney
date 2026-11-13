@@ -35,7 +35,7 @@ export default async function PortalProposePage({ searchParams }: ProposePagePro
 
   return (
     <PortalShell email={session.email} width="narrow">
-      <Link href="/portal" aria-label="Back to your talks" className={backLink}>
+      <Link href="/speaker" aria-label="Back to your talks" className={backLink}>
         <span aria-hidden="true">←</span> Your talks
       </Link>
       <h1 className={`${pageHeading} mt-6`}>Propose a talk</h1>

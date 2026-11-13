@@ -272,7 +272,7 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
         <p className="text-white/70 leading-relaxed mb-6">
           Thanks! We&rsquo;ve emailed you a copy. Our organisers will read it and get back to you by email.
         </p>
-        <Link href="/portal" aria-label="Back to your talks" className={secondaryButton}>
+        <Link href="/speaker" aria-label="Back to your talks" className={secondaryButton}>
           Back to your talks
         </Link>
       </div>

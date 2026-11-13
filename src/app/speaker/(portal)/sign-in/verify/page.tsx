@@ -53,7 +53,7 @@ export default async function PortalVerifyPage({ searchParams }: VerifyPageProps
                 : 'Sign-in links work once and run out after 30 minutes. Ask for a new one and use the newest email.'}
             </p>
             <Link
-              href="/portal/sign-in"
+              href="/speaker/sign-in"
               aria-label="Ask for a new sign-in link"
               className={primaryButton}
             >

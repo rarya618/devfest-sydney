@@ -31,7 +31,7 @@ async function ProfileButton({ email }: { email: string }) {
   const firstName = profile.name.trim().split(/\s+/)[0] || profile.name;
   return (
     <Link
-      href={`/portal/profile/${profile.id}`}
+      href={`/speaker/profile/${profile.id}`}
       aria-label={`Your profile, ${profile.name}`}
       className="inline-flex items-center gap-2.5 rounded-full border border-white/35 py-1 pl-1 pr-4 text-sm font-bold text-off-white transition-colors hover:border-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
     >
@@ -53,7 +53,7 @@ export default function PortalShell({ email, width = 'wide', children }: PortalS
       <header>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
           <Link
-            href="/portal"
+            href="/speaker"
             aria-label="GDG Sydney speaker portal, home"
             className="shrink-0 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
           >
