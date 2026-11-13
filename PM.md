@@ -49,16 +49,16 @@ Sidebar groups:
 
 ## Data model
 
-Collections are written through the Admin SDK only unless noted. No composite indexes: lists are `where('eventId', '==', ...)` and sorted in memory (`src/lib/eventScope.ts`); add indexes if a collection grows past a few thousand documents.
+Every collection is read and written through the Admin SDK; no client code uses Firestore. The rules allow public reads only of `sponsors`, `partners`, `team` and `faq`, and a public create only on `submissions` (unused since the CfS form moved to `/api/submit-proposal`). No composite indexes: lists are `where('eventId', '==', ...)` and sorted in memory (`src/lib/eventScope.ts`); add indexes if a collection grows past a few thousand documents.
 
 - **`events/{eventId}`** (readable ids: `devfest-2026`, `meetup-2026-12`): `type` (`devfest` | `general`), name, `startAt`, `endAt`, `timeZone`, venue, `bevyUrl`, `humanitixUrl`, `ticketLowestPrice`, `ticketsOnSaleAt`, and `cfs` / `showcase` / `volunteers` blocks of `{ enabled, open, closesAt }`. Tickets close automatically when the event ends. Helpers in `src/lib/events.ts`; wall-time conversion in `src/lib/zonedTime.ts`
 - **`eventPrivate/{eventId}`:** the links that unlock something (speaker, showcase and volunteer ticket access-code URLs, volunteer WhatsApp invite). Write-only in the admin form. Separate document so a public projection can't leak them
 - **`settings/site`:** `currentDevfestEventId` (which DevFest the form endpoints and `/api/public/status` follow), `speakerPhotosUrl` (the 2026 thank-you photos folder), partner logos and the prospectus URL
-- **`speakers/{speakerId}`:** a GDG-wide person (name, email, `emailNormalised`, tagline, bio, photo, links, `previousSlugs`). Reused on promotion only when email AND name match (`findOrCreatePerson`, `src/lib/people.ts`): 2026 has two people on one address. Still carries old talk fields until the cleanup pass below
+- **`speakers/{speakerId}`:** a GDG-wide person (name, email, `emailNormalised`, tagline, bio, photo, links, `previousSlugs`). Reused on promotion only when email AND name match (`findOrCreatePerson`, `src/lib/people.ts`): 2026 has two people on one address. Holds nothing about any talk (cleared by `scripts/cleanup-speaker-fields.mjs`)
 - **`talks/{talkId}`:** `eventId`, title, abstract, format, track, level, `speakerIds` (lead first), `submissionId` or `meetupProposalId`. The talk id is the proposal id. `speakerState.<speakerId>` holds per-presenter sends (co-speaker ticket, calendar invite and its `calendarInviteUid` / sequence, thank-you)
 - **`submissions`** (DevFest talk proposals) and **`meetupProposals`** (from `/speak`; gains `eventId` only when accepted into an event): the record of the decision: status, reviewer notes, acceptance email sent, `confirmByDate`, `speakerConfirmedAt`, the lead's ticket send. **Multiple proposals per person are allowed by design**: don't add email dedupe without asking
 - **`volunteerProfiles/{profileId}`:** a GDG-wide volunteer (contact, experience, Torrens and GDG on Campus answers, dietary needs, photo, LinkedIn, `volunteerInvites.<eventId>`, `inviteOptOut`). Reused when email AND name match (`src/lib/volunteerProfiles.ts`)
-- **`volunteers`:** one signup per person per event: `eventId`, `profileId`, motivation, areas, status, notes, roster (`assignedArea`, `assignedShift`), `showOnCrewPage`, acceptance and confirmation, ticket mark. Organisers are `isOrganiser: true` with `organiserRole`; they have no signup behind them, so Remove deletes them
+- **`volunteers`:** one signup per person per event, holding no person fields (cleared by `scripts/cleanup-volunteer-fields.mjs`): `eventId`, `profileId`, motivation, areas, status, notes, roster (`assignedArea`, `assignedShift`), `showOnCrewPage`, acceptance and confirmation, ticket mark. Organisers are `isOrganiser: true` with `organiserRole`; they have no signup behind them, so Remove deletes them
 - **`showcase`:** Builder Showcase entries (no client writes at all)
 - **`schedule`:** slots with `eventId`, `kind` (session / break / plenary), `title`, `talkIds`, `startTime`, `durationMinutes`, `room`, `isTentative`. Loaded by `scripts/seed-schedule.mjs` (`EVENT_ID`, `--dry-run`); 2026 slot ids have no event prefix, later events' do
 - **`sponsors`**, **`partners`** (community partners, empty), **`admins`**
@@ -168,8 +168,8 @@ Event settings (open/closed, deadlines, ticket links) are not env vars: they liv
 | 3 | Domains and redirects | Done 2026-11-10. Builder's Space, guides and crew ported to gdgsydney.com; content pages deleted here 2026-11-13 |
 | 4a | `events` collection, settings out of env vars | Done and migrated |
 | 4b | `eventId` on everything event-shaped; DevFest edition picker | Done and migrated |
-| 4c | Speakers split into people and talks | Done and migrated. **Cleanup pass to do** (below) |
-| 4d | Volunteer profiles, invites, volunteer pool, general-event volunteers | Done and migrated (49 profiles, 52 signups). **Cleanup pass to do** |
+| 4c | Speakers split into people and talks | Done and migrated. Cleanup pass written 2026-11-13 (see below) |
+| 4d | Volunteer profiles, invites, volunteer pool, general-event volunteers | Done and migrated (49 profiles, 52 signups). Cleanup pass written 2026-11-13 (see below) |
 | 4e | Copy reads from the event | Done |
 | 4f | Meetup talks accepted into general events | Done. Not exercised end to end: no general event exists yet |
 | 4g | Starter guides into Firestore | **Not started** |
@@ -177,8 +177,7 @@ Event settings (open/closed, deadlines, ticket links) are not env vars: they liv
 | 6 | Speaker portal | **Not started**, needs nothing more from stage 4 |
 
 ### Remaining stage 4 work
-- **4c cleanup pass:** remove the old talk fields, `submissionId`, `coSpeakerOf`, `eventId` and the per-speaker send fields from `speakers`, and `speakerIds` from slots. Update `isValidSpeaker` in `firestore.rules`, which still describes the old shape (only documentation, since nothing writes speakers from the client).
-- **4d cleanup pass:** remove the person fields left on `volunteers` signups once every read goes through the profile (it already does; a signup without a profile falls back to its own copy).
+- **4c and 4d cleanup passes (written 2026-11-13):** `scripts/cleanup-speaker-fields.mjs` removes the talk fields, `submissionId`, `promotedAt`, `eventId`, `coSpeakerOf` and the per-speaker sends from all 23 `speakers` documents, and `speakerIds` from all 28 slots. `scripts/cleanup-volunteer-fields.mjs` removes the person fields from all 52 signups; it refuses if a signup has no profile or holds a value its profile lacks (placeholders like "N/A" don't count). Both dry runs pass against production. The code no longer falls back to a signup's own copy: `loadVolunteerRecord` returns null without a profile, and the crew editor writes only to the profile. `firestore.rules` drops the `speakers` and `schedule` blocks (until now `speakers`, emails included, was **publicly readable**) and the public create on `volunteers`. Old code works with the cleaned data and new code with the old data, so the scripts, the push and the rules deploy (`firebase deploy --only firestore:rules`) can happen in any order.
 - **Known limit:** the public projection is one entry per talk, so a person with two talks at one event gets a second slug (`-2`).
 - **Data fix:** Yuting Mao is stored under Qasim Tariq's email; correct it by hand.
 - **4g:** `starterGuides` collection (today `gdg-sydney/src/data/starterGuides.ts`, 33 guides, logos already in Storage under `guide-logos/`), an editor under the admin, `/api/public/starter-guides`, and the stage 1 rebuild trigger (a `repository_dispatch` on `gdg-sydney`) firing on save. Build the trigger once here and reuse it for speakers, schedule and sponsors.
@@ -201,5 +200,5 @@ Speakers sign in to keep one profile, see past and upcoming talks, and propose t
    - Then reword the matching `/privacy` sections (Job Board still says "We take the job board down ... after the event") to say the data has been deleted.
 2. **Security leftovers:** rotate the reCAPTCHA key's secret (it once sat in `.env.local` under the site key's name), and decide whether to switch App Check on in production.
 3. **Verify before relying on them** (never exercised with a real send, since every recipient was real): a volunteer invite and `/volunteer/join` submission, and the meetup acceptance flow. Create the first general event in `/admin/events`, then send one of each to an organiser inbox.
-4. The 4c and 4d cleanup passes, then 4g.
+4. If not yet done: run the two cleanup scripts and deploy the rules (see Remaining stage 4 work). Then 4g.
 5. Optional: point the `/speak` form's `PROPOSAL_URL` in `gdg-sydney` at `app.gdgsydney.com` (the old host still works).

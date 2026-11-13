@@ -17,48 +17,23 @@ rules_version='2';
 //   - previousTalkLink: string (optional, max 500 chars)
 //   - submittedAt: timestamp (required, must be recent)
 //
-// Collection: speakers
-// Document ID: auto-generated
-// Written by promoteSubmission() (src/app/admin/actions.ts) when an admin
-// promotes a CfS submission — fields mirror that write exactly.
-// Fields:
-//   - name: string (required, 1–100 chars)
-//   - email: string (required, valid email)
-//   - talkTitle: string (required, 1–150 chars)
-//   - abstract: string (required, 1–2000 chars)
-//   - format: string (required) — 'talk' | 'lightning-talk' | 'workshop'
-//   - track: string (required) — 'keynote' | 'spotlight' | 'developer' | 'builder' | 'workshop' | 'showcase'
-//   - experienceLevel: string (required) — 'beginner' | 'intermediate' | 'advanced'
-//   - linkedinUrl: string (optional, max 500 chars, may be empty)
-//   - githubUrl: string (optional, max 500 chars, may be empty)
-//   - websiteUrl: string (optional, max 500 chars, may be empty)
-//   - submissionId: string (required) — id of the source submissions doc
-//   - promotedAt: timestamp (required)
-//   - bio: string (optional, max 1000 chars, may be empty)
-//   - tagline: string (optional, max 200 chars, may be empty)
-//   - photoUrl: string (optional, valid https URL or empty — starts blank until an admin adds one)
-//   - previousSlugs: list of strings (optional) — slugs the speaker's page used to live at,
-//     appended by updateSpeaker() on a rename so /speakers/<old-slug> can redirect
-//   - calendarInviteSentAt, calendarInviteSentBy, calendarInviteSequence, calendarInviteSlot
-//     (optional) — written by sendCalendarInvite() (src/app/admin/calendarInviteActions.ts);
-//     calendarInviteSlot is a map { startTime, endTime, room, talkTitle } of what the last
-//     invite said, removed when a cancellation is sent
+// Collections: speakers, talks, schedule
+// Admin SDK only, with no match block below, so every client read and write is denied.
+// Nothing reads them with the client SDK: the public lineup and schedule are served as
+// projections by /api/public/*. A speaker document holds a private email address, which is
+// why it is not publicly readable (it was until 2026-11-13).
+// speakers (a GDG-wide person, stage 4c): name, email, emailNormalised, linkedinUrl,
+//   githubUrl, websiteUrl, bio, tagline, photoUrl, previousSlugs, createdAt
+// talks (one per accepted proposal, id = the proposal id): eventId, talkTitle, abstract,
+//   format, track, experienceLevel, speakerIds (lead first), submissionId or
+//   meetupProposalId, promotedAt, speakerState (map of per-presenter sends, by speaker id)
+// schedule (written by scripts/seed-schedule.mjs): eventId, kind ('session' | 'break' |
+//   'plenary'), title, talkIds, startTime, durationMinutes, room, isTentative
 //
 // Collection: admins
 // Document ID: user's email address
 // Fields:
 //   - name: string (optional, max 100 chars) — display name
-//
-// Collection: schedule
-// Document ID: "<HHMM>-<room>", written by scripts/seed-schedule.mjs
-// Fields:
-//   - kind: string (required) — 'session' | 'break' | 'plenary'
-//   - title: string (required, 1–150 chars); a session's placeholder until its speaker confirms
-//   - speakerIds: list of `speakers` doc ids (required, may be empty, max 10)
-//   - startTime: timestamp (required)
-//   - durationMinutes: number (required, 1–480)
-//   - room: string (required) — 'auditorium' | 'developer' | 'builder' | 'workshops' | 'all'
-//   - isTentative: bool (required); shown as "TBC"
 //
 // Collection: sponsors
 // Document ID: auto-generated
@@ -97,52 +72,18 @@ rules_version='2';
 //   - answer: string (required, 1–2000 chars)
 //   - order: number (optional, non-negative integer)
 //
-// Collection: volunteers
-// Document ID: auto-generated
-// Fields:
-//   - name: string (required, 1–100 chars)
-//   - email: string (required, valid email) — contact email (PII)
-//   - phone: string (optional, max 30 chars)
-//   - motivation: string (required, 1–1000 chars) — why they want to volunteer
-//   - areasOfInterest: list of strings (required, 1+ items) — subset of
-//     'registration' | 'av-tech' | 'speaker-support' | 'workshop-facilitator' | 'mc' | 'general-floater' |
-//     'setup-packdown' | 'photography' | 'social-media' | 'merch-table'
-//   - priorExperience: string (optional, max 1000 chars)
-//   - googleTechExperience: string (optional, max 1000 chars) — experience with Google
-//     technologies (Firebase, Android, Flutter, Gemini, Google Cloud, etc.), used to
-//     assess whether the volunteer could facilitate a hands-on workshop
-//   - isTorrensStudentOrStaff: boolean (required) — whether the volunteer is a
-//     student or staff member at Torrens University
-//   - hasBeenGdgOnCampusExec: boolean (required) — whether the volunteer has been on the
-//     exec team of a GDG on Campus chapter
-//   - gdgOnCampusChapter: string (required) — 'usyd' | 'uts' | 'other', or '' when the above is false
-//   - dietaryRequirements: string (optional, max 300 chars)
-//   - submittedAt: timestamp (required, must be recent)
-//   - status: string (required) - 'pending' | 'accepted' | 'rejected' | 'archived'
-//   - reviewerNotes: list of maps (optional) - admin-only notes
-//
-//   Set by an admin on /admin/crew once the signup is accepted. None of these can be
-//   written from the client: the create rule below rejects any document carrying an
-//   unlisted field, and update is admin-only, so they only ever arrive through the
-//   Admin SDK, which bypasses these rules. isValidVolunteerSubmission therefore does
-//   not list them.
-//   - assignedArea: string - a VolunteerArea, or '' when not rostered yet. Also allows
-//     'videography' and 'lead-volunteer', which are roster-only and never an areaOfInterest
-//   - assignedShift: string - 'full-day' | 'morning' | 'afternoon', or '' when unset
-//   - photoUrl: string (optional, max 500 chars) - crew-photos/ object in the default bucket
-//   - showOnCrewPage: boolean - opt-in to being named on the public /crew page
-//   - acceptanceEmailSentAt: timestamp, acceptanceEmailSentBy: string
-//   - confirmByDate: timestamp - the volunteer's deadline to confirm
-//   - volunteerConfirmedAt: timestamp - set from /volunteer/confirm
-//   - ticketSentAt: timestamp (optional) - marked by hand on /admin/crew; hides the ticket link on /volunteer/confirm
-//   - ticketSentBy: string (optional) - email of the admin who marked it
-//
-//   Organisers. Added straight onto the crew from /admin/crew rather than arriving
-//   through the signup form, so they share this collection but skip the review and
-//   confirmation flow. Admin SDK only, for the same reason as the roster fields above.
-//   - isOrganiser: boolean - true for an organiser, absent or false for a signup
-//   - organiserRole: string (max 80 chars) - free text, e.g. 'Lead organiser'
-//   - linkedinUrl: string (optional, max 500 chars) - shown on / and /crew
+// Collections: volunteers, volunteerProfiles
+// Admin SDK only (no match block for volunteerProfiles; volunteers is admin-only). Signups
+// arrive through /api/submit-volunteer, /volunteer/join and Add organiser on the server, so
+// there is no public create path (there was until 2026-11-13).
+// volunteerProfiles (a GDG-wide person, stage 4d): name, email, emailNormalised, phone,
+//   priorExperience, googleTechExperience, isTorrensStudentOrStaff, hasBeenGdgOnCampusExec,
+//   gdgOnCampusChapter, dietaryRequirements, photoUrl, linkedinUrl, volunteerInvites,
+//   inviteOptOut, createdAt, updatedAt
+// volunteers (one signup per person per event): eventId, profileId, motivation,
+//   areasOfInterest, tracking, submittedAt, status, reviewerNotes, assignedArea,
+//   assignedShift, showOnCrewPage, acceptanceEmailSentAt/By, confirmByDate,
+//   volunteerConfirmedAt, ticketSentAt/By, and for organisers isOrganiser and organiserRole
 //
 // Collection: showcase
 // Document ID: auto-generated
@@ -215,23 +156,6 @@ service cloud.firestore {
          request.resource.data[field].size() <= maxLen);
     }
 
-    // Like isValidOptionalString, but also accepts an empty string —
-    // for fields that are written blank and filled in later (e.g. photoUrl).
-    function isValidBlankableString(field, maxLen) {
-      return !(field in request.resource.data) ||
-        (request.resource.data[field] is string &&
-         request.resource.data[field].size() <= maxLen);
-    }
-
-    // Accepts a valid https URL, or an empty/absent string.
-    function isValidBlankableHttpsUrl(field, maxLen) {
-      return !(field in request.resource.data) ||
-        (request.resource.data[field] is string &&
-         (request.resource.data[field] == '' ||
-          (request.resource.data[field].matches('^https://.*') &&
-           request.resource.data[field].size() <= maxLen)));
-    }
-
     function isRecent(time) {
       return time is timestamp &&
         time > request.time - duration.value(5, 'm') &&
@@ -262,77 +186,6 @@ service cloud.firestore {
         data.requiresTravelSupport is bool &&
         data.isGoogleDeveloperExpert is bool &&
         data.submittedAt is timestamp;
-    }
-
-    function isValidVolunteerSubmission(data) {
-      let allowedAreas = ['registration', 'av-tech', 'speaker-support', 'workshop-facilitator', 'mc', 'general-floater',
-                          'setup-packdown', 'photography', 'social-media', 'merch-table'];
-      return data.keys().hasOnly(['name', 'email', 'phone', 'motivation',
-                                   'areasOfInterest', 'priorExperience', 'googleTechExperience',
-                                   'isTorrensStudentOrStaff', 'hasBeenGdgOnCampusExec', 'gdgOnCampusChapter',
-                                   'dietaryRequirements', 'submittedAt']) &&
-        data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
-        data.email is string && isValidEmail(data.email) &&
-        isValidOptionalString('phone', 1, 30) &&
-        data.motivation is string && data.motivation.size() >= 1 && data.motivation.size() <= 1000 &&
-        data.areasOfInterest is list && data.areasOfInterest.size() >= 1 &&
-        data.areasOfInterest.hasOnly(allowedAreas) &&
-        isValidOptionalString('priorExperience', 1, 1000) &&
-        isValidOptionalString('googleTechExperience', 1, 1000) &&
-        data.isTorrensStudentOrStaff is bool &&
-        data.hasBeenGdgOnCampusExec is bool &&
-        data.gdgOnCampusChapter in ['', 'usyd', 'uts', 'other'] &&
-        isValidOptionalString('dietaryRequirements', 1, 300) &&
-        data.submittedAt is timestamp;
-    }
-
-    function isValidSpeaker(data) {
-      let allowedFormats = ['talk', 'lightning-talk', 'workshop'];
-      let allowedTracks = ['keynote', 'spotlight', 'developer', 'builder', 'workshop', 'showcase'];
-      let allowedLevels = ['beginner', 'intermediate', 'advanced'];
-      return data.keys().hasOnly(['name', 'email', 'talkTitle', 'abstract', 'format',
-                                   'track', 'experienceLevel', 'linkedinUrl', 'githubUrl',
-                                   'websiteUrl', 'submissionId', 'promotedAt', 'bio',
-                                   'tagline', 'photoUrl', 'previousSlugs',
-                                   'calendarInviteSentAt', 'calendarInviteSentBy',
-                                   'calendarInviteSequence', 'calendarInviteSlot',
-                                   'coSpeakerOf', 'speakerTicketEmailSentAt',
-                                   'speakerTicketEmailSentBy']) &&
-        data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
-        data.email is string && isValidEmail(data.email) &&
-        // A co-speaker holds only their profile: the session, and the proposal it came
-        // from, are read from the lead speaker named in coSpeakerOf.
-        (('coSpeakerOf' in data && data.coSpeakerOf is string && data.coSpeakerOf.size() >= 1 &&
-          !('talkTitle' in data) && !('submissionId' in data)) ||
-         (!('coSpeakerOf' in data) &&
-          data.talkTitle is string && data.talkTitle.size() >= 1 && data.talkTitle.size() <= 150 &&
-          data.abstract is string && data.abstract.size() >= 1 && data.abstract.size() <= 2000 &&
-          data.format in allowedFormats &&
-          data.track in allowedTracks &&
-          data.experienceLevel in allowedLevels &&
-          data.submissionId is string && data.submissionId.size() >= 1)) &&
-        isValidBlankableString('linkedinUrl', 500) &&
-        isValidBlankableString('githubUrl', 500) &&
-        isValidBlankableString('websiteUrl', 500) &&
-        data.promotedAt is timestamp &&
-        isValidBlankableString('bio', 1000) &&
-        isValidBlankableString('tagline', 200) &&
-        isValidBlankableHttpsUrl('photoUrl', 500) &&
-        (!('previousSlugs' in data) || (data.previousSlugs is list && data.previousSlugs.size() <= 20));
-    }
-
-    function isValidScheduleItem(data) {
-      let allowedKinds = ['session', 'break', 'plenary'];
-      let allowedRooms = ['auditorium', 'developer', 'builder', 'workshops', 'all'];
-      return data.keys().hasOnly(['kind', 'title', 'speakerIds', 'startTime',
-                                   'durationMinutes', 'room', 'isTentative']) &&
-        data.kind in allowedKinds &&
-        data.title is string && data.title.size() >= 1 && data.title.size() <= 150 &&
-        data.speakerIds is list && data.speakerIds.size() <= 10 &&
-        data.startTime is timestamp &&
-        data.durationMinutes is number && data.durationMinutes > 0 && data.durationMinutes <= 480 &&
-        data.room in allowedRooms &&
-        data.isTentative is bool;
     }
 
     // Shared by sponsors and community partners: name, logo, website, order, optional blurb.
@@ -384,13 +237,9 @@ service cloud.firestore {
     }
 
     // ===============================================================
-    // volunteers — public write (volunteer form), admin-only read
+    // volunteers — no client writes, admin-only read
     // ===============================================================
     match /volunteers/{volunteerId} {
-      // Anyone may sign up — no auth required for the volunteer form
-      allow create: if isValidVolunteerSubmission(request.resource.data) &&
-                       isRecent(request.resource.data.submittedAt);
-      // Only admins may read, update (add notes/status), or delete
       allow read, update, delete: if isAdmin();
     }
 
@@ -414,32 +263,12 @@ service cloud.firestore {
     }
 
     // ===============================================================
-    // speakers — public read, admin-only write
-    // ===============================================================
-    match /speakers/{speakerId} {
-      allow read: if true;
-      allow create: if isAdmin() && isValidSpeaker(request.resource.data);
-      allow update: if isAdmin() && isValidSpeaker(request.resource.data);
-      allow delete: if isAdmin();
-    }
-
-    // ===============================================================
     // admins — each user may only read their own doc (for isAdmin checks);
     // only existing admins may write
     // ===============================================================
     match /admins/{email} {
       allow read: if isAuthenticated() && request.auth.token.email == email;
       allow create, update, delete: if isAdmin();
-    }
-
-    // ===============================================================
-    // schedule — public read, admin-only write
-    // ===============================================================
-    match /schedule/{itemId} {
-      allow read: if true;
-      allow create: if isAdmin() && isValidScheduleItem(request.resource.data);
-      allow update: if isAdmin() && isValidScheduleItem(request.resource.data);
-      allow delete: if isAdmin();
     }
 
     // ===============================================================

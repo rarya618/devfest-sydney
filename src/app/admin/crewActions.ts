@@ -124,13 +124,10 @@ export async function updateCrewMember(volunteerId: string, fields: CrewEditable
     // profile, and follow them to every event; the rest is this event's roster.
     const { organiserRole, linkedinUrl, photoUrl, ...roster } = validated.values;
     const profileId = String(snapshot.data()?.profileId ?? '');
+    if (!profileId) return { error: 'This crew member has no volunteer profile, so their details can\'t be saved.' };
     const personFields = isOrganiser ? { photoUrl, linkedinUrl } : { photoUrl };
-    if (profileId) {
-      await adminDb.collection('volunteerProfiles').doc(profileId).update(personFields);
-      await volunteerRef.update(isOrganiser ? { ...roster, organiserRole } : roster);
-    } else {
-      await volunteerRef.update(isOrganiser ? { ...roster, organiserRole, ...personFields } : { ...roster, ...personFields });
-    }
+    await adminDb.collection('volunteerProfiles').doc(profileId).update(personFields);
+    await volunteerRef.update(isOrganiser ? { ...roster, organiserRole } : roster);
     revalidateCrewPages();
     return {};
   } catch {
@@ -314,7 +311,7 @@ export async function uploadCrewPhoto(volunteerId: string, formData: FormData): 
     const record = await loadVolunteerRecord(volunteerId);
     if (!record) return { error: 'Volunteer signup not found.' };
     // On the person (stage 4d), so the photo follows them to the next event's crew.
-    const photoOwnerRef = record.profileRef ?? record.ref;
+    const photoOwnerRef = record.profileRef;
 
     const bucket = adminStorage.bucket();
     const objectPath = `crew-photos/${volunteerId}/${randomUUID()}.${extension}`;
@@ -348,7 +345,7 @@ export async function removeCrewPhoto(volunteerId: string): Promise<{ error?: st
     const record = await loadVolunteerRecord(volunteerId);
     if (!record) return { error: 'Volunteer signup not found.' };
 
-    await (record.profileRef ?? record.ref).update({ photoUrl: '' });
+    await record.profileRef.update({ photoUrl: '' });
     await deleteManagedPhoto(record.data.photoUrl as string | undefined);
 
     revalidateCrewPages();

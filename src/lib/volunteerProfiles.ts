@@ -68,37 +68,40 @@ export async function findOrCreateVolunteerProfile(fields: Partial<VolunteerProf
   return created.id;
 }
 
-// The signup with its person's fields laid over it. Signups from before 4d still carry their
-// own copy of those fields, so a missing profile falls back to them rather than to blanks.
+// The signup with its person's fields laid over it. Since the 4d cleanup pass
+// (scripts/cleanup-volunteer-fields.mjs) a signup holds none of them itself, so the profile
+// is the only source; a missing profile reads as blank details.
 export function withProfile(
   signup: FirebaseFirestore.DocumentData,
   profile: FirebaseFirestore.DocumentData | undefined
 ): FirebaseFirestore.DocumentData {
-  if (!profile) return signup;
   const merged: FirebaseFirestore.DocumentData = { ...signup };
   for (const key of VOLUNTEER_PROFILE_KEYS) {
-    if (profile[key] !== undefined) merged[key] = profile[key];
+    if (profile?.[key] !== undefined) merged[key] = profile[key];
   }
   return merged;
 }
 
 export interface VolunteerRecord {
   ref: FirebaseFirestore.DocumentReference;
-  profileRef: FirebaseFirestore.DocumentReference | null;
+  profileRef: FirebaseFirestore.DocumentReference;
   // The signup with the person's current details merged in.
   data: FirebaseFirestore.DocumentData;
 }
 
 // One signup, joined to its profile, for the actions and confirm pages that read a
-// volunteer's name or address. Null when the signup doesn't exist.
+// volunteer's name or address. Null when the signup, or the profile it points at, doesn't
+// exist: without the profile there is no name or address to work with.
 export async function loadVolunteerRecord(volunteerId: string): Promise<VolunteerRecord | null> {
   const ref = adminDb.collection('volunteers').doc(volunteerId);
   const snapshot = await ref.get();
   if (!snapshot.exists) return null;
   const signup = snapshot.data()!;
   const profileId = typeof signup.profileId === 'string' ? signup.profileId : '';
-  const profileRef = profileId ? adminDb.collection('volunteerProfiles').doc(profileId) : null;
-  const profile = profileRef ? (await profileRef.get()).data() : undefined;
+  if (!profileId) return null;
+  const profileRef = adminDb.collection('volunteerProfiles').doc(profileId);
+  const profile = (await profileRef.get()).data();
+  if (!profile) return null;
   return { ref, profileRef, data: withProfile(signup, profile) };
 }
 

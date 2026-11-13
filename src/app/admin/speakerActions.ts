@@ -14,8 +14,8 @@ const TALK_FORMATS: TalkFormat[] = ['talk', 'lightning-talk', 'workshop'];
 const TRACKS: Track[] = ['keynote', 'spotlight', 'developer', 'builder', 'workshop', 'showcase'];
 const EXPERIENCE_LEVELS: ExperienceLevel[] = ['beginner', 'intermediate', 'advanced'];
 
-// Everything on a speaker document except submissionId and promotedAt, which record where
-// the speaker came from and must not be edited.
+// What the edit modal offers on a speaker row: the person (saved to `speakers`) and, from
+// the lead's row only, the talk (saved to `talks`).
 export interface SpeakerEditableFields {
   name: string;
   email: string;
@@ -32,8 +32,7 @@ export interface SpeakerEditableFields {
   photoUrl: string;
 }
 
-// The half of a speaker that is about the person. A co-speaker's document holds only this,
-// since their session is read from the lead they present with.
+// The half of a speaker that is about the person: all a `speakers` document holds.
 export type SpeakerProfileFields = Pick<
   SpeakerEditableFields,
   'name' | 'email' | 'linkedinUrl' | 'githubUrl' | 'websiteUrl' | 'bio' | 'tagline' | 'photoUrl'
