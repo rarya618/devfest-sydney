@@ -13,7 +13,7 @@ import { confirmDeadlineFrom, confirmUrl } from '@/lib/speakerConfirm';
 import { normaliseProfileUrl } from '@/lib/speakers';
 import type { ExperienceLevel, SubmissionStatus, TalkFormat, Track } from '@/lib/types';
 import { fetchCurrentDevfestPublicTicketUrl, requireCurrentDevfestLink } from '@/lib/events';
-import { getAdminEventId } from '@/lib/adminEvent';
+import { getAdminDevfestId } from '@/lib/adminEvent';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -369,9 +369,9 @@ export async function createSubmission(
   const validated = validateSubmissionFields(fields);
   if ('error' in validated) return { error: validated.error };
 
-  // Filed under the event the admin has selected in the sidebar (stage 4b).
-  const eventId = await getAdminEventId();
-  if (!eventId) return { error: 'Create an event in Events before adding a proposal.' };
+  // Filed under the DevFest edition selected in the sidebar (stage 4b).
+  const eventId = await getAdminDevfestId();
+  if (!eventId) return { error: 'Create a DevFest in Events before adding a proposal.' };
 
   // Defaults to now, but an organiser can set the date the proposal actually reached
   // them. Without that, a late entry sorts to the top of the dashboard and lands on the

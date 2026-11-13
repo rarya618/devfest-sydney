@@ -202,14 +202,15 @@ export interface ShowcaseSubmission {
   confirmation: ShowcaseConfirmation;
 }
 
-// An event GDG Sydney runs: a DevFest or a meetup. Stage 4a of the One GDG Sydney Site plan
+// An event GDG Sydney runs: a DevFest, or a general event (a meetup, a workshop, anything
+// else). Stage 4a of the One GDG Sydney Site plan
 // in PM.md: what used to be a dozen env vars per DevFest. Stored in `events/{eventId}`, read
 // and written only through the Admin SDK. Dates are ISO strings here and Timestamps in
 // Firestore.
-export type GdgEventType = 'devfest' | 'meetup';
+export type GdgEventType = 'devfest' | 'general';
 
 // The three things people can apply for. Each event says whether it has the flow at all
-// (`enabled`: a meetup has no showcase), whether it is taking entries (`open`, the old
+// (`enabled`: a general event has no showcase), whether it is taking entries (`open`, the old
 // *_OPEN switch), and when it stops on its own (`closesAt`, the old *_CLOSE_DATE).
 export type EventFlowKey = 'cfs' | 'showcase' | 'volunteers';
 

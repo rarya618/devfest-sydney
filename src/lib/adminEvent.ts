@@ -3,32 +3,35 @@ import { cookies } from 'next/headers';
 import { loadCurrentDevfestId, loadEvents } from '@/lib/events';
 import type { GdgEvent } from '@/lib/types';
 
-// Which event the admin is looking at (stage 4b, PM.md). Kept in a cookie so it survives
-// moving between sections, and defaulting to the current DevFest. The event-shaped sections
-// (Submissions, Showcase, Volunteers, Crew, Speakers, Speaker gifts, Analytics, Feedback)
-// list only its records, and anything an admin creates there (a proposal entered by hand, an
-// organiser) is filed under it.
+// Which DevFest edition the admin's DevFest section shows (stage 4b, PM.md). The DevFest
+// sections (Submissions, Speakers, Volunteers, Crew, Showcase, Speaker gifts, Credits,
+// Feedback, Analytics) list only that edition's records, and anything an admin creates there
+// (a proposal entered by hand, an organiser) is filed under it. Defaults to the current
+// DevFest; the picker in the sidebar's DevFest heading looks at a past year, and is kept in a
+// cookie so it survives moving between sections. General events don't use it.
 
-export const ADMIN_EVENT_COOKIE = 'admin-event';
+export const ADMIN_DEVFEST_COOKIE = 'admin-devfest';
 
-export interface AdminEventContext {
-  events: GdgEvent[];
-  selectedEvent: GdgEvent | null;
+export interface AdminDevfestContext {
+  devfests: GdgEvent[]; // newest first
+  selectedDevfest: GdgEvent | null;
+  currentDevfestId: string | null;
 }
 
-export const getAdminEventContext = cache(async (): Promise<AdminEventContext> => {
+export const getAdminDevfestContext = cache(async (): Promise<AdminDevfestContext> => {
   const [events, currentDevfestId, cookieStore] = await Promise.all([loadEvents(), loadCurrentDevfestId(), cookies()]);
-  const chosenId = cookieStore.get(ADMIN_EVENT_COOKIE)?.value;
-  const selectedEvent =
-    events.find((event) => event.id === chosenId) ??
-    events.find((event) => event.id === currentDevfestId) ??
-    events[0] ??
+  const devfests = events.filter((event) => event.type === 'devfest');
+  const chosenId = cookieStore.get(ADMIN_DEVFEST_COOKIE)?.value;
+  const selectedDevfest =
+    devfests.find((event) => event.id === chosenId) ??
+    devfests.find((event) => event.id === currentDevfestId) ??
+    devfests[0] ??
     null;
-  return { events, selectedEvent };
+  return { devfests, selectedDevfest, currentDevfestId };
 });
 
-// The selected event's id, for a page's fetch or an action's write. '' when there are no
-// events at all, which every fetcher reads as "nothing to show".
-export async function getAdminEventId(): Promise<string> {
-  return (await getAdminEventContext()).selectedEvent?.id ?? '';
+// The selected edition's id, for a DevFest page's fetch or an action's write. '' when no
+// DevFest exists at all, which every fetcher reads as "nothing to show".
+export async function getAdminDevfestId(): Promise<string> {
+  return (await getAdminDevfestContext()).selectedDevfest?.id ?? '';
 }

@@ -2,11 +2,11 @@ import type { EventFlowKey, EventPrivateLinkKey, GdgEventType } from '@/lib/type
 
 // Browser-safe labels for the events model, shared by /admin/events and the server.
 
-export const EVENT_TYPES: GdgEventType[] = ['devfest', 'meetup'];
+export const EVENT_TYPES: GdgEventType[] = ['devfest', 'general'];
 
 export const EVENT_TYPE_LABELS: Record<GdgEventType, string> = {
   devfest: 'DevFest',
-  meetup: 'Meetup',
+  general: 'General event',
 };
 
 export const EVENT_FLOW_KEYS: EventFlowKey[] = ['cfs', 'showcase', 'volunteers'];

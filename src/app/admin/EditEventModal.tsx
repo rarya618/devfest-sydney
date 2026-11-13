@@ -41,7 +41,7 @@ function toFormInput(summary: AdminEventSummary | null): EventFormInput {
   if (!summary) {
     return {
       id: '',
-      type: 'meetup',
+      type: 'general',
       name: '',
       timeZone: DEFAULT_EVENT_TIME_ZONE,
       startAtWallTime: '',

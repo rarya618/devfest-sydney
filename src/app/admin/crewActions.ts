@@ -6,7 +6,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { adminDb, adminStorage } from '@/lib/firebase-admin';
 import { verifyAdminSession } from '@/lib/adminSession';
 import type { VolunteerArea, VolunteerShift } from '@/lib/types';
-import { getAdminEventId } from '@/lib/adminEvent';
+import { getAdminDevfestId } from '@/lib/adminEvent';
 
 const VOLUNTEER_AREAS: VolunteerArea[] = [
   'registration',
@@ -176,9 +176,9 @@ export async function addOrganiser(fields: NewOrganiserFields): Promise<{ error?
     return { error: 'Your session has expired. Please sign in again.' };
   }
 
-  // Filed under the event the admin has selected in the sidebar (stage 4b).
-  const eventId = await getAdminEventId();
-  if (!eventId) return { error: 'Create an event in Events before adding an organiser.' };
+  // Filed under the DevFest edition selected in the sidebar (stage 4b).
+  const eventId = await getAdminDevfestId();
+  if (!eventId) return { error: 'Create a DevFest in Events before adding an organiser.' };
 
   const name = fields.name.trim();
   if (!name || name.length > 100) {

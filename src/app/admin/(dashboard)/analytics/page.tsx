@@ -4,7 +4,7 @@ import { fetchSubmissions } from '@/lib/submissions';
 import { fetchVolunteerSignups } from '@/lib/volunteers';
 import { fetchShowcaseSubmissions } from '@/lib/showcaseSubmissions';
 import AnalyticsView, { isAnalyticsTab } from './AnalyticsView';
-import { getAdminEventId } from '@/lib/adminEvent';
+import { getAdminDevfestId } from '@/lib/adminEvent';
 
 export const metadata = {
   title: 'Analytics',
@@ -17,7 +17,7 @@ interface AnalyticsPageProps {
 }
 
 export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps) {
-  const eventId = await getAdminEventId();
+  const eventId = await getAdminDevfestId();
   const [, { tab }, submissions, volunteers, showcaseEntries] = await Promise.all([
     getVerifiedSession(),
     searchParams,

@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { getInitials } from '@/lib/format';
 import Alert from '@/components/Alert';
 import { MobileBarContext } from './MobileBarContext';
-import { selectAdminEvent } from './eventActions';
+import { selectAdminDevfest } from './eventActions';
 
 interface NavItem {
   href: string;
@@ -17,36 +17,35 @@ interface NavItem {
 interface NavGroup {
   label: string;
   items: NavItem[];
+  hasDevfestPicker?: boolean;
 }
 
-// Grouped by what an admin is doing: working through what people sent in, managing
-// what the public site shows, looking at how it is going, and running the panel itself.
+// DevFest and general events are kept apart (stage 4b, PM.md). The DevFest group shows one
+// edition at a time, picked in its heading; general events, and the tools and settings that
+// belong to all of GDG Sydney, sit below it.
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: 'Review',
+    label: 'DevFest',
+    hasDevfestPicker: true,
     items: [
       { href: '/admin', label: 'Submissions' },
-      { href: '/admin/meetups', label: 'Meetup talks' },
-      { href: '/admin/volunteers', label: 'Volunteers' },
-      { href: '/admin/showcase', label: 'Showcase' },
-      { href: '/admin/credits', label: 'Credits' },
-    ],
-  },
-  {
-    label: 'Content',
-    items: [
       { href: '/admin/speakers', label: 'Speakers' },
-      { href: '/admin/speaker-gifts', label: 'Speaker gifts' },
+      { href: '/admin/volunteers', label: 'Volunteers' },
       { href: '/admin/crew', label: 'Crew' },
+      { href: '/admin/showcase', label: 'Showcase' },
+      { href: '/admin/speaker-gifts', label: 'Speaker gifts' },
+      { href: '/admin/credits', label: 'Credits' },
+      { href: '/admin/feedback', label: 'Feedback' },
+      { href: '/admin/analytics', label: 'Analytics' },
     ],
   },
   {
-    label: 'Insights',
-    items: [
-      { href: '/admin/analytics', label: 'Analytics' },
-      { href: '/admin/feedback', label: 'Feedback' },
-      { href: '/admin/links', label: 'Links' },
-    ],
+    label: 'General events',
+    items: [{ href: '/admin/meetups', label: 'Meetup talks' }],
+  },
+  {
+    label: 'Tools',
+    items: [{ href: '/admin/links', label: 'Links' }],
   },
   {
     label: 'Settings',
@@ -60,59 +59,56 @@ const NAV_GROUPS: NavGroup[] = [
 interface Props {
   adminEmail: string;
   adminName: string;
-  events: EventOption[];
-  selectedEventId: string | null;
+  devfests: DevfestOption[];
+  selectedDevfestId: string | null;
   children: ReactNode;
 }
 
-interface EventOption {
+interface DevfestOption {
   id: string;
   name: string;
+  isCurrent: boolean;
 }
 
-interface EventSwitcherProps {
-  events: EventOption[];
-  selectedEventId: string | null;
+interface DevfestPickerProps {
+  devfests: DevfestOption[];
+  selectedDevfestId: string | null;
   onError: (message: string) => void;
   idSuffix: string;
 }
 
-// Which event the event-shaped sections show (stage 4b, PM.md). A native select: it is
-// keyboard and screen-reader friendly as it is, and the list is short.
-function EventSwitcher({ events, selectedEventId, onError, idSuffix }: EventSwitcherProps) {
+// The DevFest group's heading, doubling as its edition picker: "DEVFEST [2026]". A native
+// select, which is keyboard and screen-reader friendly as it is. With one DevFest there is
+// nothing to pick, so it is plain text.
+function DevfestPicker({ devfests, selectedDevfestId, onError, idSuffix }: DevfestPickerProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  if (events.length === 0) return null;
+  if (devfests.length < 2) return null;
 
   function handleChange(eventId: string) {
     startTransition(async () => {
-      const result = await selectAdminEvent(eventId);
+      const result = await selectAdminDevfest(eventId);
       if (result.error) onError(result.error);
       else router.refresh();
     });
   }
 
-  const selectId = `admin-event-switcher-${idSuffix}`;
   return (
-    <div className="px-4">
-      <label htmlFor={selectId} className="block font-mono text-[11px] uppercase tracking-[0.12em] text-white/50 mb-1.5">
-        Event
-      </label>
-      <select
-        id={selectId}
-        value={selectedEventId ?? ''}
-        onChange={(changeEvent) => handleChange(changeEvent.target.value)}
-        disabled={isPending}
-        aria-label="Choose which event the admin sections show"
-        className="w-full rounded-lg border border-white/35 bg-white/[0.06] px-3 py-2 text-sm font-semibold text-white focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40 disabled:opacity-60"
-      >
-        {events.map((event) => (
-          <option key={event.id} value={event.id} className="bg-[#191a1d]">
-            {event.name}
-          </option>
-        ))}
-      </select>
-    </div>
+    <select
+      id={`admin-devfest-picker-${idSuffix}`}
+      value={selectedDevfestId ?? ''}
+      onChange={(changeEvent) => handleChange(changeEvent.target.value)}
+      disabled={isPending}
+      aria-label="Choose which DevFest the DevFest sections show"
+      className="ml-2 rounded-md border border-white/35 bg-white/[0.06] px-1.5 py-0.5 font-mono text-[11px] text-white normal-case tracking-normal focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40 disabled:opacity-60"
+    >
+      {devfests.map((devfest) => (
+        <option key={devfest.id} value={devfest.id} className="bg-[#191a1d]">
+          {devfest.name}
+          {devfest.isCurrent ? ' (current)' : ''}
+        </option>
+      ))}
+    </select>
   );
 }
 
@@ -124,16 +120,18 @@ interface NavLinksProps {
   pathname: string;
   onNavigate?: () => void;
   rounded: boolean;
+  devfestPicker: ReactNode;
 }
 
-function NavLinks({ pathname, onNavigate, rounded }: NavLinksProps) {
+function NavLinks({ pathname, onNavigate, rounded, devfestPicker }: NavLinksProps) {
   return (
     <nav aria-label="Admin sections" className={rounded ? 'space-y-5' : 'space-y-2'}>
       {NAV_GROUPS.map((group) => (
         <div key={group.label}>
-          <p className={`font-mono text-[11px] uppercase tracking-[0.12em] text-white/50 px-4 ${rounded ? 'mb-1.5' : 'pt-1 pb-1'}`}>
-            {group.label}
-          </p>
+          <div className={`flex items-center px-4 ${rounded ? 'mb-1.5' : 'pt-1 pb-1'}`}>
+            <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-white/50">{group.label}</p>
+            {group.hasDevfestPicker && devfestPicker}
+          </div>
           <ul className={rounded ? 'space-y-0.5' : undefined}>
             {group.items.map((item) => {
               const active = isActive(item.href, pathname);
@@ -196,7 +194,7 @@ function AccountRow({ adminName, adminEmail, signingOut, onSignOut }: AccountRow
   );
 }
 
-export default function AdminShell({ adminEmail, adminName, events, selectedEventId, children }: Props) {
+export default function AdminShell({ adminEmail, adminName, devfests, selectedDevfestId, children }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
@@ -292,12 +290,16 @@ export default function AdminShell({ adminEmail, adminName, events, selectedEven
       {mobileMenuOpen && (
         <>
           <div className="fixed inset-0 z-40 md:hidden" onClick={() => setMobileMenuOpen(false)} aria-hidden="true" />
-          <div className="md:hidden fixed top-[57px] right-3 mt-2 z-50 w-72 max-w-[calc(100vw-1.5rem)] bg-[#191a1d] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden">
-            <div className="pt-3 pb-1">
-              <EventSwitcher events={events} selectedEventId={selectedEventId} onError={setAlertMessage} idSuffix="mobile" />
-            </div>
+          <div className="md:hidden fixed top-[57px] right-3 mt-2 z-50 w-72 max-w-[calc(100vw-1.5rem)] max-h-[calc(100dvh-5rem)] overflow-y-auto bg-[#191a1d] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden">
             <div className="py-1.5">
-              <NavLinks pathname={pathname} onNavigate={() => setMobileMenuOpen(false)} rounded={false} />
+              <NavLinks
+                pathname={pathname}
+                onNavigate={() => setMobileMenuOpen(false)}
+                rounded={false}
+                devfestPicker={
+                  <DevfestPicker devfests={devfests} selectedDevfestId={selectedDevfestId} onError={setAlertMessage} idSuffix="mobile" />
+                }
+              />
             </div>
             <div className="border-t border-white/10 px-1 py-1.5 bg-white/[0.04]">
               <AccountRow adminName={adminName} adminEmail={adminEmail} signingOut={signingOut} onSignOut={handleSignOut} />
@@ -309,12 +311,15 @@ export default function AdminShell({ adminEmail, adminName, events, selectedEven
       {/* Sidebar (desktop only) */}
       <aside className="hidden md:sticky md:flex top-0 left-0 z-50 w-64 shrink-0 h-screen flex-col border-r border-white/10 px-3 pt-7 pb-4 bg-[#010103]">
         <div className="pl-3 mb-6">{wordmark}</div>
-        <div className="-mx-1 mb-6">
-          <EventSwitcher events={events} selectedEventId={selectedEventId} onError={setAlertMessage} idSuffix="sidebar" />
-        </div>
 
-        <div className="flex-1">
-          <NavLinks pathname={pathname} rounded />
+        <div className="flex-1 min-h-0 overflow-y-auto -mx-3 px-3">
+          <NavLinks
+            pathname={pathname}
+            rounded
+            devfestPicker={
+              <DevfestPicker devfests={devfests} selectedDevfestId={selectedDevfestId} onError={setAlertMessage} idSuffix="sidebar" />
+            }
+          />
         </div>
 
         <div className="border-t border-white/10 pt-3 -mx-3 px-3">

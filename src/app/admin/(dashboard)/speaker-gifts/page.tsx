@@ -3,7 +3,7 @@ import { getVerifiedSession } from '@/lib/adminSession';
 import { fetchSpeakers } from '@/lib/speakers';
 import { fetchSpeakerGifts } from '@/lib/speakerThanks';
 import SpeakerGiftsDashboard from '../../SpeakerGiftsDashboard';
-import { getAdminEventId } from '@/lib/adminEvent';
+import { getAdminDevfestId } from '@/lib/adminEvent';
 
 export const metadata = {
   title: 'Speaker gifts',
@@ -12,7 +12,7 @@ export const metadata = {
 };
 
 export default async function SpeakerGiftsAdminPage() {
-  const eventId = await getAdminEventId();
+  const eventId = await getAdminDevfestId();
   const [, gifts, speakers] = await Promise.all([getVerifiedSession(), fetchSpeakerGifts(), fetchSpeakers(eventId)]);
 
   // Who has been thanked but hasn't answered yet, so an organiser can chase them.

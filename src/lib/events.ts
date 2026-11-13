@@ -12,7 +12,8 @@ import type {
   GdgEventType,
 } from '@/lib/types';
 
-// The events model, stage 4a of the One GDG Sydney Site plan in PM.md. Everything a DevFest
+// The events model, stage 4a of the One GDG Sydney Site plan in PM.md. Two kinds of event:
+// DevFest, and general events (meetups, workshops and the rest). Everything a DevFest
 // used to read from env vars (whether each form is open and until when, when tickets go on
 // sale, the ticket links) is read from Firestore instead, per request, so a deadline still
 // passes with no deploy, and the next event is a document rather than a code change.
@@ -63,7 +64,7 @@ function toVenue(value: unknown): EventVenue | null {
 export function toGdgEvent(id: string, eventData: FirebaseFirestore.DocumentData): GdgEvent {
   return {
     id,
-    type: EVENT_TYPES.includes(eventData.type) ? (eventData.type as GdgEventType) : 'meetup',
+    type: EVENT_TYPES.includes(eventData.type) ? (eventData.type as GdgEventType) : 'general',
     name: stringOrEmpty(eventData.name),
     // Both are required on write; the fallback only stops a hand-edited document crashing a page.
     startAt: isoOrNull(eventData.startAt) ?? new Date(0).toISOString(),

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { getVerifiedSession } from '@/lib/adminSession';
-import { getAdminEventContext } from '@/lib/adminEvent';
+import { getAdminDevfestContext } from '@/lib/adminEvent';
 import AdminShell from '../AdminShell';
 
 // The shell (sidebar, mobile bar, account menu) renders once here rather than inside
@@ -9,14 +9,21 @@ import AdminShell from '../AdminShell';
 // stays shell-free. Each page still verifies the session itself; `verifyAdminSession`
 // is request-cached so the two checks cost one lookup.
 export default async function AdminDashboardLayout({ children }: { children: ReactNode }) {
-  const [admin, { events, selectedEvent }] = await Promise.all([getVerifiedSession(), getAdminEventContext()]);
+  const [admin, { devfests, selectedDevfest, currentDevfestId }] = await Promise.all([
+    getVerifiedSession(),
+    getAdminDevfestContext(),
+  ]);
 
   return (
     <AdminShell
       adminEmail={admin.email}
       adminName={admin.name}
-      events={events.map((event) => ({ id: event.id, name: event.name }))}
-      selectedEventId={selectedEvent?.id ?? null}
+      devfests={devfests.map((devfest) => ({
+        id: devfest.id,
+        name: devfest.name,
+        isCurrent: devfest.id === currentDevfestId,
+      }))}
+      selectedDevfestId={selectedDevfest?.id ?? null}
     >
       {children}
     </AdminShell>

@@ -2,7 +2,7 @@ import { SITE_OG_IMAGE } from '@/lib/metadata';
 import { getVerifiedSession } from '@/lib/adminSession';
 import { fetchVolunteerSignups } from '@/lib/volunteers';
 import VolunteersDashboard from '../../VolunteersDashboard';
-import { getAdminEventId } from '@/lib/adminEvent';
+import { getAdminDevfestId } from '@/lib/adminEvent';
 
 export const metadata = {
   title: 'Volunteers',
@@ -11,7 +11,7 @@ export const metadata = {
 };
 
 export default async function VolunteersPage() {
-  const eventId = await getAdminEventId();
+  const eventId = await getAdminDevfestId();
   const [, volunteers] = await Promise.all([getVerifiedSession(), fetchVolunteerSignups(eventId)]);
 
   return <VolunteersDashboard volunteers={volunteers} />;

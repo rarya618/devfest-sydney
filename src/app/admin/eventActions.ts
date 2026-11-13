@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 import { verifyAdminSession } from '@/lib/adminSession';
-import { ADMIN_EVENT_COOKIE } from '@/lib/adminEvent';
+import { ADMIN_DEVFEST_COOKIE } from '@/lib/adminEvent';
 import {
   EVENT_FLOW_KEYS,
   EVENT_FLOW_LABELS,
@@ -222,7 +222,7 @@ async function saveEvent(input: EventFormInput, mode: 'create' | 'update'): Prom
     return { error: 'Could not save this event. Please try again.' };
   }
 
-  // The layout too: the event switcher in the sidebar lists every event.
+  // The layout too: the sidebar's DevFest picker lists every DevFest.
   revalidatePath('/admin', 'layout');
   return {};
 }
@@ -259,14 +259,14 @@ export async function setCurrentDevfest(eventId: string): Promise<{ error?: stri
     return { error: 'Could not make this the current DevFest. Please try again.' };
   }
 
-  // The layout too: the event switcher in the sidebar lists every event.
+  // The layout too: the sidebar's DevFest picker lists every DevFest.
   revalidatePath('/admin', 'layout');
   return {};
 }
 
-// The event switcher in the admin sidebar. Per browser, not per admin: two organisers can
-// look at different events at once.
-export async function selectAdminEvent(eventId: string): Promise<{ error?: string }> {
+// The edition picker in the sidebar's DevFest heading. Per browser, not per admin: two
+// organisers can look at different years at once.
+export async function selectAdminDevfest(eventId: string): Promise<{ error?: string }> {
   try {
     await verifyAdminSession();
   } catch {
@@ -275,13 +275,14 @@ export async function selectAdminEvent(eventId: string): Promise<{ error?: strin
 
   try {
     const snapshot = await adminDb.collection('events').doc(eventId).get();
-    if (!snapshot.exists) return { error: 'This event no longer exists. Refresh the page.' };
+    if (!snapshot.exists) return { error: 'This DevFest no longer exists. Refresh the page.' };
+    if (snapshot.data()?.type !== 'devfest') return { error: 'Only a DevFest can be picked here.' };
   } catch {
-    return { error: 'Could not switch events. Please try again.' };
+    return { error: 'Could not switch to that DevFest. Please try again.' };
   }
 
   const cookieStore = await cookies();
-  cookieStore.set(ADMIN_EVENT_COOKIE, eventId, {
+  cookieStore.set(ADMIN_DEVFEST_COOKIE, eventId, {
     path: '/admin',
     httpOnly: true,
     sameSite: 'lax',
