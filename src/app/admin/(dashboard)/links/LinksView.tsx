@@ -1,45 +1,46 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import Alert from '@/components/Alert';
 import { useMobileBarHidden } from '../../MobileBarContext';
 
-const FIELDS: { key: 'source' | 'medium' | 'campaign' | 'ref'; label: string; placeholder: string }[] = [
-  { key: 'source', label: 'Source', placeholder: 'e.g. twitter' },
-  { key: 'medium', label: 'Medium', placeholder: 'e.g. social' },
-  { key: 'campaign', label: 'Campaign', placeholder: 'e.g. launch' },
-  { key: 'ref', label: 'Ref', placeholder: 'e.g. newsletter' },
+// Every public page lives on gdgsydney.com since the content pages left this app (stage 3,
+// PM.md). Its Google Analytics property records the utm_* params on arrival, so that is where
+// these links are counted; nothing on that site reads `ref`, so it isn't offered.
+const GDG_SITE = 'https://gdgsydney.com';
+
+type FieldKey = 'source' | 'medium' | 'campaign' | 'content';
+
+const FIELDS: { key: FieldKey; param: string; label: string; placeholder: string }[] = [
+  { key: 'source', param: 'utm_source', label: 'Source', placeholder: 'e.g. linkedin' },
+  { key: 'medium', param: 'utm_medium', label: 'Medium', placeholder: 'e.g. social' },
+  { key: 'campaign', param: 'utm_campaign', label: 'Campaign', placeholder: 'e.g. devfest-2027' },
+  { key: 'content', param: 'utm_content', label: 'Content', placeholder: 'e.g. speaker-post' },
 ];
 
 const DESTINATIONS: { path: string; label: string }[] = [
-  { path: '/', label: 'Homepage' },
-  { path: '/call-for-speakers', label: 'Call for Speakers' },
-  { path: '/builder-showcase', label: 'Builder Showcase' },
-  { path: '/volunteer', label: 'Volunteer' },
+  { path: '/', label: 'GDG Sydney homepage' },
+  { path: '/devfest', label: 'DevFest' },
+  { path: '/speak', label: 'Speak at a meetup' },
+  { path: '/guides', label: 'Starter guides' },
 ];
 
 export default function LinksView() {
-  const [origin, setOrigin] = useState('');
-  const [values, setValues] = useState({ source: '', medium: '', campaign: '', ref: '' });
+  const [values, setValues] = useState<Record<FieldKey, string>>({ source: '', medium: '', campaign: '', content: '' });
   const [copiedPath, setCopiedPath] = useState<string | null>(null);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const mobileBarHidden = useMobileBarHidden();
 
-  useEffect(() => {
-    setOrigin(window.location.origin);
-  }, []);
-
   const query = useMemo(() => {
     const params = new URLSearchParams();
-    if (values.source.trim()) params.set('utm_source', values.source.trim());
-    if (values.medium.trim()) params.set('utm_medium', values.medium.trim());
-    if (values.campaign.trim()) params.set('utm_campaign', values.campaign.trim());
-    if (values.ref.trim()) params.set('ref', values.ref.trim());
+    for (const { key, param } of FIELDS) {
+      if (values[key].trim()) params.set(param, values[key].trim());
+    }
     return params.toString();
   }, [values]);
 
   function urlFor(path: string): string {
-    return `${origin}${path}${query ? `?${query}` : ''}`;
+    return `${GDG_SITE}${path}${query ? `?${query}` : ''}`;
   }
 
   async function handleCopy(path: string) {
@@ -62,10 +63,8 @@ export default function LinksView() {
         <div className="bg-surface border border-white/10 rounded-2xl px-5 py-5">
           <h2 className="text-sm font-bold text-white/70 mb-1">Generate a tracking link</h2>
           <p className="text-xs text-white/50 mb-4">
-            Add a source, medium, campaign, or ref to a link below. Call for Speakers submissions show up under
-            &quot;Traffic sources&quot; on the Analytics page; Builder Showcase entries and volunteer signups show
-            their link tracking on each card. Tracking params carry over automatically if someone lands on the
-            homepage and clicks through to any of the forms.
+            Add a source, medium, campaign or content tag to any link below. Visits are counted in Google
+            Analytics for gdgsydney.com, under traffic acquisition, not on this app&apos;s Analytics page.
           </p>
 
           <div className="grid sm:grid-cols-4 gap-3 mb-4">
