@@ -1,11 +1,10 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { randomUUID } from 'node:crypto';
 import { FieldValue } from 'firebase-admin/firestore';
-import { adminDb, adminStorage } from '@/lib/firebase-admin';
+import { adminDb } from '@/lib/firebase-admin';
 import { normaliseProfileUrl, toSpeakerSlug } from '@/lib/speakers';
-import { deleteManagedPhoto, findOrCreatePerson, removePeopleWithoutTalks } from '@/lib/people';
+import { clearSpeakerPhoto, findOrCreatePerson, removePeopleWithoutTalks, replaceSpeakerPhoto } from '@/lib/people';
 import { verifyAdminSession } from '@/lib/adminSession';
 import type { ExperienceLevel, TalkFormat, Track } from '@/lib/types';
 
@@ -262,17 +261,8 @@ export async function removeSpeaker(talkId: string, speakerId: string): Promise<
   }
 }
 
-const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
-const PHOTO_EXTENSIONS: Record<string, string> = {
-  'image/jpeg': 'jpg',
-  'image/png': 'png',
-  'image/webp': 'webp',
-};
-
-// Stores the photo under speaker-photos/<speakerId>/ with a fresh name each time, so a
-// replacement never collides with a cached copy of the old one. The public URL is on
-// storage.googleapis.com, the same host the site's other assets use and one that
-// next.config.ts already allows for next/image.
+// The photo itself is stored by replaceSpeakerPhoto (src/lib/people.ts), shared with the
+// speaker portal.
 export async function uploadSpeakerPhoto(speakerId: string, formData: FormData): Promise<{ error?: string; photoUrl?: string }> {
   try {
     await verifyAdminSession();
@@ -280,40 +270,11 @@ export async function uploadSpeakerPhoto(speakerId: string, formData: FormData):
     return { error: 'Your session has expired. Please sign in again.' };
   }
 
-  const photo = formData.get('photo');
-  if (!(photo instanceof File) || photo.size === 0) {
-    return { error: 'Please choose a photo to upload.' };
-  }
-  const extension = PHOTO_EXTENSIONS[photo.type];
-  if (!extension) {
-    return { error: 'Photos must be a JPEG, PNG, or WebP image.' };
-  }
-  if (photo.size > PHOTO_MAX_BYTES) {
-    return { error: 'That photo is too large. Please keep it under 5 MB.' };
-  }
-
   try {
-    const speakerRef = adminDb.collection('speakers').doc(speakerId);
-    const snapshot = await speakerRef.get();
-    if (!snapshot.exists) return { error: 'Speaker not found.' };
-
-    const bucket = adminStorage.bucket();
-    const objectPath = `speaker-photos/${speakerId}/${randomUUID()}.${extension}`;
-    const file = bucket.file(objectPath);
-    await file.save(Buffer.from(await photo.arrayBuffer()), {
-      contentType: photo.type,
-      metadata: { cacheControl: 'public, max-age=31536000, immutable' },
-    });
-    await file.makePublic();
-
-    const photoUrl = `https://storage.googleapis.com/${bucket.name}/${objectPath}`;
-    await speakerRef.update({ photoUrl });
-
-    const previousPhotoUrl = snapshot.data()?.photoUrl as string | undefined;
-    await deleteManagedPhoto(previousPhotoUrl);
-
+    const result = await replaceSpeakerPhoto(speakerId, formData.get('photo'));
+    if ('error' in result) return result;
     revalidateLineup();
-    return { photoUrl };
+    return { photoUrl: result.photoUrl };
   } catch {
     return { error: 'Could not upload this photo. Please try again.' };
   }
@@ -327,13 +288,8 @@ export async function removeSpeakerPhoto(speakerId: string): Promise<{ error?: s
   }
 
   try {
-    const speakerRef = adminDb.collection('speakers').doc(speakerId);
-    const snapshot = await speakerRef.get();
-    if (!snapshot.exists) return { error: 'Speaker not found.' };
-
-    await speakerRef.update({ photoUrl: '' });
-    await deleteManagedPhoto(snapshot.data()?.photoUrl as string | undefined);
-
+    const failure = await clearSpeakerPhoto(speakerId);
+    if (failure) return failure;
     revalidateLineup();
     return {};
   } catch {

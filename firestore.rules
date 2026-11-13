@@ -72,6 +72,12 @@ rules_version='2';
 //   - answer: string (required, 1–2000 chars)
 //   - order: number (optional, non-negative integer)
 //
+// Collections: portalSignInLinks, portalSignInRequests, portalSessions
+// The speaker portal's sign-in (src/lib/portalAuth.ts). Admin SDK only, with no match block,
+// so every client read and write is denied. Document ids are SHA-256 hashes of the emailed
+// link token, the email address and the session cookie respectively, and each document has
+// an expiresAt for a TTL policy.
+//
 // Collections: volunteers, volunteerProfiles
 // Admin SDK only (no match block for volunteerProfiles; volunteers is admin-only). Signups
 // arrive through /api/submit-volunteer, /volunteer/join and Add organiser on the server, so

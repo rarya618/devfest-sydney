@@ -24,6 +24,7 @@ This file describes the app as it is now and what is left to do. The history of 
 - `/builder-showcase/confirm` : an accepted showcase entrant confirms; then shows the showcase ticket link
 - `/feedback` : DevFest 2026 survey (pinned to `devfest-2026` by `FEEDBACK_EVENT_ID`)
 - `/credits` : DevFest 2026 workshop credit requests (Shang Yi Lim's workshop only, `CREDIT_WORKSHOP_SLOT_IDS`)
+- `/portal` : the speaker portal (stage 6, below). `/portal/sign-in` and `/portal/sign-in/verify` are its sign-in; `/portal` lists the address's profiles, talks and proposals; `/portal/profile/<speakerId>` edits a profile; `/portal/propose` files a meetup proposal, or a DevFest one while the current DevFest's CfS is open
 
 Every confirm-style page acts behind a button, never on page load, so mail scanners can't answer on someone's behalf. Each sends hello@gdgsydney.com a notice with `replyTo` set to the person, once, on the transition only.
 
@@ -62,6 +63,7 @@ Every collection is read and written through the Admin SDK; no client code uses 
 - **`showcase`:** Builder Showcase entries (no client writes at all)
 - **`schedule`:** slots with `eventId`, `kind` (session / break / plenary), `title`, `talkIds`, `startTime`, `durationMinutes`, `room`, `isTentative`. Loaded by `scripts/seed-schedule.mjs` (`EVENT_ID`, `--dry-run`); 2026 slot ids have no event prefix, later events' do
 - **`sponsors`**, **`partners`** (community partners, empty), **`admins`**
+- **`portalSignInLinks`, `portalSignInRequests`, `portalSessions`:** the speaker portal's sign-in (`src/lib/portalAuth.ts`). Ids are SHA-256 hashes (of the link token, the email, the cookie), so the collections hold nothing that signs anyone in. Each has `expiresAt`; used links and signed-out sessions are deleted, expired ones linger until a TTL policy is set (see Next tasks)
 - **Pinned to DevFest 2026, due for deletion** (see Next tasks): `speakerGifts`, `creditRequests`, `jobSeekers`, `jobListings`
 - `feedback`: survey answers, `eventId` on each
 
@@ -174,7 +176,7 @@ Event settings (open/closed, deadlines, ticket links) are not env vars: they liv
 | 4f | Meetup talks accepted into general events | Done. Not exercised end to end: no general event exists yet |
 | 4g | Starter guides into Firestore | **Not started** |
 | 5 | Meetups through the pipeline | Intake, review, acceptance and confirmation done (via 4f). Rejection emails, tickets, invites and thank-yous for meetups not done |
-| 6 | Speaker portal | **Not started**, needs nothing more from stage 4 |
+| 6 | Speaker portal | **Built 2026-11-14, not yet exercised in production** (see below) |
 
 ### Remaining stage 4 work
 - **4c and 4d cleanup passes (written 2026-11-13):** `scripts/cleanup-speaker-fields.mjs` removes the talk fields, `submissionId`, `promotedAt`, `eventId`, `coSpeakerOf` and the per-speaker sends from all 23 `speakers` documents, and `speakerIds` from all 28 slots. `scripts/cleanup-volunteer-fields.mjs` removes the person fields from all 52 signups; it refuses if a signup has no profile or holds a value its profile lacks (placeholders like "N/A" don't count). Both dry runs pass against production. The code no longer falls back to a signup's own copy: `loadVolunteerRecord` returns null without a profile, and the crew editor writes only to the profile. `firestore.rules` drops the `speakers` and `schedule` blocks (until now `speakers`, emails included, was **publicly readable**) and the public create on `volunteers`. Old code works with the cleaned data and new code with the old data, so the scripts, the push and the rules deploy (`firebase deploy --only firestore:rules`) can happen in any order.
@@ -183,7 +185,13 @@ Event settings (open/closed, deadlines, ticket links) are not env vars: they liv
 - **4g:** `starterGuides` collection (today `gdg-sydney/src/data/starterGuides.ts`, 33 guides, logos already in Storage under `guide-logos/`), an editor under the admin, `/api/public/starter-guides`, and the stage 1 rebuild trigger (a `repository_dispatch` on `gdg-sydney`) firing on save. Build the trigger once here and reuse it for speakers, schedule and sponsors.
 
 ### Stage 6: speaker portal
-Speakers sign in to keep one profile, see past and upcoming talks, and propose to DevFest or a meetup. Its own area (`/speaker` or `/portal`), not inside `/admin`, so a missed role check can't expose other people's data. Magic links or Firebase email-link sign-in, not Google. Point Auth at a custom domain (e.g. `auth.gdgsydney.com`) first, since Google sign-in currently names `devfest-sydney-2026.firebaseapp.com`. If bios and photos by email become a pain sooner, a signed-link "edit your profile" page like `/speaker/thanks` covers it and folds in later.
+At `/portal`, its own area outside `/admin`. Decided 2026-11-14:
+- **Sign-in is our own single-use magic link**, not Firebase Auth and not Google: a 30-minute link sent through Resend, used behind a button on `/portal/sign-in/verify` (never on page load, so mail scanners can't sign in or burn it). The session is a random token in an httpOnly `portal_session` cookie scoped to `/portal`, 30 days, revocable by deleting its `portalSessions` document. It never touches the admin's `__session`. This drops the custom Auth domain the plan used to need first. Rate limit: one link a minute and five an hour per address.
+- **A session is an email address, not a person.** The portal shows every `speakers` person with that `emailNormalised` (several, for a shared address) and every proposal in `submissions` / `meetupProposals` with that `email`. Any address can sign in, so a first-time speaker can propose; the sign-in form says the same thing whether or not we know the address.
+- **Profile edits go live at once** (tagline, bio, links, photo; not name or email, which stay with organisers since a rename moves the public slug), and hello@ gets a notice of each change with `replyTo` set to the speaker.
+- **Proposing** goes through the same validation, storage and confirmation email as the form endpoints (`src/lib/proposalFiling.ts`, shared with `/api/submit-proposal` and `/api/submit-meetup-proposal`). The email is always the session's. DevFest ones carry `tracking.ref = speaker-portal`, meetup ones `source = speaker-portal`.
+- **Status shows only what the speaker has been told:** a decision reads "Under review" until its acceptance or rejection email has gone. An accepted, unconfirmed proposal links to its `/speaker/confirm`.
+- Not built: talk editing, withdrawing a proposal, co-speakers seeing a proposal filed under the lead's address, a link to the portal from any email or from gdgsydney.com.
 
 ### Open decisions
 - **States that flip by date** (tickets on sale, form deadlines) can't be frozen into a static page: a browser island asking `/api/public/status`, or a scheduled rebuild at each deadline. Pick per state, when the next live edition starts.
@@ -191,7 +199,9 @@ Speakers sign in to keep one profile, see past and upcoming talks, and propose t
 - **Who can create events:** any admin, or only some. There are no roles today.
 - **Who maintains it:** two frameworks to keep up. Write it down if other organisers join, and explain the project ID in the README.
 
-## Next tasks (as of 2026-11-13)
+## Next tasks (as of 2026-11-14)
+
+0. **Speaker portal, before telling anyone about it:** deploy, then sign in with an organiser address in production and check the `portal_session` cookie survives App Hosting's CDN (the `admin-devfest` cookie does, so it should). Edit a profile and propose to a meetup end to end. Fix the Yuting Mao record first (see Remaining stage 4 work), or signing in as Qasim Tariq's address shows Yuting's profile too. Optionally add TTL policies on `expiresAt` for the three portal collections (`gcloud firestore fields ttls update expiresAt --collection-group=portalSessions --enable-ttl --project devfest-sydney-2026`, and the same for `portalSignInLinks` and `portalSignInRequests`). Then link to it from gdgsydney.com/speak and from the acceptance and thank-you emails.
 
 1. **Stage 0, the 2026 clean-up.** Each item waits on something outside the app:
    - **Job board data** (`jobSeekers` 34, `jobListings` 6, still in Firestore): share the two CSVs in `~/Desktop/devfest-2026/` with employers, then delete both collections and the Desktop copies. The open-to-work CSV deliberately has no emails and only the 29 approved profiles, which is what the consent tick covered.

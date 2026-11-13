@@ -33,6 +33,13 @@ This may include your name, email address, phone number, talk or session details
     ],
   },
   {
+    slug: 'speaker-portal',
+    title: 'Speaker Portal',
+    content: `Speakers can sign in to our speaker portal with a link we email them. To send it, we keep the address you sign in with for as long as the link is valid (30 minutes), and a one-way fingerprint of it for an hour so we can stop the form being used to flood someone's inbox. While you are signed in, we keep a record of your session for up to 30 days, or until you sign out.
+
+In the portal you can see the talks and proposals filed under your email address and edit your speaker profile. Changes to your bio, tagline, links and photo are published straight away wherever we show our speakers, and our organisers are told about each change.`,
+  },
+  {
     slug: 'job-board',
     title: 'Job Board',
     content: `If you post a role or a profile to the job board, an organiser reviews it before it appears. Your email address is never shown publicly: it is only used to contact you about your post.
@@ -67,7 +74,7 @@ Profiles from people looking for work are shown only with your consent, are kept
   {
     slug: 'cookies-and-tracking',
     title: 'Cookies & Tracking',
-    content: `We don't use advertising cookies or third-party trackers. When you arrive via a shared link (for example, one with a utm_source parameter), we store that campaign information in your browser's local storage for up to 30 days so we can understand which channels bring people to the site. This information is anonymous and is only ever attached to a form if you choose to submit one.`,
+    content: `We don't use advertising cookies or third-party trackers. The only cookies we set are the ones that keep you signed in to the speaker portal or our admin. When you arrive via a shared link (for example, one with a utm_source parameter), we store that campaign information in your browser's local storage for up to 30 days so we can understand which channels bring people to the site. This information is anonymous and is only ever attached to a form if you choose to submit one.`,
   },
   {
     slug: 'data-retention',
@@ -89,7 +96,7 @@ export default function PrivacyPolicy() {
       <section className="relative pt-36 pb-10 px-6 overflow-hidden">
         <div className="relative max-w-4xl mx-auto text-center">
           <p className="mb-4 text-base font-bold text-white/80 animate-fade-in">
-            Last updated August 2026
+            Last updated November 2026
           </p>
 
           <h1 className="text-[clamp(2.5rem,10vw,4rem)] md:text-[clamp(2.25rem,5.5vw,4rem)] font-bold leading-[0.95] tracking-tight text-white mb-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>

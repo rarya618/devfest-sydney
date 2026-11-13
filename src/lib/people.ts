@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { FieldValue, type Timestamp } from 'firebase-admin/firestore';
 import { adminDb, adminStorage } from '@/lib/firebase-admin';
 import { normaliseProfileUrl } from '@/lib/speakers';
@@ -91,6 +92,52 @@ export async function deleteManagedPhoto(photoUrl: string | undefined): Promise<
   } catch {
     // Orphaned object; nothing the admin can act on.
   }
+}
+
+export const SPEAKER_PHOTO_MAX_BYTES = 5 * 1024 * 1024;
+const SPEAKER_PHOTO_EXTENSIONS: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+};
+
+// Stores a person's photo under speaker-photos/<speakerId>/ with a fresh name each time, so a
+// replacement never collides with a cached copy of the old one, then deletes the old one. The
+// public URL is on storage.googleapis.com, which next.config.ts allows for next/image. Shared
+// by the admin and the speaker portal; the caller checks who may change this person. Errors
+// come back as plain sentences for the person who chose the file.
+export async function replaceSpeakerPhoto(speakerId: string, photo: unknown): Promise<{ error: string } | { photoUrl: string }> {
+  if (!(photo instanceof File) || photo.size === 0) return { error: 'Please choose a photo to upload.' };
+  const extension = SPEAKER_PHOTO_EXTENSIONS[photo.type];
+  if (!extension) return { error: 'Photos must be a JPEG, PNG, or WebP image.' };
+  if (photo.size > SPEAKER_PHOTO_MAX_BYTES) return { error: 'That photo is too large. Please keep it under 5 MB.' };
+
+  const speakerRef = adminDb.collection('speakers').doc(speakerId);
+  const snapshot = await speakerRef.get();
+  if (!snapshot.exists) return { error: 'Speaker not found.' };
+
+  const bucket = adminStorage.bucket();
+  const objectPath = `speaker-photos/${speakerId}/${randomUUID()}.${extension}`;
+  const file = bucket.file(objectPath);
+  await file.save(Buffer.from(await photo.arrayBuffer()), {
+    contentType: photo.type,
+    metadata: { cacheControl: 'public, max-age=31536000, immutable' },
+  });
+  await file.makePublic();
+
+  const photoUrl = `https://storage.googleapis.com/${bucket.name}/${objectPath}`;
+  await speakerRef.update({ photoUrl });
+  await deleteManagedPhoto(snapshot.data()?.photoUrl as string | undefined);
+  return { photoUrl };
+}
+
+export async function clearSpeakerPhoto(speakerId: string): Promise<{ error: string } | null> {
+  const speakerRef = adminDb.collection('speakers').doc(speakerId);
+  const snapshot = await speakerRef.get();
+  if (!snapshot.exists) return { error: 'Speaker not found.' };
+  await speakerRef.update({ photoUrl: '' });
+  await deleteManagedPhoto(snapshot.data()?.photoUrl as string | undefined);
+  return null;
 }
 
 // One row of /admin/people: the person and every talk they have given or are giving.

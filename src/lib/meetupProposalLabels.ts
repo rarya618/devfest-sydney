@@ -4,6 +4,20 @@ import type { MeetupFormat, MeetupProposalStatus } from '@/lib/types';
 
 export const MEETUP_FORMATS: MeetupFormat[] = ['standard', 'workshop'];
 
+// Field limits, checked by the server and shown as maxLength in the speaker portal's form:
+// generous for real proposals, small enough to stop a pasted novel.
+export const MEETUP_PROPOSAL_LIMITS = {
+  name: 120,
+  email: 254,
+  profileUrl: 300,
+  talkTitle: 200,
+  abstract: 2000,
+  audience: 1000,
+  bio: 2000,
+  speakingExperience: 1000,
+  notes: 1000,
+} as const;
+
 // The wording the /speak form uses, quoted back in the confirmation email.
 export const MEETUP_FORMAT_LABELS: Record<MeetupFormat, string> = {
   standard: 'Standard talk (20 to 30 min)',
