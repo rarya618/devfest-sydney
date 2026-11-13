@@ -135,19 +135,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Soft, brand-coloured atmosphere for the hero — four large, low-opacity
-   blooms in the core Google colours. Purely decorative; keeps the hero from
-   reading as flat while staying well clear of any legible content. */
-.hero-atmosphere {
-  background-image:
-    radial-gradient(circle at 10% 10%, color-mix(in srgb, var(--google-blue) 7%, transparent) 0%, transparent 28%),
-    radial-gradient(circle at 92% 8%, color-mix(in srgb, var(--google-red) 5%, transparent) 0%, transparent 26%),
-    radial-gradient(circle at 94% 92%, color-mix(in srgb, var(--google-yellow) 6%, transparent) 0%, transparent 30%),
-    radial-gradient(circle at 6% 94%, color-mix(in srgb, var(--google-green) 5%, transparent) 0%, transparent 28%);
-  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-}
-
 @keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
