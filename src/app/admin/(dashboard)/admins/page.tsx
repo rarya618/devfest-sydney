@@ -7,8 +7,8 @@ import type { Timestamp } from 'firebase-admin/firestore';
 
 export const metadata = {
   title: 'Admins',
-  openGraph: { title: 'Admins — DevFest Sydney 2026', images: [SITE_OG_IMAGE] },
-  twitter: { card: 'summary_large_image', title: 'Admins — DevFest Sydney 2026', images: [SITE_OG_IMAGE] },
+  openGraph: { title: 'Admins — GDG Sydney', images: [SITE_OG_IMAGE] },
+  twitter: { card: 'summary_large_image', title: 'Admins — GDG Sydney', images: [SITE_OG_IMAGE] },
 };
 
 async function fetchAdmins(): Promise<AdminUser[]> {

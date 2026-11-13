@@ -1,4 +1,5 @@
 import { escapeHtml } from '@/lib/escapeHtml';
+import { emailLogoTag } from '@/lib/eventCopy';
 
 // The "will you crew again?" email (stage 4d-2). Same table-based construction and escaping
 // as volunteerAcceptanceEmail.ts, since email clients strip stylesheets, and green for the
@@ -16,8 +17,6 @@ export interface VolunteerInviteEmailDetails {
 }
 
 const FONT = "font-family:'Google Sans',Roboto,sans-serif;letter-spacing:-0.01em;";
-const WORDMARK_URL =
-  'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/site-assets/logo-wordmark.png';
 
 export function volunteerInviteEmailSubject(eventName: string): string {
   return `Want to crew ${eventName}?`;
@@ -42,7 +41,7 @@ export function buildVolunteerInviteEmail(details: VolunteerInviteEmailDetails):
         <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;">
           <tr>
             <td style="padding:0 0 32px;text-align:center;">
-              <img src="${WORDMARK_URL}" alt="DevFest Sydney" width="180" style="display:inline-block;width:180px;height:auto;border:0;" />
+              ${emailLogoTag(null, 200, 'display:inline-block;border:0;')}
             </td>
           </tr>
           <tr>

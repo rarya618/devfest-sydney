@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { buildPageMetadata } from '@/lib/metadata';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { fetchFeedbackSessionOptions } from '@/lib/feedback';
+import { FEEDBACK_EVENT_ID, fetchFeedbackSessionOptions } from '@/lib/feedback';
+import { loadEvent } from '@/lib/events';
 import FeedbackForm from './FeedbackForm';
 
 export const dynamic = 'force-dynamic';
@@ -18,7 +19,9 @@ export const metadata: Metadata = {
 };
 
 export default async function FeedbackPage() {
-  const sessionOptions = await fetchFeedbackSessionOptions();
+  // Pinned to one event (FEEDBACK_EVENT_ID in src/lib/feedback.ts), and named from it.
+  const [sessionOptions, event] = await Promise.all([fetchFeedbackSessionOptions(), loadEvent(FEEDBACK_EVENT_ID).catch(() => null)]);
+  const eventName = event?.name ?? 'DevFest Sydney';
 
   return (
     <div className="bg-[#010103] text-white min-h-screen">
@@ -29,7 +32,7 @@ export default async function FeedbackPage() {
         <div className="relative max-w-3xl mx-auto">
           <p className="font-mono text-sm text-white/70 mb-4 animate-fade-in">Feedback · about 3 minutes</p>
           <h1 className="text-[clamp(2.25rem,8vw,3.5rem)] font-bold leading-[1] tracking-tight text-white mb-5 animate-slide-up">
-            How was DevFest Sydney?
+            How was {eventName}?
           </h1>
           <p className="text-white/80 text-lg max-w-2xl leading-relaxed animate-slide-up" style={{ animationDelay: '0.1s' }}>
             Two questions are required and the rest are optional. Answers are anonymous unless you choose to
@@ -40,7 +43,7 @@ export default async function FeedbackPage() {
 
       <section className="pb-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <FeedbackForm sessionOptions={sessionOptions} />
+          <FeedbackForm sessionOptions={sessionOptions} eventName={eventName} />
         </div>
       </section>
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
-import { currentDevfestFlowState } from '@/lib/events';
+import { currentDevfestFlowState, loadCurrentDevfest } from '@/lib/events';
 import { Resend } from 'resend';
 import { FieldValue } from 'firebase-admin/firestore';
 import { escapeHtml } from '@/lib/escapeHtml';
@@ -127,7 +127,7 @@ function validatePayload(body: unknown): SubmissionPayload {
   };
 }
 
-function buildConfirmationEmail(submission: SubmissionPayload): string {
+function buildConfirmationEmail(submission: SubmissionPayload, eventName: string): string {
   const font = "font-family:'Google Sans',Roboto,sans-serif;letter-spacing:-0.01em;";
 
   const dot = (color: string, label: string) => `
@@ -146,7 +146,7 @@ function buildConfirmationEmail(submission: SubmissionPayload): string {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Proposal received: DevFest Sydney 2026</title>
+  <title>Proposal received: ${escapeHtml(eventName)}</title>
 </head>
 <body style="margin:0;padding:0;background:#202124;${font}color:#ffffff;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#202124;padding:48px 16px;">
@@ -167,7 +167,7 @@ function buildConfirmationEmail(submission: SubmissionPayload): string {
                 ${escapeHtml(submission.name.split(' ')[0])}
               </h2>
               <p style="margin:0 0 40px;${font}font-size:24px;font-weight:400;color:#ffffff;line-height:1.75;">
-                We appreciate the effort you've put into submitting a talk for DevFest Sydney. We will review and get back to you via email.
+                We appreciate the effort you've put into submitting a talk for ${escapeHtml(eventName)}. We will review and get back to you via email.
               </p>
 
               <!-- Submission recap card -->
@@ -244,14 +244,17 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    // The event the proposal was filed under (stage 4e), read once per request already when
+    // the form was checked as open.
+    const eventName = (await loadCurrentDevfest())?.name ?? 'GDG Sydney';
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
       from: `GDG Sydney <${process.env.RESEND_FROM_EMAIL}>`,
       to: submission.email,
       bcc: 'hello@gdgsydney.com',
       replyTo: 'hello@gdgsydney.com',
-      subject: `We've got your DevFest Sydney 2026 submission`,
-      html: buildConfirmationEmail(submission),
+      subject: `We've got your ${eventName} submission`,
+      html: buildConfirmationEmail(submission, eventName),
     });
   } catch {
     // Email failure is non-fatal: submission is already saved.

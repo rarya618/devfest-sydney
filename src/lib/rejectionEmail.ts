@@ -1,4 +1,6 @@
 import { escapeHtml } from '@/lib/escapeHtml';
+import { emailLogoTag } from '@/lib/eventCopy';
+import type { GdgEventType } from '@/lib/types';
 
 // Sent to a speaker whose proposal was not accepted. Same table-based, inline-styled
 // construction as acceptanceEmail.ts, but laid out as a plain letter rather than a
@@ -10,13 +12,12 @@ export interface RejectionEmailDetails {
   talkTitles: string[];
   // The event the proposals were for (stage 4e).
   eventName: string;
+  eventType: GdgEventType;
   // The event's public Humanitix page (GdgEvent.humanitixUrl), '' when it has none.
   publicTicketUrl: string;
 }
 
 const FONT = "font-family:'Google Sans',Roboto,sans-serif;letter-spacing:-0.01em;";
-const WORDMARK_URL =
-  'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/site-assets/logo-wordmark.png';
 
 export function rejectionEmailSubject(talkTitles: string[], eventName: string): string {
   return talkTitles.length === 1
@@ -61,7 +62,7 @@ export function buildRejectionEmail(details: RejectionEmailDetails): string {
             <td style="padding:48px 40px;">
 
               <!-- Wordmark -->
-              <img src="${WORDMARK_URL}" alt="DevFest Sydney" width="221" height="40" style="display:block;margin:0 0 40px;" />
+              ${emailLogoTag(details.eventType, 221, 'display:block;margin:0 0 40px;')}
 
               <p style="margin:0 0 20px;${bodyText}">Hi ${escapeHtml(details.name)},</p>
 

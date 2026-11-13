@@ -5,8 +5,8 @@ import CreditRequestsDashboard from '../../CreditRequestsDashboard';
 
 export const metadata = {
   title: 'Credits',
-  openGraph: { title: 'Credits — DevFest Sydney 2026', images: [SITE_OG_IMAGE] },
-  twitter: { card: 'summary_large_image', title: 'Credits — DevFest Sydney 2026', images: [SITE_OG_IMAGE] },
+  openGraph: { title: 'Credits — GDG Sydney', images: [SITE_OG_IMAGE] },
+  twitter: { card: 'summary_large_image', title: 'Credits — GDG Sydney', images: [SITE_OG_IMAGE] },
 };
 
 export default async function CreditRequestsAdminPage() {

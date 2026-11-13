@@ -7,8 +7,8 @@ import { fetchInvitablePastVolunteers, inviteClosedReason } from '@/lib/voluntee
 
 export const metadata = {
   title: 'Crew',
-  openGraph: { title: 'Crew — DevFest Sydney 2026', images: [SITE_OG_IMAGE] },
-  twitter: { card: 'summary_large_image', title: 'Crew — DevFest Sydney 2026', images: [SITE_OG_IMAGE] },
+  openGraph: { title: 'Crew — GDG Sydney', images: [SITE_OG_IMAGE] },
+  twitter: { card: 'summary_large_image', title: 'Crew — GDG Sydney', images: [SITE_OG_IMAGE] },
 };
 
 export default async function CrewPage() {

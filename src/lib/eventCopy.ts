@@ -60,3 +60,23 @@ export function eventScheduleUrl(event: Pick<GdgEvent, 'type' | 'bevyUrl'>): str
   if (event.type === 'devfest') return 'https://gdgsydney.com/devfest';
   return event.bevyUrl || null;
 }
+
+// The logo at the top of an email: the DevFest wordmark for a DevFest, the GDG Sydney logo for
+// anything else (a general event, or the volunteer pool, which belongs to all of GDG Sydney).
+// The GDG logo is the dark-background one the main site serves from its public folder.
+const DEVFEST_WORDMARK = {
+  url: 'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/site-assets/logo-wordmark.png',
+  alt: 'DevFest Sydney',
+  aspectRatio: 1331 / 240,
+};
+const GDG_SYDNEY_LOGO = {
+  url: 'https://gdgsydney.com/gdg-logo-dark.png',
+  alt: 'GDG Sydney',
+  aspectRatio: 1700 / 215,
+};
+
+export function emailLogoTag(eventType: GdgEvent['type'] | null, width: number, style: string): string {
+  const logo = eventType === 'devfest' ? DEVFEST_WORDMARK : GDG_SYDNEY_LOGO;
+  const height = Math.round(width / logo.aspectRatio);
+  return `<img src="${logo.url}" alt="${logo.alt}" width="${width}" height="${height}" style="${style}" />`;
+}

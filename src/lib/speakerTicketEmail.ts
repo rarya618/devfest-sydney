@@ -1,5 +1,5 @@
 import { escapeHtml } from '@/lib/escapeHtml';
-import { formatEventDay, formatVenueAddress, type EventCopy } from '@/lib/eventCopy';
+import { emailLogoTag, formatEventDay, formatVenueAddress, type EventCopy } from '@/lib/eventCopy';
 
 // The speaker-facing "here is your complimentary ticket" email, sent from the admin once a
 // speaker has confirmed. Same table-based, inline-styled construction as
@@ -15,8 +15,6 @@ export interface SpeakerTicketEmailDetails {
 }
 
 const FONT = "font-family:'Google Sans',Roboto,sans-serif;letter-spacing:-0.01em;";
-const WORDMARK_URL =
-  'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/site-assets/logo-wordmark.png';
 
 function card(innerHtml: string): string {
   return `
@@ -64,7 +62,7 @@ export function buildSpeakerTicketEmail(details: SpeakerTicketEmailDetails): str
             <td style="padding:48px 40px;">
 
               <!-- Wordmark -->
-              <img src="${WORDMARK_URL}" alt="DevFest Sydney" width="221" height="40" style="display:block;margin:0 auto 36px;" />
+              ${emailLogoTag(details.event.type, 221, 'display:block;margin:0 auto 36px;')}
 
               <!-- Heading -->
               <h1 style="margin:0 0 4px;${FONT}font-size:40px;font-weight:400;color:#ffffff;line-height:1.4;text-align:center;">

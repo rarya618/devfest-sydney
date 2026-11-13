@@ -7,8 +7,8 @@ import { getAdminDevfestId } from '@/lib/adminEvent';
 
 export const metadata = {
   title: 'Speakers',
-  openGraph: { title: 'Speakers — DevFest Sydney 2026', images: [SITE_OG_IMAGE] },
-  twitter: { card: 'summary_large_image', title: 'Speakers — DevFest Sydney 2026', images: [SITE_OG_IMAGE] },
+  openGraph: { title: 'Speakers — GDG Sydney', images: [SITE_OG_IMAGE] },
+  twitter: { card: 'summary_large_image', title: 'Speakers — GDG Sydney', images: [SITE_OG_IMAGE] },
 };
 
 export default async function SpeakersPage() {

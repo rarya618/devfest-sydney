@@ -148,9 +148,11 @@ function Fieldset({ legend, hint, children }: { legend: ReactNode; hint?: string
 
 interface Props {
   sessionOptions: FeedbackSessionOption[];
+  // The event the survey is about (FEEDBACK_EVENT_ID), named in its questions.
+  eventName: string;
 }
 
-export default function FeedbackForm({ sessionOptions }: Props) {
+export default function FeedbackForm({ sessionOptions, eventName }: Props) {
   const [fields, setFields] = useState<FormFields>({
     overallRating: null,
     recommendScore: null,
@@ -295,7 +297,7 @@ export default function FeedbackForm({ sessionOptions }: Props) {
           <h2 id="feedback-section-day" className={sectionHeadingClass}>The day</h2>
 
           <div id="feedback-overallRating">
-            <Fieldset legend={<>Overall, how was DevFest Sydney 2026? {required}</>}>
+            <Fieldset legend={<>Overall, how was {eventName}? {required}</>}>
               <ScaleRadios
                 name="overallRating"
                 values={OVERALL_SCALE}

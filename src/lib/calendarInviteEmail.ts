@@ -1,4 +1,6 @@
 import { escapeHtml } from '@/lib/escapeHtml';
+import { emailLogoTag } from '@/lib/eventCopy';
+import type { GdgEventType } from '@/lib/types';
 
 // The speaker's calendar invite for their session: an email with an iCalendar file attached,
 // sent from /admin/speakers. The .ics goes out as `text/calendar; method=REQUEST`, which is
@@ -11,8 +13,6 @@ import { escapeHtml } from '@/lib/escapeHtml';
 // METHOD:CANCEL with the same UID removes it.
 
 const FONT = "font-family:'Google Sans',Roboto,sans-serif;letter-spacing:-0.01em;";
-const WORDMARK_URL =
-  'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/site-assets/logo-wordmark.png';
 
 export type CalendarInviteKind = 'invite' | 'update' | 'cancel';
 
@@ -32,6 +32,7 @@ export interface CalendarInviteDetails {
   // The event (stage 4e): named in the subject and invite, its venue's address the location,
   // and its time zone the one every time is shown in.
   eventName: string;
+  eventType: GdgEventType;
   venueAddress: string;
   timeZone: string;
   // Where the full schedule is published, or null to leave the link out.
@@ -214,7 +215,7 @@ export function buildCalendarInviteEmail(details: CalendarInviteDetails): string
           <tr>
             <td style="padding:48px 40px;">
 
-              <img src="${WORDMARK_URL}" alt="DevFest Sydney" width="221" height="40" style="display:block;margin:0 auto 36px;" />
+              ${emailLogoTag(details.eventType, 221, 'display:block;margin:0 auto 36px;')}
 
               <h1 style="margin:0 0 20px;${FONT}font-size:32px;font-weight:700;color:#ffffff;line-height:1.3;text-align:center;">
                 ${escapeHtml(heading)}

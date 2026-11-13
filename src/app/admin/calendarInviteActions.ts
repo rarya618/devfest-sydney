@@ -110,6 +110,7 @@ export async function sendCalendarInvite(talkId: string, speakerId: string): Pro
     sequence,
     organiserEmail,
     eventName: event.name,
+    eventType: event.type,
     venueAddress: formatVenueAddress(event),
     timeZone: event.timeZone,
     scheduleUrl: eventScheduleUrl(event),

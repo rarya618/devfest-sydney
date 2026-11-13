@@ -2,7 +2,7 @@ import { formatDeadlineDate } from '@/lib/format';
 import { VOLUNTEER_AREA_LABELS, VOLUNTEER_SHIFT_LABELS } from '@/lib/volunteerLabels';
 import type { VolunteerArea, VolunteerShift } from '@/lib/types';
 import { escapeHtml } from '@/lib/escapeHtml';
-import { formatEventWhen, isDevfest, type EventCopy } from '@/lib/eventCopy';
+import { emailLogoTag, formatEventWhen, isDevfest, type EventCopy } from '@/lib/eventCopy';
 
 // Same table-based construction and escaping as acceptanceEmail.ts: email clients strip
 // stylesheets, and several still ignore flexbox and CSS variables entirely. Green rather
@@ -95,7 +95,7 @@ export function buildVolunteerAcceptanceEmail(details: VolunteerAcceptanceEmailD
             <td style="padding:48px 40px;">
 
               <!-- Wordmark -->
-              <img src="${WORDMARK_URL}" alt="DevFest Sydney" width="221" height="40" style="display:block;margin:0 auto 36px;" />
+              ${emailLogoTag(details.event.type, 221, 'display:block;margin:0 auto 36px;')}
 
               <!-- Heading -->
               <h1 style="margin:0 0 4px;${FONT}font-size:40px;font-weight:400;color:#ffffff;line-height:1.4;text-align:center;">

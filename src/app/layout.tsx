@@ -5,26 +5,28 @@ import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://devfest.gdgsydney.com';
 
+// The app is GDG Sydney's back office and form handler (app.gdgsydney.com) since stage 3 of the
+// plan in PM.md. The few public pages left (privacy, the token pages, feedback, credits) are
+// GDG Sydney's; DevFest's own pages live on gdgsydney.com.
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'DevFest Sydney 2026',
-    template: '%s — DevFest Sydney 2026',
+    default: 'GDG Sydney',
+    template: '%s — GDG Sydney',
   },
-  description:
-    'GDG Sydney\'s annual community conference, presented by Google. A full day of talks and workshops on Saturday 10 October 2026 at Torrens University, Surry Hills.',
+  description: 'GDG Sydney organises DevFest Sydney and regular meetups for developers and builders. Find our events at gdgsydney.com.',
   openGraph: {
-    title: 'DevFest Sydney 2026',
-    description: 'Build, Secure, Scale: Developers and Builders in the Agentic Era. Sat, 10 October 2026 · Torrens University, Surry Hills.',
+    title: 'GDG Sydney',
+    description: 'DevFest Sydney and regular meetups for developers and builders.',
     url: siteUrl,
-    siteName: 'DevFest Sydney 2026',
+    siteName: 'GDG Sydney',
     locale: 'en_AU',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'DevFest Sydney 2026',
-    description: 'Build, Secure, Scale. 10 Oct 2026 · Surry Hills · GDG Sydney.',
+    title: 'GDG Sydney',
+    description: 'DevFest Sydney and regular meetups for developers and builders.',
   },
 };
 

@@ -6,8 +6,8 @@ import { getAdminDevfestId } from '@/lib/adminEvent';
 
 export const metadata = {
   title: 'Volunteers',
-  openGraph: { title: 'Volunteers — DevFest Sydney 2026', images: [SITE_OG_IMAGE] },
-  twitter: { card: 'summary_large_image', title: 'Volunteers — DevFest Sydney 2026', images: [SITE_OG_IMAGE] },
+  openGraph: { title: 'Volunteers — GDG Sydney', images: [SITE_OG_IMAGE] },
+  twitter: { card: 'summary_large_image', title: 'Volunteers — GDG Sydney', images: [SITE_OG_IMAGE] },
 };
 
 export default async function VolunteersPage() {

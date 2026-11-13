@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 
-export const SITE_NAME = 'DevFest Sydney 2026';
+// The app is GDG Sydney's back office (app.gdgsydney.com) since stage 3; DevFest's public
+// pages live on gdgsydney.com.
+export const SITE_NAME = 'GDG Sydney';
 export const OG_LOCALE = 'en_AU';
 // The site-wide share image is a static file (`src/app/opengraph-image.png`), so Next
 // serves it at the .png path; the bare `/opengraph-image` route only existed while it

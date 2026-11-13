@@ -886,7 +886,7 @@ export async function sendRejectionEmail(submissionId: string): Promise<{ error?
       // somewhere an organiser reads.
       replyTo: 'hello@gdgsydney.com',
       subject: rejectionEmailSubject(talkTitles, event.name),
-      html: buildRejectionEmail({ name: submission.name, talkTitles, eventName: event.name, publicTicketUrl: event.humanitixUrl }),
+      html: buildRejectionEmail({ name: submission.name, talkTitles, eventName: event.name, eventType: event.type, publicTicketUrl: event.humanitixUrl }),
     });
   } catch (err) {
     console.error('Rejection email failed for submission:', submissionId, err);

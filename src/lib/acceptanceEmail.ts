@@ -1,7 +1,7 @@
 import { formatDeadlineDate } from '@/lib/format';
 import type { ExperienceLevel, TalkFormat, Track } from '@/lib/types';
 import { escapeHtml } from '@/lib/escapeHtml';
-import { formatEventWhen, type EventCopy } from '@/lib/eventCopy';
+import { emailLogoTag, formatEventWhen, type EventCopy } from '@/lib/eventCopy';
 
 // Built to the "Email template - Confirmed Speaker" frame in the DevFest Figma file.
 // Table-based and inline-styled throughout: email clients strip stylesheets, and several
@@ -114,7 +114,7 @@ export function buildAcceptanceEmail(details: AcceptanceEmailDetails): string {
             <td style="padding:48px 40px;">
 
               <!-- Wordmark -->
-              <img src="${WORDMARK_URL}" alt="DevFest Sydney" width="221" height="40" style="display:block;margin:0 auto 36px;" />
+              ${emailLogoTag(details.event.type, 221, 'display:block;margin:0 auto 36px;')}
 
               <!-- Heading -->
               <h1 style="margin:0 0 4px;${FONT}font-size:40px;font-weight:400;color:#ffffff;line-height:1.4;text-align:center;">

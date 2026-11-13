@@ -1,32 +1,25 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import VolunteerLink from './VolunteerLink';
-import ShowcaseLink from './ShowcaseLink';
-import { isBuildersSpaceRevealed } from '@/lib/buildersSpace';
+// The footer of the few public pages this app still serves (privacy, feedback, credits, the
+// 404). Since stage 3 the event pages live on gdgsydney.com, so the links go there directly
+// rather than through this app's redirects; only the privacy policy is served here.
+const GDG_SITE = 'https://gdgsydney.com';
 
-const COLUMNS: { heading: string; links: { label: string; href: string; external?: boolean; hidden?: () => boolean }[] }[] = [
+const COLUMNS: { heading: string; links: { label: string; href: string; external?: boolean }[] }[] = [
   {
-    heading: 'Event',
+    heading: 'GDG Sydney',
     links: [
-      { label: 'Tickets', href: '/tickets' },
-      { label: 'Speakers', href: '/speakers' },
-      { label: 'Schedule', href: '/schedule' },
-      { label: 'Tracks', href: '/#tracks' },
-      { label: 'Venue', href: '/#venue' },
-      { label: 'Partners', href: '/partners' },
+      { label: 'Events and meetups', href: GDG_SITE, external: true },
+      { label: 'DevFest Sydney', href: `${GDG_SITE}/devfest`, external: true },
+      { label: 'Speak at a meetup', href: `${GDG_SITE}/speak`, external: true },
+      { label: 'Starter guides', href: `${GDG_SITE}/guides`, external: true },
     ],
   },
   {
     heading: 'Support',
     links: [
-      { label: 'Builder Showcase', href: '/builder-showcase' },
-      // A surprise on the day: see src/lib/buildersSpace.ts.
-      { label: "Builder's Space", href: '/builders-space', hidden: () => !isBuildersSpaceRevealed() },
-      { label: 'Volunteer', href: '/volunteer' },
-      { label: 'Crew', href: '/crew' },
-      { label: 'FAQ', href: '/faq' },
+      { label: 'Code of Conduct', href: `${GDG_SITE}/conduct`, external: true },
       { label: 'Privacy Policy', href: '/privacy' },
-      { label: 'Code of Conduct', href: '/conduct' },
     ],
   },
   {
@@ -44,18 +37,11 @@ const COLUMNS: { heading: string; links: { label: string; href: string; external
 export default function Footer() {
   return (
     <footer className="px-6 pb-8">
-      <div className="bg-surface rounded-[40px] pb-8 overflow-hidden">
-        <div className="bg-white/10 py-3 px-6 flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 text-base text-center">
-          <span className="flex items-center gap-2.5">
-            <span className="font-bold text-white">Sat, 10 October 2026</span>
-            <span className="w-1 h-1 rounded-full bg-white/70 shrink-0" aria-hidden="true" />
-          </span>
-          <span className="font-bold text-white">Torrens University, Surry Hills</span>
-        </div>
+      <div className="bg-surface rounded-[40px] pt-4 pb-8 overflow-hidden">
 
         <div className="flex flex-col items-center text-center md:items-start md:text-left md:flex-row md:justify-between gap-10 px-6 md:px-10 pt-8 pb-12">
           <div>
-            <Link href="/" className="inline-flex items-center group" aria-label="DevFest Sydney home">
+            <a href={`${GDG_SITE}/devfest`} className="inline-flex items-center group" aria-label="DevFest Sydney on gdgsydney.com">
               <Image
                 src="/logo-wordmark.png"
                 alt="DevFest Sydney"
@@ -63,7 +49,7 @@ export default function Footer() {
                 height={240}
                 className="h-9 w-auto object-contain group-hover:opacity-80 transition-opacity"
               />
-            </Link>
+            </a>
             <p className="text-sm text-white mt-1 max-w-xs leading-relaxed">
               Organised by{' '}
               <a
@@ -82,25 +68,7 @@ export default function Footer() {
               <div key={column.heading} className="min-w-[150px]">
                 <p className="text-xl font-bold text-white mb-3">{column.heading}</p>
                 <ul className="space-y-3">
-                  {column.links.filter((link) => !link.hidden?.()).map((link) => {
-                    if (link.label === 'Builder Showcase') {
-                      return (
-                        <li key={link.label}>
-                          <ShowcaseLink source="footer" className="text-sm text-white hover:text-white/70 transition-colors">
-                            {link.label}
-                          </ShowcaseLink>
-                        </li>
-                      );
-                    }
-                    if (link.label === 'Volunteer') {
-                      return (
-                        <li key={link.label}>
-                          <VolunteerLink source="footer" className="text-sm text-white hover:text-white/70 transition-colors">
-                            {link.label}
-                          </VolunteerLink>
-                        </li>
-                      );
-                    }
+                  {column.links.map((link) => {
                     if (link.external) {
                       return (
                         <li key={link.label}>
@@ -130,7 +98,7 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 md:px-10 pt-8 pb-4">
-          <span className="font-mono text-sm font-bold text-white">© 2026 GDG Sydney. All rights reserved.</span>
+          <span className="font-mono text-sm font-bold text-white">© {new Date().getFullYear()} GDG Sydney. All rights reserved.</span>
           <div className="flex items-center gap-8">
             <a
               href="https://gdgsydney.com"
