@@ -473,7 +473,7 @@ export default function AdminShell({ adminEmail, adminName, devfests, selectedDe
       )}
 
       {/* Sidebar (desktop only) */}
-      <aside className="hidden md:sticky md:flex top-0 left-0 z-50 w-64 shrink-0 h-screen flex-col border-r border-white/10 px-3 pt-7 pb-4 bg-black-02">
+      <aside className="hidden md:sticky md:flex top-0 left-0 z-50 w-72 shrink-0 h-screen flex-col border-r border-white/10 px-3 pt-7 pb-4 bg-black-02">
         <div className="pl-3 mb-6">{wordmark}</div>
 
         <div className="flex-1 min-h-0 overflow-y-auto -mx-3 px-3">
