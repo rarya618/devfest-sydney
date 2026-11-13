@@ -2,6 +2,7 @@ import { SITE_OG_IMAGE } from '@/lib/metadata';
 import { getVerifiedSession } from '@/lib/adminSession';
 import { fetchShowcaseSubmissions } from '@/lib/showcaseSubmissions';
 import ShowcaseDashboard from '../../ShowcaseDashboard';
+import { getAdminEventId } from '@/lib/adminEvent';
 
 export const metadata = {
   title: 'Builder Showcase',
@@ -10,7 +11,8 @@ export const metadata = {
 };
 
 export default async function ShowcasePage() {
-  const [, entries] = await Promise.all([getVerifiedSession(), fetchShowcaseSubmissions()]);
+  const eventId = await getAdminEventId();
+  const [, entries] = await Promise.all([getVerifiedSession(), fetchShowcaseSubmissions(eventId)]);
 
   return <ShowcaseDashboard entries={entries} />;
 }

@@ -1,4 +1,5 @@
 import { adminDb } from '@/lib/firebase-admin';
+import { loadEventDocs } from '@/lib/eventScope';
 import type { CalendarInviteSlot, PublicSpeaker, ScheduleRoom, Speaker, SpeakerConfirmation } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
 
@@ -55,13 +56,16 @@ export function normaliseProfileUrl(rawUrl: string): string {
 
 // Speakers are the public lineup, but whether each one has actually confirmed lives on
 // the submission they were promoted from, so the two are joined here.
-export async function fetchSpeakers(): Promise<Speaker[]> {
-  const snapshot = await adminDb
-    .collection('speakers')
-    .orderBy('promotedAt', 'desc')
-    .get();
+export async function fetchSpeakers(eventId: string): Promise<Speaker[]> {
+  // Newest promotion first. Each speaker document carries its event since stage 4b; in 4c the
+  // talk will, and the speaker document becomes the person.
+  const speakerDocs = (await loadEventDocs('speakers', eventId)).sort(
+    (first, second) =>
+      ((second.data().promotedAt as Timestamp | undefined)?.toMillis() ?? 0) -
+      ((first.data().promotedAt as Timestamp | undefined)?.toMillis() ?? 0)
+  );
 
-  const submissionIds = snapshot.docs
+  const submissionIds = speakerDocs
     .map((doc) => doc.data().submissionId as string | undefined)
     .filter((submissionId): submissionId is string => Boolean(submissionId));
 
@@ -74,7 +78,7 @@ export async function fetchSpeakers(): Promise<Speaker[]> {
     }
   });
 
-  const speakers = snapshot.docs.map((doc) => {
+  const speakers = speakerDocs.map((doc) => {
     const data = doc.data();
     const promotedAt = data.promotedAt as Timestamp | undefined;
     const submissionId: string = data.submissionId ?? '';
@@ -186,8 +190,8 @@ function attachSessionPartners(speakers: Omit<PublicSpeaker, 'sessionPartners'>[
 // a promoted speaker who has not been emailed yet, or has not answered, is not announced.
 // Throws on a failed read, for /api/public/speakers: a static build that took a failed
 // read for an empty lineup would publish a page with no speakers on it.
-export async function loadPublicSpeakers(): Promise<PublicSpeaker[]> {
-  const speakers = await fetchSpeakers();
+export async function loadPublicSpeakers(eventId: string): Promise<PublicSpeaker[]> {
+  const speakers = await fetchSpeakers(eventId);
   const confirmed = speakers
       .filter((speaker) => speaker.confirmation === 'confirmed')
       .sort((first, second) => first.name.localeCompare(second.name))

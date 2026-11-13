@@ -122,6 +122,8 @@ export async function addCoSpeaker(leadSpeakerId: string, fields: SpeakerProfile
     await adminDb.collection('speakers').add({
       ...validated.values,
       coSpeakerOf: leadSpeakerId,
+      // The lead's event (stage 4b): a co-speaker presents the same session.
+      eventId: leadSnapshot.data()?.eventId ?? '',
       previousSlugs: [],
       promotedAt: FieldValue.serverTimestamp(),
     });

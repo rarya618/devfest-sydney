@@ -1,9 +1,11 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 import { verifyAdminSession } from '@/lib/adminSession';
+import { ADMIN_EVENT_COOKIE } from '@/lib/adminEvent';
 import {
   EVENT_FLOW_KEYS,
   EVENT_FLOW_LABELS,
@@ -220,7 +222,8 @@ async function saveEvent(input: EventFormInput, mode: 'create' | 'update'): Prom
     return { error: 'Could not save this event. Please try again.' };
   }
 
-  revalidatePath('/admin/events');
+  // The layout too: the event switcher in the sidebar lists every event.
+  revalidatePath('/admin', 'layout');
   return {};
 }
 
@@ -256,6 +259,35 @@ export async function setCurrentDevfest(eventId: string): Promise<{ error?: stri
     return { error: 'Could not make this the current DevFest. Please try again.' };
   }
 
-  revalidatePath('/admin/events');
+  // The layout too: the event switcher in the sidebar lists every event.
+  revalidatePath('/admin', 'layout');
+  return {};
+}
+
+// The event switcher in the admin sidebar. Per browser, not per admin: two organisers can
+// look at different events at once.
+export async function selectAdminEvent(eventId: string): Promise<{ error?: string }> {
+  try {
+    await verifyAdminSession();
+  } catch {
+    return { error: 'Your session has expired. Please sign in again.' };
+  }
+
+  try {
+    const snapshot = await adminDb.collection('events').doc(eventId).get();
+    if (!snapshot.exists) return { error: 'This event no longer exists. Refresh the page.' };
+  } catch {
+    return { error: 'Could not switch events. Please try again.' };
+  }
+
+  const cookieStore = await cookies();
+  cookieStore.set(ADMIN_EVENT_COOKIE, eventId, {
+    path: '/admin',
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 60 * 60 * 24 * 365,
+  });
+  revalidatePath('/admin', 'layout');
   return {};
 }

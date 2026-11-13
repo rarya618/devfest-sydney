@@ -1,4 +1,5 @@
 import { adminDb } from '@/lib/firebase-admin';
+import { loadEventDocs } from '@/lib/eventScope';
 import { loadPublicSpeakers, sessionLeadId } from '@/lib/speakers';
 import type { PublicScheduleSlot, PublicSpeaker, ScheduleItem, ScheduleKind, ScheduleRoom, SpeakerSessionTime } from '@/lib/types';
 import { SCHEDULE_ROOMS } from '@/lib/scheduleLabels';
@@ -13,9 +14,9 @@ const SCHEDULE_ROOM_VALUES: ScheduleRoom[] = [...SCHEDULE_ROOMS, 'all'];
 
 // Documents are written by scripts/seed-schedule.mjs through the Admin SDK, so the rules'
 // validation never ran on them; anything malformed is skipped rather than rendered.
-async function fetchScheduleItems(): Promise<ScheduleItem[]> {
-  const snapshot = await adminDb.collection('schedule').orderBy('startTime').get();
-  return snapshot.docs.flatMap((doc) => {
+async function fetchScheduleItems(eventId: string): Promise<ScheduleItem[]> {
+  const docs = await loadEventDocs('schedule', eventId);
+  const items = docs.flatMap((doc): ScheduleItem[] => {
     const data = doc.data();
     const startTime = data.startTime as Timestamp | undefined;
     const kind = data.kind as ScheduleKind;
@@ -37,6 +38,7 @@ async function fetchScheduleItems(): Promise<ScheduleItem[]> {
       } satisfies ScheduleItem,
     ];
   });
+  return items.sort((first, second) => first.startTime.localeCompare(second.startTime));
 }
 
 function toPublicSlot(item: ScheduleItem, confirmedSpeakers: PublicSpeaker[]): PublicScheduleSlot {
@@ -78,15 +80,15 @@ function toPublicSlot(item: ScheduleItem, confirmedSpeakers: PublicSpeaker[]): P
 
 // The public schedule, in start order. Throws on a failed read (of the schedule or of the
 // speakers it names), for /api/public/schedule, where an empty answer would be published.
-export async function loadPublicSchedule(): Promise<PublicScheduleSlot[]> {
-  const [items, speakers] = await Promise.all([fetchScheduleItems(), loadPublicSpeakers()]);
+export async function loadPublicSchedule(eventId: string): Promise<PublicScheduleSlot[]> {
+  const [items, speakers] = await Promise.all([fetchScheduleItems(eventId), loadPublicSpeakers(eventId)]);
   return items.map((item) => toPublicSlot(item, speakers));
 }
 
 // The same schedule for /schedule, which shows its "being finalised" state on a failed read.
-export async function fetchPublicSchedule(): Promise<PublicScheduleSlot[]> {
+export async function fetchPublicSchedule(eventId: string): Promise<PublicScheduleSlot[]> {
   try {
-    return await loadPublicSchedule();
+    return await loadPublicSchedule(eventId);
   } catch {
     return [];
   }
@@ -102,9 +104,9 @@ function toSessionTime(item: ScheduleItem): SpeakerSessionTime {
 // not read the schedule" for "not on the schedule".
 // A co-speaker shares their lead's slot without being listed on it, so they are given it
 // here, confirmed or not: the dashboard and the invite action apply their own gates.
-export async function fetchSessionTimesBySpeakerId(): Promise<Record<string, SpeakerSessionTime>> {
+export async function fetchSessionTimesBySpeakerId(eventId: string): Promise<Record<string, SpeakerSessionTime>> {
   const [items, coSpeakerSnapshot] = await Promise.all([
-    fetchScheduleItems(),
+    fetchScheduleItems(eventId),
     adminDb.collection('speakers').where('coSpeakerOf', '!=', '').get(),
   ]);
   const sessionTimes: Record<string, SpeakerSessionTime> = {};

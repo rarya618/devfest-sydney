@@ -193,12 +193,16 @@ export function areTicketsOnSale(event: GdgEvent | null, now: Date = new Date())
 // For the form endpoints: whether the current DevFest is taking entries for a flow, with a
 // failed read kept apart from "closed", so a Firestore hiccup asks the person to try again
 // rather than telling them the form has shut.
-export async function currentDevfestFlowState(flow: EventFlowKey): Promise<'open' | 'closed' | 'unreadable'> {
+// When open, it also names the event, so the entry is filed under the event that took it.
+export async function currentDevfestFlowState(
+  flow: EventFlowKey
+): Promise<{ state: 'open'; eventId: string } | { state: 'closed' | 'unreadable' }> {
   try {
-    return isFlowOpen(await loadCurrentDevfest(), flow) ? 'open' : 'closed';
+    const event = await loadCurrentDevfest();
+    return event && isFlowOpen(event, flow) ? { state: 'open', eventId: event.id } : { state: 'closed' };
   } catch (error) {
     console.error(`Could not read the current DevFest to check ${flow}:`, error);
-    return 'unreadable';
+    return { state: 'unreadable' };
   }
 }
 

@@ -219,13 +219,13 @@ export async function POST(request: NextRequest) {
   // Hiding the form is not the same as closing entries: without this the endpoint keeps
   // accepting demos after the deadline, from a stale tab or a direct post.
   const flowState = await currentDevfestFlowState('showcase');
-  if (flowState === 'unreadable') {
+  if (flowState.state === 'unreadable') {
     return NextResponse.json(
       { message: "We couldn't check whether we're taking entries right now. Please try again in a moment." },
       { status: 503 }
     );
   }
-  if (flowState === 'closed') {
+  if (flowState.state !== 'open') {
     return NextResponse.json(
       { message: 'The Builder Showcase call for demos has closed, so we can no longer accept entries. Thank you for your interest.' },
       { status: 403 }
@@ -247,6 +247,7 @@ export async function POST(request: NextRequest) {
   try {
     await adminDb.collection('showcase').add({
       ...entry,
+      eventId: flowState.eventId,
       submittedAt: FieldValue.serverTimestamp(),
       status: 'pending',
     });

@@ -56,7 +56,8 @@ export async function sendCalendarInvite(speakerId: string): Promise<{ error?: s
     if (sessionOwner?.submissionId) {
       submission = (await adminDb.collection('submissions').doc(sessionOwner.submissionId).get()).data();
     }
-    session = (await fetchSessionTimesBySpeakerId())[speakerId] ?? null;
+    // The speaker's own event, not whichever one the admin has selected.
+    session = (await fetchSessionTimesBySpeakerId(String(speaker.eventId ?? '')))[speakerId] ?? null;
   } catch {
     // Deliberately stops here rather than treating a failed schedule read as "not on the
     // schedule", which would send a cancellation.

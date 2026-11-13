@@ -18,7 +18,8 @@ export type CreditRequestFields = Omit<CreditRequest, 'id' | 'submittedAt'>;
 const CREDIT_WORKSHOP_SLOT_IDS = ['1400-workshops'];
 
 export async function fetchCreditWorkshopOptions(): Promise<CreditWorkshopOption[]> {
-  const schedule = await fetchPublicSchedule();
+  // The credits are for one DevFest 2026 workshop, so this is pinned to that event.
+  const schedule = await fetchPublicSchedule('devfest-2026');
   return schedule
     .filter((slot) => CREDIT_WORKSHOP_SLOT_IDS.includes(slot.id) && slot.format === 'workshop')
     .map((slot) => ({

@@ -1,4 +1,4 @@
-import { adminDb } from '@/lib/firebase-admin';
+import { loadEventDocs, newestSubmittedFirst } from '@/lib/eventScope';
 import type { ReviewerNote, Submission } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
 
@@ -6,13 +6,10 @@ function toIsoOrNull(timestamp: Timestamp | undefined): string | null {
   return timestamp ? timestamp.toDate().toISOString() : null;
 }
 
-export async function fetchSubmissions(): Promise<Submission[]> {
-  const snapshot = await adminDb
-    .collection('submissions')
-    .orderBy('submittedAt', 'desc')
-    .get();
+export async function fetchSubmissions(eventId: string): Promise<Submission[]> {
+  const docs = await loadEventDocs('submissions', eventId);
 
-  return snapshot.docs.map((doc) => {
+  const records = docs.map((doc) => {
     const data = doc.data();
     const timestamp = data.submittedAt as Timestamp | undefined;
     return {
@@ -70,4 +67,5 @@ export async function fetchSubmissions(): Promise<Submission[]> {
       })) satisfies ReviewerNote[],
     } satisfies Submission;
   });
+  return records.sort(newestSubmittedFirst);
 }

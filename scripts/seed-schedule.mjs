@@ -44,6 +44,13 @@ initializeApp({
 const db = getFirestore();
 const isDryRun = process.argv.includes('--dry-run');
 
+// The event these slots belong to (stage 4b, PM.md). Only this event's slots are compared
+// and cleaned up, so reseeding one event's day never touches another's. The 2026 ids
+// ("1050-auditorium") predate events and stay as they are; for a new event, copy this script
+// and set EVENT_ID, and its slot ids get the event as a prefix so two days can't collide.
+const EVENT_ID = 'devfest-2026';
+const SLOT_ID_PREFIX = EVENT_ID === 'devfest-2026' ? '' : `${EVENT_ID}-`;
+
 // Saturday 10 October 2026 is after the daylight-saving switch, so Sydney is on AEDT.
 const EVENT_DATE = '2026-10-10';
 const EVENT_OFFSET = '+11:00';
@@ -94,7 +101,8 @@ function toDate(wallClock) {
   return new Date(`${EVENT_DATE}T${wallClock}:00${EVENT_OFFSET}`);
 }
 
-const speakerSnapshot = await db.collection('speakers').get();
+// Only this event's speakers, so a name that recurs across years resolves to the right one.
+const speakerSnapshot = await db.collection('speakers').where('eventId', '==', EVENT_ID).get();
 const speakerIdsByName = new Map(
   speakerSnapshot.docs.map((doc) => [String(doc.data().name ?? '').trim().toLowerCase(), doc.id])
 );
@@ -112,9 +120,10 @@ const documents = SLOTS.map((slot) => {
   });
 
   return {
-    id: `${slot.start.replace(':', '')}-${slot.room}`,
+    id: `${SLOT_ID_PREFIX}${slot.start.replace(':', '')}-${slot.room}`,
     speakerNames: slot.speakers ?? [],
     data: {
+      eventId: EVENT_ID,
       kind: slot.kind,
       title: slot.title,
       speakerIds,
@@ -137,7 +146,7 @@ if (duplicateIds.length > 0) {
   process.exit(1);
 }
 
-const existingSnapshot = await db.collection('schedule').get();
+const existingSnapshot = await db.collection('schedule').where('eventId', '==', EVENT_ID).get();
 const keptIds = new Set(documents.map((doc) => doc.id));
 const staleIds = existingSnapshot.docs.map((doc) => doc.id).filter((id) => !keptIds.has(id));
 

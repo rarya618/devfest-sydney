@@ -178,13 +178,13 @@ export async function POST(request: NextRequest) {
   // Hiding the form is not the same as closing signups: without this the endpoint keeps
   // accepting them after signups are switched off, from a stale tab or a direct post.
   const flowState = await currentDevfestFlowState('volunteers');
-  if (flowState === 'unreadable') {
+  if (flowState.state === 'unreadable') {
     return NextResponse.json(
       { message: "We couldn't check whether we're taking signups right now. Please try again in a moment." },
       { status: 503 }
     );
   }
-  if (flowState === 'closed') {
+  if (flowState.state !== 'open') {
     return NextResponse.json(
       { message: 'Volunteer signups have closed, so we can no longer accept applications. Thank you for your interest.' },
       { status: 403 }
@@ -206,6 +206,7 @@ export async function POST(request: NextRequest) {
   try {
     await adminDb.collection('volunteers').add({
       ...volunteer,
+      eventId: flowState.eventId,
       submittedAt: FieldValue.serverTimestamp(),
       status: 'pending',
     });

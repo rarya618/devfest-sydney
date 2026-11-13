@@ -1,4 +1,4 @@
-import { adminDb } from '@/lib/firebase-admin';
+import { loadEventDocs, newestSubmittedFirst } from '@/lib/eventScope';
 import type {
   ReviewerNote,
   VolunteerConfirmation,
@@ -18,13 +18,10 @@ function toConfirmation(data: FirebaseFirestore.DocumentData): VolunteerConfirma
   return 'not-emailed';
 }
 
-export async function fetchVolunteers(): Promise<VolunteerSubmission[]> {
-  const snapshot = await adminDb
-    .collection('volunteers')
-    .orderBy('submittedAt', 'desc')
-    .get();
+export async function fetchVolunteers(eventId: string): Promise<VolunteerSubmission[]> {
+  const docs = await loadEventDocs('volunteers', eventId);
 
-  return snapshot.docs.map((doc) => {
+  const records = docs.map((doc) => {
     const data = doc.data();
     const timestamp = data.submittedAt as Timestamp | undefined;
     return {
@@ -77,14 +74,15 @@ export async function fetchVolunteers(): Promise<VolunteerSubmission[]> {
       linkedinUrl: data.linkedinUrl ?? '',
     } satisfies VolunteerSubmission;
   });
+  return records.sort(newestSubmittedFirst);
 }
 
 // The signups: everyone who came through the volunteer form. Organisers are added
 // straight onto the crew by an admin and never filled the form in, so they are left out
 // of the review dashboard and the analytics, where they would be counted as signups that
 // never happened.
-export async function fetchVolunteerSignups(): Promise<VolunteerSubmission[]> {
-  const volunteers = await fetchVolunteers();
+export async function fetchVolunteerSignups(eventId: string): Promise<VolunteerSubmission[]> {
+  const volunteers = await fetchVolunteers(eventId);
   return volunteers.filter((volunteer) => !volunteer.isOrganiser);
 }
 
@@ -93,8 +91,8 @@ export async function fetchVolunteerSignups(): Promise<VolunteerSubmission[]> {
 // way accepted speakers are. A speaker document exists because the public profile is
 // edited away from the proposal that produced it; a crew member's roster is just a few
 // more fields on the signup, and a copy would only be something to keep in sync.
-export async function fetchCrew(): Promise<VolunteerSubmission[]> {
-  const volunteers = await fetchVolunteers();
+export async function fetchCrew(eventId: string): Promise<VolunteerSubmission[]> {
+  const volunteers = await fetchVolunteers(eventId);
   return volunteers.filter((volunteer) => volunteer.status === 'accepted');
 }
 

@@ -1,4 +1,4 @@
-import { adminDb } from '@/lib/firebase-admin';
+import { loadEventDocs, newestSubmittedFirst } from '@/lib/eventScope';
 import type { CoPresenter, ReviewerNote, ShowcaseConfirmation, ShowcaseSubmission } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
 
@@ -14,13 +14,10 @@ function toConfirmation(data: FirebaseFirestore.DocumentData): ShowcaseConfirmat
   return 'not-emailed';
 }
 
-export async function fetchShowcaseSubmissions(): Promise<ShowcaseSubmission[]> {
-  const snapshot = await adminDb
-    .collection('showcase')
-    .orderBy('submittedAt', 'desc')
-    .get();
+export async function fetchShowcaseSubmissions(eventId: string): Promise<ShowcaseSubmission[]> {
+  const docs = await loadEventDocs('showcase', eventId);
 
-  return snapshot.docs.map((doc) => {
+  const records = docs.map((doc) => {
     const data = doc.data();
     const timestamp = data.submittedAt as Timestamp | undefined;
     return {
@@ -69,4 +66,5 @@ export async function fetchShowcaseSubmissions(): Promise<ShowcaseSubmission[]> 
       confirmation: toConfirmation(data),
     } satisfies ShowcaseSubmission;
   });
+  return records.sort(newestSubmittedFirst);
 }

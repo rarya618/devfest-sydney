@@ -13,6 +13,7 @@ import { confirmDeadlineFrom, confirmUrl } from '@/lib/speakerConfirm';
 import { normaliseProfileUrl } from '@/lib/speakers';
 import type { ExperienceLevel, SubmissionStatus, TalkFormat, Track } from '@/lib/types';
 import { fetchCurrentDevfestPublicTicketUrl, requireCurrentDevfestLink } from '@/lib/events';
+import { getAdminEventId } from '@/lib/adminEvent';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -113,6 +114,8 @@ export async function promoteSubmission(submissionId: string): Promise<{ error?:
       githubUrl: normaliseProfileUrl(data.githubUrl ?? ''),
       websiteUrl: normaliseProfileUrl(data.websiteUrl ?? ''),
       submissionId,
+      // The proposal's event (stage 4b). In 4c the talk carries it instead.
+      eventId: data.eventId ?? '',
       promotedAt: FieldValue.serverTimestamp(),
       bio: data.speakerBio ?? '',
       tagline: data.speakerTagline ?? '',
@@ -366,6 +369,10 @@ export async function createSubmission(
   const validated = validateSubmissionFields(fields);
   if ('error' in validated) return { error: validated.error };
 
+  // Filed under the event the admin has selected in the sidebar (stage 4b).
+  const eventId = await getAdminEventId();
+  if (!eventId) return { error: 'Create an event in Events before adding a proposal.' };
+
   // Defaults to now, but an organiser can set the date the proposal actually reached
   // them. Without that, a late entry sorts to the top of the dashboard and lands on the
   // analytics chart on the day it was typed in rather than the day it was sent.
@@ -383,6 +390,7 @@ export async function createSubmission(
   try {
     await adminDb.collection('submissions').add({
       ...validated.values,
+      eventId,
       submittedAt,
       status: 'pending',
       // Provenance as a reviewer note rather than a bespoke field: the notes panel
@@ -785,10 +793,11 @@ export async function sendRejectionEmail(submissionId: string): Promise<{ error?
     if (!snap.exists) return { error: 'Submission not found.' };
     submission = snap.data()!;
 
-    // The whole collection rather than a where() on the address: an admin edit can leave
-    // stray capitals or spaces, and the dashboard groups on the normalised form. It is a
-    // few dozen documents.
-    const allSnap = await adminDb.collection('submissions').get();
+    // The event's proposals rather than a where() on the address: an admin edit can leave
+    // stray capitals or spaces, and the dashboard groups on the normalised form. Scoped to
+    // the event (stage 4b) because a rejection is about one call for speakers: someone
+    // turned down in 2026 and pending in 2027 is a different conversation.
+    const allSnap = await adminDb.collection('submissions').where('eventId', '==', String(submission.eventId ?? '')).get();
     const key = applicantKey(String(submission.email ?? ''));
     applicantProposals = allSnap.docs.filter((doc) => applicantKey(String(doc.data().email ?? '')) === key);
   } catch {

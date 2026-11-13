@@ -2,6 +2,7 @@ import { SITE_OG_IMAGE } from '@/lib/metadata';
 import { getVerifiedSession } from '@/lib/adminSession';
 import { fetchFeedbackResponses } from '@/lib/feedback';
 import FeedbackDashboard from '../../FeedbackDashboard';
+import { getAdminEventId } from '@/lib/adminEvent';
 
 export const metadata = {
   title: 'Feedback',
@@ -10,6 +11,7 @@ export const metadata = {
 };
 
 export default async function FeedbackAdminPage() {
-  const [, responses] = await Promise.all([getVerifiedSession(), fetchFeedbackResponses()]);
+  const eventId = await getAdminEventId();
+  const [, responses] = await Promise.all([getVerifiedSession(), fetchFeedbackResponses(eventId)]);
   return <FeedbackDashboard responses={responses} />;
 }

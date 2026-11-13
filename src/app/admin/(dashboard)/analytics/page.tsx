@@ -4,6 +4,7 @@ import { fetchSubmissions } from '@/lib/submissions';
 import { fetchVolunteerSignups } from '@/lib/volunteers';
 import { fetchShowcaseSubmissions } from '@/lib/showcaseSubmissions';
 import AnalyticsView, { isAnalyticsTab } from './AnalyticsView';
+import { getAdminEventId } from '@/lib/adminEvent';
 
 export const metadata = {
   title: 'Analytics',
@@ -16,12 +17,13 @@ interface AnalyticsPageProps {
 }
 
 export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps) {
+  const eventId = await getAdminEventId();
   const [, { tab }, submissions, volunteers, showcaseEntries] = await Promise.all([
     getVerifiedSession(),
     searchParams,
-    fetchSubmissions(),
-    fetchVolunteerSignups(),
-    fetchShowcaseSubmissions(),
+    fetchSubmissions(eventId),
+    fetchVolunteerSignups(eventId),
+    fetchShowcaseSubmissions(eventId),
   ]);
   const activeTab = isAnalyticsTab(tab) ? tab : 'speakers';
 

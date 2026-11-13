@@ -261,6 +261,16 @@ Ruled out:
 
 #### 4b. `eventId` on everything event-shaped
 
+**Built 2026-11-13, not yet deployed.** What was built, and where it differs from the plan below:
+- `eventId` is on `submissions`, `showcase`, `volunteers`, `schedule`, `feedback` and also `speakers` (not in the plan: until 4c moves it onto talks, a speaker needs its own, and a co-speaker takes its lead's). `scripts/migrate-event-ids.mjs` stamps every existing document `devfest-2026` (245 as of today), skipping any that already have one.
+- New entries: the three form endpoints file under the current DevFest they were open for; an admin-entered proposal and Add organiser under the event selected in the sidebar; a promoted speaker under its proposal's event. `/feedback` and `/credits` are pinned to `devfest-2026` (`FEEDBACK_EVENT_ID`, and the credit workshop list), since both are about that day: once 2027 is current, a late 2026 answer must not be filed under it. 4e makes the survey follow an event.
+- **No composite indexes** (a change from the plan): every list is `where('eventId', '==', ...)` and sorted in memory (`src/lib/eventScope.ts`). A filter plus `orderBy` needs an index per collection, built before the code that uses it can deploy; these collections hold a few hundred documents. Add indexes if one grows past a few thousand.
+- The switcher is a select at the top of the admin sidebar and the mobile menu, kept in the `admin-event` cookie (path `/admin`, per browser), defaulting to the current DevFest (`src/lib/adminEvent.ts`). Meetup talks, Credits, Links, Events and Admins ignore it.
+- Rejection emails group a person's rejected proposals within one event only. Calendar invites read the schedule of the speaker's own event, not the selected one.
+- `scripts/seed-schedule.mjs` has an `EVENT_ID`, writes it on each slot, matches speaker names and deletes stale slots within that event only. 2026 slot ids keep their old form; other events' get the event id as a prefix.
+- Public API: `/api/public/events/<id>/speakers` and `/schedule`. The original `/api/public/speakers` and `/schedule` now answer for whichever DevFest is current (404 if none).
+- Deploy order: run `node scripts/migrate-event-ids.mjs` BEFORE pushing (the new code lists only stamped records), then once more after the deploy, for anything the old code wrote in between.
+
 - Add `eventId` to `submissions`, `showcase`, `schedule`, `feedback` and `volunteers` (all `devfest-2026` in the migration). `meetupProposals` gains it only when a talk is accepted into a meetup, since a `/speak` proposal is made to GDG Sydney, not to a particular night.
 - Schedule slot ids gain the event as a prefix for new events (`devfest-2027-1050-auditorium`); the 2026 ids stay as they are.
 - An event switcher in `AdminShell`, kept in a cookie so it survives moving between sections, defaulting to the current DevFest. Submissions, Showcase, Volunteers, Crew, Speakers, Analytics and Feedback filter by it, and Firestore indexes are added for `eventId` + `submittedAt`.

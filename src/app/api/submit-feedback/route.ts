@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { FieldValue } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
-import { validateFeedback, type FeedbackFields } from '@/lib/feedback';
+import { FEEDBACK_EVENT_ID, validateFeedback, type FeedbackFields } from '@/lib/feedback';
 
 // The post-event survey. No confirmation email: most responses are anonymous, and an
 // email address, when given, is only so an organiser can reply to what someone wrote.
@@ -20,6 +20,7 @@ export async function POST(request: NextRequest) {
   try {
     await adminDb.collection('feedback').add({
       ...response,
+      eventId: FEEDBACK_EVENT_ID,
       submittedAt: FieldValue.serverTimestamp(),
     });
   } catch (error) {

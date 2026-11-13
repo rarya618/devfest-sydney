@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useRef, useEffect, type ReactNode } from 'react';
+import { useState, useRef, useEffect, useTransition, type ReactNode } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getInitials } from '@/lib/format';
 import Alert from '@/components/Alert';
 import { MobileBarContext } from './MobileBarContext';
+import { selectAdminEvent } from './eventActions';
 
 interface NavItem {
   href: string;
@@ -59,7 +60,60 @@ const NAV_GROUPS: NavGroup[] = [
 interface Props {
   adminEmail: string;
   adminName: string;
+  events: EventOption[];
+  selectedEventId: string | null;
   children: ReactNode;
+}
+
+interface EventOption {
+  id: string;
+  name: string;
+}
+
+interface EventSwitcherProps {
+  events: EventOption[];
+  selectedEventId: string | null;
+  onError: (message: string) => void;
+  idSuffix: string;
+}
+
+// Which event the event-shaped sections show (stage 4b, PM.md). A native select: it is
+// keyboard and screen-reader friendly as it is, and the list is short.
+function EventSwitcher({ events, selectedEventId, onError, idSuffix }: EventSwitcherProps) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  if (events.length === 0) return null;
+
+  function handleChange(eventId: string) {
+    startTransition(async () => {
+      const result = await selectAdminEvent(eventId);
+      if (result.error) onError(result.error);
+      else router.refresh();
+    });
+  }
+
+  const selectId = `admin-event-switcher-${idSuffix}`;
+  return (
+    <div className="px-4">
+      <label htmlFor={selectId} className="block font-mono text-[11px] uppercase tracking-[0.12em] text-white/50 mb-1.5">
+        Event
+      </label>
+      <select
+        id={selectId}
+        value={selectedEventId ?? ''}
+        onChange={(changeEvent) => handleChange(changeEvent.target.value)}
+        disabled={isPending}
+        aria-label="Choose which event the admin sections show"
+        className="w-full rounded-lg border border-white/35 bg-white/[0.06] px-3 py-2 text-sm font-semibold text-white focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40 disabled:opacity-60"
+      >
+        {events.map((event) => (
+          <option key={event.id} value={event.id} className="bg-[#191a1d]">
+            {event.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
 }
 
 function isActive(href: string, pathname: string): boolean {
@@ -142,7 +196,7 @@ function AccountRow({ adminName, adminEmail, signingOut, onSignOut }: AccountRow
   );
 }
 
-export default function AdminShell({ adminEmail, adminName, children }: Props) {
+export default function AdminShell({ adminEmail, adminName, events, selectedEventId, children }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
@@ -239,6 +293,9 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
         <>
           <div className="fixed inset-0 z-40 md:hidden" onClick={() => setMobileMenuOpen(false)} aria-hidden="true" />
           <div className="md:hidden fixed top-[57px] right-3 mt-2 z-50 w-72 max-w-[calc(100vw-1.5rem)] bg-[#191a1d] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden">
+            <div className="pt-3 pb-1">
+              <EventSwitcher events={events} selectedEventId={selectedEventId} onError={setAlertMessage} idSuffix="mobile" />
+            </div>
             <div className="py-1.5">
               <NavLinks pathname={pathname} onNavigate={() => setMobileMenuOpen(false)} rounded={false} />
             </div>
@@ -252,6 +309,9 @@ export default function AdminShell({ adminEmail, adminName, children }: Props) {
       {/* Sidebar (desktop only) */}
       <aside className="hidden md:sticky md:flex top-0 left-0 z-50 w-64 shrink-0 h-screen flex-col border-r border-white/10 px-3 pt-7 pb-4 bg-[#010103]">
         <div className="pl-3 mb-6">{wordmark}</div>
+        <div className="-mx-1 mb-6">
+          <EventSwitcher events={events} selectedEventId={selectedEventId} onError={setAlertMessage} idSuffix="sidebar" />
+        </div>
 
         <div className="flex-1">
           <NavLinks pathname={pathname} rounded />

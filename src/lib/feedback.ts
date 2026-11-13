@@ -1,4 +1,4 @@
-import { adminDb } from '@/lib/firebase-admin';
+import { loadEventDocs, newestSubmittedFirst } from '@/lib/eventScope';
 import type { Timestamp } from 'firebase-admin/firestore';
 import { fetchPublicSchedule, formatScheduleTime } from '@/lib/schedule';
 import { EMAIL_PATTERN } from '@/lib/emailPattern';
@@ -30,8 +30,13 @@ function sessionTitleOf(slot: PublicScheduleSlot): string {
   return slot.kind === 'plenary' ? slot.talkTitle ?? slot.title : slot.title;
 }
 
+// The survey's questions and copy are about DevFest 2026, so its answers are filed under that
+// event (stage 4b) rather than whichever DevFest is current: a late answer arriving after next
+// year's is made current must not land there. 4e makes the survey follow an event.
+export const FEEDBACK_EVENT_ID = 'devfest-2026';
+
 export async function fetchFeedbackSessionOptions(): Promise<FeedbackSessionOption[]> {
-  const schedule = await fetchPublicSchedule();
+  const schedule = await fetchPublicSchedule(FEEDBACK_EVENT_ID);
   return schedule
     .filter((slot) => slot.speakers.length > 0 && (slot.kind === 'session' || slot.talkTitle))
     .map((slot) => ({
@@ -133,7 +138,7 @@ function toFeedbackResponse(id: string, data: FirebaseFirestore.DocumentData): F
   };
 }
 
-export async function fetchFeedbackResponses(): Promise<FeedbackResponse[]> {
-  const snapshot = await adminDb.collection('feedback').orderBy('submittedAt', 'desc').get();
-  return snapshot.docs.map((doc) => toFeedbackResponse(doc.id, doc.data()));
+export async function fetchFeedbackResponses(eventId: string): Promise<FeedbackResponse[]> {
+  const docs = await loadEventDocs('feedback', eventId);
+  return docs.map((doc) => toFeedbackResponse(doc.id, doc.data())).sort(newestSubmittedFirst);
 }
