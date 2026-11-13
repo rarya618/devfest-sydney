@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState, useTransition, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, useTransition, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Alert from '@/components/Alert';
 import { hintClass, inputNormal, labelClass } from '@/lib/formStyles';
@@ -14,10 +14,21 @@ interface SavedTalkEditorProps {
   initialFields: SavedTalkFields;
   // Where it has been proposed, to explain that those proposals won't change.
   proposedCount: number;
+  // Inline use, inside the dashboard: saving refreshes the page in place and calls onSaved
+  // instead of going back to the dashboard, and a Cancel button calls onCancel.
+  onSaved?: () => void;
+  onCancel?: () => void;
 }
 
-export default function SavedTalkEditor({ savedTalkId, initialFields, proposedCount }: SavedTalkEditorProps) {
+export default function SavedTalkEditor({ savedTalkId, initialFields, proposedCount, onSaved, onCancel }: SavedTalkEditorProps) {
   const router = useRouter();
+  const isInline = Boolean(onSaved);
+  const titleInput = useRef<HTMLInputElement>(null);
+
+  // Inline, the form opens because someone asked for it: put them in the first field.
+  useEffect(() => {
+    if (isInline) titleInput.current?.focus();
+  }, [isInline]);
   const [fields, setFields] = useState<SavedTalkFields>(initialFields);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
@@ -38,7 +49,10 @@ export default function SavedTalkEditor({ savedTalkId, initialFields, proposedCo
     startTransition(async () => {
       const result = await saveTalkForLater(savedTalkId, fields);
       if ('error' in result) setAlertMessage(result.error);
-      else router.push('/speaker');
+      else if (onSaved) {
+        router.refresh();
+        onSaved();
+      } else router.push('/speaker');
     });
   }
 
@@ -60,11 +74,11 @@ export default function SavedTalkEditor({ savedTalkId, initialFields, proposedCo
           <label htmlFor="saved-title" className={labelClass}>
             Title <span className="text-google-red-light" aria-hidden="true">*</span>
           </label>
-          <input id="saved-title" value={fields.talkTitle} required maxLength={SAVED_TALK_LIMITS.talkTitle} onChange={(event) => update('talkTitle', event.target.value)} className={inputNormal} />
+          <input ref={titleInput} id="saved-title" value={fields.talkTitle} required maxLength={SAVED_TALK_LIMITS.talkTitle} onChange={(event) => update('talkTitle', event.target.value)} className={inputNormal} />
         </div>
         <div>
           <label htmlFor="saved-abstract" className={labelClass}>Abstract</label>
-          <textarea id="saved-abstract" rows={8} value={fields.abstract} maxLength={SAVED_TALK_LIMITS.abstract} aria-describedby="saved-abstract-hint" onChange={(event) => update('abstract', event.target.value)} className={`${inputNormal} resize-y`} />
+          <textarea id="saved-abstract" rows={isInline ? 5 : 8} value={fields.abstract} maxLength={SAVED_TALK_LIMITS.abstract} aria-describedby="saved-abstract-hint" onChange={(event) => update('abstract', event.target.value)} className={`${inputNormal} resize-y`} />
           <p id="saved-abstract-hint" className={hintClass}>
             What the session is about and what people take away. {fields.abstract.length} of {SAVED_TALK_LIMITS.abstract} characters.
           </p>
@@ -86,6 +100,11 @@ export default function SavedTalkEditor({ savedTalkId, initialFields, proposedCo
           <button type="submit" disabled={isPending} aria-label="Save this talk" className={primaryButton}>
             {isPending ? 'Saving…' : 'Save talk'}
           </button>
+          {onCancel && (
+            <button type="button" disabled={isPending} onClick={onCancel} aria-label="Cancel adding a talk" className={secondaryButton}>
+              Cancel
+            </button>
+          )}
           {savedTalkId &&
             (isConfirmingDelete ? (
               <>

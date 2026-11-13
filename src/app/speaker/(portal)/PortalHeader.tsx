@@ -41,12 +41,13 @@ async function ProfileButton({ email }: { email: string }) {
 }
 
 // Rendered by the layout, so it stays on screen while the page below it loads: moving between
-// portal pages swaps only the content. Signed out (the sign-in pages), it shows just the logo.
+// portal pages swaps only the content. Sticky, on a slightly see-through page colour so content
+// scrolling under it stays legible. Signed out (the sign-in pages), it shows just the logo.
 export default async function PortalHeader() {
   // A failed read shows the signed-out header; the page itself decides what to do.
   const session = await getPortalSession().catch(() => null);
   return (
-    <header>
+    <header className="sticky top-0 z-40 bg-black-02/90 backdrop-blur-md supports-[backdrop-filter]:bg-black-02/80">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
         <Link
           href="/speaker"

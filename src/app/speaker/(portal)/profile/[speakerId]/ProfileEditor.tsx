@@ -94,7 +94,7 @@ export default function ProfileEditor({ profile }: ProfileEditorProps) {
 
   return (
     <div className="grid gap-12 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-16">
-      <div className="lg:sticky lg:top-8 lg:self-start">
+      <div className="lg:sticky lg:top-28 lg:self-start">
         <SpeakerCard
           profile={{
             name: profile.name,

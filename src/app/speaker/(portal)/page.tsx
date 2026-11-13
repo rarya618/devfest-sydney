@@ -10,6 +10,7 @@ import {
 } from '@/lib/portalData';
 import { listSavedTalks, type SavedTalk } from '@/lib/portalSavedTalks';
 import PortalShell from './PortalShell';
+import AddSavedTalk from './AddSavedTalk';
 import SpeakerCard from './SpeakerCard';
 import { pageHeading, primaryButton, primaryButtonSmall, secondaryButton, sectionHeading } from './portalStyles';
 
@@ -180,13 +181,7 @@ function Proposals({ proposals }: { proposals: PortalProposal[] }) {
 function SavedTalks({ savedTalks, proposals }: { savedTalks: SavedTalk[]; proposals: PortalProposal[] }) {
   return (
     <section aria-labelledby="saved-talks-heading">
-      <div className="flex items-center justify-between gap-4">
-        <h2 id="saved-talks-heading" className={sectionHeading}>Saved talks</h2>
-        <Link href="/speaker/talks/new" aria-label="Add a talk to propose later" className={secondaryButton}>
-          Add a talk
-        </Link>
-      </div>
-      <p className="mt-2 text-sm text-white/60">Only you can see these until you propose them.</p>
+      <AddSavedTalk>
       {savedTalks.length === 0 ? (
         <p className="mt-4 py-5 border-t border-white/10 text-white/60">
           Keep a talk idea here and propose it when you&rsquo;re ready, to a meetup, DevFest, or both.
@@ -219,6 +214,7 @@ function SavedTalks({ savedTalks, proposals }: { savedTalks: SavedTalk[]; propos
           })}
         </ul>
       )}
+      </AddSavedTalk>
     </section>
   );
 }
@@ -257,7 +253,7 @@ export default async function PortalHomePage() {
         </p>
       ) : (
         <div className="grid gap-12 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-16">
-          <aside aria-label="Your speaker profile" className="lg:sticky lg:top-8 lg:self-start">
+          <aside aria-label="Your speaker profile" className="lg:sticky lg:top-28 lg:self-start">
             <ProfileColumn profiles={overview.profiles} />
           </aside>
           <div className="space-y-14 min-w-0">
