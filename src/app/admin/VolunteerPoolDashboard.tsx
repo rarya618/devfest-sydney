@@ -183,7 +183,7 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
         </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <div role="group" aria-label="Filter the pool" className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:flex-wrap md:overflow-visible">
+          <div role="group" aria-label="Filter the pool" className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {filterTabs.map((tab) => (
               <button
                 key={tab.value}
