@@ -5,13 +5,20 @@ import { getInitials } from '@/lib/format';
 import { requirePortalSession } from '@/lib/portalAuth';
 import { loadPortalOverview, type PortalOverview, type PortalProfile, type PortalTalk } from '@/lib/portalData';
 import { PORTAL_STATUS_LABELS, PORTAL_STATUS_STYLES } from '@/lib/portalLabels';
+import { listSavedTalks, type SavedTalk } from '@/lib/portalSavedTalks';
 import PortalShell from './PortalShell';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'Your talks' };
+export const metadata: Metadata = { title: { absolute: 'Your talks — GDG Sydney speaker portal' } };
 
 const linkButton =
   'inline-flex items-center px-5 py-2 text-sm font-bold text-white rounded border border-white/35 transition-colors hover:border-white';
+
+// "a photo", "a photo and a bio", "a photo, a tagline and a bio".
+function listInWords(parts: (string | false)[]): string {
+  const words = parts.filter((part): part is string => Boolean(part));
+  return words.length <= 1 ? words.join('') : `${words.slice(0, -1).join(', ')} and ${words[words.length - 1]}`;
+}
 
 function formatEventDate(iso: string | null, timeZone: string): string {
   if (!iso) return '';
@@ -51,7 +58,7 @@ function ProfileCard({ profile }: { profile: PortalProfile }) {
           {profile.tagline && <p className="mt-1 text-white/70">{profile.tagline}</p>}
           {isIncomplete && (
             <p className="mt-2 text-sm text-google-yellow">
-              Your profile is missing {[!profile.photoUrl && 'a photo', !profile.tagline && 'a tagline', !profile.bio && 'a bio'].filter(Boolean).join(', ')}.
+              Your profile is missing {listInWords([!profile.photoUrl && 'a photo', !profile.tagline && 'a tagline', !profile.bio && 'a bio'])}.
             </p>
           )}
           <Link href={`/portal/profile/${profile.id}`} aria-label={`Edit the speaker profile for ${profile.name}`} className={`${linkButton} mt-4`}>
@@ -65,6 +72,54 @@ function ProfileCard({ profile }: { profile: PortalProfile }) {
         <ul>{profile.talks.map((talk) => <TalkRow key={talk.talkId} talk={talk} />)}</ul>
       ) : (
         <p className="text-white/60">No talks on the schedule yet.</p>
+      )}
+    </section>
+  );
+}
+
+function SavedTalks({ savedTalks, proposals }: { savedTalks: SavedTalk[]; proposals: PortalOverview['proposals'] }) {
+  return (
+    <section aria-labelledby="saved-talks-heading" className="mt-12">
+      <div className="flex items-end justify-between gap-4 mb-2">
+        <h2 id="saved-talks-heading" className="text-2xl font-bold">Saved talks</h2>
+        <Link href="/portal/talks/new" aria-label="Add a talk to propose later" className={linkButton}>
+          Add a talk
+        </Link>
+      </div>
+      <p className="mb-5 text-white/60">Talks you keep here to propose when you&rsquo;re ready. Only you can see them.</p>
+      {savedTalks.length === 0 ? (
+        <p className="rounded-2xl border border-dashed border-white/15 px-6 py-5 text-white/60">
+          No saved talks yet. Add one now and propose it whenever you like.
+        </p>
+      ) : (
+        <ul className="rounded-2xl border border-white/10 bg-white/[0.04] px-6 sm:px-8">
+          {savedTalks.map((savedTalk) => {
+            const proposedAs = proposals.filter((proposal) => proposal.savedTalkId === savedTalk.id);
+            return (
+              <li key={savedTalk.id} className="py-5 border-t border-white/10 first:border-t-0 flex flex-col sm:flex-row sm:items-start gap-4 sm:justify-between">
+                <div className="min-w-0">
+                  <p className="font-bold text-white">{savedTalk.talkTitle}</p>
+                  {savedTalk.abstract && <p className="mt-1 text-sm text-white/60 line-clamp-2">{savedTalk.abstract}</p>}
+                  <p className="mt-2 font-mono text-sm text-white/60">
+                    {proposedAs.length === 0
+                      ? 'Not proposed yet'
+                      : `Proposed to ${proposedAs
+                          .map((proposal) => proposal.eventName ?? (proposal.kind === 'meetup' ? 'a meetup' : 'DevFest'))
+                          .join(', ')}`}
+                  </p>
+                </div>
+                <div className="flex gap-3 shrink-0">
+                  <Link href={`/portal/talks/${savedTalk.id}`} aria-label={`Edit ${savedTalk.talkTitle}`} className={linkButton}>
+                    Edit
+                  </Link>
+                  <Link href={`/portal/propose?talk=${savedTalk.id}`} aria-label={`Propose ${savedTalk.talkTitle}`} className="inline-flex items-center px-5 py-2 text-sm font-bold text-white rounded bg-google-blue-deep transition-opacity hover:opacity-80">
+                    Propose
+                  </Link>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
       )}
     </section>
   );
@@ -110,8 +165,9 @@ export default async function PortalHomePage() {
   const session = await requirePortalSession();
 
   let overview: PortalOverview | null = null;
+  let savedTalks: SavedTalk[] = [];
   try {
-    overview = await loadPortalOverview(session.email);
+    [overview, savedTalks] = await Promise.all([loadPortalOverview(session.email), listSavedTalks(session.email)]);
   } catch (error) {
     console.error('Portal overview failed for', session.email, error);
   }
@@ -151,6 +207,7 @@ export default async function PortalHomePage() {
               </p>
             </div>
           )}
+          <SavedTalks savedTalks={savedTalks} proposals={overview.proposals} />
           <Proposals proposals={overview.proposals} />
         </>
       )}

@@ -41,3 +41,32 @@ export const PORTAL_STATUS_STYLES: Record<PortalProposalStatus, { text: string; 
   'not-selected': { text: 'text-white/60', dot: 'bg-white/60' },
   closed: { text: 'text-white/60', dot: 'bg-white/60' },
 };
+
+// A talk a speaker keeps in the portal to propose later, possibly more than once.
+export const SAVED_TALK_LIMITS = {
+  talkTitle: 200,
+  abstract: 2000,
+  audience: 1000,
+} as const;
+
+// Plenty for real use; stops the collection being used as free storage.
+export const MAX_SAVED_TALKS = 50;
+
+export interface SavedTalkFields {
+  talkTitle: string;
+  abstract: string;
+  audience: string;
+}
+
+// Shared by the editor and the server, so the messages match. Only the title is required:
+// a saved talk can be a half-formed idea.
+export function findSavedTalkError(fields: SavedTalkFields): string | null {
+  if (!fields.talkTitle.trim()) return 'Please give your talk a title.';
+  for (const key of ['talkTitle', 'abstract', 'audience'] as const) {
+    if (fields[key].trim().length > SAVED_TALK_LIMITS[key]) {
+      const label = { talkTitle: 'title', abstract: 'abstract', audience: 'audience' }[key];
+      return `The ${label} can be up to ${SAVED_TALK_LIMITS[key]} characters.`;
+    }
+  }
+  return null;
+}

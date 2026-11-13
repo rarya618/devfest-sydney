@@ -212,9 +212,16 @@ function buildDevfestConfirmationEmail(submission: DevfestProposalPayload, event
 // Stores a DevFest proposal under the event that is taking proposals and emails the
 // speaker a copy (bcc hello@, which is how organisers hear about it). Throws when the
 // write fails; a failed email is logged and swallowed, since the proposal is already saved.
-export async function fileDevfestProposal(submission: DevfestProposalPayload, eventId: string, eventName: string): Promise<string> {
+// savedTalkId is set when the speaker portal proposes one of a speaker's saved talks.
+export async function fileDevfestProposal(
+  submission: DevfestProposalPayload,
+  eventId: string,
+  eventName: string,
+  savedTalkId: string | null = null
+): Promise<string> {
   const created = await adminDb.collection('submissions').add({
     ...submission,
+    ...(savedTalkId ? { savedTalkId } : {}),
     eventId,
     submittedAt: FieldValue.serverTimestamp(),
     status: 'pending',
@@ -348,9 +355,14 @@ export type MeetupProposalSource = 'gdgsydney.com/speak' | 'speaker-portal';
 
 // Stores a meetup proposal (no event yet: one is picked on acceptance) and emails the speaker
 // a copy, bcc hello@. Throws when the write fails; a failed email is logged and swallowed.
-export async function fileMeetupProposal(proposal: MeetupProposalFields, source: MeetupProposalSource): Promise<string> {
+export async function fileMeetupProposal(
+  proposal: MeetupProposalFields,
+  source: MeetupProposalSource,
+  savedTalkId: string | null = null
+): Promise<string> {
   const created = await adminDb.collection('meetupProposals').add({
     ...proposal,
+    ...(savedTalkId ? { savedTalkId } : {}),
     source,
     status: 'pending',
     submittedAt: FieldValue.serverTimestamp(),

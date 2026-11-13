@@ -51,6 +51,8 @@ export interface PortalProposal {
   // The signed /speaker/confirm link, for an accepted proposal not yet confirmed. The portal
   // session already proves the address, so handing it over shows nothing new.
   confirmUrl: string | null;
+  // The saved talk it was proposed from (src/lib/portalSavedTalks.ts), if any.
+  savedTalkId: string | null;
 }
 
 export interface PortalOverview {
@@ -175,6 +177,7 @@ export async function loadPortalOverview(email: string): Promise<PortalOverview>
         submittedAt: isoOrNull(proposal.submittedAt),
         status,
         confirmUrl: status === 'accepted' ? confirmUrl(doc.id) : null,
+        savedTalkId: text(proposal.savedTalkId) || null,
       };
     })
     .sort((first, second) => String(second.submittedAt).localeCompare(String(first.submittedAt)));

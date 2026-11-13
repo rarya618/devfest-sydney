@@ -6,8 +6,10 @@ import Alert from '@/components/Alert';
 import { hintClass, inputNormal, labelClass, optionButtonClass, submitClass } from '@/lib/formStyles';
 import { MEETUP_FORMAT_LABELS, MEETUP_FORMATS, MEETUP_PROPOSAL_LIMITS } from '@/lib/meetupProposalLabels';
 import type { PortalProfile } from '@/lib/portalData';
+import { findSavedTalkError } from '@/lib/portalLabels';
+import type { SavedTalk } from '@/lib/portalSavedTalks';
 import type { MeetupFormat } from '@/lib/types';
-import { submitPortalProposal } from '../actions';
+import { saveTalkForLater, submitPortalProposal } from '../actions';
 
 type ProposalKind = 'meetup' | 'devfest';
 type DevfestTrack = 'developer' | 'builder' | 'workshop';
@@ -18,6 +20,9 @@ interface ProposalFormProps {
   profiles: Omit<PortalProfile, 'talks'>[];
   // The current DevFest, when its Call for Speakers is open.
   openDevfest: { name: string; closesAt: string | null } | null;
+  savedTalks: SavedTalk[];
+  // From ?talk=: the saved talk to start from.
+  initialSavedTalkId: string | null;
 }
 
 const DEVFEST_ABSTRACT_MAX = 2000;
@@ -121,7 +126,10 @@ function TextField({
   );
 }
 
-export default function ProposalForm({ profiles, openDevfest }: ProposalFormProps) {
+export default function ProposalForm({ profiles, openDevfest, savedTalks, initialSavedTalkId }: ProposalFormProps) {
+  const initialSavedTalk = savedTalks.find((savedTalk) => savedTalk.id === initialSavedTalkId) ?? null;
+  const [savedTalkId, setSavedTalkId] = useState<string | null>(initialSavedTalk?.id ?? null);
+  const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const firstProfile = profiles[0] ?? null;
   const [kind, setKind] = useState<ProposalKind>('meetup');
   const [profileId, setProfileId] = useState<string>(firstProfile?.id ?? '');
@@ -134,13 +142,13 @@ export default function ProposalForm({ profiles, openDevfest }: ProposalFormProp
   const profile = profiles.find((candidate) => candidate.id === profileId) ?? null;
 
   // Shared between both kinds.
-  const [talkTitle, setTalkTitle] = useState('');
-  const [abstract, setAbstract] = useState('');
+  const [talkTitle, setTalkTitle] = useState(initialSavedTalk?.talkTitle ?? '');
+  const [abstract, setAbstract] = useState(initialSavedTalk?.abstract ?? '');
   const [bio, setBio] = useState(firstProfile?.bio ?? '');
 
   // Meetup.
   const [meetupFormat, setMeetupFormat] = useState<MeetupFormat | ''>('');
-  const [audience, setAudience] = useState('');
+  const [audience, setAudience] = useState(initialSavedTalk?.audience ?? '');
   const [profileUrl, setProfileUrl] = useState(firstProfile?.linkedinUrl || firstProfile?.websiteUrl || '');
   const [speakingExperience, setSpeakingExperience] = useState('');
   const [notes, setNotes] = useState('');
@@ -170,6 +178,35 @@ export default function ProposalForm({ profiles, openDevfest }: ProposalFormProp
     setGithubUrl(next.githubUrl);
     setWebsiteUrl(next.websiteUrl);
     setProfileUrl(next.linkedinUrl || next.websiteUrl);
+  }
+
+  function startFromSavedTalk(nextId: string) {
+    const savedTalk = savedTalks.find((candidate) => candidate.id === nextId) ?? null;
+    setSavedTalkId(savedTalk?.id ?? null);
+    setSavedMessage(null);
+    if (!savedTalk) return;
+    setTalkTitle(savedTalk.talkTitle);
+    setAbstract(savedTalk.abstract);
+    setAudience(savedTalk.audience);
+  }
+
+  // Keeps the title, abstract and audience under Saved talks without sending anything: a new
+  // saved talk, or an update to the one the form started from.
+  function handleSaveForLater() {
+    const fields = { talkTitle, abstract, audience };
+    const problem = findSavedTalkError(fields);
+    if (problem) {
+      setAlertMessage(problem);
+      return;
+    }
+    startTransition(async () => {
+      const result = await saveTalkForLater(savedTalkId, fields);
+      if ('error' in result) setAlertMessage(result.error);
+      else {
+        setSavedTalkId(result.savedTalkId);
+        setSavedMessage('Saved under Saved talks. Nothing has been sent.');
+      }
+    });
   }
 
   function missingRequired(): string | null {
@@ -218,7 +255,7 @@ export default function ProposalForm({ profiles, openDevfest }: ProposalFormProp
             ...Object.fromEntries(DEVFEST_CHECKBOXES.map((box) => [box.key, checks[box.key] === true])),
           };
     startTransition(async () => {
-      const result = await submitPortalProposal({ kind, profileId: profile?.id ?? null, name, fields });
+      const result = await submitPortalProposal({ kind, profileId: profile?.id ?? null, name, savedTalkId, fields });
       if (result.error) setAlertMessage(result.error);
       else {
         setSubmitted(true);
@@ -265,6 +302,19 @@ export default function ProposalForm({ profiles, openDevfest }: ProposalFormProp
           <p className="text-white/70">Proposing as <span className="font-bold text-white">{profile.name}</span>.</p>
         ) : (
           <TextField id="proposal-name" label="Your full name" value={name} onChange={setName} isRequired maxLength={MEETUP_PROPOSAL_LIMITS.name} />
+        )}
+
+        {savedTalks.length > 0 && (
+          <div>
+            <label htmlFor="proposal-saved-talk" className={labelClass}>Start from a saved talk</label>
+            <select id="proposal-saved-talk" value={savedTalkId ?? ''} onChange={(event) => startFromSavedTalk(event.target.value)} className={inputNormal}>
+              <option value="" className="bg-[#1e1e1e]">A new talk</option>
+              {savedTalks.map((savedTalk) => (
+                <option key={savedTalk.id} value={savedTalk.id} className="bg-[#1e1e1e]">{savedTalk.talkTitle}</option>
+              ))}
+            </select>
+            <p className={hintClass}>Fills in the title, abstract and audience. Changes here are only for this proposal unless you save them.</p>
+          </div>
         )}
 
         <TextField id="proposal-title" label="Talk title" value={talkTitle} onChange={setTalkTitle} isRequired maxLength={MEETUP_PROPOSAL_LIMITS.talkTitle} />
@@ -331,9 +381,21 @@ export default function ProposalForm({ profiles, openDevfest }: ProposalFormProp
           </>
         )}
 
-        <button type="submit" disabled={isPending} aria-label="Send your proposal" className={submitClass}>
-          {isPending ? 'Sending…' : 'Send proposal'}
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <button type="submit" disabled={isPending} aria-label="Send your proposal" className={submitClass}>
+            {isPending ? 'Working…' : 'Send proposal'}
+          </button>
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={handleSaveForLater}
+            aria-label={savedTalkId ? 'Save changes to this saved talk without sending it' : 'Save this talk for later without sending it'}
+            className="inline-flex items-center px-6 py-2 text-base font-bold text-white rounded border border-white/35 transition-colors hover:border-white disabled:opacity-50"
+          >
+            {savedTalkId ? 'Update saved talk' : 'Save for later'}
+          </button>
+          {savedMessage && <p role="status" className="text-sm text-google-green">{savedMessage}</p>}
+        </div>
       </form>
       {alertMessage && <Alert message={alertMessage} onDismiss={dismissAlert} />}
     </>

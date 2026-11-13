@@ -72,6 +72,11 @@ rules_version='2';
 //   - answer: string (required, 1–2000 chars)
 //   - order: number (optional, non-negative integer)
 //
+// Collection: savedTalks
+// A speaker portal user's talks kept to propose later (src/lib/portalSavedTalks.ts):
+//   ownerEmail (normalised), talkTitle, abstract, audience, createdAt, updatedAt.
+// Admin SDK only, with no match block. Proposals made from one carry its savedTalkId.
+//
 // Collections: portalSignInLinks, portalSignInRequests, portalSessions
 // The speaker portal's sign-in (src/lib/portalAuth.ts). Admin SDK only, with no match block,
 // so every client read and write is denied. Document ids are SHA-256 hashes of the emailed

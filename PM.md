@@ -24,7 +24,7 @@ This file describes the app as it is now and what is left to do. The history of 
 - `/builder-showcase/confirm` : an accepted showcase entrant confirms; then shows the showcase ticket link
 - `/feedback` : DevFest 2026 survey (pinned to `devfest-2026` by `FEEDBACK_EVENT_ID`)
 - `/credits` : DevFest 2026 workshop credit requests (Shang Yi Lim's workshop only, `CREDIT_WORKSHOP_SLOT_IDS`)
-- `/portal` : the speaker portal (stage 6, below). `/portal/sign-in` and `/portal/sign-in/verify` are its sign-in; `/portal` lists the address's profiles, talks and proposals; `/portal/profile/<speakerId>` edits a profile; `/portal/propose` files a meetup proposal, or a DevFest one while the current DevFest's CfS is open
+- `/portal` : the speaker portal (stage 6, below). `/portal/sign-in` and `/portal/sign-in/verify` are its sign-in; `/portal` lists the address's profiles, talks and proposals; `/portal/profile/<speakerId>` edits a profile; `/portal/propose` files a meetup proposal, or a DevFest one while the current DevFest's CfS is open; `/portal/talks/new` and `/portal/talks/<id>` add and edit saved talks
 
 Every confirm-style page acts behind a button, never on page load, so mail scanners can't answer on someone's behalf. Each sends hello@gdgsydney.com a notice with `replyTo` set to the person, once, on the transition only.
 
@@ -63,6 +63,7 @@ Every collection is read and written through the Admin SDK; no client code uses 
 - **`showcase`:** Builder Showcase entries (no client writes at all)
 - **`schedule`:** slots with `eventId`, `kind` (session / break / plenary), `title`, `talkIds`, `startTime`, `durationMinutes`, `room`, `isTentative`. Loaded by `scripts/seed-schedule.mjs` (`EVENT_ID`, `--dry-run`); 2026 slot ids have no event prefix, later events' do
 - **`sponsors`**, **`partners`** (community partners, empty), **`admins`**
+- **`savedTalks`:** talks a portal user keeps to propose later: `ownerEmail`, title, abstract, audience. Private to the address until proposed; a proposal made from one records `savedTalkId` and is a copy
 - **`portalSignInLinks`, `portalSignInRequests`, `portalSessions`:** the speaker portal's sign-in (`src/lib/portalAuth.ts`). Ids are SHA-256 hashes (of the link token, the email, the cookie), so the collections hold nothing that signs anyone in. Each has `expiresAt`; used links and signed-out sessions are deleted, expired ones linger until a TTL policy is set (see Next tasks)
 - **Pinned to DevFest 2026, due for deletion** (see Next tasks): `speakerGifts`, `creditRequests`, `jobSeekers`, `jobListings`
 - `feedback`: survey answers, `eventId` on each
@@ -190,6 +191,7 @@ At `/portal`, its own area outside `/admin`. Decided 2026-11-14:
 - **A session is an email address, not a person.** The portal shows every `speakers` person with that `emailNormalised` (several, for a shared address) and every proposal in `submissions` / `meetupProposals` with that `email`. Any address can sign in, so a first-time speaker can propose; the sign-in form says the same thing whether or not we know the address.
 - **Profile edits go live at once** (tagline, bio, links, photo; not name or email, which stay with organisers since a rename moves the public slug), and hello@ gets a notice of each change with `replyTo` set to the speaker.
 - **Proposing** goes through the same validation, storage and confirmation email as the form endpoints (`src/lib/proposalFiling.ts`, shared with `/api/submit-proposal` and `/api/submit-meetup-proposal`). The email is always the session's. DevFest ones carry `tracking.ref = speaker-portal`, meetup ones `source = speaker-portal`.
+- **Saved talks** (added 2026-11-14 on request): a speaker can keep a talk without sending it, from "Add a talk" or "Save for later" on the proposal form, and propose it when ready. It stays after proposing, so one talk can go to a meetup and later to DevFest, and the dashboard lists where each has gone. Up to 50 per address.
 - **Status shows only what the speaker has been told:** a decision reads "Under review" until its acceptance or rejection email has gone. An accepted, unconfirmed proposal links to its `/speaker/confirm`.
 - Not built: talk editing, withdrawing a proposal, co-speakers seeing a proposal filed under the lead's address, a link to the portal from any email or from gdgsydney.com.
 

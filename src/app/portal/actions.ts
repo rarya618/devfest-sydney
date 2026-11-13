@@ -1,6 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { FieldValue } from 'firebase-admin/firestore';
 import { revalidatePath } from 'next/cache';
 import { Resend } from 'resend';
 import { adminDb } from '@/lib/firebase-admin';
@@ -10,7 +11,15 @@ import { currentDevfestFlowState, loadCurrentDevfest } from '@/lib/events';
 import { clearSpeakerPhoto, replaceSpeakerPhoto } from '@/lib/people';
 import { endPortalSession, getPortalSession, requestSignInLink, signInWithLink } from '@/lib/portalAuth';
 import { loadOwnedProfile } from '@/lib/portalData';
-import { PORTAL_PROFILE_FIELD_LABELS, PORTAL_PROFILE_LIMITS, type PortalProfileFields } from '@/lib/portalLabels';
+import {
+  findSavedTalkError,
+  MAX_SAVED_TALKS,
+  PORTAL_PROFILE_FIELD_LABELS,
+  PORTAL_PROFILE_LIMITS,
+  type PortalProfileFields,
+  type SavedTalkFields,
+} from '@/lib/portalLabels';
+import { loadOwnedSavedTalk } from '@/lib/portalSavedTalks';
 import { fileDevfestProposal, fileMeetupProposal, validateDevfestProposal, validateMeetupProposal } from '@/lib/proposalFiling';
 import { normaliseProfileUrl } from '@/lib/speakers';
 
@@ -192,6 +201,73 @@ export async function removePortalPhoto(speakerId: string): Promise<{ error?: st
 }
 
 // ---------------------------------------------------------------------------------------
+// Saved talks (src/lib/portalSavedTalks.ts)
+// ---------------------------------------------------------------------------------------
+
+function cleanSavedTalk(fields: SavedTalkFields): SavedTalkFields {
+  return {
+    talkTitle: String(fields.talkTitle ?? '').trim(),
+    abstract: String(fields.abstract ?? '').trim(),
+    audience: String(fields.audience ?? '').trim(),
+  };
+}
+
+// Creates a saved talk, or updates one when savedTalkId is given. Returns its id.
+export async function saveTalkForLater(
+  savedTalkId: string | null,
+  fields: SavedTalkFields
+): Promise<{ error: string } | { savedTalkId: string }> {
+  const values = cleanSavedTalk(fields);
+  const problem = findSavedTalkError(values);
+  if (problem) return { error: problem };
+
+  try {
+    const session = await getPortalSession();
+    if (!session) return { error: SESSION_EXPIRED };
+
+    if (savedTalkId) {
+      const existing = await loadOwnedSavedTalk(session.email, savedTalkId);
+      if (!existing) return { error: "We couldn't find this talk among your saved talks." };
+      await adminDb.collection('savedTalks').doc(savedTalkId).update({ ...values, updatedAt: FieldValue.serverTimestamp() });
+      revalidatePath('/portal', 'layout');
+      return { savedTalkId };
+    }
+
+    const count = (await adminDb.collection('savedTalks').where('ownerEmail', '==', session.email).count().get()).data().count;
+    if (count >= MAX_SAVED_TALKS) {
+      return { error: `You can keep up to ${MAX_SAVED_TALKS} saved talks. Delete one you no longer need to add another.` };
+    }
+    const created = await adminDb.collection('savedTalks').add({
+      ...values,
+      ownerEmail: session.email,
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+    revalidatePath('/portal', 'layout');
+    return { savedTalkId: created.id };
+  } catch (error) {
+    console.error('Saving a talk failed:', error);
+    return { error: "We couldn't save your talk just now. Please try again in a moment." };
+  }
+}
+
+// Deletes the saved talk only. Proposals made from it are copies and stay as they are.
+export async function deleteSavedTalk(savedTalkId: string): Promise<{ error?: string }> {
+  try {
+    const session = await getPortalSession();
+    if (!session) return { error: SESSION_EXPIRED };
+    const existing = await loadOwnedSavedTalk(session.email, savedTalkId);
+    if (!existing) return { error: "We couldn't find this talk among your saved talks." };
+    await adminDb.collection('savedTalks').doc(savedTalkId).delete();
+    revalidatePath('/portal', 'layout');
+    return {};
+  } catch (error) {
+    console.error('Deleting a saved talk failed:', error);
+    return { error: "We couldn't delete this talk just now. Please try again in a moment." };
+  }
+}
+
+// ---------------------------------------------------------------------------------------
 // Proposals
 // ---------------------------------------------------------------------------------------
 
@@ -201,6 +277,8 @@ export interface PortalProposalInput {
   // who types their name instead.
   profileId: string | null;
   name: string;
+  // The saved talk this proposal starts from, if any; recorded on the proposal.
+  savedTalkId: string | null;
   // The rest of the form, checked by the same validator as the public endpoint.
   fields: Record<string, unknown>;
 }
@@ -232,6 +310,16 @@ export async function submitPortalProposal(input: PortalProposalInput): Promise<
   }
   const body = { ...input.fields, name, email: session.email };
 
+  // Only recorded when the address owns it, so a proposal can't be tied to someone else's.
+  let savedTalkId: string | null = null;
+  if (input.savedTalkId) {
+    try {
+      savedTalkId = (await loadOwnedSavedTalk(session.email, input.savedTalkId))?.id ?? null;
+    } catch (error) {
+      console.error('Portal proposal saved-talk read failed:', error);
+    }
+  }
+
   if (input.kind === 'meetup') {
     let proposal;
     try {
@@ -240,7 +328,7 @@ export async function submitPortalProposal(input: PortalProposalInput): Promise<
       return { error: error instanceof Error ? error.message : 'Please check your proposal and try again.' };
     }
     try {
-      await fileMeetupProposal(proposal, 'speaker-portal');
+      await fileMeetupProposal(proposal, 'speaker-portal', savedTalkId);
     } catch (error) {
       console.error('Portal meetup proposal failed:', error);
       return { error: "We couldn't save your proposal. Please try again in a moment." };
@@ -260,7 +348,7 @@ export async function submitPortalProposal(input: PortalProposalInput): Promise<
     }
     try {
       const eventName = (await loadCurrentDevfest())?.name ?? 'DevFest Sydney';
-      await fileDevfestProposal(submission, flowState.eventId, eventName);
+      await fileDevfestProposal(submission, flowState.eventId, eventName, savedTalkId);
     } catch (error) {
       console.error('Portal DevFest proposal failed:', error);
       return { error: "We couldn't save your proposal. Please try again in a moment." };
