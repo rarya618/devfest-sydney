@@ -60,7 +60,10 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: 'General events',
-    items: [{ href: '/admin/meetups', label: 'Meetup talks' }],
+    items: [
+      { href: '/admin/meetups', label: 'Meetup talks' },
+      { href: '/admin/event-volunteers', label: 'Volunteers' },
+    ],
   },
   {
     // GDG-wide since stage 4c: one profile per person, across DevFests and general events.

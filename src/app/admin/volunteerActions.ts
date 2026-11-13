@@ -11,12 +11,15 @@ import {
 } from '@/lib/volunteerAcceptanceEmail';
 import { volunteerConfirmDeadlineFrom, volunteerConfirmUrl } from '@/lib/volunteerConfirm';
 import { loadVolunteerRecord } from '@/lib/volunteerProfiles';
+import { loadEvent } from '@/lib/events';
 
 // Accepting or un-accepting a signup moves it on and off /admin/crew, so both pages are
 // revalidated wherever the status changes.
 function revalidateVolunteerPages() {
   revalidatePath('/admin/volunteers');
   revalidatePath('/admin/crew');
+  revalidatePath('/admin/event-volunteers');
+  revalidatePath('/admin/volunteer-pool');
 }
 
 export async function acceptVolunteer(volunteerId: string): Promise<{ error?: string }> {
@@ -146,6 +149,16 @@ export async function sendVolunteerAcceptanceEmail(volunteerId: string): Promise
   // nothing to accept them into and no confirmation link that would mean anything.
   if (volunteer.isOrganiser) {
     return { error: 'Organisers are added to the crew directly, so there is no acceptance email to send them.' };
+  }
+  // The email and /volunteer/confirm are written for DevFest until stage 4e makes them follow
+  // the event, so a general event's volunteers are told some other way for now.
+  try {
+    const event = await loadEvent(String(volunteer.eventId ?? ''));
+    if (event?.type !== 'devfest') {
+      return { error: 'The acceptance email is written for DevFest, so it can\'t be sent for a general event yet. Email them directly for now.' };
+    }
+  } catch {
+    return { error: 'Could not check which event this signup is for. Please try again.' };
   }
 
   const sentAt = new Date();

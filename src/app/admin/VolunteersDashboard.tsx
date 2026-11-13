@@ -20,6 +20,7 @@ import {
 } from '@/lib/volunteerLabels';
 import type { ReviewerNote, VolunteerArea, VolunteerStatus, VolunteerSubmission } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
+import { useRouter } from 'next/navigation';
 
 interface ReviewerNotesPanelProps {
   volunteerId: string;
@@ -90,9 +91,12 @@ function ReviewerNotesPanel({ volunteerId, notes, onError }: ReviewerNotesPanelP
 interface VolunteerRowProps {
   volunteer: VolunteerSubmission;
   onError: (message: string) => void;
+  // False on a general event's page: the acceptance email and /volunteer/confirm are written
+  // for DevFest until stage 4e, so the envelope and the Not emailed chip are left out.
+  showsAcceptanceEmail: boolean;
 }
 
-function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
+function VolunteerRow({ volunteer, onError, showsAcceptanceEmail }: VolunteerRowProps) {
   const [isPending, startTransition] = useTransition();
   const [notesOpen, setNotesOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -150,8 +154,9 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
         <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{volunteer.name}</h3>
         {/* Only on accepted signups: "Not emailed" against a pending one would read as a
-            task, when the thing to do first is decide. */}
-        {volunteer.status === 'accepted' && (
+            task, when the thing to do first is decide. Not on general events, which have no
+            acceptance email yet. */}
+        {showsAcceptanceEmail && volunteer.status === 'accepted' && (
           <span
             title={VOLUNTEER_CONFIRMATION_CHIPS[volunteer.confirmation].title}
             className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${VOLUNTEER_CONFIRMATION_CHIPS[volunteer.confirmation].className}`}
@@ -313,7 +318,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
           )}
           {/* The same send this volunteer's card offers on /admin/crew, so an organiser
               working through the review queue doesn't have to change pages to tell someone. */}
-          {volunteer.status === 'accepted' && (
+          {showsAcceptanceEmail && volunteer.status === 'accepted' && (
             <button
               onClick={() => handleAction(sendVolunteerAcceptanceEmail)}
               disabled={isPending}
@@ -408,12 +413,17 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
 
 interface Props {
   volunteers: VolunteerSubmission[];
+  // Set on General events > Volunteers: the general events to pick between, and which one
+  // is shown. Absent on the DevFest page, which follows the sidebar's DevFest picker.
+  generalEvents?: { events: { id: string; name: string }[]; selectedId: string };
 }
 
 type FilterStatus = 'all' | VolunteerStatus;
 type FilterArea = 'all' | VolunteerArea;
 
-export default function VolunteersDashboard({ volunteers }: Props) {
+export default function VolunteersDashboard({ volunteers, generalEvents }: Props) {
+  const router = useRouter();
+  const showsAcceptanceEmail = !generalEvents;
   const mobileBarHidden = useMobileBarHidden();
   const [filter, setFilter] = useState<FilterStatus>('all');
   const [areaFilter, setAreaFilter] = useState<FilterArea>('all');
@@ -537,9 +547,24 @@ export default function VolunteersDashboard({ volunteers }: Props) {
             <h1 className="text-xl font-bold text-white tracking-tight">Volunteers</h1>
             <p className="mt-0.5 text-sm text-white/55">
               {counts.all} total &middot; {counts.pending} pending review
-              {notEmailedCount > 0 && <> &middot; {notEmailedCount} accepted, not emailed</>}
+              {showsAcceptanceEmail && notEmailedCount > 0 && <> &middot; {notEmailedCount} accepted, not emailed</>}
             </p>
           </div>
+
+          {generalEvents && generalEvents.events.length > 0 && (
+            <select
+              value={generalEvents.selectedId}
+              onChange={(changeEvent) => router.push(`/admin/event-volunteers?event=${encodeURIComponent(changeEvent.target.value)}`)}
+              aria-label="Choose which general event's volunteers to show"
+              className="h-10 rounded-full border border-white/35 bg-white/[0.06] px-4 text-sm font-semibold text-white focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
+            >
+              {generalEvents.events.map((event) => (
+                <option key={event.id} value={event.id} className="bg-[#191a1d]">
+                  {event.name}
+                </option>
+              ))}
+            </select>
+          )}
 
           <div className="flex flex-wrap items-center gap-2 min-w-0">
             <div
@@ -691,7 +716,7 @@ export default function VolunteersDashboard({ volunteers }: Props) {
         ) : (
           <div className="grid grid-cols-1 gap-5 items-start">
             {filtered.map((volunteer) => (
-              <VolunteerRow key={volunteer.id} volunteer={volunteer} onError={setAlertMessage} />
+              <VolunteerRow key={volunteer.id} volunteer={volunteer} onError={setAlertMessage} showsAcceptanceEmail={showsAcceptanceEmail} />
             ))}
           </div>
         )}
