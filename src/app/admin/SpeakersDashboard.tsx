@@ -124,11 +124,11 @@ function missingProfileParts(speaker: Speaker): string[] {
 
 function SpeakerAvatar({ speaker }: { speaker: Speaker }) {
   return (
-    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden bg-white/[0.06] shrink-0">
+    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden bg-white/[0.06] shrink-0">
       {speaker.photoUrl ? (
-        <Image src={speaker.photoUrl} alt={speaker.name} width={64} height={64} className="w-full h-full object-cover" />
+        <Image src={speaker.photoUrl} alt={speaker.name} width={44} height={44} className="w-full h-full object-cover" />
       ) : (
-        <div className="w-full h-full flex items-center justify-center text-white/55 text-base font-bold" aria-hidden="true">
+        <div className="w-full h-full flex items-center justify-center text-white/60 text-xs font-bold" aria-hidden="true">
           {getInitials(speaker.name)}
         </div>
       )}
@@ -248,100 +248,102 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
     setIsOpen((open) => !open);
   }
 
+  const quietIcon = 'text-white/60 hover:text-white hover:bg-white/[0.08]';
+  const neutralChip = 'inline-flex items-center text-[11px] leading-none px-2 py-1 rounded-full bg-white/[0.06] text-white/70 font-medium';
+  const warningChip = 'inline-flex items-center text-[11px] leading-none px-2 py-1 rounded-full font-bold bg-google-yellow/15 text-google-yellow';
+
+  // Compact by default (redesigned 2026-11-14: the card had seven stacked action buttons and six
+  // lines before the talk title). Collapsed: who, what, and one row of chips with every gap
+  // that needs acting on. Expanded (click the card): tagline, email, abstract, bio, links,
+  // history.
   return (
     <div
       onClick={handleCardClick}
-      className={`relative cursor-pointer bg-surface border-l-4 ${TRACK_BORDER_COLORS[speaker.track]} rounded-lg p-4 sm:p-5 transition-colors hover:bg-white/[0.07] ${
+      className={`relative cursor-pointer bg-surface border-l-4 ${TRACK_BORDER_COLORS[speaker.track]} rounded-2xl px-3 py-3 sm:px-4 transition-colors hover:bg-white/[0.07] ${
         isPending ? 'opacity-50 pointer-events-none' : ''
       }`}
       aria-label={`Speaker ${speaker.name}`}
     >
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-3 sm:gap-4">
         <SpeakerAvatar speaker={speaker} />
 
         <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <h3 className="font-bold text-white text-xl leading-snug tracking-tight">{speaker.name}</h3>
-            <span title={confirmation.title} className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${confirmation.className}`}>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+            <h3 className="font-bold text-white text-base leading-snug">{speaker.name}</h3>
+            <span title={confirmation.title} className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${confirmation.className}`}>
               {confirmation.label}
             </span>
+            {isCoSpeaker && (
+              <span className="text-xs font-bold text-google-blue-light">
+                with {leadSpeaker?.name ?? 'a speaker no longer in the lineup'}
+              </span>
+            )}
+            {coSpeakers.length > 0 && (
+              <span className="text-xs font-bold text-google-blue-light">
+                with {coSpeakers.map((coSpeaker) => coSpeaker.name).join(' and ')}
+              </span>
+            )}
           </div>
-          {isCoSpeaker && (
-            <p className="mt-0.5 text-xs font-bold text-google-blue-light">
-              Co-speaker with {leadSpeaker?.name ?? 'a speaker no longer in the lineup'}
-            </p>
-          )}
-          {coSpeakers.length > 0 && (
-            <p className="mt-0.5 text-xs font-bold text-google-blue-light">
-              Presenting with {coSpeakers.map((coSpeaker) => coSpeaker.name).join(' and ')}
-            </p>
-          )}
-          {speaker.tagline ? (
-            <p className="mt-0.5 text-sm text-white/65">{speaker.tagline}</p>
-          ) : (
-            <p className="mt-0.5 text-sm text-white/50 italic">No tagline yet</p>
-          )}
 
-          <p className="mt-2 flex items-center gap-1.5 text-sm text-white/55 truncate">
-            <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-              <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 5 6-5" />
-            </svg>
-            <span className="truncate">{speaker.email}</span>
+          <p className={`mt-0.5 text-sm text-white/85 leading-snug ${isOpen ? '' : 'truncate'}`} title={speaker.talkTitle}>
+            {speaker.talkTitle}
           </p>
 
-          <div className="flex flex-wrap items-center gap-1.5 gap-y-2 mt-3">
-            <span className={`inline-flex items-center gap-1.5 text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] font-bold ${TRACK_CHIP_COLORS[speaker.track]}`}>
+          <div className="flex flex-wrap items-center gap-1 mt-2">
+            <span className={`${neutralChip} gap-1.5 font-bold ${TRACK_CHIP_COLORS[speaker.track]}`}>
               <span className={`w-1.5 h-1.5 rounded-full ${TRACK_DOT_COLORS[speaker.track]}`} aria-hidden="true" />
               {TRACK_LABELS[speaker.track]}
             </span>
-            <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-medium">
-              {FORMAT_LABELS[speaker.format]}
-            </span>
-            <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-medium">
-              {EXPERIENCE_LABELS[speaker.experienceLevel]}
-            </span>
+            <span className={neutralChip}>{FORMAT_LABELS[speaker.format]}</span>
+            <span className={neutralChip}>{EXPERIENCE_LABELS[speaker.experienceLevel]}</span>
+            {session && (
+              <span className={neutralChip}>
+                {session.room === 'all' ? '' : `${SCHEDULE_ROOM_LABELS[session.room].name}, `}
+                {formatScheduleTime(session.startTime)}
+              </span>
+            )}
             {missing.length > 0 && (
-              <span
-                title="These fields are blank and will show as gaps on the public speakers section."
-                className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25"
-              >
+              <span title="These fields are blank and will show as gaps on the public speakers section." className={warningChip}>
                 Missing {missing.join(', ')}
               </span>
             )}
             {canSendTicket && !ticketSent && (
               <span
                 title="This speaker has confirmed but hasn't been sent their complimentary ticket yet. Send it with the ticket button."
-                className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25"
+                className={warningChip}
               >
                 No ticket sent
               </span>
             )}
-            {session && (
-              <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-medium">
-                {session.room === 'all' ? '' : `${SCHEDULE_ROOM_LABELS[session.room].name} · `}
-                {formatScheduleTime(session.startTime)}
-              </span>
-            )}
             {inviteChip && (
-              <span
-                title={inviteChip.title}
-                className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25"
-              >
+              <span title={inviteChip.title} className={warningChip}>
                 {inviteChip.label}
               </span>
             )}
           </div>
 
-          <p className="mt-4 font-semibold text-white/90 text-base leading-snug">{speaker.talkTitle}</p>
-
           <div className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
             <div className="overflow-hidden">
+              <div className="mt-3 space-y-1">
+                {speaker.tagline ? (
+                  <p className="text-sm text-white/70">{speaker.tagline}</p>
+                ) : (
+                  <p className="text-sm text-white/50">No tagline yet</p>
+                )}
+                <p className="flex items-center gap-1.5 text-sm text-white/60 min-w-0">
+                  <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                    <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 5 6-5" />
+                  </svg>
+                  <span className="truncate">{speaker.email}</span>
+                </p>
+              </div>
+
               <p className="mt-3 text-sm text-white/65 leading-relaxed whitespace-pre-wrap">{speaker.abstract}</p>
 
-              <div className="mt-4 text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
+              <div className="mt-4 text-sm text-white/65 bg-white/[0.04] rounded-xl px-4 py-3 leading-relaxed">
                 <span className="font-bold text-white/85">Bio: </span>
-                {speaker.bio ? <span className="whitespace-pre-wrap">{speaker.bio}</span> : <span className="italic text-white/50">not written yet</span>}
+                {speaker.bio ? <span className="whitespace-pre-wrap">{speaker.bio}</span> : <span className="text-white/50">not written yet</span>}
               </div>
 
               {(speaker.linkedinUrl || speaker.githubUrl || speaker.websiteUrl) && (
@@ -357,13 +359,9 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
           </div>
         </div>
 
-        <div className="flex flex-col items-end gap-1.5 shrink-0">
-          <button
-            onClick={() => setEditing(true)}
-            aria-label={`Edit ${speaker.name}`}
-            title="Edit speaker"
-            className="inline-flex items-center justify-center w-9 h-9 rounded-full text-white/70 hover:text-white hover:bg-white/[0.08] transition-colors"
-          >
+        {/* One row of actions rather than a column: the column set the card's height. */}
+        <div className="relative flex flex-wrap items-center justify-end gap-0.5 shrink-0 max-w-[8.5rem] sm:max-w-none">
+          <button onClick={() => setEditing(true)} aria-label={`Edit ${speaker.name}`} title="Edit speaker" className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${quietIcon}`}>
             <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" />
             </svg>
@@ -374,7 +372,7 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
               onClick={() => setAddingCoSpeaker(true)}
               aria-label={`Add a co-speaker to ${speaker.name}'s session`}
               title="Add co-speaker"
-              className="inline-flex items-center justify-center w-9 h-9 rounded-full text-white/70 hover:text-white hover:bg-white/[0.08] transition-colors"
+              className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${quietIcon}`}
             >
               <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                 <circle cx="6.5" cy="5" r="2.5" />
@@ -389,11 +387,7 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
               disabled={isPending}
               aria-label={`${alreadyEmailed ? 'Resend' : 'Send'} acceptance email to ${speaker.name} for: ${speaker.talkTitle}`}
               title={alreadyEmailed ? 'Resend acceptance email' : 'Send acceptance email'}
-              className={`inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                alreadyEmailed
-                  ? 'text-white/55 hover:text-white hover:bg-white/[0.08]'
-                  : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
-              }`}
+              className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${alreadyEmailed ? quietIcon : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'}`}
             >
               <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                 <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
@@ -408,11 +402,7 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
               disabled={isPending}
               aria-label={`${ticketSent ? 'Resend' : 'Send'} the complimentary speaker ticket to ${speaker.name}`}
               title={ticketSent ? 'Resend speaker ticket' : 'Send speaker ticket'}
-              className={`inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                ticketSent
-                  ? 'text-white/55 hover:text-white hover:bg-white/[0.08]'
-                  : 'bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white'
-              }`}
+              className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${ticketSent ? quietIcon : 'bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white'}`}
             >
               <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 6.25V4.5a1 1 0 011-1h11a1 1 0 011 1v1.75a1.75 1.75 0 000 3.5V11.5a1 1 0 01-1 1h-11a1 1 0 01-1-1V9.75a1.75 1.75 0 000-3.5z" />
@@ -427,11 +417,7 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
               disabled={isPending}
               aria-label={`${INVITE_BUTTON_TITLE[inviteAction]} to ${speaker.name}`}
               title={INVITE_BUTTON_TITLE[inviteAction]}
-              className={`inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                inviteNeedsSending
-                  ? 'bg-google-yellow/15 text-google-yellow hover:bg-google-yellow hover:text-black-02'
-                  : 'text-white/55 hover:text-white hover:bg-white/[0.08]'
-              }`}
+              className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${inviteNeedsSending ? 'bg-google-yellow/15 text-google-yellow hover:bg-google-yellow hover:text-black-02' : quietIcon}`}
             >
               <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                 <rect x="2" y="3" width="12" height="11" rx="1.5" />
@@ -446,11 +432,7 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
               disabled={isPending}
               aria-label={`${thanksSent ? 'Resend' : 'Send'} the thank-you email with photos, mug and Asana trial to ${speaker.name}`}
               title={thanksSent ? 'Resend thank-you' : 'Send thank-you'}
-              className={`inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                thanksSent
-                  ? 'text-white/55 hover:text-white hover:bg-white/[0.08]'
-                  : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
-              }`}
+              className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${thanksSent ? quietIcon : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'}`}
             >
               <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                 <path strokeLinejoin="round" d="M8 13.5S1.75 9.75 1.75 5.75A3 3 0 018 4a3 3 0 016.25 1.75C14.25 9.75 8 13.5 8 13.5z" />
@@ -458,9 +440,25 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
             </button>
           )}
 
-          {confirmingRemove ? (
-            <div role="group" aria-label={`Confirm removing ${speaker.name}`} className="flex flex-col items-end gap-1.5 bg-surface-raised border border-white/10 rounded-xl px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.45)] w-52">
-              <p className="text-xs text-white/70 leading-snug text-left w-full">
+          <button
+            onClick={() => setConfirmingRemove((open) => !open)}
+            aria-label={`Remove ${speaker.name} from the lineup`}
+            aria-expanded={confirmingRemove}
+            title="Remove from lineup"
+            className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-white/60 hover:text-google-red-light hover:bg-google-red/[0.08]`}
+          >
+            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9h6.6l.7-9" />
+            </svg>
+          </button>
+
+          {confirmingRemove && (
+            <div
+              role="group"
+              aria-label={`Confirm removing ${speaker.name}`}
+              className="absolute right-0 top-full mt-1.5 z-20 flex flex-col items-end gap-2 bg-surface-raised border border-white/10 rounded-2xl px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.45)] w-56"
+            >
+              <p className="text-xs text-white/70 leading-snug w-full">
                 {isCoSpeaker
                   ? 'Remove this co-speaker from the lineup?'
                   : coSpeakers.length > 0
@@ -471,7 +469,7 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
                 <button
                   onClick={() => setConfirmingRemove(false)}
                   aria-label="Keep this speaker"
-                  className="text-xs px-2.5 py-1 rounded-lg border border-white/40 text-white/50 hover:border-white/60 hover:text-white transition-colors"
+                  className="text-xs px-2.5 py-1 rounded-full border border-white/35 text-white/70 hover:border-white/60 hover:text-white transition-colors"
                 >
                   Keep
                 </button>
@@ -484,17 +482,6 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
                 </button>
               </div>
             </div>
-          ) : (
-            <button
-              onClick={() => setConfirmingRemove(true)}
-              aria-label={`Remove ${speaker.name} from the lineup`}
-              title="Remove from lineup"
-              className="inline-flex items-center justify-center w-9 h-9 rounded-full text-white/55 hover:text-google-red-light hover:bg-google-red/[0.08] transition-colors"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9h6.6l.7-9" />
-              </svg>
-            </button>
           )}
         </div>
       </div>
@@ -992,7 +979,7 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
             <p className="text-sm text-white/50">No speakers match this filter.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 items-start">
+          <div className="grid grid-cols-1 gap-2.5 items-start">
             {filtered.map((speaker) => (
               <SpeakerCard
                 key={speaker.rowId}
