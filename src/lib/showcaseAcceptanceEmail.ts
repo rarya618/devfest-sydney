@@ -2,6 +2,7 @@ import { formatDeadlineDate } from '@/lib/format';
 import { SHOWCASE_STAGE_LABELS } from '@/lib/showcaseLabels';
 import type { ShowcaseStage } from '@/lib/types';
 import { escapeHtml } from '@/lib/escapeHtml';
+import { formatEventWhen, type EventCopy } from '@/lib/eventCopy';
 
 // Same table-based construction and escaping as volunteerAcceptanceEmail.ts: email
 // clients strip stylesheets, and several still ignore flexbox and CSS variables entirely.
@@ -15,6 +16,8 @@ export interface ShowcaseAcceptanceEmailDetails {
   coPresenterNames: string[];
   confirmUrl: string;
   confirmByIso: string;
+  // The DevFest the showcase is part of (stage 4e): its name, date and venue fill the copy.
+  event: EventCopy;
 }
 
 const FONT = "font-family:'Google Sans',Roboto,sans-serif;letter-spacing:-0.01em;";
@@ -36,8 +39,8 @@ function joinNames(names: string[]): string {
   return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
 }
 
-export function showcaseAcceptanceEmailSubject(projectName: string): string {
-  return `${projectName} is in the DevFest Sydney 2026 Builder Showcase`;
+export function showcaseAcceptanceEmailSubject(projectName: string, eventName: string): string {
+  return `${projectName} is in the ${eventName} Builder Showcase`;
 }
 
 export function buildShowcaseAcceptanceEmail(details: ShowcaseAcceptanceEmailDetails): string {
@@ -58,7 +61,7 @@ export function buildShowcaseAcceptanceEmail(details: ShowcaseAcceptanceEmailDet
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>You're in the DevFest Sydney 2026 Builder Showcase</title>
+  <title>You're in the ${escapeHtml(details.event.name)} Builder Showcase</title>
 </head>
 <body style="margin:0;padding:0;background:#202124;${FONT}color:#ffffff;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#202124;padding:48px 16px;">
@@ -79,7 +82,7 @@ export function buildShowcaseAcceptanceEmail(details: ShowcaseAcceptanceEmailDet
                 ${escapeHtml(firstName)}
               </h2>
               <p style="margin:0 0 32px;${FONT}font-size:20px;font-weight:400;color:#ffffff;line-height:1.6;text-align:center;">
-                We'd love you to demo your project in the Builder Showcase at DevFest Sydney 2026
+                We'd love you to demo your project in the Builder Showcase at ${escapeHtml(details.event.name)}
               </p>
 
               <!-- Project -->
@@ -110,10 +113,10 @@ export function buildShowcaseAcceptanceEmail(details: ShowcaseAcceptanceEmailDet
               <!-- The showcase -->
               <h3 style="margin:0 0 12px;${sectionHeading}">How the showcase works</h3>
               <p style="margin:0 0 16px;${bodyText}">
-                You get five minutes on the main stage in the Auditorium, mid-afternoon. Slides are optional: the audience would rather see the thing working.
+                You get five minutes on the main stage. Slides are optional: the audience would rather see the thing working.
               </p>
               <p style="margin:0 0 32px;${bodyText}">
-                DevFest Sydney is on Saturday 10 October at Torrens University, Surry Hills. Closer to the day we'll send you the running order and when to be at the stage for a quick tech check. If there's anything you need for your demo that you didn't mention when you entered, just reply and tell us.
+                ${escapeHtml(details.event.name)} is on ${escapeHtml(formatEventWhen(details.event))}. Closer to the day we'll send you the running order and when to be at the stage for a quick tech check. If there's anything you need for your demo that you didn't mention when you entered, just reply and tell us.
               </p>
 
               <!-- Questions -->
@@ -142,6 +145,7 @@ export interface ShowcaseConfirmationNoticeDetails {
   coPresenterNames: string[];
   demoRequirements: string;
   confirmedAtIso: string;
+  eventName: string;
 }
 
 // Sent to the organisers when an entrant confirms. Plainer than the entrant-facing
@@ -182,7 +186,7 @@ export function buildShowcaseConfirmedNotice(details: ShowcaseConfirmationNotice
               <img src="${WORDMARK_URL}" alt="DevFest Sydney" width="177" height="32" style="display:block;margin:0 0 32px;" />
 
               <h1 style="margin:0 0 8px;${FONT}font-size:28px;font-weight:700;color:${SHOWCASE_YELLOW};line-height:1.4;">Showcase demo confirmed</h1>
-              <p style="margin:0 0 24px;${bodyText}">${escapeHtml(details.name)} has confirmed they'll demo ${escapeHtml(details.projectName)} in the Builder Showcase.</p>
+              <p style="margin:0 0 24px;${bodyText}">${escapeHtml(details.name)} has confirmed they'll demo ${escapeHtml(details.projectName)} in the Builder Showcase at ${escapeHtml(details.eventName)}.</p>
 
               ${card(`<table cellpadding="0" cellspacing="0" width="100%">
                 ${row('Project', details.projectName)}

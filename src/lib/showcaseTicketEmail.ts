@@ -1,4 +1,5 @@
 import { escapeHtml } from '@/lib/escapeHtml';
+import { formatEventDay, formatVenueAddress, type EventCopy } from '@/lib/eventCopy';
 
 // The entrant-facing "here is your complimentary ticket" email, sent from /admin/showcase
 // once an entrant has confirmed their demo. Same table-based, inline-styled construction
@@ -11,6 +12,8 @@ export interface ShowcaseTicketEmailDetails {
   // asks them to pass the link on when there is anyone to pass it to.
   coPresenterNames: string[];
   ticketUrl: string;
+  // The DevFest the showcase is part of (stage 4e).
+  event: EventCopy;
 }
 
 const FONT = "font-family:'Google Sans',Roboto,sans-serif;letter-spacing:-0.01em;";
@@ -30,8 +33,8 @@ function joinNames(names: string[]): string {
   return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
 }
 
-export function showcaseTicketEmailSubject(): string {
-  return 'Your complimentary Builder Showcase ticket for DevFest Sydney 2026';
+export function showcaseTicketEmailSubject(eventName: string): string {
+  return `Your complimentary Builder Showcase ticket for ${eventName}`;
 }
 
 export function buildShowcaseTicketEmail(details: ShowcaseTicketEmailDetails): string {
@@ -49,7 +52,7 @@ export function buildShowcaseTicketEmail(details: ShowcaseTicketEmailDetails): s
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Your complimentary Builder Showcase ticket for DevFest Sydney 2026</title>
+  <title>${escapeHtml(showcaseTicketEmailSubject(details.event.name))}</title>
 </head>
 <body style="margin:0;padding:0;background:#202124;${FONT}color:#ffffff;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#202124;padding:48px 16px;">
@@ -91,7 +94,7 @@ export function buildShowcaseTicketEmail(details: ShowcaseTicketEmailDetails): s
 
               ${card(`
                 <h3 style="margin:0 0 12px;${sectionHeading}">The day itself</h3>
-                <p style="margin:0 0 12px;${bodyText}">Saturday 10 October 2026 at Torrens University, Shop 1/37 Foveaux St, Surry Hills.</p>
+                <p style="margin:0 0 12px;${bodyText}">${escapeHtml([formatEventDay(details.event), formatVenueAddress(details.event)].filter(Boolean).join(' at '))}.</p>
                 <p style="margin:0;${bodyText}">We will be in touch closer to the day with the running order and when to be at the stage for a quick tech check.</p>
               `)}
 

@@ -5,11 +5,12 @@ import { adminDb } from '@/lib/firebase-admin';
 import { verifyAdminSession } from '@/lib/adminSession';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { Resend } from 'resend';
-import type { CoPresenter, ShowcaseStage } from '@/lib/types';
+import type { CoPresenter, GdgEvent, ShowcaseStage } from '@/lib/types';
 import { buildShowcaseAcceptanceEmail, showcaseAcceptanceEmailSubject } from '@/lib/showcaseAcceptanceEmail';
 import { showcaseConfirmDeadlineFrom, showcaseConfirmUrl } from '@/lib/showcaseConfirm';
 import { buildShowcaseTicketEmail, showcaseTicketEmailSubject } from '@/lib/showcaseTicketEmail';
-import { requireCurrentDevfestLink } from '@/lib/events';
+import { loadEvent, requireEventLink } from '@/lib/events';
+import { toEventCopy } from '@/lib/eventCopy';
 
 async function setShowcaseStatus(
   entryId: string,
@@ -221,6 +222,17 @@ export async function updateShowcaseEntry(
 // Tells an accepted entrant their demo is in, and asks them to confirm. A separate,
 // explicit step from accepting, as with speakers and volunteers: accepting is a decision,
 // emailing is telling someone about it, and an admin should choose when.
+// The DevFest an entry is filed under, for naming it in an email (stage 4e).
+async function loadEntryEvent(eventId: unknown): Promise<{ event: GdgEvent } | { error: string }> {
+  try {
+    const event = typeof eventId === 'string' && eventId ? await loadEvent(eventId) : null;
+    if (!event) return { error: 'This entry isn\'t filed under an event that still exists, so the email can\'t say what it\'s for.' };
+    return { event };
+  } catch {
+    return { error: 'Could not load the event this entry is for. Please try again.' };
+  }
+}
+
 export async function sendShowcaseAcceptanceEmail(entryId: string): Promise<{ error?: string }> {
   let senderName: string;
   let senderEmail: string;
@@ -245,6 +257,11 @@ export async function sendShowcaseAcceptanceEmail(entryId: string): Promise<{ er
     return { error: 'Only accepted demos can be sent an acceptance email. Accept this entry first.' };
   }
 
+  // The entry's own DevFest names the email (stage 4e).
+  const eventResult = await loadEntryEvent(entry.eventId);
+  if ('error' in eventResult) return eventResult;
+  const event = eventResult.event;
+
   const sentAt = new Date();
   const confirmBy = showcaseConfirmDeadlineFrom(sentAt);
 
@@ -268,7 +285,7 @@ export async function sendShowcaseAcceptanceEmail(entryId: string): Promise<{ er
       to: entry.email,
       bcc: 'hello@gdgsydney.com',
       replyTo: 'hello@gdgsydney.com',
-      subject: showcaseAcceptanceEmailSubject(entry.projectName),
+      subject: showcaseAcceptanceEmailSubject(entry.projectName, event.name),
       html: buildShowcaseAcceptanceEmail({
         name: entry.name,
         projectName: entry.projectName,
@@ -276,6 +293,7 @@ export async function sendShowcaseAcceptanceEmail(entryId: string): Promise<{ er
         coPresenterNames,
         confirmUrl: confirmLink,
         confirmByIso: confirmBy.toISOString(),
+        event: toEventCopy(event),
       }),
     });
   } catch (err) {
@@ -319,10 +337,6 @@ export async function sendShowcaseTicketEmail(entryId: string): Promise<{ error?
     return { error: 'Your session has expired. Please sign in again.' };
   }
 
-  const ticketLink = await requireCurrentDevfestLink('showcaseTicketUrl', 'Builder Showcase ticket link');
-  if ('error' in ticketLink) return ticketLink;
-  const ticketUrl = ticketLink.url;
-
   const entryRef = adminDb.collection('showcase').doc(entryId);
 
   let entry: FirebaseFirestore.DocumentData;
@@ -341,6 +355,14 @@ export async function sendShowcaseTicketEmail(entryId: string): Promise<{ error?
     return { error: 'This entrant hasn\'t confirmed their demo yet, so the ticket can\'t be sent.' };
   }
 
+  // The entry's own DevFest's ticket link and copy (stage 4e).
+  const eventResult = await loadEntryEvent(entry.eventId);
+  if ('error' in eventResult) return eventResult;
+  const event = eventResult.event;
+  const ticketLink = await requireEventLink(event.id, 'showcaseTicketUrl', 'Builder Showcase ticket link');
+  if ('error' in ticketLink) return ticketLink;
+  const ticketUrl = ticketLink.url;
+
   const coPresenterNames = ((entry.coPresenters ?? []) as Array<{ name?: string }>)
     .map((coPresenter) => coPresenter.name?.trim() ?? '')
     .filter(Boolean);
@@ -352,12 +374,13 @@ export async function sendShowcaseTicketEmail(entryId: string): Promise<{ error?
       to: entry.email,
       bcc: 'hello@gdgsydney.com',
       replyTo: 'hello@gdgsydney.com',
-      subject: showcaseTicketEmailSubject(),
+      subject: showcaseTicketEmailSubject(event.name),
       html: buildShowcaseTicketEmail({
         name: entry.name,
         projectName: entry.projectName,
         coPresenterNames,
         ticketUrl,
+        event: toEventCopy(event),
       }),
     });
   } catch (err) {

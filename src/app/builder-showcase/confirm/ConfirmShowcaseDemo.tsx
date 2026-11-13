@@ -8,13 +8,14 @@ import ShowcaseNextSteps from './ShowcaseNextSteps';
 interface ConfirmShowcaseDemoProps {
   token: string;
   projectName: string;
+  eventName: string;
   // Rendered here rather than on the page so it disappears along with the button: a
   // "we need to hear from you by the 5th" line left standing under a confirmation reads
   // as though the click didn't take.
   intro: string;
 }
 
-export default function ConfirmShowcaseDemo({ token, projectName, intro }: ConfirmShowcaseDemoProps) {
+export default function ConfirmShowcaseDemo({ token, projectName, eventName, intro }: ConfirmShowcaseDemoProps) {
   const [isPending, startTransition] = useTransition();
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [ticketUrl, setTicketUrl] = useState<string | null>(null);
@@ -58,7 +59,7 @@ export default function ConfirmShowcaseDemo({ token, projectName, intro }: Confi
       <button
         onClick={handleConfirm}
         disabled={isPending}
-        aria-label={`Confirm you will demo ${projectName} in the DevFest Sydney 2026 Builder Showcase`}
+        aria-label={`Confirm you will demo ${projectName} in the ${eventName} Builder Showcase`}
         className="inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-yellow text-black-02 text-base font-bold rounded
           border border-google-yellow transition-opacity hover:opacity-80
           disabled:opacity-50 disabled:cursor-not-allowed"

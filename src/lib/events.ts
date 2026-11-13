@@ -117,20 +117,6 @@ export async function loadEventPrivateLinks(eventId: string): Promise<EventPriva
   return links;
 }
 
-// One private link of the current DevFest, or null when it is unset, there is no current
-// DevFest, or the read fails. For the confirm pages, which treat null as "we'll email it to
-// you" rather than showing a dead button; an admin send uses requireCurrentDevfestLink.
-export async function fetchCurrentDevfestLink(key: EventPrivateLinkKey): Promise<string | null> {
-  try {
-    const event = await loadCurrentDevfest();
-    if (!event) return null;
-    return (await loadEventPrivateLinks(event.id))[key] || null;
-  } catch (error) {
-    console.error(`Could not read the current DevFest's ${key}:`, error);
-    return null;
-  }
-}
-
 // One private link of a given event, for an admin about to email it: says which of the
 // three things went wrong, since each has a different fix (stage 4e: the event is the talk's
 // own, not whichever DevFest is current).
@@ -164,26 +150,6 @@ export async function fetchEventLink(eventId: string, key: EventPrivateLinkKey):
     console.error(`Could not read ${key} for ${eventId}:`, error);
     return null;
   }
-}
-
-// The same, for an admin about to email the link: tells them which of the three things went
-// wrong, since each has a different fix.
-export async function requireCurrentDevfestLink(
-  key: EventPrivateLinkKey,
-  label: string
-): Promise<{ url: string } | { error: string }> {
-  let event: GdgEvent | null;
-  let links: EventPrivateLinks;
-  try {
-    event = await loadCurrentDevfest();
-    if (!event) return { error: 'No DevFest is set as current in Events, so there is no ticket link to send.' };
-    links = await loadEventPrivateLinks(event.id);
-  } catch {
-    return { error: `We couldn't read the ${label.toLowerCase()} just now. Please try again in a moment.` };
-  }
-  const url = links[key];
-  if (!url) return { error: `The ${label.toLowerCase()} isn't set on ${event.name} yet. Add it in Events first.` };
-  return { url };
 }
 
 // Local development reads the same Firestore as production, so it can't open a form without

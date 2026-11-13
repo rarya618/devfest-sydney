@@ -8,7 +8,8 @@ import { SHOWCASE_STAGE_LABELS } from '@/lib/showcaseLabels';
 import type { ShowcaseStage } from '@/lib/types';
 import ConfirmShowcaseDemo from './ConfirmShowcaseDemo';
 import ShowcaseNextSteps from './ShowcaseNextSteps';
-import { fetchCurrentDevfestLink } from '@/lib/events';
+import { fetchEventLink, loadEvent } from '@/lib/events';
+import { formatEventWhen, toEventCopy, type EventCopy } from '@/lib/eventCopy';
 
 // Reached only from a link in an acceptance email, and the answer depends on a Firestore
 // read that changes the moment the entrant clicks, so there is nothing to prerender.
@@ -30,6 +31,8 @@ interface AcceptedEntry {
   confirmByIso: string | null;
   alreadyConfirmed: boolean;
   hasCoPresenters: boolean;
+  eventId: string;
+  event: EventCopy | null;
 }
 
 async function loadAcceptedEntry(token: string): Promise<AcceptedEntry | null> {
@@ -44,7 +47,12 @@ async function loadAcceptedEntry(token: string): Promise<AcceptedEntry | null> {
   if (entry.status !== 'accepted') return null;
 
   const confirmByDate = entry.confirmByDate as Timestamp | undefined;
+  // The entry's own event (stage 4e) words the page and supplies the ticket link.
+  const eventId = String(entry.eventId ?? '');
+  const event = await loadEvent(eventId).catch(() => null);
   return {
+    eventId,
+    event: event ? toEventCopy(event) : null,
     projectName: entry.projectName ?? '',
     stage: entry.stage ?? 'prototype',
     confirmByIso: confirmByDate ? confirmByDate.toDate().toISOString() : null,
@@ -117,7 +125,7 @@ export default async function ShowcaseConfirmPage({ searchParams }: ConfirmPageP
                   check.
                 </p>
                 <ShowcaseNextSteps
-                  ticketUrl={await fetchCurrentDevfestLink('showcaseTicketUrl')}
+                  ticketUrl={await fetchEventLink(entry.eventId, 'showcaseTicketUrl')}
                   hasCoPresenters={entry.hasCoPresenters}
                 />
               </>
@@ -126,7 +134,8 @@ export default async function ShowcaseConfirmPage({ searchParams }: ConfirmPageP
                 <ConfirmShowcaseDemo
                   token={token!}
                   projectName={entry.projectName}
-                  intro={`Let us know you'll be there to present on Saturday 10 October at Torrens University, Surry Hills.${
+                  eventName={entry.event?.name ?? 'the event'}
+                  intro={`Let us know you'll be there to present${entry.event ? ` on ${formatEventWhen(entry.event)}` : ''}.${
                     entry.confirmByIso
                       ? ` We need to hear from you by ${formatDeadlineDate(entry.confirmByIso)}, as we will need to offer your slot to someone else.`
                       : ''

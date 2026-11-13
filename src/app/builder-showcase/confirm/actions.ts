@@ -5,7 +5,7 @@ import { Timestamp } from 'firebase-admin/firestore';
 import { Resend } from 'resend';
 import { buildShowcaseConfirmedNotice } from '@/lib/showcaseAcceptanceEmail';
 import { verifyShowcaseConfirmToken } from '@/lib/showcaseConfirm';
-import { fetchCurrentDevfestLink } from '@/lib/events';
+import { fetchEventLink, loadEvent } from '@/lib/events';
 
 const ORGANISER_INBOX = 'hello@gdgsydney.com';
 
@@ -13,9 +13,10 @@ const ORGANISER_INBOX = 'hello@gdgsydney.com';
 // surfaced: the entrant has already done their part, and an email problem is ours.
 async function notifyOrganisers(entry: FirebaseFirestore.DocumentData, confirmedAt: Date) {
   try {
+    const event = await loadEvent(String(entry.eventId ?? '')).catch(() => null);
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
-      from: `DevFest Sydney <${process.env.RESEND_FROM_EMAIL}>`,
+      from: `GDG Sydney <${process.env.RESEND_FROM_EMAIL}>`,
       to: ORGANISER_INBOX,
       // So an organiser can reply straight to the entrant from the notification.
       replyTo: entry.email,
@@ -29,6 +30,7 @@ async function notifyOrganisers(entry: FirebaseFirestore.DocumentData, confirmed
           .filter(Boolean),
         demoRequirements: entry.demoRequirements ?? '',
         confirmedAtIso: confirmedAt.toISOString(),
+        eventName: event?.name ?? 'the event',
       }),
     });
   } catch (err) {
@@ -71,7 +73,8 @@ export async function confirmShowcaseDemo(token: string): Promise<ConfirmResult>
     }
 
     return {
-      ticketUrl: await fetchCurrentDevfestLink('showcaseTicketUrl'),
+      // The entry's own event's ticket link (stage 4e), not whichever DevFest is current.
+      ticketUrl: await fetchEventLink(String(snap.data()?.eventId ?? ''), 'showcaseTicketUrl'),
       hasCoPresenters: (snap.data()?.coPresenters ?? []).length > 0,
     };
   } catch {
