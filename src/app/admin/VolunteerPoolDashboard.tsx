@@ -141,7 +141,7 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
       >
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <div className="min-w-0">
-            <h1 className="text-2xl font-bold text-off-white tracking-[-0.01em]">Volunteer pool</h1>
+            <h1 className="text-xl font-bold text-off-white tracking-[-0.01em]">Volunteer pool</h1>
             <p className="mt-0.5 text-sm text-white/55">
               {poolMembers.length} {poolMembers.length === 1 ? 'person' : 'people'} in the pool
               {chosenEvent && <> &middot; {signedUpCount} signed up for {chosenEvent.name}</>}

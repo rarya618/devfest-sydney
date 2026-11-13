@@ -36,7 +36,7 @@ export default async function EventVolunteersPage({ searchParams }: Props) {
   if (!selected) {
     return (
       <div className="px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-10">
-        <h1 className="text-2xl font-bold text-off-white tracking-[-0.01em] mb-5">Volunteers</h1>
+        <h1 className="text-xl font-bold text-off-white tracking-[-0.01em] mb-5">Volunteers</h1>
         <div className="bg-surface border border-white/10 rounded-2xl p-12 text-center">
           <p className="text-sm text-white/50">No general events yet. Create one in Events, then invite people from the Volunteer pool.</p>
         </div>

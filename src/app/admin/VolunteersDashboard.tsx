@@ -539,7 +539,7 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
       <div className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-black-02/95 backdrop-blur-sm`}>
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <div className="min-w-0">
-            <h1 className="text-2xl font-bold text-off-white tracking-[-0.01em]">Volunteers</h1>
+            <h1 className="text-xl font-bold text-off-white tracking-[-0.01em]">Volunteers</h1>
             <p className="mt-0.5 text-sm text-white/55">
               {counts.all} total &middot; {counts.pending} pending review
               {notEmailedCount > 0 && <> &middot; {notEmailedCount} accepted, not emailed</>}

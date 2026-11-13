@@ -74,7 +74,7 @@ export default function CreditRequestsDashboard({ requests }: Props) {
       <StickyAdminHeader className="z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-black-02/95 backdrop-blur-sm">
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <div className="min-w-0">
-            <h1 className="text-2xl font-bold text-off-white tracking-[-0.01em]">Workshop credits</h1>
+            <h1 className="text-xl font-bold text-off-white tracking-[-0.01em]">Workshop credits</h1>
             <p className="mt-0.5 text-sm text-white/55">
               {requests.length} request{requests.length === 1 ? '' : 's'} &middot;{' '}
               <Link href="/credits" className="underline underline-offset-2 hover:text-white">Open the form</Link>

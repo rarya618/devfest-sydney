@@ -56,7 +56,7 @@ export default function LinksView() {
   return (
     <>
       <div className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-4 pb-4 md:pt-8 md:pb-5 bg-black-02/95 backdrop-blur-sm`}>
-        <h1 className="text-2xl font-bold text-off-white tracking-[-0.01em]">Links</h1>
+        <h1 className="text-xl font-bold text-off-white tracking-[-0.01em]">Links</h1>
       </div>
 
       <div className="px-4 md:px-5">

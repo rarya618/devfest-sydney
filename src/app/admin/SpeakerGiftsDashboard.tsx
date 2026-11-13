@@ -148,7 +148,7 @@ export default function SpeakerGiftsDashboard({ gifts, awaitingReply, thankedCou
       <StickyAdminHeader className="z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-black-02/95 backdrop-blur-sm">
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <div className="min-w-0">
-            <h1 className="text-2xl font-bold text-off-white tracking-[-0.01em]">Speaker gifts</h1>
+            <h1 className="text-xl font-bold text-off-white tracking-[-0.01em]">Speaker gifts</h1>
             <p className="mt-0.5 text-sm text-white/55">
               {gifts.length} of {thankedCount} thanked {thankedCount === 1 ? 'speaker has' : 'speakers have'} answered &middot;{' '}
               {mugGifts.length} {mugGifts.length === 1 ? 'mug' : 'mugs'} &middot; {asanaGifts.length} Asana {asanaGifts.length === 1 ? 'trial' : 'trials'}

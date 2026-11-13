@@ -165,7 +165,7 @@ export default function EventsDashboard({ summaries, hasCurrentDevfest }: Props)
       >
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <div className="min-w-0">
-            <h1 className="text-2xl font-bold text-off-white tracking-[-0.01em]">Events</h1>
+            <h1 className="text-xl font-bold text-off-white tracking-[-0.01em]">Events</h1>
             <p className="mt-0.5 text-sm text-white/55">
               {summaries.length} {summaries.length === 1 ? 'event' : 'events'} &middot;{' '}
               {currentDevfest ? <>current DevFest: {currentDevfest.event.name}</> : 'no current DevFest set'}
