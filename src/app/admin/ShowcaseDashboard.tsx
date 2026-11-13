@@ -760,7 +760,7 @@ export default function ShowcaseDashboard({ entries }: Props) {
         <div
           role="group"
           aria-label="Filter entries by project stage"
-          className="mt-3 -mx-4 md:-mx-5 px-4 md:px-5 flex items-center gap-2 overflow-x-auto"
+          className="mt-3 -mx-4 md:-mx-5 px-4 md:px-5 flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:flex-wrap md:overflow-visible"
         >
           {stageTabs.map((tab) => (
             <button

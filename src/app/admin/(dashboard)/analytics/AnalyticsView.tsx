@@ -38,7 +38,7 @@ export default function AnalyticsView({ activeTab, submissions, volunteers, show
     <>
       <StickyAdminHeader className="z-20 w-full px-4 md:px-5 pt-4 pb-3 md:pt-8 md:pb-4 bg-black-02/95 backdrop-blur-sm">
         <h1 className="text-2xl font-bold text-off-white tracking-[-0.01em] mb-3">Analytics</h1>
-        <nav aria-label="Analytics sections" className="flex gap-1.5 overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+        <nav aria-label="Analytics sections" className="flex gap-1.5 overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:flex-wrap md:overflow-visible">
           {ANALYTICS_TABS.map((tab) => {
             const active = tab === activeTab;
             return (
