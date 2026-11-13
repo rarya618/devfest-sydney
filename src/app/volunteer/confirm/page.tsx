@@ -3,11 +3,12 @@ import type { Timestamp } from 'firebase-admin/firestore';
 import Image from 'next/image';
 import { adminDb } from '@/lib/firebase-admin';
 import { formatDeadlineDate } from '@/lib/format';
-import { verifyVolunteerConfirmToken, volunteerTicketUrl, volunteerWhatsappUrl } from '@/lib/volunteerConfirm';
+import { verifyVolunteerConfirmToken } from '@/lib/volunteerConfirm';
 import { VOLUNTEER_AREA_LABELS, VOLUNTEER_SHIFT_LABELS } from '@/lib/volunteerLabels';
 import type { VolunteerArea, VolunteerShift } from '@/lib/types';
 import ConfirmVolunteering from './ConfirmVolunteering';
 import VolunteerNextSteps from './VolunteerNextSteps';
+import { fetchCurrentDevfestLink } from '@/lib/events';
 
 // Reached only from a link in an acceptance email, and the answer depends on a Firestore
 // read that changes the moment the volunteer clicks, so there is nothing to prerender.
@@ -134,9 +135,9 @@ export default async function VolunteerConfirmPage({ searchParams }: ConfirmPage
                 </p>
                 {/* Rendered only on this branch: the links belong to someone who has said yes. */}
                 <VolunteerNextSteps
-                  ticketUrl={volunteer.ticketAlreadySent ? null : volunteerTicketUrl()}
+                  ticketUrl={volunteer.ticketAlreadySent ? null : await fetchCurrentDevfestLink('volunteerTicketUrl')}
                   ticketAlreadySent={volunteer.ticketAlreadySent}
-                  whatsappUrl={volunteerWhatsappUrl()}
+                  whatsappUrl={await fetchCurrentDevfestLink('volunteerWhatsappUrl')}
                 />
               </>
             ) : (

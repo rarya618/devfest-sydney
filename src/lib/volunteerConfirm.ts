@@ -67,15 +67,3 @@ export function volunteerConfirmDeadlineFrom(sentAt: Date): Date {
   deadline.setDate(deadline.getDate() + VOLUNTEER_CONFIRM_WINDOW_DAYS);
   return deadline;
 }
-
-// The two links a volunteer is handed once they have confirmed. Both read per call, and
-// both are secrets: the ticket link carries a Humanitix access code, and a WhatsApp
-// invite lets anyone who holds it into the group. Null when unset, which the confirm page
-// treats as "we'll send it to you" rather than showing a dead button.
-export function volunteerTicketUrl(): string | null {
-  return process.env.VOLUNTEER_TICKET_URL?.trim() || null;
-}
-
-export function volunteerWhatsappUrl(): string | null {
-  return process.env.VOLUNTEER_WHATSAPP_URL?.trim() || null;
-}

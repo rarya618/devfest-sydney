@@ -202,6 +202,56 @@ export interface ShowcaseSubmission {
   confirmation: ShowcaseConfirmation;
 }
 
+// An event GDG Sydney runs: a DevFest or a meetup. Stage 4a of the One GDG Sydney Site plan
+// in PM.md: what used to be a dozen env vars per DevFest. Stored in `events/{eventId}`, read
+// and written only through the Admin SDK. Dates are ISO strings here and Timestamps in
+// Firestore.
+export type GdgEventType = 'devfest' | 'meetup';
+
+// The three things people can apply for. Each event says whether it has the flow at all
+// (`enabled`: a meetup has no showcase), whether it is taking entries (`open`, the old
+// *_OPEN switch), and when it stops on its own (`closesAt`, the old *_CLOSE_DATE).
+export type EventFlowKey = 'cfs' | 'showcase' | 'volunteers';
+
+export interface EventFlowWindow {
+  enabled: boolean;
+  open: boolean;
+  closesAt: string | null;
+}
+
+export interface EventVenue {
+  name: string;
+  streetAddress: string;
+  locality: string;
+  region: string;
+  postalCode: string;
+  country: string; // ISO 3166 alpha-2, e.g. AU
+}
+
+export interface GdgEvent {
+  id: string;
+  type: GdgEventType;
+  name: string;
+  startAt: string;
+  endAt: string;
+  timeZone: string; // IANA, e.g. Australia/Sydney: how dates are entered and shown
+  venue: EventVenue | null;
+  bevyUrl: string; // the listing and RSVPs, for events Bevy holds; '' if none
+  humanitixUrl: string; // the public ticket page; '' if the event isn't ticketed
+  ticketLowestPrice: string; // cheapest tier in AUD, e.g. "40.00"; '' publishes no price
+  ticketsOnSaleAt: string | null;
+  cfs: EventFlowWindow;
+  showcase: EventFlowWindow;
+  volunteers: EventFlowWindow;
+  updatedAt: string | null;
+  updatedBy: string;
+}
+
+// `eventPrivate/{eventId}`: the links that unlock something (a free ticket, a WhatsApp group).
+// Kept off the event document so no projection of an event can ever carry them.
+export type EventPrivateLinkKey = 'speakerTicketUrl' | 'showcaseTicketUrl' | 'volunteerTicketUrl' | 'volunteerWhatsappUrl';
+export type EventPrivateLinks = Record<EventPrivateLinkKey, string>; // '' when unset
+
 // Talk proposals for GDG Sydney's monthly meetups, from the /speak form on gdgsydney.com
 // through /api/submit-meetup-proposal. Not tied to an event yet: there is no `events`
 // collection until stage 4 of the One GDG Sydney Site plan in PM.md.

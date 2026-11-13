@@ -7,6 +7,8 @@ import { escapeHtml } from '@/lib/escapeHtml';
 export interface SpeakerTicketEmailDetails {
   name: string;
   ticketUrl: string;
+  // The event's public Humanitix page (GdgEvent.humanitixUrl), '' when it has none.
+  publicTicketUrl: string;
 }
 
 const FONT = "font-family:'Google Sans',Roboto,sans-serif;letter-spacing:-0.01em;";
@@ -33,7 +35,7 @@ export function buildSpeakerTicketEmail(details: SpeakerTicketEmailDetails): str
   // The public event page, for the "please share it" ask. Rendered only when it is
   // configured: asking a speaker to pass on a link we have not given them reads as a
   // broken email, the same call the acceptance template makes.
-  const publicTicketUrl = process.env.NEXT_PUBLIC_HUMANITIX_URL || '';
+  const publicTicketUrl = details.publicTicketUrl;
   const generalTicketLink = publicTicketUrl
     ? `<a href="${escapeHtml(publicTicketUrl)}" style="color:#34A853;text-decoration:underline;">the general ticket link</a>`
     : 'the general ticket link';

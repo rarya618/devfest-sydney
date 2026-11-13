@@ -3,19 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import CfsLink from './CfsLink';
-import TicketsLink from './TicketsLink';
-
-type Accent = 'blue' | 'green' | 'red' | 'yellow';
-
-const ACCENT_CLASSES: Record<Accent, string> = {
-  blue: 'bg-google-blue-deep border-google-blue-deep text-white',
-  green: 'bg-google-green-deep border-google-green-deep text-white',
-  red: 'bg-google-red-deep border-google-red-deep text-white',
-  // Yellow is light enough that white on it fails WCAG AA, so this accent pairs with
-  // Black 02 text rather than the white the other three use.
-  yellow: 'bg-google-yellow border-google-yellow text-black-02',
-};
 
 // Pages only, never anchors into the landing page: a nav item should take you somewhere,
 // not scroll the page you are on. About and Tracks stay reachable from the footer.
@@ -29,19 +16,11 @@ const NAV_LINKS = [
   { href: '/partners', label: 'Partners' },
 ];
 
-export default function Navbar({
-  accent = 'blue',
-  isCfsOpen = false,
-  cfsCloseDate,
-  // Computed on the server by areTicketsOpen() and passed in: this is a client component,
-  // so it cannot read the server-only env vars that decide it.
-  areTicketsOpen = false,
-}: {
-  accent?: Accent;
-  isCfsOpen?: boolean;
-  cfsCloseDate?: string;
-  areTicketsOpen?: boolean;
-}) {
+// The public pages' header, still used by /privacy, /feedback, /credits and the 404. Its ticket
+// banner and "Get tickets" / "Apply to speak" button went in stage 4a (2026-11-13): both
+// pointed at pages this app no longer has, and the next DevFest's forms and tickets are
+// promoted on gdgsydney.com.
+export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -72,31 +51,6 @@ export default function Navbar({
           aria-hidden="true"
         />
       )}
-      {(areTicketsOpen || isCfsOpen) && (
-        <div
-          className={`overflow-hidden transition-[max-height,opacity] duration-300 ${
-            scrolled ? 'max-h-0 opacity-0' : 'max-h-16 opacity-100'
-          }`}
-        >
-          {areTicketsOpen ? (
-            <TicketsLink
-              source="banner"
-              className="block bg-google-blue-deep text-white text-center py-2 text-sm font-semibold tracking-wide underline underline-offset-2 decoration-white/40 hover:decoration-white transition-colors"
-            >
-              DevFest Sydney 2026 tickets are on sale now. Grab yours before they go
-            </TicketsLink>
-          ) : (
-            <CfsLink
-              source="banner"
-              className="block bg-google-red-deep text-white text-center py-2 text-sm font-semibold tracking-wide underline underline-offset-2 decoration-white/40 hover:decoration-white transition-colors"
-            >
-              {cfsCloseDate
-                ? 'Last chance: the Call for Speakers closes at midnight tonight. Submit your session'
-                : 'The Call for Speakers is open. Submit your session'}
-            </CfsLink>
-          )}
-        </div>
-      )}
       <nav
         className={`relative z-50 transition-all duration-300 ${
           scrolled ? 'bg-[#010103]/90 backdrop-blur-lg shadow-sm shadow-black/20' : 'bg-transparent'
@@ -124,24 +78,6 @@ export default function Navbar({
                 </Link>
               ))}
             </div>
-
-            {/* CTA: tickets are the primary conversion once they are on sale */}
-            {areTicketsOpen ? (
-              <TicketsLink
-                source="navbar"
-                aria-label="Get tickets for DevFest Sydney 2026 on Humanitix"
-                className={`hidden md:inline-flex items-center whitespace-nowrap px-5.5 py-1.75 text-sm font-bold rounded-sm border transition-opacity hover:opacity-80 ${ACCENT_CLASSES[accent]}`}
-              >
-                Get tickets
-              </TicketsLink>
-            ) : (
-              <CfsLink
-                source="navbar"
-                className={`hidden md:inline-flex items-center whitespace-nowrap px-5.5 py-1.75 text-sm font-bold rounded-sm border transition-opacity hover:opacity-80 ${ACCENT_CLASSES[accent]}`}
-              >
-                Apply to speak
-              </CfsLink>
-            )}
 
             {/* Mobile menu toggle */}
             <button
@@ -179,22 +115,6 @@ export default function Navbar({
                 {link.label}
               </Link>
             ))}
-            {areTicketsOpen ? (
-              <TicketsLink
-                source="navbar-mobile"
-                aria-label="Get tickets for DevFest Sydney 2026 on Humanitix"
-                className={`inline-flex items-center justify-center px-5.5 py-1.75 text-sm font-bold rounded-sm border transition-opacity hover:opacity-80 ${ACCENT_CLASSES[accent]}`}
-              >
-                Get tickets
-              </TicketsLink>
-            ) : (
-              <CfsLink
-                source="navbar"
-                className={`inline-flex items-center justify-center px-5.5 py-1.75 text-sm font-bold rounded-sm border transition-opacity hover:opacity-80 ${ACCENT_CLASSES[accent]}`}
-              >
-                Apply to speak
-              </CfsLink>
-            )}
           </div>
         </div>
       </nav>

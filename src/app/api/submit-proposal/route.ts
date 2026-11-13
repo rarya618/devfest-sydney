@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
-import { isCfsOpen } from '@/lib/cfs';
+import { currentDevfestFlowState } from '@/lib/events';
 import { Resend } from 'resend';
 import { FieldValue } from 'firebase-admin/firestore';
 import { escapeHtml } from '@/lib/escapeHtml';
@@ -202,7 +202,14 @@ function buildConfirmationEmail(submission: SubmissionPayload): string {
 export async function POST(request: NextRequest) {
   // Hiding the form is not the same as closing submissions: without this the endpoint
   // keeps accepting proposals after the deadline, from a stale tab or a direct post.
-  if (!isCfsOpen()) {
+  const flowState = await currentDevfestFlowState('cfs');
+  if (flowState === 'unreadable') {
+    return NextResponse.json(
+      { message: "We couldn't check whether we're taking proposals right now. Please try again in a moment." },
+      { status: 503 }
+    );
+  }
+  if (flowState === 'closed') {
     return NextResponse.json(
       { message: 'The Call for Speakers has closed, so we can no longer accept submissions. Thank you for your interest.' },
       { status: 403 }

@@ -67,50 +67,10 @@ env:
       - BUILD
       - RUNTIME
 
-  # Call for Speakers toggle
-  - variable: CFS_OPEN
-    value: "true"
-    availability:
-      - BUILD
-      - RUNTIME
-  - variable: CFS_CLOSE_DATE
-    value: "2026-08-31T00:00:00+10:00"
-    availability:
-      - BUILD
-      - RUNTIME
-
-  # Tickets (Humanitix)
-  # TICKETS_ON_SALE_DATE is the ISO datetime tickets go on sale; sales open at that moment
-  # on their own, with no deploy. Removed 2026-11-10, after the event, which closes every
-  # ticket CTA (App Hosting rejects empty values, so "closed" means omitting the variable).
-  # To reopen: add it back, e.g. value: "2027-08-31T00:00:00+10:00", BUILD and RUNTIME.
-  - variable: NEXT_PUBLIC_HUMANITIX_URL
-    value: https://events.humanitix.com/devfest-sydney
-    availability:
-      - BUILD
-      - RUNTIME
-  # Cheapest ticket tier on sale, AUD, excluding the booking fee. Feeds only the Event
-  # JSON-LD price on /. Update when Humanitix tiers change; empty publishes no price.
-  - variable: TICKET_LOWEST_PRICE
-    value: "40.00"
-    availability:
-      - RUNTIME
-
-  # Volunteer signup toggle
-  - variable: VOLUNTEER_OPEN
-    value: "false"
-    availability:
-      - BUILD
-      - RUNTIME
-
-  # Builder Showcase (call for demos)
-  # Master switch. An optional SHOWCASE_CLOSE_DATE deadline can be added here later;
-  # App Hosting rejects empty values, so "no deadline" means omitting the variable.
-  - variable: SHOWCASE_OPEN
-    value: "false"
-    availability:
-      - BUILD
-      - RUNTIME
+  # Event settings (whether each form is open and until when, ticket on-sale date, the
+  # Humanitix link, the lowest price) moved to the `events` collection in stage 4a
+  # (2026-11-13) and are edited in /admin/events. CFS_OPEN, CFS_CLOSE_DATE,
+  # NEXT_PUBLIC_HUMANITIX_URL, TICKET_LOWEST_PRICE, VOLUNTEER_OPEN and SHOWCASE_OPEN were here.
 
   # Firebase Admin SDK — stored as secrets
   # BUILD availability is required: Next.js executes route modules (which
@@ -161,39 +121,10 @@ env:
     availability:
       - RUNTIME
 
-  # Speaker complimentary ticket link — stored as a secret
-  # The Humanitix URL carrying the speaker access code, emailed to a speaker once they
-  # confirm. A secret rather than a plain value: the code unlocks free tickets, so it does
-  # not belong in the repo. Unset means the admin cannot send the ticket email at all.
-  - variable: SPEAKER_TICKET_URL
-    secret: SPEAKER_TICKET_URL
-    availability:
-      - RUNTIME
-
-  # Builder Showcase complimentary ticket link, shown on /builder-showcase/confirm once an
-  # entrant has confirmed. A secret because the access code unlocks free tickets. NOTE:
-  # adding this block does not create the secret: create it and grant the backend access
-  # before the next rollout, or it fails with "Misconfigured secret".
-  - variable: SHOWCASE_TICKET_URL
-    secret: SHOWCASE_TICKET_URL
-    availability:
-      - RUNTIME
-
-  # Volunteer ticket and WhatsApp links, shown on /volunteer/confirm once a volunteer has
-  # confirmed. Secrets: the ticket link carries a Humanitix access code, and the invite
-  # lets anyone who holds it into the group. NOTE: adding these blocks does not create the
-  # secrets. Create each with `firebase apphosting:secrets:set <NAME> --project
-  # devfest-sydney-2026` and grant the backend access before the next rollout, or it fails
-  # with "Misconfigured secret".
-  - variable: VOLUNTEER_TICKET_URL
-    secret: VOLUNTEER_TICKET_URL
-    availability:
-      - RUNTIME
-
-  - variable: VOLUNTEER_WHATSAPP_URL
-    secret: VOLUNTEER_WHATSAPP_URL
-    availability:
-      - RUNTIME
+  # The speaker, showcase and volunteer ticket links and the volunteer WhatsApp invite moved
+  # to `eventPrivate` in stage 4a (2026-11-13), set per event in /admin/events. Their Secret
+  # Manager secrets (SPEAKER_TICKET_URL, SHOWCASE_TICKET_URL, VOLUNTEER_TICKET_URL,
+  # VOLUNTEER_WHATSAPP_URL) are no longer read and can be deleted once 4a is live.
 
   # Resend — stored as secrets
   - variable: RESEND_API_KEY

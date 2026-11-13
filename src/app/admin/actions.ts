@@ -12,6 +12,7 @@ import { applicantKey, rejectionEmailBlocker } from '@/lib/rejectionEligibility'
 import { confirmDeadlineFrom, confirmUrl } from '@/lib/speakerConfirm';
 import { normaliseProfileUrl } from '@/lib/speakers';
 import type { ExperienceLevel, SubmissionStatus, TalkFormat, Track } from '@/lib/types';
+import { fetchCurrentDevfestPublicTicketUrl, requireCurrentDevfestLink } from '@/lib/events';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -577,6 +578,7 @@ export async function sendAcceptanceEmail(submissionId: string): Promise<{ error
         experienceLevel: session.experienceLevel,
         confirmUrl: confirmLink,
         confirmByIso: confirmBy.toISOString(),
+        publicTicketUrl: await fetchCurrentDevfestPublicTicketUrl(),
       }),
     });
   } catch (err) {
@@ -623,10 +625,9 @@ export async function sendSpeakerTicketEmail(submissionId: string): Promise<{ er
     return { error: 'Your session has expired. Please sign in again.' };
   }
 
-  const ticketUrl = process.env.SPEAKER_TICKET_URL?.trim();
-  if (!ticketUrl) {
-    return { error: 'The speaker ticket link isn\'t configured on the server, so this email can\'t be sent yet.' };
-  }
+  const ticketLink = await requireCurrentDevfestLink('speakerTicketUrl', 'Speaker ticket link');
+  if ('error' in ticketLink) return ticketLink;
+  const ticketUrl = ticketLink.url;
 
   const submissionRef = adminDb.collection('submissions').doc(submissionId);
 
@@ -663,6 +664,7 @@ export async function sendSpeakerTicketEmail(submissionId: string): Promise<{ er
       html: buildSpeakerTicketEmail({
         name: speaker.name,
         ticketUrl,
+        publicTicketUrl: await fetchCurrentDevfestPublicTicketUrl(),
       }),
     });
   } catch (err) {
@@ -701,10 +703,9 @@ export async function sendCoSpeakerTicketEmail(speakerId: string): Promise<{ err
     return { error: 'Your session has expired. Please sign in again.' };
   }
 
-  const ticketUrl = process.env.SPEAKER_TICKET_URL?.trim();
-  if (!ticketUrl) {
-    return { error: 'The speaker ticket link isn\'t configured on the server, so this email can\'t be sent yet.' };
-  }
+  const ticketLink = await requireCurrentDevfestLink('speakerTicketUrl', 'Speaker ticket link');
+  if ('error' in ticketLink) return ticketLink;
+  const ticketUrl = ticketLink.url;
 
   const coSpeakerRef = adminDb.collection('speakers').doc(speakerId);
   let coSpeaker: FirebaseFirestore.DocumentData;
@@ -736,7 +737,11 @@ export async function sendCoSpeakerTicketEmail(speakerId: string): Promise<{ err
       bcc: 'hello@gdgsydney.com',
       replyTo: 'hello@gdgsydney.com',
       subject: speakerTicketEmailSubject(),
-      html: buildSpeakerTicketEmail({ name: String(coSpeaker.name ?? ''), ticketUrl }),
+      html: buildSpeakerTicketEmail({
+        name: String(coSpeaker.name ?? ''),
+        ticketUrl,
+        publicTicketUrl: await fetchCurrentDevfestPublicTicketUrl(),
+      }),
     });
   } catch (err) {
     console.error('Speaker ticket email failed for co-speaker:', speakerId, err);
@@ -819,7 +824,7 @@ export async function sendRejectionEmail(submissionId: string): Promise<{ error?
       // somewhere an organiser reads.
       replyTo: 'hello@gdgsydney.com',
       subject: rejectionEmailSubject(talkTitles),
-      html: buildRejectionEmail({ name: submission.name, talkTitles }),
+      html: buildRejectionEmail({ name: submission.name, talkTitles, publicTicketUrl: await fetchCurrentDevfestPublicTicketUrl() }),
     });
   } catch (err) {
     console.error('Rejection email failed for submission:', submissionId, err);

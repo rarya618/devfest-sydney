@@ -5,6 +5,7 @@ import { Timestamp } from 'firebase-admin/firestore';
 import { Resend } from 'resend';
 import { buildSpeakerConfirmedNotice } from '@/lib/acceptanceEmail';
 import { verifySpeakerConfirmToken } from '@/lib/speakerConfirm';
+import { fetchCurrentDevfestLink } from '@/lib/events';
 
 const ORGANISER_INBOX = 'hello@gdgsydney.com';
 
@@ -67,7 +68,7 @@ export async function confirmSpeakerParticipation(token: string): Promise<Confir
       await notifyOrganisers(snap.data()!, confirmedAt);
     }
 
-    return { ticketUrl: process.env.SPEAKER_TICKET_URL?.trim() || null };
+    return { ticketUrl: await fetchCurrentDevfestLink('speakerTicketUrl') };
   } catch {
     return { error: 'We couldn\'t record your confirmation just now. Please try again in a moment.' };
   }

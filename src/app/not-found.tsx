@@ -2,8 +2,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { areTicketsOpen } from '@/lib/tickets';
-import { isCfsOpen } from '@/lib/cfs';
 
 export const metadata: Metadata = {
   title: 'Page not found',
@@ -15,7 +13,7 @@ export const metadata: Metadata = {
 export default function NotFound() {
   return (
     <div className="bg-[#010103] text-white min-h-screen flex flex-col">
-      <Navbar accent="blue" isCfsOpen={isCfsOpen()} cfsCloseDate={process.env.CFS_CLOSE_DATE} areTicketsOpen={areTicketsOpen()} />
+      <Navbar />
 
       <section className="relative flex-1 flex items-center pt-36 pb-24 px-4 sm:px-6 lg:px-12 overflow-hidden">
         <div className="absolute inset-0 hero-atmosphere pointer-events-none" aria-hidden="true" />

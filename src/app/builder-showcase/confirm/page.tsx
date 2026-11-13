@@ -8,6 +8,7 @@ import { SHOWCASE_STAGE_LABELS } from '@/lib/showcaseLabels';
 import type { ShowcaseStage } from '@/lib/types';
 import ConfirmShowcaseDemo from './ConfirmShowcaseDemo';
 import ShowcaseNextSteps from './ShowcaseNextSteps';
+import { fetchCurrentDevfestLink } from '@/lib/events';
 
 // Reached only from a link in an acceptance email, and the answer depends on a Firestore
 // read that changes the moment the entrant clicks, so there is nothing to prerender.
@@ -116,7 +117,7 @@ export default async function ShowcaseConfirmPage({ searchParams }: ConfirmPageP
                   check.
                 </p>
                 <ShowcaseNextSteps
-                  ticketUrl={process.env.SHOWCASE_TICKET_URL?.trim() || null}
+                  ticketUrl={await fetchCurrentDevfestLink('showcaseTicketUrl')}
                   hasCoPresenters={entry.hasCoPresenters}
                 />
               </>

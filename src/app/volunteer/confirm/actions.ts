@@ -4,8 +4,9 @@ import { adminDb } from '@/lib/firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
 import { Resend } from 'resend';
 import { buildVolunteerConfirmedNotice } from '@/lib/volunteerAcceptanceEmail';
-import { verifyVolunteerConfirmToken, volunteerTicketUrl, volunteerWhatsappUrl } from '@/lib/volunteerConfirm';
+import { verifyVolunteerConfirmToken } from '@/lib/volunteerConfirm';
 import type { VolunteerLinks } from './VolunteerNextSteps';
+import { fetchCurrentDevfestLink } from '@/lib/events';
 
 const ORGANISER_INBOX = 'hello@gdgsydney.com';
 
@@ -70,9 +71,9 @@ export async function confirmVolunteering(token: string): Promise<ConfirmResult>
     const ticketAlreadySent = Boolean(snap.data()?.ticketSentAt);
     return {
       links: {
-        ticketUrl: ticketAlreadySent ? null : volunteerTicketUrl(),
+        ticketUrl: ticketAlreadySent ? null : await fetchCurrentDevfestLink('volunteerTicketUrl'),
         ticketAlreadySent,
-        whatsappUrl: volunteerWhatsappUrl(),
+        whatsappUrl: await fetchCurrentDevfestLink('volunteerWhatsappUrl'),
       },
     };
   } catch {

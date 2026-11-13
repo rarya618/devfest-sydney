@@ -14,6 +14,8 @@ export interface AcceptanceEmailDetails {
   experienceLevel: ExperienceLevel;
   confirmUrl: string;
   confirmByIso: string;
+  // The event's public Humanitix page (GdgEvent.humanitixUrl), '' when it has none.
+  publicTicketUrl: string;
 }
 
 const FONT = "font-family:'Google Sans',Roboto,sans-serif;letter-spacing:-0.01em;";
@@ -72,7 +74,7 @@ export function acceptanceEmailSubject(talkTitle: string): string {
 export function buildAcceptanceEmail(details: AcceptanceEmailDetails): string {
   const firstName = details.name.trim().split(/\s+/)[0] || details.name;
   const confirmBy = formatDeadlineDate(details.confirmByIso);
-  const humanitixUrl = process.env.NEXT_PUBLIC_HUMANITIX_URL || '';
+  const humanitixUrl = details.publicTicketUrl;
 
   const indicators = [
     indicatorPill(TRACK_DOT_COLOR[details.track], TRACK_LABELS[details.track]),

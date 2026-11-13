@@ -49,7 +49,10 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: 'Settings',
-    items: [{ href: '/admin/admins', label: 'Admins' }],
+    items: [
+      { href: '/admin/events', label: 'Events' },
+      { href: '/admin/admins', label: 'Admins' },
+    ],
   },
 ];
 

@@ -5,6 +5,7 @@ import { Timestamp } from 'firebase-admin/firestore';
 import { Resend } from 'resend';
 import { buildShowcaseConfirmedNotice } from '@/lib/showcaseAcceptanceEmail';
 import { verifyShowcaseConfirmToken } from '@/lib/showcaseConfirm';
+import { fetchCurrentDevfestLink } from '@/lib/events';
 
 const ORGANISER_INBOX = 'hello@gdgsydney.com';
 
@@ -70,7 +71,7 @@ export async function confirmShowcaseDemo(token: string): Promise<ConfirmResult>
     }
 
     return {
-      ticketUrl: process.env.SHOWCASE_TICKET_URL?.trim() || null,
+      ticketUrl: await fetchCurrentDevfestLink('showcaseTicketUrl'),
       hasCoPresenters: (snap.data()?.coPresenters ?? []).length > 0,
     };
   } catch {

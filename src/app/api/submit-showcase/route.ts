@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
-import { isShowcaseOpen } from '@/lib/showcase';
+import { currentDevfestFlowState } from '@/lib/events';
 import { Resend } from 'resend';
 import { FieldValue } from 'firebase-admin/firestore';
 import { escapeHtml } from '@/lib/escapeHtml';
@@ -218,7 +218,14 @@ function buildConfirmationEmail(entry: ShowcasePayload): string {
 export async function POST(request: NextRequest) {
   // Hiding the form is not the same as closing entries: without this the endpoint keeps
   // accepting demos after the deadline, from a stale tab or a direct post.
-  if (!isShowcaseOpen()) {
+  const flowState = await currentDevfestFlowState('showcase');
+  if (flowState === 'unreadable') {
+    return NextResponse.json(
+      { message: "We couldn't check whether we're taking entries right now. Please try again in a moment." },
+      { status: 503 }
+    );
+  }
+  if (flowState === 'closed') {
     return NextResponse.json(
       { message: 'The Builder Showcase call for demos has closed, so we can no longer accept entries. Thank you for your interest.' },
       { status: 403 }

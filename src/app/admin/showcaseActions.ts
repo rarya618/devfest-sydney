@@ -9,6 +9,7 @@ import type { CoPresenter, ShowcaseStage } from '@/lib/types';
 import { buildShowcaseAcceptanceEmail, showcaseAcceptanceEmailSubject } from '@/lib/showcaseAcceptanceEmail';
 import { showcaseConfirmDeadlineFrom, showcaseConfirmUrl } from '@/lib/showcaseConfirm';
 import { buildShowcaseTicketEmail, showcaseTicketEmailSubject } from '@/lib/showcaseTicketEmail';
+import { requireCurrentDevfestLink } from '@/lib/events';
 
 async function setShowcaseStatus(
   entryId: string,
@@ -318,10 +319,9 @@ export async function sendShowcaseTicketEmail(entryId: string): Promise<{ error?
     return { error: 'Your session has expired. Please sign in again.' };
   }
 
-  const ticketUrl = process.env.SHOWCASE_TICKET_URL?.trim();
-  if (!ticketUrl) {
-    return { error: 'The showcase ticket link isn\'t configured on the server, so this email can\'t be sent yet.' };
-  }
+  const ticketLink = await requireCurrentDevfestLink('showcaseTicketUrl', 'Builder Showcase ticket link');
+  if ('error' in ticketLink) return ticketLink;
+  const ticketUrl = ticketLink.url;
 
   const entryRef = adminDb.collection('showcase').doc(entryId);
 

@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { buildPageMetadata } from '@/lib/metadata';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { areTicketsOpen } from '@/lib/tickets';
 import { fetchCreditWorkshopOptions } from '@/lib/creditRequests';
 import CreditRequestForm from './CreditRequestForm';
 
@@ -23,7 +22,7 @@ export default async function CreditsPage() {
 
   return (
     <div className="bg-[#010103] text-white min-h-screen">
-      <Navbar areTicketsOpen={areTicketsOpen()} />
+      <Navbar />
 
       <section className="relative pt-36 pb-10 px-6 overflow-hidden">
         <div className="absolute inset-0 hero-atmosphere pointer-events-none" aria-hidden="true" />

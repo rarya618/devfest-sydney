@@ -8,6 +8,8 @@ export interface RejectionEmailDetails {
   name: string;
   // Every rejected proposal from this person, oldest first. One email covers them all.
   talkTitles: string[];
+  // The event's public Humanitix page (GdgEvent.humanitixUrl), '' when it has none.
+  publicTicketUrl: string;
 }
 
 const FONT = "font-family:'Google Sans',Roboto,sans-serif;letter-spacing:-0.01em;";
@@ -31,7 +33,7 @@ function quotedTitleList(talkTitles: string[]): string {
 
 export function buildRejectionEmail(details: RejectionEmailDetails): string {
   const bodyText = `${FONT}font-size:16px;font-weight:400;color:rgba(255,255,255,0.85);line-height:1.75;`;
-  const humanitixUrl = process.env.NEXT_PUBLIC_HUMANITIX_URL || '';
+  const humanitixUrl = details.publicTicketUrl;
   const isPlural = details.talkTitles.length > 1;
 
   // Without the Humanitix URL the "tickets are here" clause would point at nothing, so
