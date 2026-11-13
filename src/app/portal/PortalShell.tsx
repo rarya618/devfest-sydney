@@ -57,7 +57,7 @@ export default function PortalShell({ email, width = 'wide', children }: PortalS
             aria-label="GDG Sydney speaker portal, home"
             className="shrink-0 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
           >
-            <Image src={GDG_LOGO_URL} alt="" width={1700} height={215} priority className="h-7 sm:h-9 w-auto" />
+            <Image src={GDG_LOGO_URL} alt="" width={1700} height={215} priority className="h-6 sm:h-8 w-auto" />
           </Link>
           {email && (
             <div className="flex items-center gap-3">
