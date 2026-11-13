@@ -16,8 +16,9 @@ interface VerifyPageProps {
   searchParams: Promise<{ token?: string }>;
 }
 
-// Opened from the sign-in email. Loading the page only looks the link up; signing in is
-// behind the button, so a mail scanner fetching the URL neither signs in nor uses it up.
+// Opened from the sign-in email. The server render only looks the link up, so a scanner that
+// fetches the URL without running JavaScript neither signs in nor uses it up; VerifySignIn then
+// signs in from the browser straight away.
 export default async function PortalVerifyPage({ searchParams }: VerifyPageProps) {
   const { token } = await searchParams;
   let email: string | null = null;
@@ -37,8 +38,8 @@ export default async function PortalVerifyPage({ searchParams }: VerifyPageProps
         {email && token ? (
           <>
             <h1 className={pageHeading}>Sign in</h1>
-            <p className="mt-5 mb-10 text-white/70 leading-relaxed">
-              You&rsquo;re signing in to the speaker portal as <span className="text-white font-bold">{email}</span>.
+            <p className="mt-5 mb-4 text-white/70 leading-relaxed">
+              As <span className="text-white font-bold">{email}</span>.
             </p>
             <VerifySignIn token={token} email={email} />
           </>

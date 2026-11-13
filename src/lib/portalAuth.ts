@@ -10,9 +10,10 @@ import { buildPortalSignInEmail, PORTAL_SIGN_IN_SUBJECT } from '@/lib/portalSign
 // Sign-in for the speaker portal (stage 6 of the plan in PM.md). Speakers sign in with a
 // single-use link emailed to them, not with Google and not with Firebase Auth's email link:
 //
-// - The link is used behind a button (/speaker/sign-in/verify), never on page load, so a mail
-//   scanner that opens it signs no one in and doesn't burn the link. Firebase's email link
-//   signs in from page-load JavaScript, which is the problem every confirm page here avoids.
+// - The link is used from the browser by /speaker/sign-in/verify as soon as it opens (decided
+//   2026-11-14, over a button), never by the server render, so a scanner that only fetches the
+//   URL signs no one in and doesn't burn it. Scanners that run JavaScript can still burn it;
+//   the speaker then asks for a new one. The confirm pages keep their buttons.
 // - It is sent through Resend from hello@gdgsydney.com, like every other email the app sends,
 //   and needs no custom Auth domain.
 // - The portal's session is its own cookie, never the admin's `__session`, so being signed in

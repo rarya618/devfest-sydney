@@ -8,7 +8,7 @@ import { EMAIL_PATTERN } from '@/lib/emailPattern';
 import { currentDevfestFlowState, loadCurrentDevfest } from '@/lib/events';
 import { clearSpeakerPhoto, replaceSpeakerPhoto } from '@/lib/people';
 import { endPortalSession, getPortalSession, requestSignInLink, signInWithLink } from '@/lib/portalAuth';
-import { loadOwnedProfile } from '@/lib/portalData';
+import { loadOwnedProfile, loadOwnedProfiles } from '@/lib/portalData';
 import {
   findSavedTalkError,
   MAX_SAVED_TALKS,
@@ -61,8 +61,17 @@ export async function completePortalSignIn(token: string): Promise<{ error: stri
     console.error('Portal sign-in failed:', error);
     return { error: "We couldn't sign you in just now. Please try the link again in a moment." };
   }
-  if (!email) return { error: 'This sign-in link has already been used or has run out. Please ask for a new one.' };
-  redirect('/speaker');
+  if (!email) return { error: 'This sign-in link has already been used or has run out. Ask for a new one from the sign-in page.' };
+
+  // Straight to the profile (decided 2026-11-14): the address's first one, or the dashboard
+  // for a speaker who has none yet. A failed read only costs the shortcut.
+  let profileId: string | undefined;
+  try {
+    profileId = (await loadOwnedProfiles(email))[0]?.id;
+  } catch (error) {
+    console.error('Portal sign-in could not load the profile for', email, error);
+  }
+  redirect(profileId ? `/speaker/profile/${profileId}` : '/speaker');
 }
 
 export async function signOutOfPortal(): Promise<void> {
