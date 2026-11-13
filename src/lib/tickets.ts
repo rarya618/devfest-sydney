@@ -39,36 +39,3 @@ export function ticketsHref(source?: string): string {
   });
   return `${TICKETS_URL}${separator}${params.toString()}`;
 }
-
-// Shared by the landing page's ticket section and the /tickets page so the two never
-// drift. Deliberately limited to what EVENT.md actually confirms: no claims about
-// catering, swag, or recordings until those are locked in.
-export const TICKET_INCLUSIONS: { title: string; description: string; color: string }[] = [
-  {
-    title: 'All three tracks',
-    description: 'Move freely between the Spotlight, Developer, Builder, and Workshops tracks across the whole day.',
-    color: 'google-blue',
-  },
-  {
-    title: "The Builder's Space",
-    description: 'A room set aside for building, open all day, for working on your own project between sessions.',
-    color: 'google-green',
-  },
-  {
-    title: 'The Builder Showcase',
-    description: 'Five-minute demos of what fellow attendees have built.',
-    color: 'google-yellow',
-  },
-  {
-    title: 'The whole community',
-    description: 'A full day with the 2,000+ strong GDG Sydney community, in person in Surry Hills.',
-    color: 'google-red',
-  },
-];
-
-export const TICKET_INCLUSION_DOT: Record<string, string> = {
-  'google-blue': 'bg-google-blue',
-  'google-green': 'bg-google-green',
-  'google-yellow': 'bg-google-yellow',
-  'google-red': 'bg-google-red',
-};

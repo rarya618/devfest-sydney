@@ -53,25 +53,9 @@ export async function loadSponsors(): Promise<Sponsor[]> {
     .filter((sponsor) => !sponsor.hidden);
 }
 
-export async function fetchSponsors(): Promise<Sponsor[]> {
-  try {
-    return await loadSponsors();
-  } catch {
-    return [];
-  }
-}
-
 export async function loadCommunityPartners(): Promise<CommunityPartner[]> {
   const snapshot = await adminDb.collection('partners').orderBy('order').get();
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as CommunityPartner));
-}
-
-export async function fetchCommunityPartners(): Promise<CommunityPartner[]> {
-  try {
-    return await loadCommunityPartners();
-  } catch {
-    return [];
-  }
 }
 
 // Diamond is left out: the Diamond sponsor (Google) already sits above every tier on `/` and
@@ -100,16 +84,4 @@ export async function loadPartnerAssets(): Promise<PartnerAssets> {
     googleLogoUrl: (data.googleLogoUrl as string | undefined) ?? null,
     torrensLogoUrl: (data.torrensLogoUrl as string | undefined) ?? null,
   };
-}
-
-export async function fetchPartnerAssets(): Promise<PartnerAssets> {
-  try {
-    return await loadPartnerAssets();
-  } catch {
-    return { sponsorshipProspectusUrl: null, googleLogoUrl: null, torrensLogoUrl: null };
-  }
-}
-
-export async function fetchSponsorshipProspectusUrl(): Promise<string | null> {
-  return (await fetchPartnerAssets()).sponsorshipProspectusUrl;
 }

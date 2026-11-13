@@ -19,9 +19,6 @@ const nextConfig: NextConfig = {
     return [
       // Content pages moving to gdgsydney.com, and this app moving to its own host.
       ...siteRedirects(),
-      // Short address printed under the QR code in the Builder's Space, easy to type on a
-      // laptop. Temporary (307), so browsers don't cache it if the target ever moves.
-      { source: '/guides', destination: '/builders-space/starter-guides', permanent: false },
     ];
   },
 };

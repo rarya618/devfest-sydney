@@ -1,7 +1,5 @@
 import { adminDb } from '@/lib/firebase-admin';
 import type {
-  PublicCrew,
-  PublicCrewMember,
   ReviewerNote,
   VolunteerConfirmation,
   VolunteerSubmission,
@@ -100,50 +98,3 @@ export async function fetchCrew(): Promise<VolunteerSubmission[]> {
   return volunteers.filter((volunteer) => volunteer.status === 'accepted');
 }
 
-// Whether a crew member may be named on the site. For a volunteer: two gates, both
-// required. They have confirmed through /volunteer/confirm, and an admin has ticked
-// "show on the public crew page" - confirming says they are coming, it does not say they
-// want their name on the website. An organiser has no confirmation step to pass: they
-// were added by an admin who knows them, so the one tick is the whole gate.
-function isPubliclyListable(member: VolunteerSubmission): boolean {
-  if (!member.showOnCrewPage) return false;
-  return member.isOrganiser || member.confirmation === 'confirmed';
-}
-
-function toPublicCrewMember(member: VolunteerSubmission): PublicCrewMember {
-  return {
-    id: member.id,
-    name: member.name,
-    assignedArea: member.assignedArea,
-    photoUrl: member.photoUrl,
-    isOrganiser: member.isOrganiser,
-    organiserRole: member.organiserRole,
-    linkedinUrl: member.linkedinUrl,
-  };
-}
-
-// The public crew, split into the two groups /crew renders under their own headings.
-// Returns empty lists rather than throwing so the page can show its "coming soon" state.
-export async function fetchPublicCrew(): Promise<PublicCrew> {
-  try {
-    const crew = await fetchCrew();
-    const listable = crew
-      .filter(isPubliclyListable)
-      .sort((first, second) => first.name.localeCompare(second.name))
-      .map(toPublicCrewMember);
-
-    return {
-      organisers: listable.filter((member) => member.isOrganiser),
-      volunteers: listable.filter((member) => !member.isOrganiser),
-    };
-  } catch {
-    return { organisers: [], volunteers: [] };
-  }
-}
-
-// The organisers alone, for the landing page's "The organisers" section. Same gate as
-// /crew, so an organiser appears in both places or neither.
-export async function fetchPublicOrganisers(): Promise<PublicCrewMember[]> {
-  const { organisers } = await fetchPublicCrew();
-  return organisers;
-}

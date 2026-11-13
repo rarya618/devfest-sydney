@@ -169,26 +169,6 @@ export interface VolunteerSubmission {
   linkedinUrl: string;
 }
 
-// What /crew renders. A deliberate subset of VolunteerSubmission: no email, no phone, no
-// motivation, no dietary requirements, nothing that only an organiser should see.
-export interface PublicCrewMember {
-  id: string;
-  name: string;
-  assignedArea: VolunteerArea | '';
-  photoUrl: string;
-  isOrganiser: boolean;
-  organiserRole: string;
-  linkedinUrl: string;
-}
-
-// The two groups /crew renders, and the split the landing page's organisers section
-// reads the first half of. Kept apart at the source rather than filtered in the page, so
-// the gate each half passes through is decided in one place.
-export interface PublicCrew {
-  organisers: PublicCrewMember[];
-  volunteers: PublicCrewMember[];
-}
-
 export interface CoPresenter {
   name: string;
   email: string;

@@ -209,31 +209,3 @@ export async function loadPublicSpeakers(): Promise<PublicSpeaker[]> {
       }));
   return attachSessionPartners(assignUniqueSlugs(confirmed));
 }
-
-// The same lineup for this app's own pages, which show their "coming soon" state on a
-// failed read rather than an error.
-export async function fetchPublicSpeakers(): Promise<PublicSpeaker[]> {
-  try {
-    return await loadPublicSpeakers();
-  } catch {
-    return [];
-  }
-}
-
-// Null for an unknown slug and for a speaker who exists but has not confirmed, so the
-// two cases are indistinguishable from outside: an unconfirmed speaker has no page yet.
-export async function fetchPublicSpeakerBySlug(slug: string): Promise<PublicSpeaker | null> {
-  const speakers = await fetchPublicSpeakers();
-  return speakers.find((speaker) => speaker.slug === slug) ?? null;
-}
-
-// Where a slug that no longer matches anyone should send the visitor. Renaming a speaker in
-// /admin/speakers records their old slug in previousSlugs, so a link shared before the
-// rename still lands on their page. A live slug always wins over a remembered one, and only
-// confirmed speakers are considered: a redirect must not reveal a page that does not exist.
-export async function findCurrentSlugForPreviousSlug(previousSlug: string): Promise<string | null> {
-  const speakers = await fetchPublicSpeakers();
-  if (speakers.some((speaker) => speaker.slug === previousSlug)) return null;
-  const owner = speakers.find((speaker) => speaker.previousSlugs.includes(previousSlug));
-  return owner?.slug ?? null;
-}

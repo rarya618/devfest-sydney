@@ -117,14 +117,3 @@ export async function fetchSessionTimesBySpeakerId(): Promise<Record<string, Spe
   }
   return sessionTimes;
 }
-
-// A speaker's slot, or null when they are not on the schedule yet (or the read fails, so
-// the page falls back to "times are announced with the schedule" rather than erroring).
-// Only called for a confirmed speaker, since their page does not exist otherwise.
-export async function fetchSpeakerSessionTime(speakerId: string): Promise<SpeakerSessionTime | null> {
-  try {
-    return (await fetchSessionTimesBySpeakerId())[speakerId] ?? null;
-  } catch {
-    return null;
-  }
-}
