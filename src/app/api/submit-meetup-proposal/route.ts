@@ -5,6 +5,8 @@ import { adminDb } from '@/lib/firebase-admin';
 import { escapeHtml } from '@/lib/escapeHtml';
 import { normaliseProfileUrl } from '@/lib/speakers';
 import { gdgSiteCorsHeaders } from '@/lib/gdgSiteOrigins';
+import { MEETUP_FORMATS, MEETUP_FORMAT_LABELS } from '@/lib/meetupProposalLabels';
+import type { MeetupFormat, MeetupProposal } from '@/lib/types';
 
 // Talk proposals for GDG Sydney's monthly meetups, from the /speak form on gdgsydney.com
 // (a separate, static Astro site). Stage 5 of the "One GDG Sydney Site" plan in PM.md:
@@ -14,27 +16,8 @@ import { gdgSiteCorsHeaders } from '@/lib/gdgSiteOrigins';
 // Writes go through the Admin SDK into `meetupProposals`, which has no client create path
 // in firestore.rules.
 
-type MeetupFormat = 'standard' | 'workshop';
-
-interface MeetupProposal {
-  name: string;
-  email: string;
-  profileUrl: string;
-  talkTitle: string;
-  format: MeetupFormat;
-  abstract: string;
-  audience: string;
-  bio: string;
-  speakingExperience: string;
-  notes: string;
-}
-
-const VALID_FORMATS: MeetupFormat[] = ['standard', 'workshop'];
-
-const FORMAT_LABELS: Record<MeetupFormat, string> = {
-  standard: 'Standard talk (20 to 30 min)',
-  workshop: 'Workshop (60 to 90 min)',
-};
+// The stored proposal, before Firestore adds its id, status and timestamps.
+type MeetupProposalFields = Omit<MeetupProposal, 'id' | 'submittedAt' | 'status' | 'reviewerNotes'>;
 
 // Field limits: generous for real proposals, small enough to stop a pasted novel.
 const LIMITS = {
@@ -68,14 +51,14 @@ function optionalText(body: Record<string, unknown>, key: keyof typeof LIMITS, l
   return value.trim();
 }
 
-function validatePayload(raw: unknown): MeetupProposal {
+function validatePayload(raw: unknown): MeetupProposalFields {
   if (!raw || typeof raw !== 'object') throw new Error('Invalid request body.');
   const body = raw as Record<string, unknown>;
 
   const email = requiredText(body, 'email', 'Email');
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('A valid email address is required.');
 
-  if (!VALID_FORMATS.includes(body.format as MeetupFormat)) throw new Error('Please choose a talk format.');
+  if (!MEETUP_FORMATS.includes(body.format as MeetupFormat)) throw new Error('Please choose a talk format.');
 
   const rawProfile = optionalText(body, 'profileUrl', 'LinkedIn or website');
   const profileUrl = rawProfile ? normaliseProfileUrl(rawProfile) : '';
@@ -95,7 +78,7 @@ function validatePayload(raw: unknown): MeetupProposal {
   };
 }
 
-function buildConfirmationEmail(proposal: MeetupProposal): string {
+function buildConfirmationEmail(proposal: MeetupProposalFields): string {
   const font = "font-family:'Google Sans',Roboto,sans-serif;";
   const firstName = escapeHtml(proposal.name.split(' ')[0]);
   return `<!DOCTYPE html>
@@ -119,7 +102,7 @@ function buildConfirmationEmail(proposal: MeetupProposal): string {
               <table cellpadding="0" cellspacing="0" width="100%" style="background:#272727;border-radius:12px;">
                 <tr>
                   <td style="padding:24px;">
-                    <p style="margin:0 0 6px;${font}font-size:13px;color:#9aa0a6;">${escapeHtml(FORMAT_LABELS[proposal.format])}</p>
+                    <p style="margin:0 0 6px;${font}font-size:13px;color:#9aa0a6;">${escapeHtml(MEETUP_FORMAT_LABELS[proposal.format])}</p>
                     <p style="margin:0;${font}font-size:20px;font-weight:700;color:#f0f0f0;">${escapeHtml(proposal.talkTitle)}</p>
                   </td>
                 </tr>
@@ -167,7 +150,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true }, { status: 201, headers });
   }
 
-  let proposal: MeetupProposal;
+  let proposal: MeetupProposalFields;
   try {
     proposal = validatePayload(body);
   } catch (err) {

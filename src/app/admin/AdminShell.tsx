@@ -25,6 +25,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Review',
     items: [
       { href: '/admin', label: 'Submissions' },
+      { href: '/admin/meetups', label: 'Meetup talks' },
       { href: '/admin/volunteers', label: 'Volunteers' },
       { href: '/admin/showcase', label: 'Showcase' },
       { href: '/admin/credits', label: 'Credits' },

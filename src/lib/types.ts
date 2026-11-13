@@ -222,6 +222,29 @@ export interface ShowcaseSubmission {
   confirmation: ShowcaseConfirmation;
 }
 
+// Talk proposals for GDG Sydney's monthly meetups, from the /speak form on gdgsydney.com
+// through /api/submit-meetup-proposal. Not tied to an event yet: there is no `events`
+// collection until stage 4 of the One GDG Sydney Site plan in PM.md.
+export type MeetupFormat = 'standard' | 'workshop';
+export type MeetupProposalStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
+
+export interface MeetupProposal {
+  id: string;
+  name: string;
+  email: string;
+  profileUrl: string;
+  talkTitle: string;
+  format: MeetupFormat;
+  abstract: string;
+  audience: string;
+  bio: string;
+  speakingExperience: string;
+  notes: string;
+  submittedAt: string; // ISO date string (serialized from Firestore Timestamp)
+  status: MeetupProposalStatus;
+  reviewerNotes: ReviewerNote[];
+}
+
 // Whether the speaker behind a promoted talk has actually been told and has confirmed.
 // Derived from the source submission, since that is where the acceptance email is recorded.
 export type SpeakerConfirmation = 'not-emailed' | 'awaiting' | 'confirmed' | 'unknown';
