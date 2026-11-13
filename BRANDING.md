@@ -77,7 +77,7 @@ Minimum text opacity on the dark page is `text-white/50`. Anything lower is deco
 
 ### Surfaces (site-only, 2026-11-14)
 
-The app (admin, speaker portal, sign-in, privacy, 404) uses gdgsydney.com's treatment: a Black 02 page (`bg-black-02`, `#1e1e1e`), the GDG Sydney logo (not the DevFest wordmark), pill buttons (`rounded-full`) and sentence-case labels rather than ALL-CAPS mono eyebrows. It replaced the near-black `#010103` page, which only the retiring DevFest 2026 forms (`/feedback`, `/credits`) and the email-link confirm pages still use.
+The app (admin, speaker portal, sign-in, the email-link pages, privacy, 404) uses gdgsydney.com's treatment: a Black 02 page (`bg-black-02`, `#1e1e1e`), the GDG Sydney logo (not the DevFest wordmark), pill buttons (`rounded-full`) and sentence-case labels rather than ALL-CAPS mono eyebrows. It replaced the near-black `#010103` page, which only the retiring DevFest 2026 forms (`/feedback`, `/credits`) still use. The pages opened from email links (confirm, thank-you, join, opt-out) use the frame's minimal mode: the logo isn't a link and there is no footer, so the page asks its one question with no way out but answering.
 
 | Token | Hex | Use | `text-white/50` on it |
 |---|---|---|---|

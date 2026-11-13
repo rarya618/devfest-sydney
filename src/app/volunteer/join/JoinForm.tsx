@@ -16,7 +16,7 @@ interface JoinFormProps {
 
 // The shared submit button in the volunteer green, as /volunteer/confirm uses.
 const GREEN_SUBMIT_CLASS =
-  'inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-green-deep text-white text-base font-bold rounded border border-google-green-deep transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed';
+  'inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-green-deep text-white text-base font-bold rounded-full border border-google-green-deep transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed';
 
 // The lead-volunteer role is offered by the organisers, not picked from a list.
 const OFFERED_AREAS = (Object.keys(VOLUNTEER_AREA_LABELS) as VolunteerArea[]).filter((area) => area !== 'lead-volunteer');
@@ -51,7 +51,7 @@ export default function JoinForm({ token, eventName, phone: savedPhone, dietaryR
 
   if (isDone) {
     return (
-      <div role="status" className="rounded-2xl border border-google-green/30 bg-google-green/10 px-6 py-8 text-center">
+      <div role="status" className="rounded-3xl bg-google-green/10 px-6 py-8">
         <p className="text-2xl font-bold text-google-green">You&rsquo;re in the queue</p>
         <p className="mt-3 text-white/70 leading-relaxed">
           Thanks for coming back. We&rsquo;ll email you to confirm your spot on the {eventName} crew.
@@ -98,7 +98,7 @@ export default function JoinForm({ token, eventName, phone: savedPhone, dietaryR
         <textarea id="join-note" rows={3} className={inputNormal} value={note} maxLength={1000} onChange={(e) => setNote(e.target.value)} />
       </div>
 
-      <div className="text-center pt-2">
+      <div className="pt-2">
         <button type="submit" disabled={isPending} aria-label={`Put me down to volunteer at ${eventName}`} className={GREEN_SUBMIT_CLASS}>
           {isPending ? 'Saving…' : 'Count me in'}
         </button>

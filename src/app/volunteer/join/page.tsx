@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
+import PublicShell from '@/components/PublicShell';
 import { loadVolunteerInvite, type VolunteerInvite } from '@/lib/volunteerInvite';
 import JoinForm from './JoinForm';
 
@@ -40,13 +40,12 @@ export default async function VolunteerJoinPage({ searchParams }: JoinPageProps)
   }
 
   return (
-    <main className="bg-[#010103] text-white min-h-screen flex items-center justify-center px-6 py-16">
-      <div className="w-full max-w-xl bg-white/[0.04] border border-white/10 rounded-3xl px-8 py-12 sm:px-12 text-center">
-        <Image src="/logo-wordmark.png" alt="DevFest Sydney" width={1331} height={240} priority className="h-8 w-auto object-contain mx-auto mb-10" />
+    <PublicShell minimal>
+      <div className="max-w-xl">
 
         {!invite ? (
           <>
-            <h1 className="text-[clamp(1.75rem,5vw,2.5rem)] font-bold leading-tight tracking-tight mb-5">This link isn&rsquo;t working</h1>
+            <h1 className="text-[clamp(2.25rem,6vw,3.5rem)] font-bold leading-[1.02] tracking-[-0.02em] mb-5">This link isn&rsquo;t working</h1>
             <p className="text-white/70 leading-relaxed">
               We couldn&rsquo;t match this link to an invite. It may have been copied incompletely. Write to{' '}
               <a href="mailto:hello@gdgsydney.com" className="text-google-green hover:underline">hello@gdgsydney.com</a> and we&rsquo;ll sort it out.
@@ -54,19 +53,19 @@ export default async function VolunteerJoinPage({ searchParams }: JoinPageProps)
           </>
         ) : invite.alreadySignedUp ? (
           <>
-            <h1 className="text-[clamp(1.75rem,5vw,2.5rem)] font-bold leading-tight tracking-tight mb-5">You&rsquo;re already signed up</h1>
+            <h1 className="text-[clamp(2.25rem,6vw,3.5rem)] font-bold leading-[1.02] tracking-[-0.02em] mb-5">You&rsquo;re already signed up</h1>
             <p className="text-white/70 leading-relaxed">
               We have you down to volunteer at {invite.event.name}. We&rsquo;ll email you to confirm your spot.
             </p>
           </>
         ) : invite.closedReason ? (
           <>
-            <h1 className="text-[clamp(1.75rem,5vw,2.5rem)] font-bold leading-tight tracking-tight mb-5">This invite has closed</h1>
+            <h1 className="text-[clamp(2.25rem,6vw,3.5rem)] font-bold leading-[1.02] tracking-[-0.02em] mb-5">This invite has closed</h1>
             <p className="text-white/70 leading-relaxed">{invite.closedReason} Thanks for wanting to help, and keep an eye out for the next one.</p>
           </>
         ) : (
           <>
-            <h1 className="text-[clamp(1.75rem,5vw,2.5rem)] font-bold leading-tight tracking-tight mb-3">
+            <h1 className="text-[clamp(2.25rem,6vw,3.5rem)] font-bold leading-[1.02] tracking-[-0.02em] mb-3">
               Crew {invite.event.name}?
             </h1>
             <p className="font-mono text-sm text-google-green mb-8">
@@ -74,7 +73,7 @@ export default async function VolunteerJoinPage({ searchParams }: JoinPageProps)
               {invite.event.venue ? ` · ${invite.event.venue.name}` : ''}
             </p>
 
-            <div className="p-5 bg-black/20 border border-white/10 rounded-2xl mb-8 text-left">
+            <div className="p-5 bg-surface rounded-3xl mb-8 text-left">
               <p className="text-xs font-mono text-white/55 mb-2">The details we have for you</p>
               <p className="font-bold">{invite.name}</p>
               <p className="text-sm text-white/65">{invite.email}</p>
@@ -87,6 +86,6 @@ export default async function VolunteerJoinPage({ searchParams }: JoinPageProps)
           </>
         )}
       </div>
-    </main>
+    </PublicShell>
   );
 }

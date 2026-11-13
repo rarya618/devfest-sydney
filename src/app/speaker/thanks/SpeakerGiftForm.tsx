@@ -93,7 +93,7 @@ export default function SpeakerGiftForm({ token, initialFields, savedAt }: Props
 
   if (submitState === 'success') {
     return (
-      <div className="text-center animate-slide-up">
+      <div className="animate-slide-up">
         <h2 className="text-xl font-bold text-white mb-3">Got it, thank you</h2>
         <p className="text-white/70 leading-relaxed">
           {fields.wantsMug && fields.wantsAsanaTrial
@@ -111,7 +111,7 @@ export default function SpeakerGiftForm({ token, initialFields, savedAt }: Props
     <>
       <form onSubmit={handleSubmit} noValidate className="space-y-8 text-left">
         {savedAt && (
-          <p className="text-sm text-white/70 leading-relaxed bg-black/20 border border-white/10 rounded-xl px-4 py-3">
+          <p className="text-sm text-white/70 leading-relaxed bg-surface rounded-2xl px-4 py-3">
             We have your details from {new Date(savedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', timeZone: 'Australia/Sydney' })}.
             Change anything below and save again.
           </p>

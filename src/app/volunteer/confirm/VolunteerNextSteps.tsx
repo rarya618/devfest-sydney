@@ -15,18 +15,18 @@ export default function VolunteerNextSteps({ ticketUrl, ticketAlreadySent, whats
   return (
     <div className="mt-8 space-y-6 text-left">
       {ticketAlreadySent ? (
-        <p className="text-center text-white/70 leading-relaxed">
+        <p className="text-white/70 leading-relaxed">
           Your volunteer ticket has already been sent to you. If you can&rsquo;t find it, reply to
           your acceptance email and we&rsquo;ll send it again.
         </p>
       ) : ticketUrl ? (
-        <div className="text-center">
+        <div>
           <a
             href={ticketUrl}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Get your volunteer ticket on Humanitix, opens in a new tab"
-            className="inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-green-deep text-white text-base font-bold rounded
+            className="inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-green-deep text-white text-base font-bold rounded-full
               border border-google-green-deep transition-opacity hover:opacity-80"
           >
             Get your volunteer ticket
@@ -36,12 +36,12 @@ export default function VolunteerNextSteps({ ticketUrl, ticketAlreadySent, whats
           </p>
         </div>
       ) : (
-        <p className="text-center text-white/70 leading-relaxed">
+        <p className="text-white/70 leading-relaxed">
           We&rsquo;ll email your volunteer ticket shortly.
         </p>
       )}
 
-      <div className="p-6 bg-black/20 border border-white/10 rounded-2xl">
+      <div className="p-6 bg-surface rounded-3xl">
         <p className="text-xs font-mono text-google-green mb-2">Volunteer WhatsApp group</p>
         <p className="text-white/70 leading-relaxed">
           This is where we&rsquo;ll share the run sheet, last-minute changes and who&rsquo;s where
@@ -54,7 +54,7 @@ export default function VolunteerNextSteps({ ticketUrl, ticketAlreadySent, whats
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Join the volunteer WhatsApp group, opens in a new tab"
-            className="mt-4 inline-flex items-center px-7 py-2 bg-transparent text-white text-base font-bold rounded border border-white/40 transition-colors hover:border-white"
+            className="mt-4 inline-flex items-center px-7 py-2 bg-transparent text-white text-base font-bold rounded-full border border-white/40 transition-colors hover:border-white"
           >
             Join the WhatsApp group
           </a>

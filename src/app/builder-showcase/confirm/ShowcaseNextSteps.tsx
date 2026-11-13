@@ -27,7 +27,7 @@ export default function ShowcaseNextSteps({ ticketUrl, hasCoPresenters }: Showca
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Get your complimentary Builder Showcase ticket on Humanitix, opens in a new tab"
-        className="inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-yellow text-black-02 text-base font-bold rounded
+        className="inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-yellow text-black-02 text-base font-bold rounded-full
           border border-google-yellow transition-opacity hover:opacity-80"
       >
         Get your showcase ticket

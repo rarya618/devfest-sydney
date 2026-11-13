@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
+import PublicShell from '@/components/PublicShell';
 import { EMPTY_SPEAKER_GIFT_FIELDS, type SpeakerGiftFormFields } from '@/lib/speakerGiftLabels';
 import {
   fetchSpeakerGift,
@@ -70,20 +70,12 @@ export default async function SpeakerThanksPage({ searchParams }: ThanksPageProp
 
   return (
     // No navbar and no footer, like /speaker/confirm: one personal task on its own.
-    <main className="bg-[#010103] text-white min-h-screen flex items-center justify-center px-4 sm:px-6 py-16">
-      <div className="w-full max-w-xl bg-white/[0.04] border border-white/10 rounded-3xl px-6 py-12 sm:px-12">
-        <Image
-          src="/logo-wordmark.png"
-          alt="DevFest Sydney"
-          width={1331}
-          height={240}
-          priority
-          className="h-8 w-auto object-contain mx-auto mb-10"
-        />
+    <PublicShell minimal>
+      <div className="max-w-xl">
 
         {!page ? (
-          <div className="text-center">
-            <h1 className="text-[clamp(1.75rem,5vw,2.5rem)] font-bold leading-tight tracking-tight mb-5">
+          <div>
+            <h1 className="text-[clamp(2.25rem,6vw,3.5rem)] font-bold leading-[1.02] tracking-[-0.02em] mb-5">
               This link isn&rsquo;t working
             </h1>
             <p className="text-white/70 leading-relaxed">
@@ -97,8 +89,8 @@ export default async function SpeakerThanksPage({ searchParams }: ThanksPageProp
           </div>
         ) : (
           <>
-            <div className="text-center mb-10">
-              <h1 className="text-[clamp(1.75rem,5vw,2.5rem)] font-bold leading-tight tracking-tight mb-4">
+            <div className="mb-10">
+              <h1 className="text-[clamp(2.25rem,6vw,3.5rem)] font-bold leading-[1.02] tracking-[-0.02em] mb-4">
                 Thank you, {firstName}
               </h1>
               <p className="text-white/70 leading-relaxed">
@@ -111,7 +103,7 @@ export default async function SpeakerThanksPage({ searchParams }: ThanksPageProp
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="See the photos from DevFest Sydney 2026 on Google Drive, opens in a new tab"
-                  className="inline-flex mt-6 items-center px-6 py-2 text-white text-sm font-bold rounded border border-white/40 transition-colors hover:border-white"
+                  className="inline-flex mt-6 items-center px-6 py-2 text-white text-sm font-bold rounded-full border border-white/40 transition-colors hover:border-white"
                 >
                   See the photos from the day
                 </a>
@@ -126,6 +118,6 @@ export default async function SpeakerThanksPage({ searchParams }: ThanksPageProp
           </>
         )}
       </div>
-    </main>
+    </PublicShell>
   );
 }

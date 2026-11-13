@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
+import PublicShell from '@/components/PublicShell';
 import type { Timestamp } from 'firebase-admin/firestore';
-import Image from 'next/image';
 import { adminDb } from '@/lib/firebase-admin';
 import { formatDeadlineDate } from '@/lib/format';
 import { verifyShowcaseConfirmToken } from '@/lib/showcaseConfirm';
@@ -79,20 +79,12 @@ export default async function ShowcaseConfirmPage({ searchParams }: ConfirmPageP
   return (
     // No navbar and no footer: this page asks one question, and every link out of it is a
     // way to leave without answering.
-    <main className="bg-[#010103] text-white min-h-screen flex items-center justify-center px-6 py-16">
-      <div className="w-full max-w-xl bg-white/[0.04] border border-white/10 rounded-3xl px-8 py-12 sm:px-12 text-center">
-        <Image
-          src="/logo-wordmark.png"
-          alt="DevFest Sydney"
-          width={1331}
-          height={240}
-          priority
-          className="h-8 w-auto object-contain mx-auto mb-10"
-        />
+    <PublicShell minimal>
+      <div className="max-w-xl">
 
         {!entry ? (
           <>
-            <h1 className="text-[clamp(1.75rem,5vw,2.5rem)] font-bold leading-tight tracking-tight mb-5">
+            <h1 className="text-[clamp(2.25rem,6vw,3.5rem)] font-bold leading-[1.02] tracking-[-0.02em] mb-5">
               This link isn&rsquo;t working
             </h1>
             <p className="text-white/70 leading-relaxed">
@@ -107,11 +99,11 @@ export default async function ShowcaseConfirmPage({ searchParams }: ConfirmPageP
           </>
         ) : (
           <>
-            <h1 className="text-[clamp(1.75rem,5vw,2.5rem)] font-bold leading-tight tracking-tight mb-8">
+            <h1 className="text-[clamp(2.25rem,6vw,3.5rem)] font-bold leading-[1.02] tracking-[-0.02em] mb-8">
               {entry.alreadyConfirmed ? 'You’re already confirmed' : 'Confirm your showcase demo'}
             </h1>
 
-            <div className="p-6 bg-black/20 border border-white/10 rounded-2xl mb-8">
+            <div className="p-6 bg-surface rounded-3xl mb-8">
               <p className="text-xs font-mono text-white/55 mb-2">Your demo</p>
               <p className="text-xl font-bold leading-snug">{entry.projectName}</p>
               <p className="mt-2 text-sm text-google-yellow">{SHOWCASE_STAGE_LABELS[entry.stage]}</p>
@@ -150,6 +142,6 @@ export default async function ShowcaseConfirmPage({ searchParams }: ConfirmPageP
           </>
         )}
       </div>
-    </main>
+    </PublicShell>
   );
 }

@@ -9,7 +9,7 @@ export const labelClass = 'block text-sm font-bold text-white/85 mb-1.5';
 export const errorClass = 'mt-1.5 text-xs text-google-red-light';
 export const hintClass = 'mt-1.5 text-xs text-white/50';
 export const submitClass =
-  'inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-blue-deep text-white text-base font-bold rounded border border-google-blue-deep transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed';
+  'inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-blue-deep text-white text-base font-bold rounded-full border border-google-blue-deep transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed';
 
 export function optionButtonClass(selected: boolean, hasError: boolean): string {
   if (hasError && !selected) return 'border-google-red-light bg-google-red/5 text-white/70';

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
+import PublicShell from '@/components/PublicShell';
 import OptOutButton from './OptOutButton';
 
 export const metadata: Metadata = {
@@ -17,10 +17,9 @@ export default async function VolunteerUnsubscribePage({ searchParams }: Unsubsc
   const { token } = await searchParams;
 
   return (
-    <main className="bg-[#010103] text-white min-h-screen flex items-center justify-center px-6 py-16">
-      <div className="w-full max-w-xl bg-white/[0.04] border border-white/10 rounded-3xl px-8 py-12 sm:px-12 text-center">
-        <Image src="/logo-wordmark.png" alt="DevFest Sydney" width={1331} height={240} priority className="h-8 w-auto object-contain mx-auto mb-10" />
-        <h1 className="text-[clamp(1.75rem,5vw,2.5rem)] font-bold leading-tight tracking-tight mb-5">Stop volunteer invites?</h1>
+    <PublicShell minimal>
+      <div className="max-w-xl">
+        <h1 className="text-[clamp(2.25rem,6vw,3.5rem)] font-bold leading-[1.02] tracking-[-0.02em] mb-5">Stop volunteer invites?</h1>
         {token ? (
           <>
             <p className="text-white/70 leading-relaxed mb-8">
@@ -37,6 +36,6 @@ export default async function VolunteerUnsubscribePage({ searchParams }: Unsubsc
           </p>
         )}
       </div>
-    </main>
+    </PublicShell>
   );
 }

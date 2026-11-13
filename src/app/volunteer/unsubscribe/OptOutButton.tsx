@@ -33,7 +33,7 @@ export default function OptOutButton({ token }: { token: string }) {
           })
         }
         aria-label="Stop sending me GDG Sydney volunteer invites"
-        className="inline-flex items-center justify-center px-7 py-2 bg-google-blue-deep text-white text-base font-bold rounded border border-google-blue-deep transition-opacity hover:opacity-80 disabled:opacity-50"
+        className="inline-flex items-center justify-center px-7 py-2 bg-google-blue-deep text-white text-base font-bold rounded-full border border-google-blue-deep transition-opacity hover:opacity-80 disabled:opacity-50"
       >
         {isPending ? 'Saving…' : 'Stop inviting me'}
       </button>

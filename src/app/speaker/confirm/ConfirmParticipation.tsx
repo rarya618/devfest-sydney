@@ -39,7 +39,7 @@ export default function ConfirmParticipation({ token, talkTitle, intro, dinnerLa
     return (
       <div
         role="status"
-        className="rounded-2xl border border-google-green/30 bg-google-green/10 px-6 py-8 text-center"
+        className="rounded-3xl bg-google-green/10 px-6 py-8"
       >
         <p className="text-2xl font-bold text-google-green">You&rsquo;re confirmed</p>
         <p className="mt-3 text-white/70 leading-relaxed">
@@ -57,7 +57,7 @@ export default function ConfirmParticipation({ token, talkTitle, intro, dinnerLa
         onClick={handleConfirm}
         disabled={isPending}
         aria-label={`Confirm you will be speaking: ${talkTitle}`}
-        className="inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-green-deep text-white text-base font-bold rounded
+        className="inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-green-deep text-white text-base font-bold rounded-full
           border border-google-green-deep transition-opacity hover:opacity-80
           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-google-green-deep disabled:hover:text-white"
       >

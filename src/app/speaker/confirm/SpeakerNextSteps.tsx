@@ -15,13 +15,13 @@ export default function SpeakerNextSteps({ ticketUrl, dinnerLabel }: SpeakerNext
   return (
     <div className="mt-8 space-y-6 text-left">
       {ticketUrl ? (
-        <div className="text-center">
+        <div>
           <a
             href={ticketUrl}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Get your complimentary speaker ticket on Humanitix, opens in a new tab"
-            className="inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-blue-deep text-white text-base font-bold rounded
+            className="inline-flex items-center justify-center gap-2.5 px-7 py-2 bg-google-blue-deep text-white text-base font-bold rounded-full
               border border-google-blue-deep transition-opacity hover:opacity-80"
           >
             Get your speaker ticket
@@ -32,13 +32,13 @@ export default function SpeakerNextSteps({ ticketUrl, dinnerLabel }: SpeakerNext
           </p>
         </div>
       ) : (
-        <p className="text-center text-white/70 leading-relaxed">
+        <p className="text-white/70 leading-relaxed">
           We&rsquo;ll email your complimentary speaker ticket shortly.
         </p>
       )}
 
       {dinnerLabel && (
-        <div className="p-6 bg-black/20 border border-white/10 rounded-2xl">
+        <div className="p-6 bg-surface rounded-3xl">
           <p className="text-xs font-mono text-google-yellow mb-2">
             Speaker dinner &middot; {dinnerLabel}
           </p>
