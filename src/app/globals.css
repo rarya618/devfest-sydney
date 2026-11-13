@@ -89,9 +89,12 @@
   --color-off-white: #f0f0f0;
   --color-black-02: #1e1e1e;
 
-  /* Card and panel fill on the near-black page. An opaque grey rather than a white tint,
-     so cards keep the same lift whatever sits behind them. */
-  --color-surface: #121316;
+  /* Card and panel fill on the Black 02 page (the admin and portal treatment, 2026-11-14;
+     #121316 on the old near-black page before). Opaque rather than a white tint, so cards
+     keep the same lift whatever sits behind them. white/50 text measures 4.8:1 on it. */
+  --color-surface: #282828;
+  /* Modals, menus and popovers, which sit above cards. white/50 text measures 4.5:1 on it. */
+  --color-surface-raised: #303030;
 }
 
 :root {

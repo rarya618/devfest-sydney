@@ -120,7 +120,7 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
       aria-modal="true"
       aria-label={isCreating ? 'Add a submission' : `Edit submission: ${submission.talkTitle}`}
     >
-      <div className="w-full max-w-xl bg-[#2d2e31] rounded-2xl shadow-xl my-8">
+      <div className="w-full max-w-xl bg-surface-raised rounded-2xl shadow-xl my-8">
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <h2 className="text-lg font-bold text-white">
@@ -474,7 +474,7 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
               type="submit"
               disabled={isPending}
               aria-label={isCreating ? 'Add this submission' : 'Save changes to submission'}
-              className="text-xs px-4 py-1.5 rounded-lg bg-google-blue-deep text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50"
+              className="text-xs px-4 py-1.5 rounded-full bg-google-blue-deep text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50"
             >
               {isPending ? (isCreating ? 'Adding…' : 'Saving…') : isCreating ? 'Add submission' : 'Save changes'}
             </button>

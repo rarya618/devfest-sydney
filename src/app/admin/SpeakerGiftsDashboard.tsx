@@ -24,7 +24,7 @@ interface Props {
 type GiftTab = 'all' | 'mugs' | 'asana' | 'awaiting';
 
 const secondaryButtonClass =
-  'text-sm font-bold px-4 py-2 rounded-lg border border-white/35 text-white/85 hover:border-white transition-colors disabled:opacity-40';
+  'text-sm font-bold px-4 py-2 rounded-full border border-white/35 text-white/85 hover:border-white transition-colors disabled:opacity-40';
 
 function postalAddress(gift: SpeakerGift): string[] {
   return [
@@ -83,10 +83,10 @@ function GiftRow({ gift, onError }: { gift: SpeakerGift; onError: (message: stri
       <div className="flex justify-end">
         {confirmingDelete ? (
           <span className="flex items-center gap-2">
-            <button type="button" onClick={() => setConfirmingDelete(false)} disabled={isPending} aria-label="Keep this answer" className="text-xs font-bold px-3 py-1.5 rounded-lg border border-white/35 text-white/80 hover:border-white disabled:opacity-40">
+            <button type="button" onClick={() => setConfirmingDelete(false)} disabled={isPending} aria-label="Keep this answer" className="text-xs font-bold px-3 py-1.5 rounded-full border border-white/35 text-white/80 hover:border-white disabled:opacity-40">
               Keep
             </button>
-            <button type="button" onClick={handleDelete} disabled={isPending} aria-label={`Delete the answer from ${gift.speakerName}`} className="text-xs font-bold px-3 py-1.5 rounded-lg bg-google-red-deep border border-google-red-deep text-white hover:opacity-90 disabled:opacity-40">
+            <button type="button" onClick={handleDelete} disabled={isPending} aria-label={`Delete the answer from ${gift.speakerName}`} className="text-xs font-bold px-3 py-1.5 rounded-full bg-google-red-deep border border-google-red-deep text-white hover:opacity-90 disabled:opacity-40">
               Delete
             </button>
           </span>
@@ -145,10 +145,10 @@ export default function SpeakerGiftsDashboard({ gifts, awaitingReply, thankedCou
 
   return (
     <>
-      <StickyAdminHeader className="z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-[#010103]/95 backdrop-blur-sm">
+      <StickyAdminHeader className="z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-black-02/95 backdrop-blur-sm">
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <div className="min-w-0">
-            <h1 className="text-xl font-bold text-white tracking-tight">Speaker gifts</h1>
+            <h1 className="text-2xl font-bold text-off-white tracking-[-0.01em]">Speaker gifts</h1>
             <p className="mt-0.5 text-sm text-white/55">
               {gifts.length} of {thankedCount} thanked {thankedCount === 1 ? 'speaker has' : 'speakers have'} answered &middot;{' '}
               {mugGifts.length} {mugGifts.length === 1 ? 'mug' : 'mugs'} &middot; {asanaGifts.length} Asana {asanaGifts.length === 1 ? 'trial' : 'trials'}
@@ -163,10 +163,10 @@ export default function SpeakerGiftsDashboard({ gifts, awaitingReply, thankedCou
             </button>
             {confirmingDeleteAll ? (
               <span role="group" aria-label="Confirm deleting every answer" className="flex items-center gap-2">
-                <button type="button" onClick={() => setConfirmingDeleteAll(false)} aria-label="Keep the answers" className="text-sm font-bold px-3 py-2 rounded-lg border border-white/35 text-white/80 hover:border-white">
+                <button type="button" onClick={() => setConfirmingDeleteAll(false)} aria-label="Keep the answers" className="text-sm font-bold px-3 py-2 rounded-full border border-white/35 text-white/80 hover:border-white">
                   Keep
                 </button>
-                <button type="button" onClick={handleDeleteAll} aria-label="Delete every speaker gift answer for good" className="text-sm font-bold px-3 py-2 rounded-lg bg-google-red-deep text-white hover:opacity-90">
+                <button type="button" onClick={handleDeleteAll} aria-label="Delete every speaker gift answer for good" className="text-sm font-bold px-3 py-2 rounded-full bg-google-red-deep text-white hover:opacity-90">
                   Delete all {gifts.length}
                 </button>
               </span>

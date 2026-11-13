@@ -79,7 +79,7 @@ function ReviewerNotesPanel({ volunteerId, notes, onError }: ReviewerNotesPanelP
           type="submit"
           disabled={isPending || !draft.trim()}
           aria-label="Save reviewer note"
-          className="shrink-0 text-xs font-semibold px-3 py-2 rounded-lg bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
+          className="shrink-0 text-xs font-semibold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
         >
           {isPending ? 'Saving…' : 'Add'}
         </button>
@@ -370,7 +370,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
             {moreOpen && (
               <div
                 role="menu"
-                className="absolute right-0 top-full mt-2 w-44 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
+                className="absolute right-0 top-full mt-2 w-44 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
               >
                 <button
                   role="menuitem"
@@ -536,10 +536,10 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
 
   return (
     <>
-      <div className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-[#010103]/95 backdrop-blur-sm`}>
+      <div className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-black-02/95 backdrop-blur-sm`}>
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <div className="min-w-0">
-            <h1 className="text-xl font-bold text-white tracking-tight">Volunteers</h1>
+            <h1 className="text-2xl font-bold text-off-white tracking-[-0.01em]">Volunteers</h1>
             <p className="mt-0.5 text-sm text-white/55">
               {counts.all} total &middot; {counts.pending} pending review
               {notEmailedCount > 0 && <> &middot; {notEmailedCount} accepted, not emailed</>}
@@ -554,7 +554,7 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
               className="h-10 rounded-full border border-white/35 bg-white/[0.06] px-4 text-sm font-semibold text-white focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
             >
               {generalEvents.events.map((event) => (
-                <option key={event.id} value={event.id} className="bg-[#191a1d]">
+                <option key={event.id} value={event.id} className="bg-surface-raised">
                   {event.name}
                 </option>
               ))}
@@ -647,7 +647,7 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
               {statusMenuOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 top-full mt-2 w-48 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
+                  className="absolute right-0 top-full mt-2 w-48 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
                 >
                   {filterTabs.map((tab) => (
                     <button

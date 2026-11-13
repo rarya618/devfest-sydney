@@ -167,10 +167,10 @@ function DevfestPicker({ devfests, selectedDevfestId, onError, idSuffix }: Devfe
       onChange={(changeEvent) => handleChange(changeEvent.target.value)}
       disabled={isPending}
       aria-label="Choose which DevFest the DevFest sections show"
-      className="ml-2 rounded-md border border-white/35 bg-white/[0.06] px-1.5 py-0.5 font-mono text-[11px] text-white normal-case tracking-normal focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40 disabled:opacity-60"
+      className="ml-2 rounded-full border border-white/35 bg-white/[0.06] px-2.5 py-0.5 text-xs font-bold text-off-white focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40 disabled:opacity-60"
     >
       {devfests.map((devfest) => (
-        <option key={devfest.id} value={devfest.id} className="bg-[#191a1d]">
+        <option key={devfest.id} value={devfest.id} className="bg-surface-raised">
           {devfest.name}
           {devfest.isCurrent ? ' (current)' : ''}
         </option>
@@ -191,8 +191,8 @@ interface NavLinksProps {
 }
 
 function navLinkClasses(active: boolean, rounded: boolean, nested = false): string {
-  return `block text-sm transition-colors ${nested ? 'pl-8 pr-4' : 'px-4'} ${rounded ? 'py-2 rounded-lg' : 'py-2.5'} ${
-    active ? 'bg-white/10 text-white font-bold' : 'text-white/55 font-medium hover:text-white hover:bg-white/[0.08]'
+  return `block text-sm transition-colors ${nested ? 'pl-8 pr-4' : 'px-4'} ${rounded ? 'py-2 rounded-full' : 'py-2.5'} ${
+    active ? 'bg-white/10 text-off-white font-bold' : 'text-white/65 font-medium hover:text-off-white hover:bg-white/[0.06]'
   }`;
 }
 
@@ -216,10 +216,10 @@ function NavDropdown({ item, pathname, onNavigate, rounded }: NavDropdownProps) 
         aria-expanded={isOpen}
         aria-controls={listId}
         aria-label={`${isOpen ? 'Hide' : 'Show'} ${item.label.toLowerCase()}`}
-        className={`w-full flex items-center justify-between text-left text-sm px-4 transition-colors ${rounded ? 'py-2 rounded-lg' : 'py-2.5'} ${
+        className={`w-full flex items-center justify-between text-left text-sm px-4 transition-colors ${rounded ? 'py-2 rounded-full' : 'py-2.5'} ${
           containsActivePage && !isOpen
-            ? 'bg-white/10 text-white font-bold'
-            : `${containsActivePage ? 'text-white font-bold' : 'text-white/55 font-medium'} hover:text-white hover:bg-white/[0.08]`
+            ? 'bg-white/10 text-off-white font-bold'
+            : `${containsActivePage ? 'text-off-white font-bold' : 'text-white/65 font-medium'} hover:text-off-white hover:bg-white/[0.06]`
         }`}
       >
         {item.label}
@@ -257,7 +257,9 @@ function NavGroupSection({ group, pathname, onNavigate, rounded, devfestPicker }
   const [isOpen, setIsOpen] = useOpenOnActivePage(containsActivePage);
   const showItems = !group.isCollapsible || isOpen;
   const listId = `nav-group-${toDomId(group.label)}-${rounded ? 'sidebar' : 'menu'}`;
-  const labelClasses = 'font-mono text-[11px] uppercase tracking-[0.12em]';
+  // Plain sentence-case labels, as on gdgsydney.com and the speaker portal (an ALL-CAPS mono
+  // eyebrow until 2026-11-14).
+  const labelClasses = 'text-xs font-bold';
 
   return (
     <div>
@@ -331,7 +333,7 @@ interface AccountRowProps {
 function AccountRow({ adminName, adminEmail, signingOut, onSignOut }: AccountRowProps) {
   return (
     <div className="flex items-center gap-3 px-3 py-2">
-      <span className="flex items-center justify-center w-8 h-8 rounded-full bg-google-blue-deep text-white text-xs font-bold shrink-0">
+      <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white/15 text-off-white text-xs font-bold shrink-0">
         {getInitials(adminName)}
       </span>
       <div className="min-w-0 flex-1">
@@ -343,7 +345,7 @@ function AccountRow({ adminName, adminEmail, signingOut, onSignOut }: AccountRow
         disabled={signingOut}
         aria-label="Sign out of admin panel"
         title="Sign out"
-        className="shrink-0 p-2 -mr-2 rounded-lg text-white/55 hover:text-google-red-light hover:bg-google-red/[0.08] transition-colors disabled:opacity-50"
+        className="shrink-0 p-2 -mr-2 rounded-full text-white/60 hover:text-google-red-light hover:bg-google-red/[0.08] transition-colors disabled:opacity-50"
       >
         <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" d="M6 14H3.5A1.5 1.5 0 012 12.5v-9A1.5 1.5 0 013.5 2H6" />
@@ -415,17 +417,20 @@ export default function AdminShell({ adminEmail, adminName, devfests, selectedDe
     }
   }
 
+  // GDG Sydney's logo (the admin covers every event, not only DevFest), the same file the
+  // speaker portal and emails use, with "Admin" beside it so it reads as the back office.
   const wordmark = (
-    <Link href="/" className="inline-flex items-center hover:opacity-80 transition-opacity" aria-label="Back to DevFest Sydney home">
-      <Image src="/logo-wordmark.png" alt="DevFest Sydney" width={1331} height={240} className="h-8 w-auto object-contain" />
+    <Link href="/admin" className="inline-flex items-center gap-2.5 rounded hover:opacity-85 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue" aria-label="GDG Sydney admin, home">
+      <Image src="https://gdgsydney.com/gdg-logo-dark.png" alt="" width={1700} height={215} className="h-5 w-auto" />
+      <span className="text-xs font-bold text-white/60">Admin</span>
     </Link>
   );
 
   return (
-    <div className="min-h-screen bg-[#010103] md:flex md:items-start">
+    <div className="min-h-screen bg-black-02 md:flex md:items-start">
       {/* Mobile top bar */}
       <div
-        className={`md:hidden sticky top-0 z-30 flex items-center justify-between pl-3 pr-4 pt-4 pb-3 bg-[#010103] transition-transform duration-300 ease-in-out ${
+        className={`md:hidden sticky top-0 z-30 flex items-center justify-between pl-3 pr-4 pt-4 pb-3 bg-black-02 transition-transform duration-300 ease-in-out ${
           mobileBarHidden ? '-translate-y-full' : 'translate-y-0'
         }`}
       >
@@ -450,7 +455,7 @@ export default function AdminShell({ adminEmail, adminName, devfests, selectedDe
       {mobileMenuOpen && (
         <>
           <div className="fixed inset-0 z-40 md:hidden" onClick={() => setMobileMenuOpen(false)} aria-hidden="true" />
-          <div className="md:hidden fixed top-[57px] right-3 mt-2 z-50 w-72 max-w-[calc(100vw-1.5rem)] max-h-[calc(100dvh-5rem)] overflow-y-auto bg-[#191a1d] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden">
+          <div className="md:hidden fixed top-[57px] right-3 mt-2 z-50 w-72 max-w-[calc(100vw-1.5rem)] max-h-[calc(100dvh-5rem)] overflow-y-auto bg-surface-raised border border-white/10 rounded-3xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden">
             <div className="py-1.5">
               <NavLinks
                 pathname={pathname}
@@ -469,7 +474,7 @@ export default function AdminShell({ adminEmail, adminName, devfests, selectedDe
       )}
 
       {/* Sidebar (desktop only) */}
-      <aside className="hidden md:sticky md:flex top-0 left-0 z-50 w-64 shrink-0 h-screen flex-col border-r border-white/10 px-3 pt-7 pb-4 bg-[#010103]">
+      <aside className="hidden md:sticky md:flex top-0 left-0 z-50 w-64 shrink-0 h-screen flex-col border-r border-white/10 px-3 pt-7 pb-4 bg-black-02">
         <div className="pl-3 mb-6">{wordmark}</div>
 
         <div className="flex-1 min-h-0 overflow-y-auto -mx-3 px-3">

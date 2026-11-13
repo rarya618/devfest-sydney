@@ -347,7 +347,7 @@ function CrewCard({ member, onError }: CrewCardProps) {
           )}
 
           {confirmingRemove ? (
-            <div role="group" aria-label={`Confirm removing ${member.name}`} className="flex flex-col items-end gap-1.5 bg-[#2d2e31] border border-white/10 rounded-xl px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.45)] w-52">
+            <div role="group" aria-label={`Confirm removing ${member.name}`} className="flex flex-col items-end gap-1.5 bg-surface-raised border border-white/10 rounded-xl px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.45)] w-52">
               <p className="text-xs text-white/70 leading-snug text-left w-full">
                 {isOrganiser
                   ? 'Remove this organiser? Their record is deleted, not returned to the signup queue.'
@@ -364,7 +364,7 @@ function CrewCard({ member, onError }: CrewCardProps) {
                 <button
                   onClick={handleRemove}
                   aria-label={`Remove ${member.name} from the crew`}
-                  className="text-xs px-2.5 py-1 rounded-lg bg-google-red-deep text-white font-medium hover:opacity-90 transition-colors"
+                  className="text-xs px-2.5 py-1 rounded-full bg-google-red-deep text-white font-medium hover:opacity-90 transition-colors"
                 >
                   Remove
                 </button>
@@ -581,10 +581,10 @@ export default function CrewDashboard({ crew, invites }: Props) {
 
   return (
     <>
-      <div className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-[#010103]/95 backdrop-blur-sm`}>
+      <div className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-black-02/95 backdrop-blur-sm`}>
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <div className="min-w-0">
-            <h1 className="text-xl font-bold text-white tracking-tight">Crew</h1>
+            <h1 className="text-2xl font-bold text-off-white tracking-[-0.01em]">Crew</h1>
             <p className="mt-0.5 text-sm text-white/55">
               {crew.length} on the crew
               {organiserCount > 0 && <> &middot; {organiserCount} organiser{organiserCount === 1 ? '' : 's'}</>} &middot; {confirmedCount} confirmed
@@ -715,7 +715,7 @@ export default function CrewDashboard({ crew, invites }: Props) {
               {confirmationMenuOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 top-full mt-2 w-56 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
+                  className="absolute right-0 top-full mt-2 w-56 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
                 >
                   {confirmationTabs.map((tab) => (
                     <button

@@ -97,7 +97,7 @@ function ReviewerNotesPanel({ proposalId, notes, onError }: ReviewerNotesPanelPr
           type="submit"
           disabled={isPending || !draft.trim()}
           aria-label="Save reviewer note"
-          className="shrink-0 text-xs font-semibold px-3 py-2 rounded-lg bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
+          className="shrink-0 text-xs font-semibold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
         >
           {isPending ? 'Saving…' : 'Add'}
         </button>
@@ -386,7 +386,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
             {moreOpen && (
               <div
                 role="menu"
-                className="absolute right-0 top-full mt-2 w-44 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
+                className="absolute right-0 top-full mt-2 w-44 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
               >
                 <button
                   role="menuitem"
@@ -464,7 +464,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
             type="button"
             onClick={() => handleTakeBack(confirmingTakeBack)}
             aria-label="Take this talk off its event"
-            className="text-xs px-3 py-1.5 rounded-lg bg-google-red-deep text-white font-semibold hover:opacity-90 transition-opacity"
+            className="text-xs px-3 py-1.5 rounded-full bg-google-red-deep text-white font-semibold hover:opacity-90 transition-opacity"
           >
             Take it off
           </button>
@@ -537,10 +537,10 @@ export default function MeetupProposalsDashboard({ proposals, events, eventNames
 
   return (
     <>
-      <div className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-[#010103]/95 backdrop-blur-sm`}>
+      <div className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-black-02/95 backdrop-blur-sm`}>
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <div className="min-w-0">
-            <h1 className="text-xl font-bold text-white tracking-tight">Meetup talks</h1>
+            <h1 className="text-2xl font-bold text-off-white tracking-[-0.01em]">Meetup talks</h1>
             <p className="mt-0.5 text-sm text-white/55">
               {counts.all} total &middot; {counts.pending} pending review &middot; from gdgsydney.com/speak
             </p>
@@ -582,7 +582,7 @@ export default function MeetupProposalsDashboard({ proposals, events, eventNames
               {statusMenuOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 top-full mt-2 w-48 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
+                  className="absolute right-0 top-full mt-2 w-48 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
                 >
                   {STATUS_TABS.map((tab) => (
                     <button

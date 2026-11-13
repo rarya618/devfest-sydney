@@ -109,7 +109,7 @@ function EventCard({
             type="button"
             onClick={onEdit}
             aria-label={`Edit ${event.name}`}
-            className="text-xs font-semibold px-3 py-2 rounded-lg bg-google-blue-deep text-white hover:opacity-90 transition-opacity"
+            className="text-xs font-semibold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-opacity"
           >
             Edit
           </button>
@@ -161,11 +161,11 @@ export default function EventsDashboard({ summaries, hasCurrentDevfest }: Props)
   return (
     <>
       <div
-        className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-[#010103]/95 backdrop-blur-sm`}
+        className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-black-02/95 backdrop-blur-sm`}
       >
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <div className="min-w-0">
-            <h1 className="text-xl font-bold text-white tracking-tight">Events</h1>
+            <h1 className="text-2xl font-bold text-off-white tracking-[-0.01em]">Events</h1>
             <p className="mt-0.5 text-sm text-white/55">
               {summaries.length} {summaries.length === 1 ? 'event' : 'events'} &middot;{' '}
               {currentDevfest ? <>current DevFest: {currentDevfest.event.name}</> : 'no current DevFest set'}

@@ -73,7 +73,19 @@ The core fills reach only 3.1 to 3.9:1 against white, which fails WCAG AA for th
 | Red 300 | `#f28b82` | `text-google-red-light` | Red text on dark surfaces (errors, destructive actions) |
 | Blue 300 | `#8ab4f8` | `text-google-blue-light` | Blue text on a blue tint (the admin status and track chips) |
 
-Minimum text opacity on the dark page is `text-white/50` (5.3:1). Anything lower is decorative only.
+Minimum text opacity on the dark page is `text-white/50`. Anything lower is decorative only.
+
+### Surfaces (site-only, 2026-11-14)
+
+The app (admin, speaker portal, sign-in, privacy, 404) uses gdgsydney.com's treatment: a Black 02 page (`bg-black-02`, `#1e1e1e`), the GDG Sydney logo (not the DevFest wordmark), pill buttons (`rounded-full`) and sentence-case labels rather than ALL-CAPS mono eyebrows. It replaced the near-black `#010103` page, which only the retiring DevFest 2026 forms (`/feedback`, `/credits`) and the email-link confirm pages still use.
+
+| Token | Hex | Use | `text-white/50` on it |
+|---|---|---|---|
+| `bg-black-02` | `#1e1e1e` | Page | 5.2:1 |
+| `bg-surface` | `#282828` | Cards and panels | 4.8:1 |
+| `bg-surface-raised` | `#303030` | Modals, menus, popovers | 4.5:1 |
+
+`text-white/50` only just clears AA on `surface-raised`, so keep anything smaller than 14px at `white/60` or above there.
 
 `bg-google-blue-deep` was Blue 600 (`#1a73e8`) until the admin contrast pass measured it at 4.48:1 against white, just under AA, and moved it down a step to 5.41:1.
 

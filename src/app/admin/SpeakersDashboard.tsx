@@ -459,7 +459,7 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
           )}
 
           {confirmingRemove ? (
-            <div role="group" aria-label={`Confirm removing ${speaker.name}`} className="flex flex-col items-end gap-1.5 bg-[#2d2e31] border border-white/10 rounded-xl px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.45)] w-52">
+            <div role="group" aria-label={`Confirm removing ${speaker.name}`} className="flex flex-col items-end gap-1.5 bg-surface-raised border border-white/10 rounded-xl px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.45)] w-52">
               <p className="text-xs text-white/70 leading-snug text-left w-full">
                 {isCoSpeaker
                   ? 'Remove this co-speaker from the lineup?'
@@ -478,7 +478,7 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
                 <button
                   onClick={handleRemove}
                   aria-label={`Remove ${speaker.name} from the lineup`}
-                  className="text-xs px-2.5 py-1 rounded-lg bg-google-red-deep text-white font-medium hover:opacity-90 transition-colors"
+                  className="text-xs px-2.5 py-1 rounded-full bg-google-red-deep text-white font-medium hover:opacity-90 transition-colors"
                 >
                   Remove
                 </button>
@@ -762,10 +762,10 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
 
   return (
     <>
-      <div className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-[#010103]/95 backdrop-blur-sm`}>
+      <div className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-black-02/95 backdrop-blur-sm`}>
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <div className="min-w-0">
-            <h1 className="text-xl font-bold text-white tracking-tight">Speakers</h1>
+            <h1 className="text-2xl font-bold text-off-white tracking-[-0.01em]">Speakers</h1>
             <p className="mt-0.5 text-sm text-white/55">
               {counts.all} in the lineup &middot; {confirmedCount} confirmed
               {notEmailedCount > 0 && <> &middot; {notEmailedCount} not emailed</>}
@@ -782,7 +782,7 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
                 Sending {BULK_COPY[bulkProgress.kind].plural} {bulkProgress.sent} of {bulkProgress.total}
               </p>
             ) : confirmingBulk ? (
-              <div role="group" aria-label={`Confirm sending ${BULK_COPY[confirmingBulk].plural}`} className="shrink-0 flex items-center gap-2 h-10 pl-4 pr-1.5 rounded-full bg-[#2d2e31] border border-white/10">
+              <div role="group" aria-label={`Confirm sending ${BULK_COPY[confirmingBulk].plural}`} className="shrink-0 flex items-center gap-2 h-10 pl-4 pr-1.5 rounded-full bg-surface-raised border border-white/10">
                 <span className="text-sm text-white/70">
                   Email {bulkTargets[confirmingBulk].length} {bulkTargets[confirmingBulk].length === 1 ? 'speaker' : 'speakers'}?
                 </span>
@@ -913,7 +913,7 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
               {confirmationMenuOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 top-full mt-2 w-56 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
+                  className="absolute right-0 top-full mt-2 w-56 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
                 >
                   {confirmationTabs.map((tab) => (
                     <button
@@ -956,7 +956,7 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
               {trackMenuOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 top-full mt-2 w-48 bg-[#2d2e31] border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
+                  className="absolute right-0 top-full mt-2 w-48 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
                 >
                   {filterTabs.map((tab) => (
                     <button

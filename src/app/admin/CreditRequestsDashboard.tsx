@@ -37,10 +37,10 @@ function RequestRow({ request, onError }: { request: CreditRequest; onError: (me
       <div className="flex justify-end pt-1">
         {confirmingDelete ? (
           <span className="flex items-center gap-2">
-            <button type="button" onClick={() => setConfirmingDelete(false)} disabled={isPending} aria-label="Keep this request" className="text-xs font-bold px-3 py-1.5 rounded-lg border border-white/35 text-white/80 hover:border-white disabled:opacity-40">
+            <button type="button" onClick={() => setConfirmingDelete(false)} disabled={isPending} aria-label="Keep this request" className="text-xs font-bold px-3 py-1.5 rounded-full border border-white/35 text-white/80 hover:border-white disabled:opacity-40">
               Keep
             </button>
-            <button type="button" onClick={handleDelete} disabled={isPending} aria-label={`Delete the credit request from ${request.name}`} className="text-xs font-bold px-3 py-1.5 rounded-lg bg-google-red-deep border border-google-red-deep text-white hover:opacity-90 disabled:opacity-40">
+            <button type="button" onClick={handleDelete} disabled={isPending} aria-label={`Delete the credit request from ${request.name}`} className="text-xs font-bold px-3 py-1.5 rounded-full bg-google-red-deep border border-google-red-deep text-white hover:opacity-90 disabled:opacity-40">
               Delete
             </button>
           </span>
@@ -71,10 +71,10 @@ export default function CreditRequestsDashboard({ requests }: Props) {
 
   return (
     <>
-      <StickyAdminHeader className="z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-[#010103]/95 backdrop-blur-sm">
+      <StickyAdminHeader className="z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-black-02/95 backdrop-blur-sm">
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <div className="min-w-0">
-            <h1 className="text-xl font-bold text-white tracking-tight">Workshop credits</h1>
+            <h1 className="text-2xl font-bold text-off-white tracking-[-0.01em]">Workshop credits</h1>
             <p className="mt-0.5 text-sm text-white/55">
               {requests.length} request{requests.length === 1 ? '' : 's'} &middot;{' '}
               <Link href="/credits" className="underline underline-offset-2 hover:text-white">Open the form</Link>
@@ -85,7 +85,7 @@ export default function CreditRequestsDashboard({ requests }: Props) {
             onClick={exportCsv}
             disabled={visibleRequests.length === 0}
             aria-label="Download the credit requests shown as a CSV file"
-            className="text-sm font-bold px-4 py-2 rounded-lg border border-white/35 text-white/85 hover:border-white transition-colors disabled:opacity-40"
+            className="text-sm font-bold px-4 py-2 rounded-full border border-white/35 text-white/85 hover:border-white transition-colors disabled:opacity-40"
           >
             Export CSV
           </button>

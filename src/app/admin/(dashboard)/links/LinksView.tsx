@@ -55,8 +55,8 @@ export default function LinksView() {
 
   return (
     <>
-      <div className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-4 pb-4 md:pt-8 md:pb-5 bg-[#010103]/95 backdrop-blur-sm`}>
-        <h1 className="text-xl font-bold text-white tracking-tight">Links</h1>
+      <div className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-4 pb-4 md:pt-8 md:pb-5 bg-black-02/95 backdrop-blur-sm`}>
+        <h1 className="text-2xl font-bold text-off-white tracking-[-0.01em]">Links</h1>
       </div>
 
       <div className="px-4 md:px-5">
@@ -96,7 +96,7 @@ export default function LinksView() {
                   <button
                     onClick={() => handleCopy(path)}
                     aria-label={`Copy ${label} tracking link`}
-                    className="shrink-0 text-xs font-semibold px-3 py-2 rounded-lg bg-google-blue-deep text-white hover:opacity-90 transition-colors"
+                    className="shrink-0 text-xs font-semibold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors"
                   >
                     {copiedPath === path ? 'Copied!' : 'Copy'}
                   </button>

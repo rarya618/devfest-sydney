@@ -73,7 +73,7 @@ export default function InvitePastVolunteersModal({ eventId, eventName, people, 
       aria-modal="true"
       aria-label={`Invite past volunteers to ${eventName}`}
     >
-      <div className="w-full max-w-xl bg-[#2d2e31] rounded-2xl shadow-xl my-8">
+      <div className="w-full max-w-xl bg-surface-raised rounded-2xl shadow-xl my-8">
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
           <h2 className="text-lg font-bold text-white">Invite past volunteers</h2>
           <button
@@ -147,7 +147,7 @@ export default function InvitePastVolunteersModal({ eventId, eventName, people, 
             onClick={handleSend}
             disabled={isPending || selected.size === 0}
             aria-label={`Send ${selected.size} invite${selected.size === 1 ? '' : 's'} to crew ${eventName}`}
-            className="text-xs px-4 py-1.5 rounded-lg bg-google-green-deep text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50"
+            className="text-xs px-4 py-1.5 rounded-full bg-google-green-deep text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50"
           >
             {isPending ? 'Sending…' : `Send ${selected.size} invite${selected.size === 1 ? '' : 's'}`}
           </button>

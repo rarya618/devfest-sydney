@@ -90,7 +90,7 @@ export default function EditCrewMemberModal({ member, onClose, onError }: Props)
       aria-modal="true"
       aria-label={`Edit ${member.isOrganiser ? 'organiser' : 'crew member'}: ${member.name}`}
     >
-      <div className="w-full max-w-xl bg-[#2d2e31] rounded-2xl shadow-xl my-8">
+      <div className="w-full max-w-xl bg-surface-raised rounded-2xl shadow-xl my-8">
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <h2 className="text-lg font-bold text-white">{member.isOrganiser ? 'Edit organiser' : 'Edit crew member'}</h2>
@@ -233,7 +233,7 @@ export default function EditCrewMemberModal({ member, onClose, onError }: Props)
                       onClick={() => photoInputRef.current?.click()}
                       disabled={isUploadingPhoto || isPending}
                       aria-label={fields.photoUrl ? 'Replace crew photo' : 'Upload crew photo'}
-                      className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-google-blue-deep text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-google-blue-deep text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50"
                     >
                       <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8 10.5v-8M4.5 6L8 2.5 11.5 6" />
@@ -274,7 +274,7 @@ export default function EditCrewMemberModal({ member, onClose, onError }: Props)
               type="submit"
               disabled={isPending}
               aria-label={`Save changes to ${member.isOrganiser ? 'organiser' : 'crew member'}`}
-              className="text-xs px-4 py-1.5 rounded-lg bg-google-blue-deep text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50"
+              className="text-xs px-4 py-1.5 rounded-full bg-google-blue-deep text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50"
             >
               {isPending ? 'Saving…' : 'Save changes'}
             </button>
