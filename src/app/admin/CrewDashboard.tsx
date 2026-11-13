@@ -18,6 +18,8 @@ import {
 import type { VolunteerArea, VolunteerConfirmation, VolunteerSubmission } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
 import HistoryDisclosure, { stampedOn, type HistoryRow } from './HistoryDisclosure';
+import InvitePastVolunteersModal from './InvitePastVolunteersModal';
+import type { InvitablePastVolunteer } from '@/lib/volunteerInvite';
 
 // Neither 'unassigned' nor 'organisers' is a VolunteerArea. 'unassigned' is the absence
 // of one, and the filter reached for most while the roster is still being built;
@@ -399,12 +401,16 @@ function CrewCard({ member, onError }: CrewCardProps) {
 
 interface Props {
   crew: VolunteerSubmission[];
+  // "Invite past volunteers" (stage 4d-2). people is null when the list couldn't be read.
+  invites: { eventName: string; people: InvitablePastVolunteer[] | null; closedReason: string | null };
 }
 
-export default function CrewDashboard({ crew }: Props) {
+export default function CrewDashboard({ crew, invites }: Props) {
   const mobileBarHidden = useMobileBarHidden();
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [addingOrganiser, setAddingOrganiser] = useState(false);
+  const [invitingPast, setInvitingPast] = useState(false);
+  const uninvitedCount = invites.people?.filter((person) => !person.invitedAt).length ?? 0;
   const [areaFilter, setAreaFilter] = useState<FilterArea>('all');
   const [confirmationFilter, setConfirmationFilter] = useState<FilterConfirmation>('all');
   const [search, setSearch] = useState('');
@@ -600,6 +606,18 @@ export default function CrewDashboard({ crew }: Props) {
               Add organiser
             </button>
 
+            {invites.people && invites.people.length > 0 && !invites.closedReason && (
+              <button
+                onClick={() => setInvitingPast(true)}
+                aria-label={`Invite past volunteers to crew ${invites.eventName}`}
+                title={`${invites.people.length} past volunteer${invites.people.length === 1 ? '' : 's'} not signed up yet, ${uninvitedCount} not invited`}
+                className="inline-flex items-center gap-1.5 h-10 text-sm px-4 rounded-full border border-white/40 text-white/85 font-bold transition-colors hover:border-white/60 hover:text-white shrink-0"
+              >
+                Invite past volunteers
+                {uninvitedCount > 0 && <span className="font-medium text-white/60">{uninvitedCount}</span>}
+              </button>
+            )}
+
             <button
               onClick={handleExport}
               disabled={filtered.length === 0}
@@ -775,6 +793,18 @@ export default function CrewDashboard({ crew }: Props) {
           onClose={() => setAddingOrganiser(false)}
           onError={(message) => {
             setAddingOrganiser(false);
+            setAlertMessage(message);
+          }}
+        />
+      )}
+
+      {invitingPast && invites.people && (
+        <InvitePastVolunteersModal
+          eventName={invites.eventName}
+          people={invites.people}
+          onClose={() => setInvitingPast(false)}
+          onError={(message) => {
+            setInvitingPast(false);
             setAlertMessage(message);
           }}
         />

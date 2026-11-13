@@ -1,12 +1,12 @@
 'use server';
 
-import { adminDb } from '@/lib/firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
 import { Resend } from 'resend';
 import { buildVolunteerConfirmedNotice } from '@/lib/volunteerAcceptanceEmail';
 import { verifyVolunteerConfirmToken } from '@/lib/volunteerConfirm';
 import type { VolunteerLinks } from './VolunteerNextSteps';
 import { fetchCurrentDevfestLink } from '@/lib/events';
+import { loadVolunteerRecord } from '@/lib/volunteerProfiles';
 
 const ORGANISER_INBOX = 'hello@gdgsydney.com';
 
@@ -53,22 +53,22 @@ export async function confirmVolunteering(token: string): Promise<ConfirmResult>
   }
 
   try {
-    const volunteerRef = adminDb.collection('volunteers').doc(volunteerId);
-    const snap = await volunteerRef.get();
-    if (!snap.exists || snap.data()?.status !== 'accepted') {
+    // With the person's current details from their profile (stage 4d), for the notice.
+    const record = await loadVolunteerRecord(volunteerId);
+    if (!record || record.data.status !== 'accepted') {
       return { error: 'This confirmation link is no longer active. Please reply to your acceptance email and we\'ll sort it out.' };
     }
 
     // A volunteer clicking twice shouldn't move the date we recorded, shouldn't error at
     // them, and shouldn't email the organisers a second time.
-    if (!snap.data()?.volunteerConfirmedAt) {
+    if (!record.data.volunteerConfirmedAt) {
       const confirmedAt = new Date();
-      await volunteerRef.update({ volunteerConfirmedAt: Timestamp.fromDate(confirmedAt) });
-      await notifyOrganisers(snap.data()!, confirmedAt);
+      await record.ref.update({ volunteerConfirmedAt: Timestamp.fromDate(confirmedAt) });
+      await notifyOrganisers(record.data, confirmedAt);
     }
 
     // Marked by an admin on /admin/crew once the ticket has gone out some other way.
-    const ticketAlreadySent = Boolean(snap.data()?.ticketSentAt);
+    const ticketAlreadySent = Boolean(record.data.ticketSentAt);
     return {
       links: {
         ticketUrl: ticketAlreadySent ? null : await fetchCurrentDevfestLink('volunteerTicketUrl'),

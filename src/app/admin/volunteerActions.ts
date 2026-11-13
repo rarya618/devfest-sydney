@@ -10,6 +10,7 @@ import {
   volunteerAcceptanceEmailSubject,
 } from '@/lib/volunteerAcceptanceEmail';
 import { volunteerConfirmDeadlineFrom, volunteerConfirmUrl } from '@/lib/volunteerConfirm';
+import { loadVolunteerRecord } from '@/lib/volunteerProfiles';
 
 // Accepting or un-accepting a signup moves it on and off /admin/crew, so both pages are
 // revalidated wherever the status changes.
@@ -130,9 +131,10 @@ export async function sendVolunteerAcceptanceEmail(volunteerId: string): Promise
 
   let volunteer: FirebaseFirestore.DocumentData;
   try {
-    const snap = await volunteerRef.get();
-    if (!snap.exists) return { error: 'Volunteer signup not found.' };
-    volunteer = snap.data()!;
+    // With the person's current name and address from their profile (stage 4d).
+    const record = await loadVolunteerRecord(volunteerId);
+    if (!record) return { error: 'Volunteer signup not found.' };
+    volunteer = record.data;
   } catch {
     return { error: 'Could not load this volunteer signup. Please try again.' };
   }

@@ -5,6 +5,7 @@ import type {
   VolunteerSubmission,
 } from '@/lib/types';
 import type { Timestamp } from 'firebase-admin/firestore';
+import { loadProfilesFor, withProfile } from '@/lib/volunteerProfiles';
 
 function toIsoOrNull(timestamp: Timestamp | undefined): string | null {
   return timestamp ? timestamp.toDate().toISOString() : null;
@@ -20,12 +21,15 @@ function toConfirmation(data: FirebaseFirestore.DocumentData): VolunteerConfirma
 
 export async function fetchVolunteers(eventId: string): Promise<VolunteerSubmission[]> {
   const docs = await loadEventDocs('volunteers', eventId);
+  const profiles = await loadProfilesFor(docs.map((doc) => doc.data()));
 
   const records = docs.map((doc) => {
-    const data = doc.data();
+    const signup = doc.data();
+    const data = withProfile(signup, profiles.get(String(signup.profileId ?? '')));
     const timestamp = data.submittedAt as Timestamp | undefined;
     return {
       id: doc.id,
+      profileId: typeof signup.profileId === 'string' ? signup.profileId : '',
       name: data.name ?? '',
       email: data.email ?? '',
       phone: data.phone ?? '',

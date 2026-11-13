@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import type { Timestamp } from 'firebase-admin/firestore';
 import Image from 'next/image';
-import { adminDb } from '@/lib/firebase-admin';
 import { formatDeadlineDate } from '@/lib/format';
 import { verifyVolunteerConfirmToken } from '@/lib/volunteerConfirm';
 import { VOLUNTEER_AREA_LABELS, VOLUNTEER_SHIFT_LABELS } from '@/lib/volunteerLabels';
@@ -9,6 +8,7 @@ import type { VolunteerArea, VolunteerShift } from '@/lib/types';
 import ConfirmVolunteering from './ConfirmVolunteering';
 import VolunteerNextSteps from './VolunteerNextSteps';
 import { fetchCurrentDevfestLink } from '@/lib/events';
+import { loadVolunteerRecord } from '@/lib/volunteerProfiles';
 
 // Reached only from a link in an acceptance email, and the answer depends on a Firestore
 // read that changes the moment the volunteer clicks, so there is nothing to prerender.
@@ -37,10 +37,11 @@ async function loadAcceptedVolunteer(token: string): Promise<AcceptedVolunteer |
   const volunteerId = verifyVolunteerConfirmToken(token);
   if (!volunteerId) return null;
 
-  const snap = await adminDb.collection('volunteers').doc(volunteerId).get();
-  if (!snap.exists) return null;
+  // With the person's current name from their profile (stage 4d).
+  const record = await loadVolunteerRecord(volunteerId);
+  if (!record) return null;
 
-  const volunteer = snap.data()!;
+  const volunteer = record.data;
   // An acceptance that has since been undone shouldn't still be confirmable.
   if (volunteer.status !== 'accepted') return null;
 

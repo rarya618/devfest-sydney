@@ -116,8 +116,12 @@ export interface Submission {
   rejectionEmailSentBy: string;
 }
 
+// One person's signup for one event, with their GDG-wide profile (`volunteerProfiles`, stage
+// 4d) merged in: name to dietaryRequirements, photoUrl and linkedinUrl are the profile's.
 export interface VolunteerSubmission {
   id: string;
+  // The person (volunteerProfiles/{profileId}); '' for a signup from before 4d not yet migrated.
+  profileId: string;
   name: string;
   email: string;
   phone: string;

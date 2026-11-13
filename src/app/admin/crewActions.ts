@@ -7,6 +7,7 @@ import { adminDb, adminStorage } from '@/lib/firebase-admin';
 import { verifyAdminSession } from '@/lib/adminSession';
 import type { VolunteerArea, VolunteerShift } from '@/lib/types';
 import { getAdminDevfestId } from '@/lib/adminEvent';
+import { findOrCreateVolunteerProfile, loadVolunteerRecord, removeVolunteerProfileIfUnused } from '@/lib/volunteerProfiles';
 
 const VOLUNTEER_AREAS: VolunteerArea[] = [
   'registration',
@@ -119,8 +120,17 @@ export async function updateCrewMember(volunteerId: string, fields: CrewEditable
     // LinkedIn, which a volunteer doesn't: writing those for a volunteer would store a
     // value nothing renders and the modal never offered.
     const isOrganiser = Boolean(snapshot.data()?.isOrganiser);
-    const { organiserRole, linkedinUrl, ...shared } = validated.values;
-    await volunteerRef.update(isOrganiser ? { ...shared, organiserRole, linkedinUrl } : shared);
+    // The photo and an organiser's LinkedIn are the person's (stage 4d), so they go on the
+    // profile, and follow them to every event; the rest is this event's roster.
+    const { organiserRole, linkedinUrl, photoUrl, ...roster } = validated.values;
+    const profileId = String(snapshot.data()?.profileId ?? '');
+    const personFields = isOrganiser ? { photoUrl, linkedinUrl } : { photoUrl };
+    if (profileId) {
+      await adminDb.collection('volunteerProfiles').doc(profileId).update(personFields);
+      await volunteerRef.update(isOrganiser ? { ...roster, organiserRole } : roster);
+    } else {
+      await volunteerRef.update(isOrganiser ? { ...roster, organiserRole, ...personFields } : { ...roster, ...personFields });
+    }
     revalidateCrewPages();
     return {};
   } catch {
@@ -149,7 +159,9 @@ export async function removeFromCrew(volunteerId: string): Promise<{ error?: str
     // applied at the top of the review queue.
     if (snapshot.data()?.isOrganiser) {
       await volunteerRef.delete();
-      await deleteManagedPhoto(snapshot.data()?.photoUrl as string | undefined);
+      // Their profile goes too unless another event's crew still has them on it.
+      const profilePhoto = await removeVolunteerProfileIfUnused(String(snapshot.data()?.profileId ?? ''));
+      await deleteManagedPhoto(profilePhoto ?? (snapshot.data()?.photoUrl as string | undefined));
     } else {
       await volunteerRef.update({
         status: 'pending',
@@ -211,13 +223,13 @@ export async function addOrganiser(fields: NewOrganiserFields): Promise<{ error?
   }
 
   try {
+    // The person on their GDG-wide profile (stage 4d), reused if they have been on a crew
+    // before under the same name and email; this event's role and roster on the signup.
+    const profileId = await findOrCreateVolunteerProfile({ name, email, phone, linkedinUrl: linkedin.value });
     await adminDb.collection('volunteers').add({
       eventId,
-      name,
-      email,
-      phone,
+      profileId,
       organiserRole,
-      linkedinUrl: linkedin.value,
       isOrganiser: true,
       // Accepted on creation: an organiser is on the crew the moment they are added,
       // which is the state every crew query filters on.
@@ -226,17 +238,9 @@ export async function addOrganiser(fields: NewOrganiserFields): Promise<{ error?
       assignedArea: fields.assignedArea,
       assignedShift: fields.assignedShift,
       showOnCrewPage: Boolean(fields.showOnCrewPage),
-      photoUrl: '',
-      // The signup form's answers, empty because there was no form. Written rather than
-      // left absent so every document in the collection has the same shape.
+      // The signup form's answers for this event, empty because there was no form.
       motivation: '',
       areasOfInterest: [],
-      priorExperience: '',
-      googleTechExperience: '',
-      isTorrensStudentOrStaff: false,
-      hasBeenGdgOnCampusExec: false,
-      gdgOnCampusChapter: '',
-      dietaryRequirements: '',
       reviewerNotes: [],
     });
     revalidateCrewPages();
@@ -307,9 +311,10 @@ export async function uploadCrewPhoto(volunteerId: string, formData: FormData): 
   }
 
   try {
-    const volunteerRef = adminDb.collection('volunteers').doc(volunteerId);
-    const snapshot = await volunteerRef.get();
-    if (!snapshot.exists) return { error: 'Volunteer signup not found.' };
+    const record = await loadVolunteerRecord(volunteerId);
+    if (!record) return { error: 'Volunteer signup not found.' };
+    // On the person (stage 4d), so the photo follows them to the next event's crew.
+    const photoOwnerRef = record.profileRef ?? record.ref;
 
     const bucket = adminStorage.bucket();
     const objectPath = `crew-photos/${volunteerId}/${randomUUID()}.${extension}`;
@@ -321,9 +326,9 @@ export async function uploadCrewPhoto(volunteerId: string, formData: FormData): 
     await file.makePublic();
 
     const photoUrl = `https://storage.googleapis.com/${bucket.name}/${objectPath}`;
-    await volunteerRef.update({ photoUrl });
+    await photoOwnerRef.update({ photoUrl });
 
-    await deleteManagedPhoto(snapshot.data()?.photoUrl as string | undefined);
+    await deleteManagedPhoto(record.data.photoUrl as string | undefined);
 
     revalidateCrewPages();
     return { photoUrl };
@@ -340,12 +345,11 @@ export async function removeCrewPhoto(volunteerId: string): Promise<{ error?: st
   }
 
   try {
-    const volunteerRef = adminDb.collection('volunteers').doc(volunteerId);
-    const snapshot = await volunteerRef.get();
-    if (!snapshot.exists) return { error: 'Volunteer signup not found.' };
+    const record = await loadVolunteerRecord(volunteerId);
+    if (!record) return { error: 'Volunteer signup not found.' };
 
-    await volunteerRef.update({ photoUrl: '' });
-    await deleteManagedPhoto(snapshot.data()?.photoUrl as string | undefined);
+    await (record.profileRef ?? record.ref).update({ photoUrl: '' });
+    await deleteManagedPhoto(record.data.photoUrl as string | undefined);
 
     revalidateCrewPages();
     return {};

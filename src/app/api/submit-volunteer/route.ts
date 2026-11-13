@@ -4,6 +4,7 @@ import { currentDevfestFlowState } from '@/lib/events';
 import { Resend } from 'resend';
 import { FieldValue } from 'firebase-admin/firestore';
 import { escapeHtml } from '@/lib/escapeHtml';
+import { findOrCreateVolunteerProfile } from '@/lib/volunteerProfiles';
 
 type GdgOnCampusChapter = '' | 'usyd' | 'uts' | 'other';
 const VALID_CHAPTERS: GdgOnCampusChapter[] = ['usyd', 'uts', 'other'];
@@ -204,8 +205,15 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    // Stage 4d: who they are goes on their GDG-wide profile (reused if they have volunteered
+    // before under the same name and email); what they said for this event on the signup.
+    const { motivation, areasOfInterest, tracking, ...profileFields } = volunteer;
+    const profileId = await findOrCreateVolunteerProfile(profileFields);
     await adminDb.collection('volunteers').add({
-      ...volunteer,
+      profileId,
+      motivation,
+      areasOfInterest,
+      tracking,
       eventId: flowState.eventId,
       submittedAt: FieldValue.serverTimestamp(),
       status: 'pending',
