@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { getPortalSession } from '@/lib/portalAuth';
 import PortalShell from '../PortalShell';
+import { pageHeading } from '../portalStyles';
 import SignInForm from './SignInForm';
 
 export const dynamic = 'force-dynamic';
@@ -13,12 +14,10 @@ export default async function PortalSignInPage() {
   if (session) redirect('/portal');
 
   return (
-    <PortalShell>
-      <div className="max-w-md mx-auto">
-        <h1 className="text-[clamp(1.75rem,5vw,2.5rem)] font-bold leading-tight tracking-tight mb-4">
-          Speak at GDG Sydney
-        </h1>
-        <p className="text-white/70 leading-relaxed mb-8">
+    <PortalShell width="narrow">
+      <div className="max-w-md">
+        <h1 className={pageHeading}>Sign in to speak with us.</h1>
+        <p className="mt-5 mb-10 text-white/70 leading-relaxed">
           Keep your speaker profile up to date, see your talks, and propose new ones for DevFest
           or a meetup. Enter your email and we&rsquo;ll send you a link to sign in. If you&rsquo;ve
           spoken for us before, use the address we have for you.

@@ -3,7 +3,8 @@
 import { useCallback, useState, useTransition, type FormEvent } from 'react';
 import Alert from '@/components/Alert';
 import { EMAIL_PATTERN } from '@/lib/emailPattern';
-import { errorClass, inputError, inputNormal, labelClass, submitClass } from '@/lib/formStyles';
+import { errorClass, inputError, inputNormal, labelClass } from '@/lib/formStyles';
+import { primaryButton } from '../portalStyles';
 import { requestPortalSignIn } from '../actions';
 
 export default function SignInForm() {
@@ -31,7 +32,7 @@ export default function SignInForm() {
 
   if (sentTo) {
     return (
-      <div role="status" className="rounded-2xl border border-google-green/30 bg-google-green/10 px-6 py-8">
+      <div role="status" className="rounded-3xl bg-google-green/10 px-6 py-8">
         <p className="text-xl font-bold text-google-green mb-3">Check your inbox</p>
         <p className="text-white/70 leading-relaxed">
           We&rsquo;ve sent a sign-in link to <span className="text-white font-bold">{sentTo}</span>. It works
@@ -40,7 +41,7 @@ export default function SignInForm() {
             type="button"
             onClick={() => setSentTo(null)}
             aria-label="Use a different email address"
-            className="text-google-blue underline hover:no-underline"
+            className="text-google-blue-light underline hover:no-underline"
           >
             try another address
           </button>
@@ -75,7 +76,7 @@ export default function SignInForm() {
           <label htmlFor="portal-company-website">Company website</label>
           <input id="portal-company-website" tabIndex={-1} autoComplete="off" value={honeypot} onChange={(event) => setHoneypot(event.target.value)} />
         </div>
-        <button type="submit" disabled={isPending} aria-label="Email me a sign-in link" className={submitClass}>
+        <button type="submit" disabled={isPending} aria-label="Email me a sign-in link" className={primaryButton}>
           {isPending ? 'Sending…' : 'Email me a sign-in link'}
         </button>
       </form>

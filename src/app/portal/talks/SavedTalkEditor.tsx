@@ -3,7 +3,8 @@
 import { useCallback, useState, useTransition, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Alert from '@/components/Alert';
-import { hintClass, inputNormal, labelClass, submitClass } from '@/lib/formStyles';
+import { hintClass, inputNormal, labelClass } from '@/lib/formStyles';
+import { dangerButton, dangerOutlineButton, primaryButton, secondaryButton } from '../portalStyles';
 import { findSavedTalkError, SAVED_TALK_LIMITS, type SavedTalkFields } from '@/lib/portalLabels';
 import { deleteSavedTalk, saveTalkForLater } from '../actions';
 
@@ -14,9 +15,6 @@ interface SavedTalkEditorProps {
   // Where it has been proposed, to explain that those proposals won't change.
   proposedCount: number;
 }
-
-const secondaryButton =
-  'inline-flex items-center px-5 py-2 text-sm font-bold rounded border transition-colors disabled:opacity-50';
 
 export default function SavedTalkEditor({ savedTalkId, initialFields, proposedCount }: SavedTalkEditorProps) {
   const router = useRouter();
@@ -85,21 +83,21 @@ export default function SavedTalkEditor({ savedTalkId, initialFields, proposedCo
         )}
 
         <div className="flex flex-wrap items-center gap-3 pt-2">
-          <button type="submit" disabled={isPending} aria-label="Save this talk" className={submitClass}>
+          <button type="submit" disabled={isPending} aria-label="Save this talk" className={primaryButton}>
             {isPending ? 'Saving…' : 'Save talk'}
           </button>
           {savedTalkId &&
             (isConfirmingDelete ? (
               <>
-                <button type="button" disabled={isPending} onClick={handleDelete} aria-label="Yes, delete this saved talk" className={`${secondaryButton} bg-google-red-deep border-google-red-deep text-white`}>
+                <button type="button" disabled={isPending} onClick={handleDelete} aria-label="Yes, delete this saved talk" className={dangerButton}>
                   Yes, delete it
                 </button>
-                <button type="button" disabled={isPending} onClick={() => setIsConfirmingDelete(false)} aria-label="Keep this saved talk" className={`${secondaryButton} border-white/35 text-white hover:border-white`}>
+                <button type="button" disabled={isPending} onClick={() => setIsConfirmingDelete(false)} aria-label="Keep this saved talk" className={secondaryButton}>
                   Keep it
                 </button>
               </>
             ) : (
-              <button type="button" disabled={isPending} onClick={() => setIsConfirmingDelete(true)} aria-label="Delete this saved talk" className={`${secondaryButton} border-white/35 text-google-red-light hover:border-white`}>
+              <button type="button" disabled={isPending} onClick={() => setIsConfirmingDelete(true)} aria-label="Delete this saved talk" className={dangerOutlineButton}>
                 Delete
               </button>
             ))}

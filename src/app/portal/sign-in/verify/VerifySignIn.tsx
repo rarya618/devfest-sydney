@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useTransition } from 'react';
 import Alert from '@/components/Alert';
-import { submitClass } from '@/lib/formStyles';
+import { primaryButton } from '../../portalStyles';
 import { completePortalSignIn } from '../../actions';
 
 export default function VerifySignIn({ token, email }: { token: string; email: string }) {
@@ -20,7 +20,7 @@ export default function VerifySignIn({ token, email }: { token: string; email: s
 
   return (
     <>
-      <button type="button" onClick={handleSignIn} disabled={isPending} aria-label={`Sign in as ${email}`} className={submitClass}>
+      <button type="button" onClick={handleSignIn} disabled={isPending} aria-label={`Sign in as ${email}`} className={primaryButton}>
         {isPending ? 'Signing in…' : 'Sign in'}
       </button>
       {alertMessage && <Alert message={alertMessage} onDismiss={dismissAlert} />}

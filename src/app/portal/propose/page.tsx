@@ -6,6 +6,7 @@ import { loadOwnedProfiles } from '@/lib/portalData';
 import { listSavedTalks, type SavedTalk } from '@/lib/portalSavedTalks';
 import type { GdgEvent } from '@/lib/types';
 import PortalShell from '../PortalShell';
+import { backLink, pageHeading } from '../portalStyles';
 import ProposalForm from './ProposalForm';
 
 export const dynamic = 'force-dynamic';
@@ -33,12 +34,12 @@ export default async function PortalProposePage({ searchParams }: ProposePagePro
   const openDevfest = devfest && isFlowOpen(devfest, 'cfs') ? { name: devfest.name, closesAt: devfest.cfs.closesAt } : null;
 
   return (
-    <PortalShell email={session.email}>
-      <Link href="/portal" aria-label="Back to your talks" className="font-mono text-sm text-white/60 hover:text-white">
-        ← Your talks
+    <PortalShell email={session.email} width="narrow">
+      <Link href="/portal" aria-label="Back to your talks" className={backLink}>
+        <span aria-hidden="true">←</span> Your talks
       </Link>
-      <h1 className="mt-4 mb-3 text-[clamp(1.75rem,5vw,2.5rem)] font-bold leading-tight tracking-tight">Propose a talk</h1>
-      <p className="mb-10 text-white/70 leading-relaxed">
+      <h1 className={`${pageHeading} mt-6`}>Propose a talk</h1>
+      <p className="mt-5 mb-12 text-white/70 leading-relaxed">
         We&rsquo;ll email you a copy, and you can follow it from your portal. Not ready to send it?
         Save it for later and it waits under Saved talks.
       </p>

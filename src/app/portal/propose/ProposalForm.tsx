@@ -3,7 +3,8 @@
 import { useCallback, useState, useTransition, type FormEvent, type ReactNode } from 'react';
 import Link from 'next/link';
 import Alert from '@/components/Alert';
-import { hintClass, inputNormal, labelClass, optionButtonClass, submitClass } from '@/lib/formStyles';
+import { hintClass, inputNormal, labelClass, optionButtonClass } from '@/lib/formStyles';
+import { primaryButton, secondaryButton } from '../portalStyles';
 import { MEETUP_FORMAT_LABELS, MEETUP_FORMATS, MEETUP_PROPOSAL_LIMITS } from '@/lib/meetupProposalLabels';
 import type { PortalProfile } from '@/lib/portalData';
 import { findSavedTalkError } from '@/lib/portalLabels';
@@ -72,11 +73,11 @@ function Choice<Value extends string>({
   return (
     <fieldset>
       <legend className={labelClass}>{legend}</legend>
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         {options.map((option) => (
           <label
             key={option.value}
-            className={`block cursor-pointer rounded-lg border px-4 py-3 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-google-blue ${optionButtonClass(selected === option.value, false)}`}
+            className={`block cursor-pointer rounded-2xl border px-4 py-3 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-google-blue ${optionButtonClass(selected === option.value, false)}`}
           >
             <input type="radio" name={name} value={option.value} checked={selected === option.value} onChange={() => onSelect(option.value)} className="sr-only" />
             <span className="block text-sm font-bold">{option.label}</span>
@@ -266,12 +267,12 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
 
   if (submitted) {
     return (
-      <div role="status" className="rounded-2xl border border-google-green/30 bg-google-green/10 px-6 py-8">
+      <div role="status" className="rounded-3xl bg-google-green/10 px-6 py-8">
         <p className="text-xl font-bold text-google-green mb-3">Proposal sent</p>
         <p className="text-white/70 leading-relaxed mb-6">
           Thanks! We&rsquo;ve emailed you a copy. Our organisers will read it and get back to you by email.
         </p>
-        <Link href="/portal" aria-label="Back to your talks" className="inline-flex px-6 py-2 text-sm font-bold text-white rounded border border-white/35 hover:border-white">
+        <Link href="/portal" aria-label="Back to your talks" className={secondaryButton}>
           Back to your talks
         </Link>
       </div>
@@ -295,7 +296,7 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
           <div>
             <label htmlFor="proposal-profile" className={labelClass}>Proposing as</label>
             <select id="proposal-profile" value={profileId} onChange={(event) => chooseProfile(event.target.value)} className={inputNormal}>
-              {profiles.map((candidate) => <option key={candidate.id} value={candidate.id} className="bg-[#1e1e1e]">{candidate.name}</option>)}
+              {profiles.map((candidate) => <option key={candidate.id} value={candidate.id} className="bg-black-02">{candidate.name}</option>)}
             </select>
           </div>
         ) : profile ? (
@@ -308,9 +309,9 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
           <div>
             <label htmlFor="proposal-saved-talk" className={labelClass}>Start from a saved talk</label>
             <select id="proposal-saved-talk" value={savedTalkId ?? ''} onChange={(event) => startFromSavedTalk(event.target.value)} className={inputNormal}>
-              <option value="" className="bg-[#1e1e1e]">A new talk</option>
+              <option value="" className="bg-black-02">A new talk</option>
               {savedTalks.map((savedTalk) => (
-                <option key={savedTalk.id} value={savedTalk.id} className="bg-[#1e1e1e]">{savedTalk.talkTitle}</option>
+                <option key={savedTalk.id} value={savedTalk.id} className="bg-black-02">{savedTalk.talkTitle}</option>
               ))}
             </select>
             <p className={hintClass}>Fills in the title, abstract and audience. Changes here are only for this proposal unless you save them.</p>
@@ -382,7 +383,7 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
         )}
 
         <div className="flex flex-wrap items-center gap-3">
-          <button type="submit" disabled={isPending} aria-label="Send your proposal" className={submitClass}>
+          <button type="submit" disabled={isPending} aria-label="Send your proposal" className={primaryButton}>
             {isPending ? 'Working…' : 'Send proposal'}
           </button>
           <button
@@ -390,7 +391,7 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
             disabled={isPending}
             onClick={handleSaveForLater}
             aria-label={savedTalkId ? 'Save changes to this saved talk without sending it' : 'Save this talk for later without sending it'}
-            className="inline-flex items-center px-6 py-2 text-base font-bold text-white rounded border border-white/35 transition-colors hover:border-white disabled:opacity-50"
+            className={`${secondaryButton} text-base px-6 py-2.5`}
           >
             {savedTalkId ? 'Update saved talk' : 'Save for later'}
           </button>

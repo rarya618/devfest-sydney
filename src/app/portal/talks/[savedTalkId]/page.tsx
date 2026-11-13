@@ -6,6 +6,7 @@ import { requirePortalSession } from '@/lib/portalAuth';
 import { loadOwnedSavedTalk } from '@/lib/portalSavedTalks';
 import PortalShell from '../../PortalShell';
 import SavedTalkEditor from '../SavedTalkEditor';
+import { backLink, pageHeading, primaryButton } from '../../portalStyles';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Edit talk' };
@@ -27,13 +28,13 @@ export default async function SavedTalkPage({ params }: SavedTalkPageProps) {
   const proposedCount = devfestProposals.data().count + meetupProposals.data().count;
 
   return (
-    <PortalShell email={session.email}>
-      <Link href="/portal" aria-label="Back to your talks" className="font-mono text-sm text-white/60 hover:text-white">
-        ← Your talks
+    <PortalShell email={session.email} width="narrow">
+      <Link href="/portal" aria-label="Back to your talks" className={backLink}>
+        <span aria-hidden="true">←</span> Your talks
       </Link>
-      <div className="mt-4 mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-        <h1 className="text-[clamp(1.75rem,5vw,2.5rem)] font-bold leading-tight tracking-tight">Edit talk</h1>
-        <Link href={`/portal/propose?talk=${savedTalk.id}`} aria-label={`Propose ${savedTalk.talkTitle}`} className="inline-flex self-start px-6 py-2 bg-google-blue-deep text-white font-bold rounded transition-opacity hover:opacity-80">
+      <div className="mt-6 mb-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <h1 className={pageHeading}>Edit talk</h1>
+        <Link href={`/portal/propose?talk=${savedTalk.id}`} aria-label={`Propose ${savedTalk.talkTitle}`} className={`${primaryButton} self-start`}>
           Propose this talk
         </Link>
       </div>

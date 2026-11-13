@@ -9,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
-  return <div className="bg-[#010103] text-white min-h-screen font-sans">{children}</div>;
+  return <div className="bg-black-02 text-off-white min-h-screen font-sans">{children}</div>;
 }

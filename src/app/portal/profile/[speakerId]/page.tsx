@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { requirePortalSession } from '@/lib/portalAuth';
 import { loadOwnedProfile } from '@/lib/portalData';
 import PortalShell from '../../PortalShell';
+import { backLink, pageHeading } from '../../portalStyles';
 import ProfileEditor from './ProfileEditor';
 
 export const dynamic = 'force-dynamic';
@@ -22,14 +23,14 @@ export default async function PortalProfilePage({ params }: ProfilePageProps) {
 
   return (
     <PortalShell email={session.email}>
-      <Link href="/portal" aria-label="Back to your talks" className="font-mono text-sm text-white/60 hover:text-white">
-        ← Your talks
+      <Link href="/portal" aria-label="Back to your talks" className={backLink}>
+        <span aria-hidden="true">←</span> Your talks
       </Link>
-      <h1 className="mt-4 text-[clamp(1.75rem,5vw,2.5rem)] font-bold leading-tight tracking-tight">{profile.name}</h1>
-      <p className="mt-2 mb-10 text-white/70 leading-relaxed">
-        This is what we show next to your talks. Changes go live as soon as you save. To change your
-        name or email address, write to{' '}
-        <a href="mailto:hello@gdgsydney.com" className="text-google-blue hover:underline">hello@gdgsydney.com</a>.
+      <h1 className={`${pageHeading} mt-6`}>Your profile</h1>
+      <p className="mt-4 mb-12 max-w-2xl text-white/70 leading-relaxed">
+        The card shows what people see next to your talks, and changes as you type. Saving publishes it. To
+        change your name or email address, write to{' '}
+        <a href="mailto:hello@gdgsydney.com" className="text-google-blue-light underline hover:no-underline">hello@gdgsydney.com</a>.
       </p>
       <ProfileEditor profile={profile} />
     </PortalShell>

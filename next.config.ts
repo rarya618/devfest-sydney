@@ -13,6 +13,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'storage.googleapis.com' },
       { protocol: 'https', hostname: '*.firebasestorage.app' },
+      // The GDG Sydney logo, served by gdgsydney.com (the emails use the same file), for the
+      // speaker portal's header. Only the logo files, not the whole site.
+      { protocol: 'https', hostname: 'gdgsydney.com', pathname: '/gdg-logo-*' },
     ],
   },
   async redirects() {
