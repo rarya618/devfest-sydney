@@ -30,20 +30,20 @@ export function PrivacyPolicyMobileNav({ sections }: { sections: Section[] }) {
   return (
     <nav
       aria-label="Sections"
-      className="lg:hidden sticky top-[88px] z-40 mt-10 bg-[#010103] border-y border-white/8 px-6 py-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+      className="lg:hidden sticky top-0 z-40 mt-10 -mx-4 sm:-mx-6 bg-black-02 border-y border-white/10 px-4 sm:px-6 py-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
     >
       <ul className="flex items-center gap-1.5 w-max">
-        {sections.map((section, i) => {
+        {sections.map((section) => {
           const isActive = activeSection === section.slug;
           return (
             <li key={section.slug}>
               <a
                 href={`#${section.slug}`}
                 aria-current={isActive ? 'true' : undefined}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-bold text-white whitespace-nowrap transition-colors
-                  ${isActive ? 'bg-white/[0.06]' : 'hover:bg-white/5'}`}
+                aria-label={`Jump to ${section.title}`}
+                className={`flex items-center px-3 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-colors
+                  ${isActive ? 'bg-white/[0.08] text-off-white' : 'text-white/65 hover:text-off-white hover:bg-white/5'}`}
               >
-                <span className="text-white/55" aria-hidden="true">0{i + 1}</span>
                 {section.title}
               </a>
             </li>
@@ -75,20 +75,20 @@ export function PrivacyPolicySidebar({ sections }: { sections: Section[] }) {
   }, [sections]);
 
   return (
-    <nav aria-label="Sections" className="hidden lg:block sticky top-28 w-64 shrink-0 self-start">
+    <nav aria-label="Sections" className="hidden lg:block sticky top-10 w-56 shrink-0 self-start">
       <ul className="space-y-1">
-        {sections.map((section, i) => {
+        {sections.map((section) => {
           const isActive = activeSection === section.slug;
           return (
             <li key={section.slug}>
               <a
                 href={`#${section.slug}`}
                 aria-current={isActive ? 'true' : undefined}
-                className={`flex items-center gap-6 px-6 py-3 rounded-lg border border-l-4 text-sm font-bold text-white transition-colors
-                  ${isActive ? 'bg-white/[0.06] border-white/40' : 'border-transparent hover:bg-white/5'}`}
+                aria-label={`Jump to ${section.title}`}
+                className={`block px-4 py-2 rounded-full text-sm font-bold transition-colors
+                  ${isActive ? 'bg-white/[0.08] text-off-white' : 'text-white/65 hover:text-off-white hover:bg-white/5'}`}
               >
-                <span className="text-xs text-white/55 leading-none self-center tabular-nums" aria-hidden="true">0{i + 1}</span>
-                <span className="leading-none self-center">{section.title}</span>
+                {section.title}
               </a>
             </li>
           );

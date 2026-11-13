@@ -15,7 +15,6 @@ const GDG_SITE = 'https://gdgsydney.com';
 // App Hosting preview URL out of it, so the old pages can still be opened in development.
 const PRODUCTION_HOSTS = '(devfest|app)\\.gdgsydney\\.com';
 const OLD_HOST = 'devfest\\.gdgsydney\\.com';
-const APP_HOST = 'app\\.gdgsydney\\.com';
 
 // A content page and where it lives now. Order matters: Next applies the first match, so
 // the one renamed speaker comes before the general speaker rule.
@@ -84,14 +83,13 @@ export function siteRedirects(): Redirect[] {
       })
     : [];
 
-  // The root differs by host. The old DevFest site's home page is the 2026 archive. The
-  // app's home is the admin (signed-out visitors land on its sign-in page), as a temporary
-  // 307 so it can become a real landing page later: a permanent one would stay cached in
-  // browsers. Before 2026-11-10 the app host sent / to the archive with a 308 too, so a
-  // browser that visited it then may keep doing so until its cache is cleared.
+  // The old DevFest site's home page is the 2026 archive. The app host's root is no longer
+  // redirected (it sent / to /admin with a temporary 307 until 2026-11-14): it is now a
+  // landing page choosing between the speaker portal and the admin (src/app/page.tsx). Before
+  // 2026-11-10 the app host sent / to the archive with a 308, so a browser that visited it
+  // then may keep doing so until its cache is cleared.
   const rootRedirects: Redirect[] = [
     ...forEachHostHeader(OLD_HOST, { source: '/', destination: `${GDG_SITE}/devfest/2026`, permanent: true }),
-    ...forEachHostHeader(APP_HOST, { source: '/', destination: '/admin', permanent: false }),
   ];
 
   return [...rootRedirects, ...contentRedirects, ...appRedirects];

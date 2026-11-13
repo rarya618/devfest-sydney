@@ -1,51 +1,40 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import PublicShell from '@/components/PublicShell';
 
 export const metadata: Metadata = {
-  title: 'Page not found',
+  title: { absolute: 'Page not found — GDG Sydney' },
   robots: { index: false },
 };
 
-// Site-wide 404. The most likely way here is a stale speaker link after someone drops
-// off the lineup, so the page points back at the speakers list as well as home.
+// Site-wide 404. Since stage 3 (PM.md) this app holds only the sign-ins and the pages behind
+// them; DevFest 2026's public pages moved to gdgsydney.com. So the likely ways here are an old
+// link to a page that moved, or a mistyped address: point at both places someone might want.
 export default function NotFound() {
   return (
-    <div className="bg-[#010103] text-white min-h-screen flex flex-col">
-      <Navbar />
-
-      <section className="relative flex-1 flex items-center pt-36 pb-24 px-4 sm:px-6 lg:px-12 overflow-hidden">
-        <div className="absolute inset-0 hero-atmosphere pointer-events-none" aria-hidden="true" />
-        <div className="relative max-w-2xl mx-auto text-center">
-          <p className="text-xs font-bold text-white/55 mb-4 animate-fade-in">404</p>
-          <h1
-            className="text-[clamp(2.5rem,9vw,4rem)] font-bold leading-[1] tracking-tight mb-6 animate-slide-up"
-            style={{ animationDelay: '0.1s' }}
-          >
-            That page isn&apos;t here
-          </h1>
-          <p className="text-white/70 text-lg leading-relaxed mb-12 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-            The link may be out of date, or the page may have moved. The lineup and the rest of the event are still where they should be.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-5 animate-slide-up" style={{ animationDelay: '0.3s' }}>
-            <Link
-              href="/speakers"
-              className="inline-flex items-center px-7 py-2 bg-transparent text-white text-base font-bold rounded border border-white/40 transition-colors hover:border-white"
-            >
-              See the speakers
-            </Link>
-            <Link
-              href="/"
-              className="inline-flex items-center px-7 py-2 bg-google-blue-deep text-white text-base font-bold rounded border border-google-blue-deep transition-opacity hover:opacity-80"
-            >
-              Back to home
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <Footer />
-    </div>
+    <PublicShell>
+      <p className="font-mono text-sm text-white/60">404</p>
+      <h1 className="mt-3 text-[clamp(2.25rem,6vw,3.5rem)] font-bold leading-[1.02] tracking-[-0.02em]">That page isn&rsquo;t here.</h1>
+      <p className="mt-5 max-w-xl text-white/70 leading-relaxed">
+        The link may be out of date, or the page may have moved. Our events, including DevFest Sydney,
+        are on gdgsydney.com. Speakers and organisers sign in here.
+      </p>
+      <div className="mt-10 flex flex-wrap gap-3">
+        <a
+          href="https://gdgsydney.com"
+          aria-label="Go to gdgsydney.com for our events"
+          className="inline-flex items-center px-6 py-2.5 rounded-full bg-google-blue-deep text-white font-bold transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue focus-visible:ring-offset-2 focus-visible:ring-offset-black-02"
+        >
+          Go to gdgsydney.com
+        </a>
+        <Link
+          href="/"
+          aria-label="Go to the sign-in page"
+          className="inline-flex items-center px-6 py-2.5 rounded-full border border-white/35 text-off-white font-bold transition-colors hover:border-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
+        >
+          Sign in
+        </Link>
+      </div>
+    </PublicShell>
   );
 }

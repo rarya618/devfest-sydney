@@ -14,7 +14,7 @@ This file describes the app as it is now and what is left to do. The history of 
 ## Scope
 
 ### Public pages (all `noindex` except `/privacy`, reached by link only)
-- `/` : redirects to `/admin`
+- `/` : landing page choosing speaker sign-in (`/speaker`) or organiser sign-in (`/admin`). No longer redirected to `/admin` (changed 2026-11-14)
 - `/privacy` : privacy policy, the only page in the sitemap. Covers the data this app holds
 - `/speaker/confirm` : an accepted speaker (DevFest or meetup) confirms from the signed link in their acceptance email
 - `/speaker/thanks` : DevFest 2026 post-event form: postal address for a mug and/or a work email for the Asana Enterprise trial (with a consent tick)
