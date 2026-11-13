@@ -421,7 +421,7 @@ export default function AdminShell({ adminEmail, adminName, devfests, selectedDe
   // speaker portal and emails use.
   const wordmark = (
     <Link href="/admin" className="inline-flex items-center rounded hover:opacity-85 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue" aria-label="GDG Sydney admin, home">
-      <Image src="https://gdgsydney.com/gdg-logo-dark.png" alt="" width={1700} height={215} className="h-6 w-auto" />
+      <Image src="https://gdgsydney.com/gdg-logo-dark.png" alt="" width={1700} height={215} className="h-7 w-auto" />
     </Link>
   );
 
