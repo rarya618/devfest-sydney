@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { isFlowOpen, loadCurrentDevfest } from '@/lib/events';
 import { requirePortalSession } from '@/lib/portalAuth';
 import {
   loadPortalOverview,
@@ -8,10 +8,11 @@ import {
   type PortalTalk,
 } from '@/lib/portalData';
 import { listSavedTalks, type SavedTalk } from '@/lib/portalSavedTalks';
+import type { GdgEvent } from '@/lib/types';
 import PortalShell from './PortalShell';
 import SavedTalksSection, { type SavedTalkRow } from './SavedTalksSection';
-import ProfileWorkspace from './ProfileWorkspace';
-import { pageHeading, primaryButton, sectionHeading } from './portalStyles';
+import DashboardWorkspace from './DashboardWorkspace';
+import { pageHeading, sectionHeading } from './portalStyles';
 
 export const dynamic = 'force-dynamic';
 // The layout's title template doesn't reach a page in its own segment.
@@ -139,18 +140,24 @@ function toSavedTalkRows(savedTalks: SavedTalk[], proposals: PortalProposal[]): 
 }
 
 interface PortalHomePageProps {
-  // ?edit=<speakerId>: open that profile's editor (the header's profile button links here).
-  searchParams: Promise<{ edit?: string }>;
+  // ?edit=<speakerId> opens that profile's editor (the header's profile button links here);
+  // ?propose, or ?propose=<savedTalkId>, opens the proposal form.
+  searchParams: Promise<{ edit?: string; propose?: string }>;
 }
 
 export default async function PortalHomePage({ searchParams }: PortalHomePageProps) {
   const session = await requirePortalSession();
-  const { edit } = await searchParams;
+  const { edit, propose } = await searchParams;
 
   let overview: PortalOverview | null = null;
   let savedTalks: SavedTalk[] = [];
+  let devfest: GdgEvent | null = null;
   try {
-    [overview, savedTalks] = await Promise.all([loadPortalOverview(session.email), listSavedTalks(session.email)]);
+    [overview, savedTalks, devfest] = await Promise.all([
+      loadPortalOverview(session.email),
+      listSavedTalks(session.email),
+      loadCurrentDevfest(),
+    ]);
   } catch (error) {
     console.error('Portal overview failed for', session.email, error);
   }
@@ -165,19 +172,21 @@ export default async function PortalHomePage({ searchParams }: PortalHomePagePro
 
   return (
     <PortalShell>
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12">
-        <h1 className={pageHeading}>{firstName ? `Hi, ${firstName}.` : 'Welcome.'}</h1>
-        <Link href="/speaker/propose" aria-label="Propose a talk" className={`${primaryButton} self-start sm:self-auto`}>
-          Propose a talk
-        </Link>
-      </div>
-
       {!overview ? (
-        <p role="alert" className="rounded-2xl border border-google-red/30 bg-google-red/10 px-6 py-5 text-white/80">
-          Your talks didn&rsquo;t load. Refresh the page to try again.
-        </p>
+        <>
+          <h1 className={`${pageHeading} mb-12`}>Welcome.</h1>
+          <p role="alert" className="rounded-2xl border border-google-red/30 bg-google-red/10 px-6 py-5 text-white/80">
+            Your talks didn&rsquo;t load. Refresh the page to try again.
+          </p>
+        </>
       ) : (
-        <ProfileWorkspace
+        <DashboardWorkspace
+          greeting={firstName ? `Hi, ${firstName}.` : 'Welcome.'}
+          openDevfest={devfest && isFlowOpen(devfest, 'cfs') ? { name: devfest.name, closesAt: devfest.cfs.closesAt } : null}
+          savedTalks={savedTalks.map(({ id, talkTitle, abstract, audience }) => ({ id, talkTitle, abstract, audience }))}
+          requestedPanel={
+            edit ? { type: 'profile', profileId: edit } : propose !== undefined ? { type: 'propose', savedTalkId: propose || null } : null
+          }
           profiles={overview.profiles.map((profile) => ({
             id: profile.id,
             name: profile.name,
@@ -188,7 +197,6 @@ export default async function PortalHomePage({ searchParams }: PortalHomePagePro
             githubUrl: profile.githubUrl,
             websiteUrl: profile.websiteUrl,
           }))}
-          initialEditingId={edit ?? null}
         >
             {allTalks.length === 0 && overview.profiles.length > 0 && (
               <section aria-labelledby="talks-empty">
@@ -200,7 +208,7 @@ export default async function PortalHomePage({ searchParams }: PortalHomePagePro
             <Proposals proposals={overview.proposals} />
             <SavedTalksSection savedTalks={toSavedTalkRows(savedTalks, overview.proposals)} />
             <TalkSchedule headingId="past-talks" title="Past talks" talks={pastTalks} isPast />
-        </ProfileWorkspace>
+        </DashboardWorkspace>
       )}
     </PortalShell>
   );

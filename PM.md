@@ -24,7 +24,7 @@ This file describes the app as it is now and what is left to do. The history of 
 - `/builder-showcase/confirm` : an accepted showcase entrant confirms; then shows the showcase ticket link
 - `/feedback` : DevFest 2026 survey (pinned to `devfest-2026` by `FEEDBACK_EVENT_ID`)
 - `/credits` : DevFest 2026 workshop credit requests (Shang Yi Lim's workshop only, `CREDIT_WORKSHOP_SLOT_IDS`)
-- `/speaker` : the speaker portal (stage 6, below). `/speaker/sign-in` and `/speaker/sign-in/verify` are its sign-in; `/speaker` lists the address's profiles, talks and proposals; profiles are edited in place on `/speaker` (the header's profile button opens `/speaker?edit=<speakerId>`); `/speaker/propose` files a meetup proposal, or a DevFest one while the current DevFest's CfS is open; saved talks are added, edited and deleted in place on `/speaker`
+- `/speaker` : the speaker portal (stage 6, below). `/speaker/sign-in` and `/speaker/sign-in/verify` are its sign-in; `/speaker` lists the address's profiles, talks and proposals; profiles are edited in place on `/speaker` (the header's profile button opens `/speaker?edit=<speakerId>`); proposing (a meetup, or DevFest while the current DevFest's CfS is open) opens in place too (`/speaker?propose` or `?propose=<savedTalkId>`); saved talks are added, edited and deleted in place on `/speaker`. Only sign-in has pages of its own
 
 Every confirm-style page acts behind a button, never on page load, so mail scanners can't answer on someone's behalf. (The portal's sign-in link is the exception: it signs in as the page opens, see stage 6.) Each sends hello@gdgsydney.com a notice with `replyTo` set to the person, once, on the transition only.
 

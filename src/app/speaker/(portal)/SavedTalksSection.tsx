@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import type { SavedTalkFields } from '@/lib/portalLabels';
+import { useDashboardPanels } from './DashboardWorkspace';
 import SavedTalkEditor from './SavedTalkEditor';
+import { revealPanel } from './revealPanel';
 import { primaryButtonSmall, secondaryButton, sectionHeading } from './portalStyles';
 
 export interface SavedTalkRow extends SavedTalkFields {
@@ -16,13 +17,10 @@ export interface SavedTalkRow extends SavedTalkFields {
 // never holds two half-filled forms.
 type OpenForm = null | 'new' | string;
 
-function prefersReducedMotion(): boolean {
-  return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
-
 // The dashboard's Saved talks: adding and editing happen in place, in the section itself, so
 // the rest of the dashboard stays where it is.
 export default function SavedTalksSection({ savedTalks }: { savedTalks: SavedTalkRow[] }) {
+  const panels = useDashboardPanels();
   const [openForm, setOpenForm] = useState<OpenForm>(null);
   const formContainer = useRef<HTMLDivElement>(null);
   // Where focus goes back to when the form closes: the button that opened it.
@@ -32,7 +30,7 @@ export default function SavedTalksSection({ savedTalks }: { savedTalks: SavedTal
   // talks, so the form can otherwise open off screen. scroll-mt keeps it clear of the header.
   useEffect(() => {
     if (!openForm) return;
-    formContainer.current?.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'nearest' });
+    revealPanel(formContainer.current);
   }, [openForm]);
 
   function open(form: Exclude<OpenForm, null>, openerId: string) {
@@ -117,9 +115,15 @@ export default function SavedTalksSection({ savedTalks }: { savedTalks: SavedTal
                     >
                       Edit
                     </button>
-                    <Link href={`/speaker/propose?talk=${savedTalk.id}`} aria-label={`Propose ${savedTalk.talkTitle}`} className={primaryButtonSmall}>
+                    <button
+                      id={`propose-saved-talk-${savedTalk.id}`}
+                      type="button"
+                      onClick={() => panels.openPropose(savedTalk.id, `propose-saved-talk-${savedTalk.id}`)}
+                      aria-label={`Propose ${savedTalk.talkTitle}`}
+                      className={primaryButtonSmall}
+                    >
                       Propose
-                    </Link>
+                    </button>
                   </div>
                 </div>
               )}

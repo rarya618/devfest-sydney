@@ -1,16 +1,15 @@
 'use client';
 
 import { useCallback, useState, useTransition, type FormEvent, type ReactNode } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Alert from '@/components/Alert';
 import { hintClass, inputNormal, labelClass, optionButtonClass } from '@/lib/formStyles';
-import { primaryButton, secondaryButton } from '../portalStyles';
+import { primaryButton, secondaryButton } from './portalStyles';
 import { MEETUP_FORMAT_LABELS, MEETUP_FORMATS, MEETUP_PROPOSAL_LIMITS } from '@/lib/meetupProposalLabels';
 import type { PortalProfile } from '@/lib/portalData';
-import { findSavedTalkError } from '@/lib/portalLabels';
-import type { SavedTalk } from '@/lib/portalSavedTalks';
+import { findSavedTalkError, type SavedTalkFields } from '@/lib/portalLabels';
 import type { MeetupFormat } from '@/lib/types';
-import { saveTalkForLater, submitPortalProposal } from '../actions';
+import { saveTalkForLater, submitPortalProposal } from './actions';
 
 type ProposalKind = 'meetup' | 'devfest';
 type DevfestTrack = 'developer' | 'builder' | 'workshop';
@@ -21,9 +20,11 @@ interface ProposalFormProps {
   profiles: Omit<PortalProfile, 'talks'>[];
   // The current DevFest, when its Call for Speakers is open.
   openDevfest: { name: string; closesAt: string | null } | null;
-  savedTalks: SavedTalk[];
-  // From ?talk=: the saved talk to start from.
+  savedTalks: (SavedTalkFields & { id: string })[];
+  // The saved talk to start from (its Propose button), or null for a blank form.
   initialSavedTalkId: string | null;
+  // Closes the panel the form sits in on the dashboard.
+  onClose: () => void;
 }
 
 const DEVFEST_ABSTRACT_MAX = 2000;
@@ -127,7 +128,8 @@ function TextField({
   );
 }
 
-export default function ProposalForm({ profiles, openDevfest, savedTalks, initialSavedTalkId }: ProposalFormProps) {
+export default function ProposalForm({ profiles, openDevfest, savedTalks, initialSavedTalkId, onClose }: ProposalFormProps) {
+  const router = useRouter();
   const initialSavedTalk = savedTalks.find((savedTalk) => savedTalk.id === initialSavedTalkId) ?? null;
   const [savedTalkId, setSavedTalkId] = useState<string | null>(initialSavedTalk?.id ?? null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
@@ -206,6 +208,7 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
       else {
         setSavedTalkId(result.savedTalkId);
         setSavedMessage('Saved under Saved talks. Nothing has been sent.');
+        router.refresh();
       }
     });
   }
@@ -260,7 +263,8 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
       if (result.error) setAlertMessage(result.error);
       else {
         setSubmitted(true);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // The new proposal appears in the list underneath straight away.
+        router.refresh();
       }
     });
   }
@@ -272,9 +276,9 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
         <p className="text-white/70 leading-relaxed mb-6">
           Thanks! We&rsquo;ve emailed you a copy. Our organisers will read it and get back to you by email.
         </p>
-        <Link href="/speaker" aria-label="Back to your talks" className={secondaryButton}>
-          Back to your talks
-        </Link>
+        <button type="button" onClick={onClose} aria-label="Close the proposal form" className={secondaryButton}>
+          Close
+        </button>
       </div>
     );
   }
@@ -394,6 +398,9 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
             className={`${secondaryButton} text-base px-6 py-2.5`}
           >
             {savedTalkId ? 'Update saved talk' : 'Save for later'}
+          </button>
+          <button type="button" disabled={isPending} onClick={onClose} aria-label="Close the proposal form without sending" className={`${secondaryButton} text-base px-6 py-2.5`}>
+            Cancel
           </button>
           {savedMessage && <p role="status" className="text-sm text-google-green">{savedMessage}</p>}
         </div>

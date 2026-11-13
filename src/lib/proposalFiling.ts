@@ -8,7 +8,7 @@ import type { MeetupFormat, MeetupProposal } from '@/lib/types';
 
 // Filing a talk proposal, shared by the form endpoints (/api/submit-proposal for a DevFest
 // Call for Speakers, /api/submit-meetup-proposal for gdgsydney.com/speak) and the speaker
-// portal (/speaker/propose), so a proposal made either way is validated, stored and confirmed
+// portal (the dashboard's Propose a talk), so a proposal made either way is validated, stored and confirmed
 // the same and reads the same in the admin. Server only.
 
 // ---------------------------------------------------------------------------------------

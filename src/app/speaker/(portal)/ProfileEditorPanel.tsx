@@ -35,7 +35,7 @@ function previewUrl(raw: string): string {
   return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
 }
 
-// The profile form, opened in place on the dashboard (ProfileWorkspace). The card beside it is
+// The profile form, opened in place on the dashboard (DashboardWorkspace). The card beside it is
 // the preview. Saving publishes and closes the form; Cancel drops unsaved text.
 export default function ProfileEditorPanel({ profile, onPreviewChange, onDone, onCancel }: ProfileEditorPanelProps) {
   const router = useRouter();
