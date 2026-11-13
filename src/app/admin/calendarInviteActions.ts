@@ -13,13 +13,14 @@ import {
   calendarInviteEmailSubject,
   type CalendarInviteKind,
 } from '@/lib/calendarInviteEmail';
-import type { CalendarInviteSlot, ScheduleRoom, SpeakerSessionTime } from '@/lib/types';
+import type { CalendarInviteSlot, GdgEvent, ScheduleRoom, SpeakerSessionTime } from '@/lib/types';
+import { loadEvent } from '@/lib/events';
+import { eventScheduleUrl, formatVenueAddress } from '@/lib/eventCopy';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://devfest.gdgsydney.com';
-
-function roomName(room: ScheduleRoom): string {
-  return room === 'all' ? 'Torrens University' : SCHEDULE_ROOM_LABELS[room].name;
+// A slot held in every room ('all') is named by the event's venue rather than a room.
+function roomName(room: ScheduleRoom, event: GdgEvent): string {
+  return room === 'all' ? event.venue?.name ?? event.name : SCHEDULE_ROOM_LABELS[room].name;
 }
 
 // Sends whatever the speaker's calendar needs to match the schedule: a first invite, an
@@ -46,6 +47,7 @@ export async function sendCalendarInvite(talkId: string, speakerId: string): Pro
   let talk: FirebaseFirestore.DocumentData;
   let submission: FirebaseFirestore.DocumentData | undefined;
   let session: SpeakerSessionTime | null;
+  let event: GdgEvent | null;
   try {
     const talkSnap = await talkRef.get();
     if (!talkSnap.exists) return { error: 'This talk is no longer in the lineup.' };
@@ -61,12 +63,14 @@ export async function sendCalendarInvite(talkId: string, speakerId: string): Pro
     }
     // The talk's own event, not whichever DevFest the admin is looking at.
     session = (await fetchSessionTimesByTalkId(String(talk.eventId ?? '')))[talkId] ?? null;
+    event = await loadEvent(String(talk.eventId ?? ''));
   } catch {
     // Deliberately stops here rather than treating a failed schedule read as "not on the
     // schedule", which would send a cancellation.
     return { error: 'Could not load this speaker or the schedule. Please try again.' };
   }
 
+  if (!event) return { error: 'This talk isn\'t filed under an event that still exists.' };
   if (!submission?.speakerConfirmedAt) {
     return { error: 'This speaker hasn\'t confirmed yet, so they can\'t be sent a calendar invite.' };
   }
@@ -100,12 +104,15 @@ export async function sendCalendarInvite(talkId: string, speakerId: string): Pro
     speakerName: String(speaker.name ?? ''),
     speakerEmail,
     talkTitle: cancelTitle,
-    roomName: roomName(slot.room),
+    roomName: roomName(slot.room, event),
     startTime: slot.startTime,
     endTime: slot.endTime,
     sequence,
     organiserEmail,
-    siteUrl,
+    eventName: event.name,
+    venueAddress: formatVenueAddress(event),
+    timeZone: event.timeZone,
+    scheduleUrl: eventScheduleUrl(event),
     previousStartTime: kind === 'update' ? sentSlot?.startTime : undefined,
   };
 

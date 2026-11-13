@@ -131,6 +131,28 @@ export async function fetchCurrentDevfestLink(key: EventPrivateLinkKey): Promise
   }
 }
 
+// One private link of a given event, for an admin about to email it: says which of the
+// three things went wrong, since each has a different fix (stage 4e: the event is the talk's
+// own, not whichever DevFest is current).
+export async function requireEventLink(
+  eventId: string,
+  key: EventPrivateLinkKey,
+  label: string
+): Promise<{ url: string } | { error: string }> {
+  let event: GdgEvent | null;
+  let links: EventPrivateLinks;
+  try {
+    event = eventId ? await loadEvent(eventId) : null;
+    if (!event) return { error: 'This isn\'t filed under an event that still exists, so there is no link to send.' };
+    links = await loadEventPrivateLinks(event.id);
+  } catch {
+    return { error: `We couldn't read the ${label.toLowerCase()} just now. Please try again in a moment.` };
+  }
+  const url = links[key];
+  if (!url) return { error: `The ${label.toLowerCase()} isn't set on ${event.name} yet. Add it in Events first.` };
+  return { url };
+}
+
 // One private link of a given event, or null when it is unset, the event is gone, or the
 // read fails. For the confirm pages, which hand a person the links of the event they signed
 // up for rather than whichever DevFest is current (stage 4e).
@@ -217,17 +239,5 @@ export async function currentDevfestFlowState(
   } catch (error) {
     console.error(`Could not read the current DevFest to check ${flow}:`, error);
     return { state: 'unreadable' };
-  }
-}
-
-// The current DevFest's public ticket page, for the "grab a ticket" lines in speaker emails.
-// '' when it has none or the read fails: those emails already leave the line out without it,
-// and an email shouldn't fail to send over a sentence.
-export async function fetchCurrentDevfestPublicTicketUrl(): Promise<string> {
-  try {
-    return (await loadCurrentDevfest())?.humanitixUrl ?? '';
-  } catch (error) {
-    console.error("Could not read the current DevFest's ticket page:", error);
-    return '';
   }
 }

@@ -33,3 +33,30 @@ export function isDevfest(event: EventCopy): boolean {
 export function toEventCopy(event: GdgEvent): EventCopy {
   return { name: event.name, type: event.type, startAt: event.startAt, timeZone: event.timeZone, venue: event.venue };
 }
+
+// "Torrens University, Shop 1/37 Foveaux St, Surry Hills NSW 2010": the venue on one line,
+// for a calendar invite's location and an email's "where". '' when the event has no venue.
+export function formatVenueAddress(event: EventCopy): string {
+  const venue = event.venue;
+  if (!venue) return '';
+  const area = [venue.locality, venue.region, venue.postalCode].filter(Boolean).join(' ');
+  // A name that ends in the suburb ("Torrens University, Surry Hills") would say it twice.
+  const suffix = venue.locality ? `, ${venue.locality}` : '';
+  const name = suffix && area && venue.name.endsWith(suffix) ? venue.name.slice(0, -suffix.length) : venue.name;
+  return [name, venue.streetAddress, area].filter(Boolean).join(', ');
+}
+
+// "Friday 9 October": the day before the event starts, in its own time zone, for the speaker
+// dinner a DevFest holds the evening before.
+export function formatEveningBefore(event: EventCopy): string {
+  const dayBefore = new Date(Date.parse(event.startAt) - 24 * 60 * 60 * 1000).toISOString();
+  return formatEventDay({ ...event, startAt: dayBefore });
+}
+
+// Where an event's schedule is published, for links in speaker emails: a DevFest's on the
+// main site's DevFest page (gdgsydney.com/devfest, stage 2 of the plan), a general event's on
+// its Bevy listing. Null when there's nowhere to send them.
+export function eventScheduleUrl(event: Pick<GdgEvent, 'type' | 'bevyUrl'>): string | null {
+  if (event.type === 'devfest') return 'https://gdgsydney.com/devfest';
+  return event.bevyUrl || null;
+}

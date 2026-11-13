@@ -1,6 +1,7 @@
 import { formatDeadlineDate } from '@/lib/format';
 import type { ExperienceLevel, TalkFormat, Track } from '@/lib/types';
 import { escapeHtml } from '@/lib/escapeHtml';
+import { formatEventWhen, type EventCopy } from '@/lib/eventCopy';
 
 // Built to the "Email template - Confirmed Speaker" frame in the DevFest Figma file.
 // Table-based and inline-styled throughout: email clients strip stylesheets, and several
@@ -14,6 +15,8 @@ export interface AcceptanceEmailDetails {
   experienceLevel: ExperienceLevel;
   confirmUrl: string;
   confirmByIso: string;
+  // The event the talk is for (stage 4e): its name, date and venue fill the copy.
+  event: EventCopy;
   // The event's public Humanitix page (GdgEvent.humanitixUrl), '' when it has none.
   publicTicketUrl: string;
 }
@@ -67,8 +70,8 @@ function card(innerHtml: string): string {
     </table>`;
 }
 
-export function acceptanceEmailSubject(talkTitle: string): string {
-  return `Your DevFest Sydney 2026 talk has been accepted: ${talkTitle}`;
+export function acceptanceEmailSubject(talkTitle: string, event: EventCopy): string {
+  return `Your ${event.name} talk has been accepted: ${talkTitle}`;
 }
 
 export function buildAcceptanceEmail(details: AcceptanceEmailDetails): string {
@@ -100,7 +103,7 @@ export function buildAcceptanceEmail(details: AcceptanceEmailDetails): string {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Your DevFest Sydney 2026 talk has been accepted</title>
+  <title>Your ${escapeHtml(details.event.name)} talk has been accepted</title>
 </head>
 <body style="margin:0;padding:0;background:#202124;${FONT}color:#ffffff;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#202124;padding:48px 16px;">
@@ -121,7 +124,7 @@ export function buildAcceptanceEmail(details: AcceptanceEmailDetails): string {
                 ${escapeHtml(firstName)}
               </h2>
               <p style="margin:0 0 32px;${FONT}font-size:20px;font-weight:400;color:#ffffff;line-height:1.6;text-align:center;">
-                We are pleased to accept your submission for DevFest Sydney 2026
+                We are pleased to accept your submission for ${escapeHtml(details.event.name)}
               </p>
 
               <!-- Accepted talk -->
@@ -143,19 +146,18 @@ export function buildAcceptanceEmail(details: AcceptanceEmailDetails): string {
                 Please do so by ${escapeHtml(confirmBy)}, as we will need to reach out to other speakers to fill in the spot.
               </p>
 
-              <!-- Tickets -->
-              <h3 style="margin:0 0 12px;${sectionHeading}">About tickets</h3>
+              <!-- Tickets: only for a ticketed event. A free meetup has nothing to hand out. -->
+              ${humanitixUrl ? `<h3 style="margin:0 0 12px;${sectionHeading}">About tickets</h3>
               <p style="margin:0 0 16px;${bodyText}">
-                You get a complimentary ticket to attend the day at DevFest. We will reach out to you to access the ticket once you have confirmed your attendance.
+                You get a complimentary ticket to attend ${escapeHtml(details.event.name)}. We will reach out to you to access the ticket once you have confirmed your attendance.
               </p>
-              ${ticketShareParagraph}
+              ${ticketShareParagraph}` : ''}
 
               <!-- Event scale -->
               <div style="height:24px;"></div>
               ${card(`
                 <h3 style="margin:0 0 12px;${sectionHeading}">If you are a GDE</h3>
-                <p style="margin:0 0 12px;${bodyText}">DevFest Sydney is on the 10th of October at Torrens University Surry Hills.</p>
-                <p style="margin:0;${bodyText}">We expect to have 200+ attendees, with over 20 speakers across 4 tracks. Each session will likely have a minimum of 40 attendees, averaging around 60 attendees across tracks.</p>
+                <p style="margin:0;${bodyText}">${escapeHtml(details.event.name)} is on ${escapeHtml(formatEventWhen(details.event))}. Reply to this email if you need attendance figures for your report and we'll send our latest estimate.</p>
               `)}
 
               <p style="margin:0 0 28px;${bodyText}">We look forward to hearing you talk.</p>
@@ -186,6 +188,7 @@ export interface ConfirmationNoticeDetails {
   track: Track;
   format: TalkFormat;
   confirmedAtIso: string;
+  eventName: string;
 }
 
 // Sent to the organisers when a speaker confirms. Plainer than the speaker-facing
@@ -226,7 +229,7 @@ export function buildSpeakerConfirmedNotice(details: ConfirmationNoticeDetails):
               <img src="${WORDMARK_URL}" alt="DevFest Sydney" width="177" height="32" style="display:block;margin:0 0 32px;" />
 
               <h1 style="margin:0 0 8px;${FONT}font-size:28px;font-weight:700;color:#34A853;line-height:1.4;">Speaker confirmed</h1>
-              <p style="margin:0 0 24px;${bodyText}">${escapeHtml(details.name)} has confirmed they'll be speaking at DevFest Sydney 2026.</p>
+              <p style="margin:0 0 24px;${bodyText}">${escapeHtml(details.name)} has confirmed they'll be speaking at ${escapeHtml(details.eventName)}.</p>
 
               ${card(`<table cellpadding="0" cellspacing="0" width="100%">
                 ${row('Talk', details.talkTitle)}

@@ -1,4 +1,5 @@
 import { escapeHtml } from '@/lib/escapeHtml';
+import { formatEventDay, formatVenueAddress, type EventCopy } from '@/lib/eventCopy';
 
 // The speaker-facing "here is your complimentary ticket" email, sent from the admin once a
 // speaker has confirmed. Same table-based, inline-styled construction as
@@ -7,6 +8,8 @@ import { escapeHtml } from '@/lib/escapeHtml';
 export interface SpeakerTicketEmailDetails {
   name: string;
   ticketUrl: string;
+  // The event the ticket is for (stage 4e).
+  event: EventCopy;
   // The event's public Humanitix page (GdgEvent.humanitixUrl), '' when it has none.
   publicTicketUrl: string;
 }
@@ -22,8 +25,8 @@ function card(innerHtml: string): string {
     </table>`;
 }
 
-export function speakerTicketEmailSubject(): string {
-  return 'Your complimentary speaker ticket for DevFest Sydney 2026';
+export function speakerTicketEmailSubject(eventName: string): string {
+  return `Your complimentary speaker ticket for ${eventName}`;
 }
 
 export function buildSpeakerTicketEmail(details: SpeakerTicketEmailDetails): string {
@@ -50,7 +53,7 @@ export function buildSpeakerTicketEmail(details: SpeakerTicketEmailDetails): str
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Your complimentary speaker ticket for DevFest Sydney 2026</title>
+  <title>${escapeHtml(speakerTicketEmailSubject(details.event.name))}</title>
 </head>
 <body style="margin:0;padding:0;background:#202124;${FONT}color:#ffffff;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#202124;padding:48px 16px;">
@@ -94,7 +97,7 @@ export function buildSpeakerTicketEmail(details: SpeakerTicketEmailDetails): str
 
               ${card(`
                 <h3 style="margin:0 0 12px;${sectionHeading}">The day itself</h3>
-                <p style="margin:0 0 12px;${bodyText}">Saturday 10 October 2026 at Torrens University, Shop 1/37 Foveaux St, Surry Hills.</p>
+                <p style="margin:0 0 12px;${bodyText}">${escapeHtml([formatEventDay(details.event), formatVenueAddress(details.event)].filter(Boolean).join(' at '))}.</p>
                 <p style="margin:0;${bodyText}">We will be in touch closer to the day with your speaking slot, run sheet and AV details.</p>
               `)}
 

@@ -8,6 +8,8 @@ export interface RejectionEmailDetails {
   name: string;
   // Every rejected proposal from this person, oldest first. One email covers them all.
   talkTitles: string[];
+  // The event the proposals were for (stage 4e).
+  eventName: string;
   // The event's public Humanitix page (GdgEvent.humanitixUrl), '' when it has none.
   publicTicketUrl: string;
 }
@@ -16,10 +18,10 @@ const FONT = "font-family:'Google Sans',Roboto,sans-serif;letter-spacing:-0.01em
 const WORDMARK_URL =
   'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/site-assets/logo-wordmark.png';
 
-export function rejectionEmailSubject(talkTitles: string[]): string {
+export function rejectionEmailSubject(talkTitles: string[], eventName: string): string {
   return talkTitles.length === 1
-    ? `Your DevFest Sydney 2026 proposal: ${talkTitles[0]}`
-    : 'Your DevFest Sydney 2026 proposals';
+    ? `Your ${eventName} proposal: ${talkTitles[0]}`
+    : `Your ${eventName} proposals`;
 }
 
 // "A," for one title, "A" and "B," for two, "A", "B" and "C," for three: the comma the
@@ -39,16 +41,16 @@ export function buildRejectionEmail(details: RejectionEmailDetails): string {
   // Without the Humanitix URL the "tickets are here" clause would point at nothing, so
   // the invitation to attend stands on its own instead.
   const ticketSentence = humanitixUrl
-    ? `We'd still love to see you at DevFest.
+    ? `We'd still love to see you at ${escapeHtml(details.eventName)}.
         <a href="${escapeHtml(humanitixUrl)}" style="color:#4285F4;text-decoration:underline;">Grab a ticket here</a>.`
-    : `We'd still love to see you at DevFest.`;
+    : `We'd still love to see you at ${escapeHtml(details.eventName)}.`;
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${escapeHtml(rejectionEmailSubject(details.talkTitles))}</title>
+  <title>${escapeHtml(rejectionEmailSubject(details.talkTitles, details.eventName))}</title>
 </head>
 <body style="margin:0;padding:0;background:#202124;${FONT}color:#ffffff;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#202124;padding:48px 16px;">
@@ -64,11 +66,11 @@ export function buildRejectionEmail(details: RejectionEmailDetails): string {
               <p style="margin:0 0 20px;${bodyText}">Hi ${escapeHtml(details.name)},</p>
 
               <p style="margin:0 0 20px;${bodyText}">
-                Thank you so much for submitting your ${isPlural ? 'proposals' : 'proposal'}, ${quotedTitleList(details.talkTitles)} to DevFest Sydney! We truly appreciate the time and effort you put into sharing your expertise with our community.
+                Thank you so much for submitting your ${isPlural ? 'proposals' : 'proposal'}, ${quotedTitleList(details.talkTitles)} to ${escapeHtml(details.eventName)}! We truly appreciate the time and effort you put into sharing your expertise with our community.
               </p>
 
               <p style="margin:0 0 20px;${bodyText}">
-                We received an overwhelming number of incredible submissions this year. Because we have a limited number of speaking slots, our team had to make some difficult choices to curate a balanced agenda, and that's why it's taken this long to finalise the speakers list. While we aren't able to feature ${isPlural ? 'your talks' : 'your talk'} in the main DevFest schedule this time around, we were genuinely impressed by ${isPlural ? 'your topics' : 'your topic'} and the insights you proposed.
+                We received an overwhelming number of incredible submissions this year. Because we have a limited number of speaking slots, our team had to make some difficult choices to curate a balanced agenda, and that's why it's taken this long to finalise the speakers list. While we aren't able to feature ${isPlural ? 'your talks' : 'your talk'} in the schedule this time around, we were genuinely impressed by ${isPlural ? 'your topics' : 'your topic'} and the insights you proposed.
               </p>
 
               <p style="margin:0 0 20px;${bodyText}">

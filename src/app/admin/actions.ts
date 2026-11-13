@@ -12,7 +12,9 @@ import { applicantKey, rejectionEmailBlocker } from '@/lib/rejectionEligibility'
 import { confirmDeadlineFrom, confirmUrl } from '@/lib/speakerConfirm';
 import { normaliseProfileUrl } from '@/lib/speakers';
 import type { ExperienceLevel, SubmissionStatus, TalkFormat, Track } from '@/lib/types';
-import { fetchCurrentDevfestPublicTicketUrl, requireCurrentDevfestLink } from '@/lib/events';
+import { loadEvent, requireEventLink } from '@/lib/events';
+import { toEventCopy } from '@/lib/eventCopy';
+import type { GdgEvent } from '@/lib/types';
 import { getAdminDevfestId } from '@/lib/adminEvent';
 import { findOrCreatePerson, removePeopleWithoutTalks } from '@/lib/people';
 
@@ -510,6 +512,19 @@ export async function archiveSubmission(submissionId: string): Promise<{ error?:
 // any of them is ignored so a half-written record can't blank one. All or nothing on
 // purpose: a record good enough to address is good enough to quote, and mailing the edited
 // title to the address on the proposal would be the same bug twice.
+// The event a proposal or talk is filed under, for naming it in an email (stage 4e). An error
+// the admin can read when it can't be loaded, since an email that names no event, or the
+// wrong one, is worse than none.
+async function loadEventForEmail(eventId: unknown): Promise<{ event: GdgEvent } | { error: string }> {
+  try {
+    const event = typeof eventId === 'string' && eventId ? await loadEvent(eventId) : null;
+    if (!event) return { error: 'This isn\'t filed under an event that still exists, so the email can\'t say what it\'s for.' };
+    return { event };
+  } catch {
+    return { error: 'Could not load the event this is for. Please try again.' };
+  }
+}
+
 async function fetchPromotedSpeaker(submissionId: string): Promise<AcceptanceEmailSession | null> {
   let talk: FirebaseFirestore.DocumentData | undefined;
   let lead: FirebaseFirestore.DocumentData | undefined;
@@ -569,6 +584,11 @@ export async function sendAcceptanceEmail(submissionId: string): Promise<{ error
   const promotedSpeaker = await fetchPromotedSpeaker(submissionId);
   const session = promotedSpeaker ?? submission;
 
+  // The proposal's own event names the email (stage 4e).
+  const eventResult = await loadEventForEmail(submission.eventId);
+  if ('error' in eventResult) return eventResult;
+  const event = eventResult.event;
+
   const sentAt = new Date();
   const confirmBy = confirmDeadlineFrom(sentAt);
 
@@ -588,7 +608,7 @@ export async function sendAcceptanceEmail(submissionId: string): Promise<{ error
       to: session.email,
       bcc: 'hello@gdgsydney.com',
       replyTo: 'hello@gdgsydney.com',
-      subject: acceptanceEmailSubject(session.talkTitle),
+      subject: acceptanceEmailSubject(session.talkTitle, toEventCopy(event)),
       html: buildAcceptanceEmail({
         name: session.name,
         talkTitle: session.talkTitle,
@@ -597,7 +617,8 @@ export async function sendAcceptanceEmail(submissionId: string): Promise<{ error
         experienceLevel: session.experienceLevel,
         confirmUrl: confirmLink,
         confirmByIso: confirmBy.toISOString(),
-        publicTicketUrl: await fetchCurrentDevfestPublicTicketUrl(),
+        publicTicketUrl: event.humanitixUrl,
+        event: toEventCopy(event),
       }),
     });
   } catch (err) {
@@ -644,10 +665,6 @@ export async function sendSpeakerTicketEmail(submissionId: string): Promise<{ er
     return { error: 'Your session has expired. Please sign in again.' };
   }
 
-  const ticketLink = await requireCurrentDevfestLink('speakerTicketUrl', 'Speaker ticket link');
-  if ('error' in ticketLink) return ticketLink;
-  const ticketUrl = ticketLink.url;
-
   const submissionRef = adminDb.collection('submissions').doc(submissionId);
 
   let submission: FirebaseFirestore.DocumentData;
@@ -666,6 +683,14 @@ export async function sendSpeakerTicketEmail(submissionId: string): Promise<{ er
     return { error: 'This speaker hasn\'t confirmed their participation yet, so the ticket can\'t be sent.' };
   }
 
+  // The ticket link and the copy are the proposal's own event's (stage 4e).
+  const eventResult = await loadEventForEmail(submission.eventId);
+  if ('error' in eventResult) return eventResult;
+  const event = eventResult.event;
+  const ticketLink = await requireEventLink(event.id, 'speakerTicketUrl', 'Speaker ticket link');
+  if ('error' in ticketLink) return ticketLink;
+  const ticketUrl = ticketLink.url;
+
   // Same reasoning as the acceptance email: the promoted speaker is the edited record, so
   // a corrected name or address is carried here too.
   const speaker = (await fetchPromotedSpeaker(submissionId)) ?? submission;
@@ -679,11 +704,12 @@ export async function sendSpeakerTicketEmail(submissionId: string): Promise<{ er
       to: speaker.email,
       bcc: 'hello@gdgsydney.com',
       replyTo: 'hello@gdgsydney.com',
-      subject: speakerTicketEmailSubject(),
+      subject: speakerTicketEmailSubject(event.name),
       html: buildSpeakerTicketEmail({
         name: speaker.name,
         ticketUrl,
-        publicTicketUrl: await fetchCurrentDevfestPublicTicketUrl(),
+        publicTicketUrl: event.humanitixUrl,
+        event: toEventCopy(event),
       }),
     });
   } catch (err) {
@@ -722,13 +748,10 @@ export async function sendCoSpeakerTicketEmail(talkId: string, speakerId: string
     return { error: 'Your session has expired. Please sign in again.' };
   }
 
-  const ticketLink = await requireCurrentDevfestLink('speakerTicketUrl', 'Speaker ticket link');
-  if ('error' in ticketLink) return ticketLink;
-  const ticketUrl = ticketLink.url;
-
   const talkRef = adminDb.collection('talks').doc(talkId);
   let coSpeaker: FirebaseFirestore.DocumentData;
   let leadSubmission: FirebaseFirestore.DocumentData | undefined;
+  let talkEventId = '';
   try {
     const talkSnapshot = await talkRef.get();
     if (!talkSnapshot.exists) return { error: 'This talk is no longer in the lineup.' };
@@ -738,6 +761,7 @@ export async function sendCoSpeakerTicketEmail(talkId: string, speakerId: string
     const coSpeakerSnap = await adminDb.collection('speakers').doc(speakerId).get();
     if (!coSpeakerSnap.exists) return { error: 'This co-speaker is no longer in the lineup.' };
     coSpeaker = coSpeakerSnap.data()!;
+    talkEventId = String(talkSnapshot.data()?.eventId ?? '');
     const submissionId = talkSnapshot.data()?.submissionId;
     if (submissionId) leadSubmission = (await adminDb.collection('submissions').doc(String(submissionId)).get()).data();
   } catch {
@@ -752,6 +776,14 @@ export async function sendCoSpeakerTicketEmail(talkId: string, speakerId: string
     return { error: 'This co-speaker\'s email address doesn\'t look right. Fix it with Edit before sending.' };
   }
 
+  // The talk's own event's ticket link and copy (stage 4e).
+  const eventResult = await loadEventForEmail(talkEventId);
+  if ('error' in eventResult) return eventResult;
+  const event = eventResult.event;
+  const ticketLink = await requireEventLink(event.id, 'speakerTicketUrl', 'Speaker ticket link');
+  if ('error' in ticketLink) return ticketLink;
+  const ticketUrl = ticketLink.url;
+
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
@@ -759,11 +791,12 @@ export async function sendCoSpeakerTicketEmail(talkId: string, speakerId: string
       to: email,
       bcc: 'hello@gdgsydney.com',
       replyTo: 'hello@gdgsydney.com',
-      subject: speakerTicketEmailSubject(),
+      subject: speakerTicketEmailSubject(event.name),
       html: buildSpeakerTicketEmail({
         name: String(coSpeaker.name ?? ''),
         ticketUrl,
-        publicTicketUrl: await fetchCurrentDevfestPublicTicketUrl(),
+        publicTicketUrl: event.humanitixUrl,
+        event: toEventCopy(event),
       }),
     });
   } catch (err) {
@@ -836,6 +869,11 @@ export async function sendRejectionEmail(submissionId: string): Promise<{ error?
     .sort((a, b) => (a.data().submittedAt?.toMillis?.() ?? 0) - (b.data().submittedAt?.toMillis?.() ?? 0));
   const talkTitles = rejectedProposals.map((doc) => String(doc.data().talkTitle));
 
+  // The call for speakers these proposals were for names the email (stage 4e).
+  const eventResult = await loadEventForEmail(submission.eventId);
+  if ('error' in eventResult) return eventResult;
+  const event = eventResult.event;
+
   const sentAt = new Date();
 
   try {
@@ -847,8 +885,8 @@ export async function sendRejectionEmail(submissionId: string): Promise<{ error?
       // The email invites a reply about presenting at a meetup, so replies need to land
       // somewhere an organiser reads.
       replyTo: 'hello@gdgsydney.com',
-      subject: rejectionEmailSubject(talkTitles),
-      html: buildRejectionEmail({ name: submission.name, talkTitles, publicTicketUrl: await fetchCurrentDevfestPublicTicketUrl() }),
+      subject: rejectionEmailSubject(talkTitles, event.name),
+      html: buildRejectionEmail({ name: submission.name, talkTitles, eventName: event.name, publicTicketUrl: event.humanitixUrl }),
     });
   } catch (err) {
     console.error('Rejection email failed for submission:', submissionId, err);

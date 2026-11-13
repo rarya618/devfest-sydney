@@ -10,11 +10,9 @@ import { escapeHtml } from '@/lib/escapeHtml';
 // replaces the event already in their calendar instead of adding a second one, and a
 // METHOD:CANCEL with the same UID removes it.
 
-const VENUE = 'Torrens University, Shop 1/37 Foveaux St, Surry Hills NSW 2010';
 const FONT = "font-family:'Google Sans',Roboto,sans-serif;letter-spacing:-0.01em;";
 const WORDMARK_URL =
   'https://storage.googleapis.com/devfest-sydney-2026.firebasestorage.app/site-assets/logo-wordmark.png';
-const EVENT_TIME_ZONE = 'Australia/Sydney';
 
 export type CalendarInviteKind = 'invite' | 'update' | 'cancel';
 
@@ -31,7 +29,13 @@ export interface CalendarInviteDetails {
   endTime: string; // ISO date string
   sequence: number;
   organiserEmail: string;
-  siteUrl: string;
+  // The event (stage 4e): named in the subject and invite, its venue's address the location,
+  // and its time zone the one every time is shown in.
+  eventName: string;
+  venueAddress: string;
+  timeZone: string;
+  // Where the full schedule is published, or null to leave the link out.
+  scheduleUrl: string | null;
   // For an update: when the session started before, so the email can say "moved to 2:00 pm"
   // only when the time actually moved (a room or title change keeps the same time).
   previousStartTime?: string;
@@ -75,15 +79,15 @@ function foldIcsLine(line: string): string {
 export function buildSessionIcs(details: CalendarInviteDetails): string {
   const isCancel = details.kind === 'cancel';
   const description = [
-    `Your ${isCancel ? 'former ' : ''}session at DevFest Sydney 2026: ${details.talkTitle}`,
+    `Your ${isCancel ? 'former ' : ''}session at ${details.eventName}: ${details.talkTitle}`,
     `Room: ${details.roomName}`,
-    `Full schedule: ${details.siteUrl}/schedule`,
+    ...(details.scheduleUrl ? [`Full schedule: ${details.scheduleUrl}`] : []),
     'Questions: hello@gdgsydney.com',
   ].join('\n');
 
   const lines = [
     'BEGIN:VCALENDAR',
-    'PRODID:-//GDG Sydney//DevFest Sydney 2026//EN',
+    'PRODID:-//GDG Sydney//Events//EN',
     'VERSION:2.0',
     'CALSCALE:GREGORIAN',
     `METHOD:${isCancel ? 'CANCEL' : 'REQUEST'}`,
@@ -93,10 +97,10 @@ export function buildSessionIcs(details: CalendarInviteDetails): string {
     `SEQUENCE:${details.sequence}`,
     `DTSTART:${toIcsUtc(details.startTime)}`,
     `DTEND:${toIcsUtc(details.endTime)}`,
-    `SUMMARY:${escapeIcsText(`Speaking at DevFest Sydney: ${details.talkTitle}`)}`,
-    `LOCATION:${escapeIcsText(`${details.roomName}, ${VENUE}`)}`,
+    `SUMMARY:${escapeIcsText(`Speaking at ${details.eventName}: ${details.talkTitle}`)}`,
+    `LOCATION:${escapeIcsText([details.roomName, details.venueAddress].filter(Boolean).join(', '))}`,
     `DESCRIPTION:${escapeIcsText(description)}`,
-    `URL:${details.siteUrl}/schedule`,
+    ...(details.scheduleUrl ? [`URL:${details.scheduleUrl}`] : []),
     `ORGANIZER;CN=GDG Sydney:mailto:${details.organiserEmail}`,
     // A parameter value is a quoted string, not escaped text: it just cannot hold a quote.
     `ATTENDEE;CN="${details.speakerName.replace(/["\r\n]/g, '')}";ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:${details.speakerEmail}`,
@@ -110,26 +114,26 @@ export function buildSessionIcs(details: CalendarInviteDetails): string {
 
 // ─── Email ────────────────────────────────────────────────────────────────────
 
-function formatSessionDate(iso: string): string {
+function formatSessionDate(iso: string, timeZone: string): string {
   return new Date(iso).toLocaleDateString('en-AU', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
-    timeZone: EVENT_TIME_ZONE,
+    timeZone,
   });
 }
 
-function formatSessionWeekday(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-AU', { weekday: 'long', timeZone: EVENT_TIME_ZONE });
+function formatSessionWeekday(iso: string, timeZone: string): string {
+  return new Date(iso).toLocaleDateString('en-AU', { weekday: 'long', timeZone });
 }
 
-function formatSessionTime(iso: string): string {
+function formatSessionTime(iso: string, timeZone: string): string {
   return new Date(iso).toLocaleTimeString('en-AU', {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
-    timeZone: EVENT_TIME_ZONE,
+    timeZone,
   });
 }
 
@@ -141,11 +145,13 @@ function card(innerHtml: string): string {
 }
 
 // The time is in the subject so the inbox preview alone says when they are on.
-export function calendarInviteEmailSubject(details: Pick<CalendarInviteDetails, 'kind' | 'startTime'>): string {
-  const when = `${formatSessionWeekday(details.startTime)}, ${formatSessionTime(details.startTime)}`;
-  if (details.kind === 'cancel') return 'Your DevFest Sydney session is off the schedule';
-  if (details.kind === 'update') return `Updated: your DevFest Sydney session is now ${when}`;
-  return `Your DevFest Sydney session: ${when}`;
+export function calendarInviteEmailSubject(
+  details: Pick<CalendarInviteDetails, 'kind' | 'startTime' | 'eventName' | 'timeZone'>
+): string {
+  const when = `${formatSessionWeekday(details.startTime, details.timeZone)}, ${formatSessionTime(details.startTime, details.timeZone)}`;
+  if (details.kind === 'cancel') return `Your ${details.eventName} session is off the schedule`;
+  if (details.kind === 'update') return `Updated: your ${details.eventName} session is now ${when}`;
+  return `Your ${details.eventName} session: ${when}`;
 }
 
 export function buildCalendarInviteEmail(details: CalendarInviteDetails): string {
@@ -153,9 +159,9 @@ export function buildCalendarInviteEmail(details: CalendarInviteDetails): string
   const bodyText = `${FONT}font-size:16px;font-weight:400;color:rgba(255,255,255,0.85);line-height:1.75;`;
   const labelText = `${FONT}font-size:13px;font-weight:700;color:rgba(255,255,255,0.6);line-height:1.5;`;
   const valueText = `${FONT}font-size:18px;font-weight:700;color:#ffffff;line-height:1.5;`;
-  const timeRange = `${formatSessionTime(details.startTime)} to ${formatSessionTime(details.endTime)}`;
+  const timeRange = `${formatSessionTime(details.startTime, details.timeZone)} to ${formatSessionTime(details.endTime, details.timeZone)}`;
 
-  const startLabel = formatSessionTime(details.startTime);
+  const startLabel = formatSessionTime(details.startTime, details.timeZone);
   const timeMoved = Boolean(details.previousStartTime && details.previousStartTime !== details.startTime);
 
   const heading =
@@ -169,7 +175,7 @@ export function buildCalendarInviteEmail(details: CalendarInviteDetails): string
 
   const intro =
     details.kind === 'cancel'
-      ? "Your session is no longer on the DevFest Sydney schedule, so we've removed it from your calendar. We'll be in touch separately about what happens next."
+      ? `Your session is no longer on the ${details.eventName} schedule, so we've removed it from your calendar. We'll be in touch separately about what happens next.`
       : details.kind === 'update'
         ? "Here are your updated session details. The attached invite updates the event already in your calendar, so there's nothing to delete."
         : "Your session is locked in. We've attached a calendar invite so it's in your diary. If anything changes, we'll update the same invite, so there's nothing to delete.";
@@ -178,18 +184,18 @@ export function buildCalendarInviteEmail(details: CalendarInviteDetails): string
                 <p style="margin:0 0 4px;${labelText}">${details.kind === 'cancel' ? 'Removed session' : 'Your session'}</p>
                 <p style="margin:0 0 20px;${FONT}font-size:22px;font-weight:700;color:#ffffff;line-height:1.4;">${escapeHtml(details.talkTitle)}</p>
                 <p style="margin:0 0 4px;${labelText}">When</p>
-                <p style="margin:0 0 16px;${valueText}">${escapeHtml(formatSessionDate(details.startTime))}<br />${escapeHtml(timeRange)}</p>
+                <p style="margin:0 0 16px;${valueText}">${escapeHtml(formatSessionDate(details.startTime, details.timeZone))}<br />${escapeHtml(timeRange)}</p>
                 <p style="margin:0 0 4px;${labelText}">Where</p>
                 <p style="margin:0;${valueText}">${escapeHtml(details.roomName)}</p>
-                <p style="margin:4px 0 0;${bodyText}">${escapeHtml(VENUE)}</p>
+                ${details.venueAddress ? `<p style="margin:4px 0 0;${bodyText}">${escapeHtml(details.venueAddress)}</p>` : ''}
               `);
 
   const nextSteps =
-    details.kind === 'cancel'
+    details.kind === 'cancel' || !details.scheduleUrl
       ? ''
       : card(`
                 <p style="margin:0 0 12px;${bodyText}">See what's on in the other rooms.</p>
-                <a href="${escapeHtml(details.siteUrl)}/schedule" style="display:inline-block;background:#1a73e8;border-radius:8px;padding:14px 28px;${FONT}font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;">See the full schedule</a>
+                <a href="${escapeHtml(details.scheduleUrl)}" style="display:inline-block;background:#1a73e8;border-radius:8px;padding:14px 28px;${FONT}font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;">See the full schedule</a>
                 <p style="margin:20px 0 0;${bodyText}">We'll send AV details closer to the day.</p>
               `);
 

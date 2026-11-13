@@ -5,7 +5,7 @@ import { Timestamp } from 'firebase-admin/firestore';
 import { Resend } from 'resend';
 import { buildSpeakerConfirmedNotice } from '@/lib/acceptanceEmail';
 import { verifySpeakerConfirmToken } from '@/lib/speakerConfirm';
-import { fetchCurrentDevfestLink } from '@/lib/events';
+import { fetchEventLink, loadEvent } from '@/lib/events';
 
 const ORGANISER_INBOX = 'hello@gdgsydney.com';
 
@@ -14,9 +14,10 @@ const ORGANISER_INBOX = 'hello@gdgsydney.com';
 // email problem is ours, not theirs.
 async function notifyOrganisers(submission: FirebaseFirestore.DocumentData, confirmedAt: Date) {
   try {
+    const event = await loadEvent(String(submission.eventId ?? '')).catch(() => null);
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
-      from: `DevFest Sydney <${process.env.RESEND_FROM_EMAIL}>`,
+      from: `GDG Sydney <${process.env.RESEND_FROM_EMAIL}>`,
       to: ORGANISER_INBOX,
       // So an organiser can reply straight to the speaker from the notification.
       replyTo: submission.email,
@@ -28,6 +29,7 @@ async function notifyOrganisers(submission: FirebaseFirestore.DocumentData, conf
         track: submission.track,
         format: submission.format,
         confirmedAtIso: confirmedAt.toISOString(),
+        eventName: event?.name ?? 'the event',
       }),
     });
   } catch (err) {
@@ -68,7 +70,8 @@ export async function confirmSpeakerParticipation(token: string): Promise<Confir
       await notifyOrganisers(snap.data()!, confirmedAt);
     }
 
-    return { ticketUrl: await fetchCurrentDevfestLink('speakerTicketUrl') };
+    // The proposal's own event's ticket link (stage 4e), not whichever DevFest is current.
+    return { ticketUrl: await fetchEventLink(String(snap.data()?.eventId ?? ''), 'speakerTicketUrl') };
   } catch {
     return { error: 'We couldn\'t record your confirmation just now. Please try again in a moment.' };
   }

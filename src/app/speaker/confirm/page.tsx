@@ -6,7 +6,8 @@ import { formatDeadlineDate } from '@/lib/format';
 import { verifySpeakerConfirmToken } from '@/lib/speakerConfirm';
 import ConfirmParticipation from './ConfirmParticipation';
 import SpeakerNextSteps from './SpeakerNextSteps';
-import { fetchCurrentDevfestLink } from '@/lib/events';
+import { fetchEventLink, loadEvent } from '@/lib/events';
+import { formatEveningBefore, formatEventWhen, isDevfest, toEventCopy, type EventCopy } from '@/lib/eventCopy';
 
 // Reached only from a link in an acceptance email, and the answer depends on a Firestore
 // read that changes the moment the speaker clicks, so there is nothing to prerender.
@@ -27,6 +28,8 @@ interface AcceptedTalk {
   name: string;
   confirmByIso: string | null;
   alreadyConfirmed: boolean;
+  eventId: string;
+  event: EventCopy | null;
 }
 
 async function loadAcceptedTalk(token: string): Promise<AcceptedTalk | null> {
@@ -41,7 +44,12 @@ async function loadAcceptedTalk(token: string): Promise<AcceptedTalk | null> {
   if (submission.status !== 'accepted') return null;
 
   const confirmByDate = submission.confirmByDate as Timestamp | undefined;
+  // The proposal's own event (stage 4e) words the page and supplies the ticket link.
+  const eventId = String(submission.eventId ?? '');
+  const event = await loadEvent(eventId).catch(() => null);
   return {
+    eventId,
+    event: event ? toEventCopy(event) : null,
     talkTitle: submission.talkTitle ?? '',
     name: submission.name ?? '',
     confirmByIso: confirmByDate ? confirmByDate.toDate().toISOString() : null,
@@ -110,14 +118,18 @@ export default async function SpeakerConfirmPage({ searchParams }: ConfirmPagePr
                   Thanks, we have you down as speaking. We&rsquo;ll be in touch with the running
                   order for the day.
                 </p>
-                <SpeakerNextSteps ticketUrl={await fetchCurrentDevfestLink('speakerTicketUrl')} />
+                <SpeakerNextSteps
+                  ticketUrl={await fetchEventLink(talk.eventId, 'speakerTicketUrl')}
+                  dinnerLabel={talk.event && isDevfest(talk.event) ? formatEveningBefore(talk.event) : null}
+                />
               </>
             ) : (
               <>
                 <ConfirmParticipation
                   token={token!}
                   talkTitle={talk.talkTitle}
-                  intro={`Let us know you'll be joining us on Saturday 10 October at Torrens University, Surry Hills.${
+                  dinnerLabel={talk.event && isDevfest(talk.event) ? formatEveningBefore(talk.event) : null}
+                  intro={`Let us know you'll be joining us${talk.event ? ` on ${formatEventWhen(talk.event)}` : ''}.${
                     talk.confirmByIso
                       ? ` We need to hear from you by ${formatDeadlineDate(talk.confirmByIso)}, as we will need to reach out to other speakers to fill in the spot.`
                       : ''

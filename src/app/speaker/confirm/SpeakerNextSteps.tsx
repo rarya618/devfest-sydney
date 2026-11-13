@@ -1,18 +1,17 @@
-// The night before the event. Held here rather than in src/lib/speakerConfirm.ts because
-// this component renders inside a client component, and that module pulls in node:crypto.
-const SPEAKER_DINNER_DATE_LABEL = 'Friday 9 October';
-
 interface SpeakerNextStepsProps {
-  // The Humanitix link carrying the speaker access code, or null when
-  // SPEAKER_TICKET_URL isn't configured. Only ever handed over for a confirmed
+  // "Friday 9 October" for a DevFest, which holds a speaker dinner the evening before
+  // (stage 4e: worked out from the event's start); null for a general event, which doesn't.
+  dinnerLabel: string | null;
+  // The Humanitix link carrying the speaker access code, or null when the event has no
+  // speaker ticket link set. Only ever handed over for a confirmed
   // speaker, since the code unlocks a complimentary ticket.
   ticketUrl: string | null;
 }
 
-// Everything a speaker needs once they have said yes: their ticket, and the dinner the
-// night before. Shared by the freshly confirmed state and the "already confirmed" one, so
+// Everything a speaker needs once they have said yes: their ticket, and at a DevFest the
+// dinner the night before. Shared by the freshly confirmed state and the "already confirmed" one, so
 // a speaker returning to the link later still finds both.
-export default function SpeakerNextSteps({ ticketUrl }: SpeakerNextStepsProps) {
+export default function SpeakerNextSteps({ ticketUrl, dinnerLabel }: SpeakerNextStepsProps) {
   return (
     <div className="mt-8 space-y-6 text-left">
       {ticketUrl ? (
@@ -38,16 +37,18 @@ export default function SpeakerNextSteps({ ticketUrl }: SpeakerNextStepsProps) {
         </p>
       )}
 
-      <div className="p-6 bg-black/20 border border-white/10 rounded-2xl">
-        <p className="text-xs font-mono text-google-yellow mb-2">
-          Speaker dinner &middot; {SPEAKER_DINNER_DATE_LABEL}
-        </p>
-        <p className="text-white/70 leading-relaxed">
-          The evening before DevFest we&rsquo;re hosting a dinner for our speakers, so you can meet
-          the rest of the lineup and the organising team before the day itself. We&rsquo;ll email
-          the venue, the time and an RSVP closer to the date.
-        </p>
-      </div>
+      {dinnerLabel && (
+        <div className="p-6 bg-black/20 border border-white/10 rounded-2xl">
+          <p className="text-xs font-mono text-google-yellow mb-2">
+            Speaker dinner &middot; {dinnerLabel}
+          </p>
+          <p className="text-white/70 leading-relaxed">
+            The evening before DevFest we&rsquo;re hosting a dinner for our speakers, so you can meet
+            the rest of the lineup and the organising team before the day itself. We&rsquo;ll email
+            the venue, the time and an RSVP closer to the date.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

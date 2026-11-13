@@ -12,9 +12,10 @@ interface ConfirmParticipationProps {
   // "we need to hear from you by the 10th" line left standing under a confirmation reads
   // as though the click didn't take.
   intro: string;
+  dinnerLabel: string | null;
 }
 
-export default function ConfirmParticipation({ token, talkTitle, intro }: ConfirmParticipationProps) {
+export default function ConfirmParticipation({ token, talkTitle, intro, dinnerLabel }: ConfirmParticipationProps) {
   const [isPending, startTransition] = useTransition();
   const [confirmed, setConfirmed] = useState(false);
   // Handed back by the action on a successful confirmation, so the ticket button can
@@ -44,7 +45,7 @@ export default function ConfirmParticipation({ token, talkTitle, intro }: Confir
         <p className="mt-3 text-white/70 leading-relaxed">
           Thanks for confirming. We&rsquo;ll be in touch with the running order for the day.
         </p>
-        <SpeakerNextSteps ticketUrl={ticketUrl} />
+        <SpeakerNextSteps ticketUrl={ticketUrl} dinnerLabel={dinnerLabel} />
       </div>
     );
   }
