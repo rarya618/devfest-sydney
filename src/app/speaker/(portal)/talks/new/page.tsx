@@ -9,9 +9,9 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Add a talk' };
 
 export default async function NewSavedTalkPage() {
-  const session = await requirePortalSession();
+  await requirePortalSession();
   return (
-    <PortalShell email={session.email} width="narrow">
+    <PortalShell width="narrow">
       <Link href="/speaker" aria-label="Back to your talks" className={backLink}>
         <span aria-hidden="true">←</span> Your talks
       </Link>

@@ -243,7 +243,7 @@ export default async function PortalHomePage() {
   const pastTalks = allTalks.filter((talk) => !talk.isUpcoming);
 
   return (
-    <PortalShell email={session.email}>
+    <PortalShell>
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12">
         <h1 className={pageHeading}>{firstName ? `Hi, ${firstName}.` : 'Welcome.'}</h1>
         <Link href="/speaker/propose" aria-label="Propose a talk" className={`${primaryButton} self-start sm:self-auto`}>

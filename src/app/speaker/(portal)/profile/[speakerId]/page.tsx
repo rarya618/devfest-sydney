@@ -22,7 +22,7 @@ export default async function PortalProfilePage({ params }: ProfilePageProps) {
   if (!profile) notFound();
 
   return (
-    <PortalShell email={session.email}>
+    <PortalShell>
       <Link href="/speaker" aria-label="Back to your talks" className={backLink}>
         <span aria-hidden="true">←</span> Your talks
       </Link>

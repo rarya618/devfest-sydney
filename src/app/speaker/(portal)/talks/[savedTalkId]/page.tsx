@@ -28,7 +28,7 @@ export default async function SavedTalkPage({ params }: SavedTalkPageProps) {
   const proposedCount = devfestProposals.data().count + meetupProposals.data().count;
 
   return (
-    <PortalShell email={session.email} width="narrow">
+    <PortalShell width="narrow">
       <Link href="/speaker" aria-label="Back to your talks" className={backLink}>
         <span aria-hidden="true">←</span> Your talks
       </Link>

@@ -62,6 +62,8 @@ export async function completePortalSignIn(token: string): Promise<{ error: stri
     return { error: "We couldn't sign you in just now. Please try the link again in a moment." };
   }
   if (!email) return { error: 'This sign-in link has already been used or has run out. Ask for a new one from the sign-in page.' };
+  // The header lives in the layout, which a client navigation keeps; refresh it for the new session.
+  revalidatePath('/speaker', 'layout');
   redirect('/speaker');
 }
 
@@ -72,6 +74,7 @@ export async function signOutOfPortal(): Promise<void> {
     // The cookie is cleared regardless; a session document left behind runs out on its own.
     console.error('Portal sign-out could not delete the session:', error);
   }
+  revalidatePath('/speaker', 'layout');
   redirect('/speaker/sign-in');
 }
 

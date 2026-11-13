@@ -34,7 +34,7 @@ export default async function PortalProposePage({ searchParams }: ProposePagePro
   const openDevfest = devfest && isFlowOpen(devfest, 'cfs') ? { name: devfest.name, closesAt: devfest.cfs.closesAt } : null;
 
   return (
-    <PortalShell email={session.email} width="narrow">
+    <PortalShell width="narrow">
       <Link href="/speaker" aria-label="Back to your talks" className={backLink}>
         <span aria-hidden="true">←</span> Your talks
       </Link>

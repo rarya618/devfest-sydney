@@ -167,6 +167,17 @@ body {
   animation: slide-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* The speaker portal's page entrance: content settles in as it arrives, so moving between
+   pages doesn't snap. Short and small on purpose; the header stays put. */
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-page-in {
+  animation: page-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 @keyframes marquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
