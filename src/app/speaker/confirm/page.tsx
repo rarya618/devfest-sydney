@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import type { Timestamp } from 'firebase-admin/firestore';
 import Image from 'next/image';
-import { adminDb } from '@/lib/firebase-admin';
+import { loadSpeakerProposal } from '@/lib/speakerProposals';
 import { formatDeadlineDate } from '@/lib/format';
 import { verifySpeakerConfirmToken } from '@/lib/speakerConfirm';
 import ConfirmParticipation from './ConfirmParticipation';
@@ -36,10 +36,11 @@ async function loadAcceptedTalk(token: string): Promise<AcceptedTalk | null> {
   const submissionId = verifySpeakerConfirmToken(token);
   if (!submissionId) return null;
 
-  const snap = await adminDb.collection('submissions').doc(submissionId).get();
-  if (!snap.exists) return null;
+  // A DevFest proposal or a meetup one (stage 4f).
+  const proposal = await loadSpeakerProposal(submissionId);
+  if (!proposal) return null;
 
-  const submission = snap.data()!;
+  const submission = proposal.data;
   // An acceptance that has since been undone shouldn't still be confirmable.
   if (submission.status !== 'accepted') return null;
 

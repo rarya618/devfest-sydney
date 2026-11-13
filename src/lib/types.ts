@@ -278,6 +278,16 @@ export interface MeetupProposal {
   submittedAt: string; // ISO date string (serialized from Firestore Timestamp)
   status: MeetupProposalStatus;
   reviewerNotes: ReviewerNote[];
+  // Set when accepted (stage 4f): the general event the talk is for. The talk is
+  // talks/{proposal id}. '' while pending, rejected or archived.
+  eventId: string;
+  // The same acceptance and confirmation steps as a DevFest proposal, sent from /admin/meetups
+  // and answered on /speaker/confirm.
+  acceptanceEmailSentAt: string | null;
+  acceptanceEmailSentBy: string;
+  confirmByDate: string | null;
+  speakerConfirmedAt: string | null;
+  confirmation: SpeakerConfirmation;
 }
 
 // Whether the speaker behind a promoted talk has actually been told and has confirmed.

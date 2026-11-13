@@ -7,6 +7,7 @@ import {
   restoreMeetupProposal,
   archiveMeetupProposal,
   addMeetupReviewerNote,
+  sendMeetupAcceptanceEmail,
 } from './meetupProposalActions';
 import Alert from '@/components/Alert';
 import { formatDate } from '@/lib/format';
@@ -114,19 +115,64 @@ function DetailBlock({ label, text }: { label: string; text: string }) {
   );
 }
 
+// An event a talk can be accepted into: upcoming general events, soonest first.
+export interface MeetupEventOption {
+  id: string;
+  name: string;
+}
+
+// The Not emailed / Awaiting / Confirmed chip, as on DevFest > Speakers (stage 4f).
+const CONFIRMATION_CHIPS: Record<MeetupProposal['confirmation'], { label: string; className: string; title: string }> = {
+  'not-emailed': {
+    label: 'Not emailed',
+    className: 'bg-google-yellow/15 text-google-yellow border-google-yellow/25',
+    title: 'Accepted, but the speaker hasn\'t been told. Send the acceptance email with the envelope button.',
+  },
+  awaiting: {
+    label: 'Awaiting confirmation',
+    className: 'bg-white/[0.06] text-white/70 border-white/10',
+    title: 'The acceptance email has gone; the speaker hasn\'t confirmed yet.',
+  },
+  confirmed: {
+    label: 'Confirmed',
+    className: 'bg-google-green/15 text-google-green border-google-green/25',
+    title: 'The speaker has confirmed. They now appear in the event\'s public lineup.',
+  },
+  unknown: { label: 'Unknown', className: 'bg-white/[0.06] text-white/70 border-white/10', title: '' },
+};
+
 interface MeetupProposalRowProps {
   proposal: MeetupProposal;
+  events: MeetupEventOption[];
+  eventNames: Record<string, string>;
   onError: (message: string) => void;
 }
 
-function MeetupProposalRow({ proposal, onError }: MeetupProposalRowProps) {
+function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProposalRowProps) {
   const [isPending, startTransition] = useTransition();
+  // Accepting asks which event; taking an accepted talk back asks first, since its talk goes.
+  const [choosingEvent, setChoosingEvent] = useState(false);
+  const [confirmingTakeBack, setConfirmingTakeBack] = useState<null | 'pending' | 'archived'>(null);
+  const isAccepted = proposal.status === 'accepted';
   const [notesOpen, setNotesOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement>(null);
   const closeMoreMenu = useCallback(() => setMoreOpen(false), []);
   useDismissable(moreOpen, moreMenuRef, closeMoreMenu);
+
+  function handleAccept(eventId: string) {
+    setChoosingEvent(false);
+    startTransition(async () => {
+      const result = await acceptMeetupProposal(proposal.id, eventId);
+      if (result.error) onError(result.error);
+    });
+  }
+
+  function handleTakeBack(target: 'pending' | 'archived') {
+    setConfirmingTakeBack(null);
+    handleAction(target === 'pending' ? restoreMeetupProposal : archiveMeetupProposal);
+  }
 
   function handleAction(action: (proposalId: string) => Promise<{ error?: string }>) {
     startTransition(async () => {
@@ -184,6 +230,19 @@ function MeetupProposalRow({ proposal, onError }: MeetupProposalRowProps) {
             >
               {MEETUP_FORMAT_SHORT_LABELS[proposal.format]}
             </span>
+            {isAccepted && (
+              <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-green/15 text-google-green border-google-green/25">
+                {eventNames[proposal.eventId] ?? 'Event removed'}
+              </span>
+            )}
+            {isAccepted && (
+              <span
+                title={CONFIRMATION_CHIPS[proposal.confirmation].title}
+                className={`inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold ${CONFIRMATION_CHIPS[proposal.confirmation].className}`}
+              >
+                {CONFIRMATION_CHIPS[proposal.confirmation].label}
+              </span>
+            )}
             {!proposal.speakingExperience && (
               <span
                 title="They left speaking experience blank, which may mean this would be their first talk."
@@ -258,9 +317,10 @@ function MeetupProposalRow({ proposal, onError }: MeetupProposalRowProps) {
               </button>
               <span className="h-px bg-white/15" />
               <button
-                onClick={() => handleAction(acceptMeetupProposal)}
+                onClick={() => (events.length > 0 ? setChoosingEvent((open) => !open) : onError('There\'s no upcoming general event to accept this into. Create one in Events first.'))}
                 disabled={isPending}
-                aria-label={`Accept meetup talk proposal: ${proposal.talkTitle}`}
+                aria-expanded={choosingEvent}
+                aria-label={`Accept meetup talk proposal: ${proposal.talkTitle}, choosing which event`}
                 title="Accept"
                 className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-green-deep hover:text-white transition-colors disabled:opacity-60"
               >
@@ -270,9 +330,27 @@ function MeetupProposalRow({ proposal, onError }: MeetupProposalRowProps) {
               </button>
             </div>
           )}
+          {isAccepted && (
+            <button
+              onClick={() => handleAction(sendMeetupAcceptanceEmail)}
+              disabled={isPending}
+              aria-label={`${proposal.acceptanceEmailSentAt ? 'Resend' : 'Send'} the acceptance email for ${proposal.talkTitle}`}
+              title={proposal.acceptanceEmailSentAt ? 'Resend acceptance email' : 'Send acceptance email'}
+              className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-60 ${
+                proposal.acceptanceEmailSentAt
+                  ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
+                  : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
+              }`}
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
+              </svg>
+            </button>
+          )}
           {proposal.status !== 'pending' && (
             <button
-              onClick={() => handleAction(restoreMeetupProposal)}
+              onClick={() => (isAccepted ? setConfirmingTakeBack('pending') : handleAction(restoreMeetupProposal))}
               disabled={isPending}
               aria-label={`Move meetup talk proposal back to pending: ${proposal.talkTitle}`}
               title="Back to pending"
@@ -324,7 +402,8 @@ function MeetupProposalRow({ proposal, onError }: MeetupProposalRowProps) {
                   <button
                     role="menuitem"
                     onClick={() => {
-                      handleAction(archiveMeetupProposal);
+                      if (isAccepted) setConfirmingTakeBack('archived');
+                      else handleAction(archiveMeetupProposal);
                       setMoreOpen(false);
                     }}
                     className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
@@ -337,6 +416,60 @@ function MeetupProposalRow({ proposal, onError }: MeetupProposalRowProps) {
           </div>
         </div>
       </div>
+
+      {choosingEvent && (
+        <div className="mt-3 pt-3 border-t border-white/10">
+          <p className="text-xs font-semibold text-white/65 mb-2">Accept into which event?</p>
+          <div className="flex flex-wrap gap-2">
+            {events.map((event) => (
+              <button
+                key={event.id}
+                type="button"
+                onClick={() => handleAccept(event.id)}
+                disabled={isPending}
+                aria-label={`Accept ${proposal.talkTitle} into ${event.name}`}
+                className="text-xs font-semibold px-3 py-1.5 rounded-full border border-white/40 text-white/85 hover:border-google-green hover:text-white transition-colors"
+              >
+                {event.name}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => setChoosingEvent(false)}
+              aria-label="Cancel accepting this proposal"
+              className="text-xs px-3 py-1.5 rounded-full text-white/55 hover:text-white transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {confirmingTakeBack && (
+        <div role="alert" className="mt-3 pt-3 border-t border-white/10 flex flex-wrap items-center gap-2">
+          <p className="text-xs text-white/70 mr-auto">
+            {confirmingTakeBack === 'pending' ? 'Back to pending' : 'Archive'} takes this talk off{' '}
+            {eventNames[proposal.eventId] ?? 'its event'}
+            {proposal.confirmation !== 'not-emailed' ? ', and the speaker has already been emailed' : ''}.
+          </p>
+          <button
+            type="button"
+            onClick={() => setConfirmingTakeBack(null)}
+            aria-label="Keep this talk on its event"
+            className="text-xs px-3 py-1.5 rounded-lg border border-white/40 text-white/70 hover:text-white transition-colors"
+          >
+            Keep
+          </button>
+          <button
+            type="button"
+            onClick={() => handleTakeBack(confirmingTakeBack)}
+            aria-label="Take this talk off its event"
+            className="text-xs px-3 py-1.5 rounded-lg bg-google-red-deep text-white font-semibold hover:opacity-90 transition-opacity"
+          >
+            Take it off
+          </button>
+        </div>
+      )}
 
       {notesOpen && <ReviewerNotesPanel proposalId={proposal.id} notes={proposal.reviewerNotes} onError={onError} />}
     </div>
@@ -356,9 +489,11 @@ const STATUS_TABS: { value: FilterStatus; label: string }[] = [
 
 interface Props {
   proposals: MeetupProposal[];
+  events: MeetupEventOption[];
+  eventNames: Record<string, string>;
 }
 
-export default function MeetupProposalsDashboard({ proposals }: Props) {
+export default function MeetupProposalsDashboard({ proposals, events, eventNames }: Props) {
   const mobileBarHidden = useMobileBarHidden();
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all');
   const [formatFilter, setFormatFilter] = useState<FilterFormat>('all');
@@ -500,7 +635,7 @@ export default function MeetupProposalsDashboard({ proposals }: Props) {
         ) : (
           <div className="grid grid-cols-1 gap-5 items-start">
             {visibleProposals.map((proposal) => (
-              <MeetupProposalRow key={proposal.id} proposal={proposal} onError={setAlertMessage} />
+              <MeetupProposalRow key={proposal.id} proposal={proposal} events={events} eventNames={eventNames} onError={setAlertMessage} />
             ))}
           </div>
         )}

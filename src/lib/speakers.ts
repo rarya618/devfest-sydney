@@ -84,10 +84,17 @@ export async function fetchSpeakers(eventId: string): Promise<Speaker[]> {
   );
 
   const speakerIds = [...new Set(talkDocs.flatMap((doc) => (doc.data().speakerIds ?? []) as string[]))];
-  const submissionIds = [...new Set(talkDocs.map((doc) => doc.data().submissionId as string | undefined).filter(Boolean))] as string[];
+  // A talk's proposal is a CfS submission or, for a general event, a meetup proposal (4f);
+  // both carry the same acceptance and confirmation fields.
+  const proposalRefs = talkDocs.flatMap((doc) => {
+    const talk = doc.data();
+    if (talk.meetupProposalId) return [adminDb.collection('meetupProposals').doc(String(talk.meetupProposalId))];
+    if (talk.submissionId) return [adminDb.collection('submissions').doc(String(talk.submissionId))];
+    return [];
+  });
   const [personSnapshots, submissionSnapshots] = await Promise.all([
     speakerIds.length > 0 ? adminDb.getAll(...speakerIds.map((id) => adminDb.collection('speakers').doc(id))) : [],
-    submissionIds.length > 0 ? adminDb.getAll(...submissionIds.map((id) => adminDb.collection('submissions').doc(id))) : [],
+    proposalRefs.length > 0 ? adminDb.getAll(...proposalRefs) : [],
   ]);
   const peopleById = new Map(personSnapshots.filter((snap) => snap.exists).map((snap) => [snap.id, snap.data()!]));
   const submissionsById = new Map(
@@ -98,7 +105,7 @@ export async function fetchSpeakers(eventId: string): Promise<Speaker[]> {
     const talk = talkDoc.data();
     const talkSpeakerIds = (talk.speakerIds ?? []) as string[];
     const leadId = talkSpeakerIds[0];
-    const submission = submissionsById.get(String(talk.submissionId ?? ''));
+    const submission = submissionsById.get(String(talk.meetupProposalId || talk.submissionId || ''));
     const promotedAt = talk.promotedAt as Timestamp | undefined;
     const states = (talk.speakerState ?? {}) as Record<string, unknown>;
 

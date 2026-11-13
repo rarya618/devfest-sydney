@@ -5,6 +5,10 @@ import type { Timestamp } from 'firebase-admin/firestore';
 
 const STATUSES: MeetupProposalStatus[] = ['pending', 'accepted', 'rejected', 'archived'];
 
+function toIsoOrNull(value: unknown): string | null {
+  return value && typeof (value as Timestamp).toDate === 'function' ? (value as Timestamp).toDate().toISOString() : null;
+}
+
 export async function fetchMeetupProposals(): Promise<MeetupProposal[]> {
   const snapshot = await adminDb.collection('meetupProposals').orderBy('submittedAt', 'desc').get();
 
@@ -25,6 +29,12 @@ export async function fetchMeetupProposals(): Promise<MeetupProposal[]> {
       notes: proposalData.notes ?? '',
       submittedAt: submittedAt ? submittedAt.toDate().toISOString() : new Date().toISOString(),
       status: STATUSES.includes(proposalData.status) ? (proposalData.status as MeetupProposalStatus) : 'pending',
+      eventId: typeof proposalData.eventId === 'string' ? proposalData.eventId : '',
+      acceptanceEmailSentAt: toIsoOrNull(proposalData.acceptanceEmailSentAt),
+      acceptanceEmailSentBy: proposalData.acceptanceEmailSentBy ?? '',
+      confirmByDate: toIsoOrNull(proposalData.confirmByDate),
+      speakerConfirmedAt: toIsoOrNull(proposalData.speakerConfirmedAt),
+      confirmation: proposalData.speakerConfirmedAt ? 'confirmed' : proposalData.acceptanceEmailSentAt ? 'awaiting' : 'not-emailed',
       reviewerNotes: ((proposalData.reviewerNotes ?? []) as Array<{
         text?: string;
         authorName?: string;

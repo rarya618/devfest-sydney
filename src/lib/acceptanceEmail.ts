@@ -49,6 +49,13 @@ const TRACK_DOT_COLOR: Record<Track, string> = {
   showcase: '#F9AB00',
 };
 
+// Without DevFest's slot lengths, which a meetup sets its own way.
+const GENERAL_FORMAT_LABELS: Record<TalkFormat, string> = {
+  talk: 'Talk',
+  'lightning-talk': 'Lightning talk',
+  workshop: 'Workshop',
+};
+
 const LEVEL_LABELS: Record<ExperienceLevel, string> = {
   beginner: 'Beginner',
   intermediate: 'Intermediate',
@@ -79,11 +86,17 @@ export function buildAcceptanceEmail(details: AcceptanceEmailDetails): string {
   const confirmBy = formatDeadlineDate(details.confirmByIso);
   const humanitixUrl = details.publicTicketUrl;
 
-  const indicators = [
-    indicatorPill(TRACK_DOT_COLOR[details.track], TRACK_LABELS[details.track]),
-    indicatorPill('#F9AB00', FORMAT_LABELS[details.format]),
-    indicatorPill('#4285F4', LEVEL_LABELS[details.experienceLevel]),
-  ].join('');
+  // A DevFest talk has a track, a slot length and a level. A general event's talk (stage 4f)
+  // has none of those settled, so it shows only what kind of session it is.
+  const indicators = (
+    details.event.type === 'devfest'
+      ? [
+          indicatorPill(TRACK_DOT_COLOR[details.track], TRACK_LABELS[details.track]),
+          indicatorPill('#F9AB00', FORMAT_LABELS[details.format]),
+          indicatorPill('#4285F4', LEVEL_LABELS[details.experienceLevel]),
+        ]
+      : [indicatorPill('#F9AB00', GENERAL_FORMAT_LABELS[details.format])]
+  ).join('');
 
   const bodyText = `${FONT}font-size:16px;font-weight:400;color:rgba(255,255,255,0.85);line-height:1.75;`;
   const sectionHeading = `${FONT}font-size:20px;font-weight:700;color:#ffffff;line-height:1.5;`;

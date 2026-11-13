@@ -6,15 +6,19 @@ import { Resend } from 'resend';
 import { buildSpeakerConfirmedNotice } from '@/lib/acceptanceEmail';
 import { verifySpeakerConfirmToken } from '@/lib/speakerConfirm';
 import { fetchEventLink, loadEvent } from '@/lib/events';
+import { loadSpeakerProposal } from '@/lib/speakerProposals';
 
 const ORGANISER_INBOX = 'hello@gdgsydney.com';
 
 // Tells the organisers a slot is settled. Deliberately not awaited on the critical path in
 // a way that could fail the confirmation: the speaker has already done their part, and an
 // email problem is ours, not theirs.
-async function notifyOrganisers(submission: FirebaseFirestore.DocumentData, confirmedAt: Date) {
+async function notifyOrganisers(proposalId: string, submission: FirebaseFirestore.DocumentData, confirmedAt: Date) {
   try {
     const event = await loadEvent(String(submission.eventId ?? '')).catch(() => null);
+    // Track and format from the talk, which both kinds of proposal have once accepted (a
+    // meetup proposal has no track of its own).
+    const talk = (await adminDb.collection('talks').doc(proposalId).get()).data();
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
       from: `GDG Sydney <${process.env.RESEND_FROM_EMAIL}>`,
@@ -26,8 +30,8 @@ async function notifyOrganisers(submission: FirebaseFirestore.DocumentData, conf
         name: submission.name,
         email: submission.email,
         talkTitle: submission.talkTitle,
-        track: submission.track,
-        format: submission.format,
+        track: talk?.track ?? submission.track ?? 'developer',
+        format: talk?.format ?? submission.format ?? 'talk',
         confirmedAtIso: confirmedAt.toISOString(),
         eventName: event?.name ?? 'the event',
       }),
@@ -56,22 +60,22 @@ export async function confirmSpeakerParticipation(token: string): Promise<Confir
   }
 
   try {
-    const submissionRef = adminDb.collection('submissions').doc(submissionId);
-    const snap = await submissionRef.get();
-    if (!snap.exists || snap.data()?.status !== 'accepted') {
+    // A DevFest proposal or a meetup one (stage 4f): the same token, the same fields.
+    const proposal = await loadSpeakerProposal(submissionId);
+    if (!proposal || proposal.data.status !== 'accepted') {
       return { error: 'This confirmation link is no longer active. Please reply to your acceptance email and we\'ll sort it out.' };
     }
 
     // A speaker clicking twice shouldn't move the date we recorded, shouldn't error at
     // them, and shouldn't email the organisers a second time.
-    if (!snap.data()?.speakerConfirmedAt) {
+    if (!proposal.data.speakerConfirmedAt) {
       const confirmedAt = new Date();
-      await submissionRef.update({ speakerConfirmedAt: Timestamp.fromDate(confirmedAt) });
-      await notifyOrganisers(snap.data()!, confirmedAt);
+      await proposal.ref.update({ speakerConfirmedAt: Timestamp.fromDate(confirmedAt) });
+      await notifyOrganisers(submissionId, proposal.data, confirmedAt);
     }
 
     // The proposal's own event's ticket link (stage 4e), not whichever DevFest is current.
-    return { ticketUrl: await fetchEventLink(String(snap.data()?.eventId ?? ''), 'speakerTicketUrl') };
+    return { ticketUrl: await fetchEventLink(String(proposal.data.eventId ?? ''), 'speakerTicketUrl') };
   } catch {
     return { error: 'We couldn\'t record your confirmation just now. Please try again in a moment.' };
   }

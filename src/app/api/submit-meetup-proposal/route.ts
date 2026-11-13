@@ -17,7 +17,19 @@ import type { MeetupFormat, MeetupProposal } from '@/lib/types';
 // in firestore.rules.
 
 // The stored proposal, before Firestore adds its id, status and timestamps.
-type MeetupProposalFields = Omit<MeetupProposal, 'id' | 'submittedAt' | 'status' | 'reviewerNotes'>;
+type MeetupProposalFields = Omit<
+  MeetupProposal,
+  | 'id'
+  | 'submittedAt'
+  | 'status'
+  | 'reviewerNotes'
+  | 'eventId'
+  | 'acceptanceEmailSentAt'
+  | 'acceptanceEmailSentBy'
+  | 'confirmByDate'
+  | 'speakerConfirmedAt'
+  | 'confirmation'
+>;
 
 // Field limits: generous for real proposals, small enough to stop a pasted novel.
 const LIMITS = {
