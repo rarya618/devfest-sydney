@@ -42,7 +42,7 @@ type TextFieldName = 'enjoyedMost' | 'improve' | 'topicsNextYear';
 const OVERALL_SCALE = [1, 2, 3, 4, 5];
 const RECOMMEND_SCALE = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-const sectionClass = 'bg-surface rounded-2xl p-6 sm:p-8 space-y-6';
+const sectionClass = 'bg-surface rounded-3xl p-6 sm:p-8 space-y-6';
 const sectionHeadingClass = 'text-lg font-bold text-white';
 const required = <span className="text-google-red-light" aria-hidden="true">*</span>;
 
@@ -84,7 +84,7 @@ function ScaleRadios({
               className="peer sr-only"
             />
             <span
-              className={`flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-lg border text-sm font-bold font-mono cursor-pointer transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-google-blue ${optionButtonClass(selected === value, hasError)}`}
+              className={`flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border text-sm font-bold font-mono cursor-pointer transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-google-blue ${optionButtonClass(selected === value, hasError)}`}
             >
               {value}
             </span>
@@ -126,7 +126,7 @@ function PillRadios<Value extends string>({
             className="peer sr-only"
           />
           <span
-            className={`inline-flex px-4 py-2 rounded-lg border text-sm font-bold cursor-pointer transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-google-blue ${optionButtonClass(selected === option.value, false)}`}
+            className={`inline-flex px-4 py-2 rounded-full border text-sm font-bold cursor-pointer transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-google-blue ${optionButtonClass(selected === option.value, false)}`}
           >
             {option.label}
           </span>
@@ -274,7 +274,7 @@ export default function FeedbackForm({ sessionOptions, eventName }: Props) {
 
   if (submitState === 'success') {
     return (
-      <div className="bg-surface rounded-2xl p-12 text-center animate-slide-up">
+      <div className="bg-surface rounded-3xl p-12 animate-slide-up">
         <h2 className="text-xl font-bold text-white mb-3">Thank you</h2>
         <p className="text-white/70 text-sm leading-relaxed max-w-sm mx-auto">
           Every response is read by the organising team, and it shapes what DevFest Sydney looks like next year.
@@ -282,7 +282,7 @@ export default function FeedbackForm({ sessionOptions, eventName }: Props) {
         </p>
         <Link
           href="/"
-          className="inline-flex mt-6 items-center px-6 py-2 text-white text-sm font-bold rounded border border-white/40 transition-colors hover:border-white"
+          className="inline-flex mt-6 items-center px-6 py-2 text-white text-sm font-bold rounded-full border border-white/40 transition-colors hover:border-white"
         >
           Back to DevFest Sydney
         </Link>
@@ -338,7 +338,7 @@ export default function FeedbackForm({ sessionOptions, eventName }: Props) {
                     type="button"
                     aria-pressed={selected}
                     onClick={() => toggleActivity(activity)}
-                    className={`px-4 py-2 rounded-lg border text-sm font-bold transition-colors ${optionButtonClass(selected, false)}`}
+                    className={`px-4 py-2 rounded-full border text-sm font-bold transition-colors ${optionButtonClass(selected, false)}`}
                   >
                     {FEEDBACK_ACTIVITY_LABELS[activity]}
                   </button>
@@ -373,7 +373,7 @@ export default function FeedbackForm({ sessionOptions, eventName }: Props) {
                           className="peer sr-only"
                         />
                         <span
-                          className={`flex items-center justify-center w-10 h-10 rounded-lg border text-sm font-bold font-mono cursor-pointer transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-google-blue ${optionButtonClass(rating === value, false)}`}
+                          className={`flex items-center justify-center w-10 h-10 rounded-full border text-sm font-bold font-mono cursor-pointer transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-google-blue ${optionButtonClass(rating === value, false)}`}
                         >
                           {value}
                         </span>

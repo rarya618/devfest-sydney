@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { buildPageMetadata } from '@/lib/metadata';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import PublicShell from '@/components/PublicShell';
 import { FEEDBACK_EVENT_ID, fetchFeedbackSessionOptions } from '@/lib/feedback';
 import { loadEvent } from '@/lib/events';
 import FeedbackForm from './FeedbackForm';
@@ -24,30 +23,16 @@ export default async function FeedbackPage() {
   const eventName = event?.name ?? 'DevFest Sydney';
 
   return (
-    <div className="bg-[#010103] text-white min-h-screen">
-      <Navbar />
-
-      <section className="relative pt-36 pb-10 px-6 overflow-hidden">
-        <div className="absolute inset-0 hero-atmosphere pointer-events-none" aria-hidden="true" />
-        <div className="relative max-w-3xl mx-auto">
-          <p className="font-mono text-sm text-white/70 mb-4 animate-fade-in">Feedback · about 3 minutes</p>
-          <h1 className="text-[clamp(2.25rem,8vw,3.5rem)] font-bold leading-[1] tracking-tight text-white mb-5 animate-slide-up">
-            How was {eventName}?
-          </h1>
-          <p className="text-white/80 text-lg max-w-2xl leading-relaxed animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            Two questions are required and the rest are optional. Answers are anonymous unless you choose to
-            leave your email, and every one is read by the organising team.
-          </p>
-        </div>
-      </section>
-
-      <section className="pb-20 px-6">
-        <div className="max-w-3xl mx-auto">
-          <FeedbackForm sessionOptions={sessionOptions} eventName={eventName} />
-        </div>
-      </section>
-
-      <Footer />
-    </div>
+    <PublicShell>
+      <div className="max-w-3xl">
+        <p className="font-mono text-sm text-white/60">About 3 minutes</p>
+        <h1 className="mt-3 text-[clamp(2.25rem,6vw,3.5rem)] font-bold leading-[1.02] tracking-[-0.02em]">How was {eventName}?</h1>
+        <p className="mt-5 mb-12 max-w-2xl text-white/70 leading-relaxed">
+          Two questions are required and the rest are optional. Answers are anonymous unless you choose to
+          leave your email, and every one is read by the organising team.
+        </p>
+        <FeedbackForm sessionOptions={sessionOptions} eventName={eventName} />
+      </div>
+    </PublicShell>
   );
 }

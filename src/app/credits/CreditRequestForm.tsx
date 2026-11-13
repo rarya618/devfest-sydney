@@ -88,14 +88,14 @@ export default function CreditRequestForm({ workshopOptions }: Props) {
 
   if (submitState === 'success') {
     return (
-      <div className="bg-surface rounded-2xl p-12 text-center animate-slide-up">
+      <div className="bg-surface rounded-3xl p-12 animate-slide-up">
         <h2 className="text-xl font-bold text-white mb-3">You&apos;re on the list</h2>
         <p className="text-white/70 text-sm leading-relaxed max-w-sm mx-auto">
           We&apos;ll email your credits to {fields.email.trim()} after the event. Thanks for bearing with us.
         </p>
         <Link
           href="/schedule"
-          className="inline-flex mt-6 items-center px-6 py-2 text-white text-sm font-bold rounded border border-white/40 transition-colors hover:border-white"
+          className="inline-flex mt-6 items-center px-6 py-2 text-white text-sm font-bold rounded-full border border-white/40 transition-colors hover:border-white"
         >
           Back to the schedule
         </Link>
@@ -105,7 +105,7 @@ export default function CreditRequestForm({ workshopOptions }: Props) {
 
   if (workshopOptions.length === 0) {
     return (
-      <div className="bg-surface rounded-2xl p-8 text-center">
+      <div className="bg-surface rounded-3xl p-8">
         <p className="text-white/70 text-sm leading-relaxed">
           We couldn&apos;t load the workshops just now. Please try again in a moment, or email{' '}
           <a href="mailto:hello@gdgsydney.com" className="underline underline-offset-2 hover:text-white">hello@gdgsydney.com</a>.
@@ -116,7 +116,7 @@ export default function CreditRequestForm({ workshopOptions }: Props) {
 
   return (
     <>
-      <form onSubmit={handleSubmit} noValidate className="bg-surface rounded-2xl p-6 sm:p-8 space-y-6">
+      <form onSubmit={handleSubmit} noValidate className="bg-surface rounded-3xl p-6 sm:p-8 space-y-6">
         <div>
           <label htmlFor="credits-name" className={labelClass}>Name {required}</label>
           <input
