@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { Timestamp } from 'firebase-admin/firestore';
 import { Resend } from 'resend';
 import { adminDb } from '@/lib/firebase-admin';
-import { buildPortalSignInEmail } from '@/lib/portalSignInEmail';
+import { buildPortalSignInEmail, PORTAL_SIGN_IN_SUBJECT } from '@/lib/portalSignInEmail';
 
 // Sign-in for the speaker portal (stage 6 of the plan in PM.md). Speakers sign in with a
 // single-use link emailed to them, not with Google and not with Firebase Auth's email link:
@@ -97,8 +97,9 @@ export async function requestSignInLink(email: string): Promise<SignInLinkReques
     from: `GDG Sydney <${process.env.RESEND_FROM_EMAIL}>`,
     to: emailNormalised,
     replyTo: 'hello@gdgsydney.com',
-    subject: 'Your sign-in link for the GDG Sydney speaker portal',
+    subject: PORTAL_SIGN_IN_SUBJECT,
     html: buildPortalSignInEmail({
+      email: emailNormalised,
       signInUrl: `${siteUrl()}/speaker/sign-in/verify?token=${token}`,
       validForMinutes: SIGN_IN_LINK_MINUTES,
     }),
