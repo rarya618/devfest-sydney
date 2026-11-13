@@ -24,7 +24,7 @@ This file describes the app as it is now and what is left to do. The history of 
 - `/builder-showcase/confirm` : an accepted showcase entrant confirms; then shows the showcase ticket link
 - `/feedback` : DevFest 2026 survey (pinned to `devfest-2026` by `FEEDBACK_EVENT_ID`)
 - `/credits` : DevFest 2026 workshop credit requests (Shang Yi Lim's workshop only, `CREDIT_WORKSHOP_SLOT_IDS`)
-- `/speaker` : the speaker portal (stage 6, below). `/speaker/sign-in` and `/speaker/sign-in/verify` are its sign-in; `/speaker` lists the address's profiles, talks and proposals; `/speaker/profile/<speakerId>` edits a profile; `/speaker/propose` files a meetup proposal, or a DevFest one while the current DevFest's CfS is open; saved talks are added inline on `/speaker` ("Add a talk") and edited at `/speaker/talks/<id>`
+- `/speaker` : the speaker portal (stage 6, below). `/speaker/sign-in` and `/speaker/sign-in/verify` are its sign-in; `/speaker` lists the address's profiles, talks and proposals; `/speaker/profile/<speakerId>` edits a profile; `/speaker/propose` files a meetup proposal, or a DevFest one while the current DevFest's CfS is open; saved talks are added, edited and deleted in place on `/speaker`
 
 Every confirm-style page acts behind a button, never on page load, so mail scanners can't answer on someone's behalf. (The portal's sign-in link is the exception: it signs in as the page opens, see stage 6.) Each sends hello@gdgsydney.com a notice with `replyTo` set to the person, once, on the transition only.
 

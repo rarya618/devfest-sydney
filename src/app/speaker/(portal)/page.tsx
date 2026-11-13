@@ -10,9 +10,9 @@ import {
 } from '@/lib/portalData';
 import { listSavedTalks, type SavedTalk } from '@/lib/portalSavedTalks';
 import PortalShell from './PortalShell';
-import AddSavedTalk from './AddSavedTalk';
+import SavedTalksSection, { type SavedTalkRow } from './SavedTalksSection';
 import SpeakerCard from './SpeakerCard';
-import { pageHeading, primaryButton, primaryButtonSmall, secondaryButton, sectionHeading } from './portalStyles';
+import { pageHeading, primaryButton, secondaryButton, sectionHeading } from './portalStyles';
 
 export const dynamic = 'force-dynamic';
 // The layout's title template doesn't reach a page in its own segment.
@@ -178,45 +178,17 @@ function Proposals({ proposals }: { proposals: PortalProposal[] }) {
   );
 }
 
-function SavedTalks({ savedTalks, proposals }: { savedTalks: SavedTalk[]; proposals: PortalProposal[] }) {
-  return (
-    <section aria-labelledby="saved-talks-heading">
-      <AddSavedTalk>
-      {savedTalks.length === 0 ? (
-        <p className="mt-4 py-5 border-t border-white/10 text-white/60">
-          Keep a talk idea here and propose it when you&rsquo;re ready, to a meetup, DevFest, or both.
-        </p>
-      ) : (
-        <ul className="mt-4">
-          {savedTalks.map((savedTalk) => {
-            const proposedTo = proposals
-              .filter((proposal) => proposal.savedTalkId === savedTalk.id)
-              .map((proposal) => proposal.eventName ?? (proposal.kind === 'meetup' ? 'a meetup' : 'DevFest'));
-            return (
-              <li key={savedTalk.id} className="py-5 border-t border-white/10 flex flex-col sm:flex-row sm:items-start gap-4 sm:justify-between">
-                <div className="min-w-0">
-                  <p className="font-bold leading-snug">{savedTalk.talkTitle}</p>
-                  {savedTalk.abstract && <p className="mt-1 text-sm text-white/60 line-clamp-2">{savedTalk.abstract}</p>}
-                  <p className="mt-2 text-sm text-white/60">
-                    {proposedTo.length === 0 ? 'Not proposed yet' : `Proposed to ${proposedTo.join(', ')}`}
-                  </p>
-                </div>
-                <div className="flex gap-2 shrink-0">
-                  <Link href={`/speaker/talks/${savedTalk.id}`} aria-label={`Edit ${savedTalk.talkTitle}`} className={secondaryButton}>
-                    Edit
-                  </Link>
-                  <Link href={`/speaker/propose?talk=${savedTalk.id}`} aria-label={`Propose ${savedTalk.talkTitle}`} className={primaryButtonSmall}>
-                    Propose
-                  </Link>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-      </AddSavedTalk>
-    </section>
-  );
+// The rows the Saved talks section shows, each with the events it has been proposed to.
+function toSavedTalkRows(savedTalks: SavedTalk[], proposals: PortalProposal[]): SavedTalkRow[] {
+  return savedTalks.map((savedTalk) => ({
+    id: savedTalk.id,
+    talkTitle: savedTalk.talkTitle,
+    abstract: savedTalk.abstract,
+    audience: savedTalk.audience,
+    proposedTo: proposals
+      .filter((proposal) => proposal.savedTalkId === savedTalk.id)
+      .map((proposal) => proposal.eventName ?? (proposal.kind === 'meetup' ? 'a meetup' : 'DevFest')),
+  }));
 }
 
 export default async function PortalHomePage() {
@@ -265,7 +237,7 @@ export default async function PortalHomePage() {
             )}
             <TalkSchedule headingId="upcoming-talks" title="Upcoming talks" talks={upcomingTalks} isPast={false} />
             <Proposals proposals={overview.proposals} />
-            <SavedTalks savedTalks={savedTalks} proposals={overview.proposals} />
+            <SavedTalksSection savedTalks={toSavedTalkRows(savedTalks, overview.proposals)} />
             <TalkSchedule headingId="past-talks" title="Past talks" talks={pastTalks} isPast />
           </div>
         </div>
