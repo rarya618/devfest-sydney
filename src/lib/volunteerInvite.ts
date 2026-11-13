@@ -98,7 +98,13 @@ export async function loadVolunteerInvite(token: string): Promise<VolunteerInvit
 }
 
 // Organisers are added to a crew directly (Add organiser on /admin/crew) and are never invited
-// like volunteers, so anyone who has been one at any event is left out of both invite lists.
+// like volunteers, so anyone who is one is left out of both invite lists. An organiser is
+// someone with an organiser signup at any event, or whose profile says so (`isOrganiser`,
+// GDG-wide: someone who joined the team between events, with no event crew to be on yet).
+export function isOrganiserProfile(profile: FirebaseFirestore.DocumentData | undefined): boolean {
+  return profile?.isOrganiser === true;
+}
+
 function organiserProfileIds(signups: FirebaseFirestore.QueryDocumentSnapshot[]): Set<string> {
   return new Set(
     signups
@@ -109,7 +115,7 @@ function organiserProfileIds(signups: FirebaseFirestore.QueryDocumentSnapshot[])
 }
 
 // Someone who could be invited to an event: on the crew of an earlier one (accepted there),
-// not an organiser, and with no signup for this one yet. `invitedAt` is set once an invite has gone out.
+// in the volunteer pool, not an organiser, and with no signup for this one yet. `invitedAt` is set once an invite has gone out.
 export interface InvitablePastVolunteer {
   profileId: string;
   name: string;
@@ -146,8 +152,12 @@ export async function fetchInvitablePastVolunteers(eventId: string): Promise<Inv
   const profiles = await adminDb.getAll(...candidateIds.map((id) => adminDb.collection('volunteerProfiles').doc(id)));
 
   return profiles
-    // Anyone who asked not to be invited again is left off.
-    .filter((profile) => profile.exists && !profile.data()?.inviteOptOut)
+    // Only people who asked to stay on the list (inPool, see fetchVolunteerPool); anyone who
+    // later used "Don't invite me again" is out of it.
+    .filter(
+      (profile) =>
+        profile.exists && profile.data()?.inPool === true && !profile.data()?.inviteOptOut && !isOrganiserProfile(profile.data())
+    )
     .map((profile) => {
       const data = profile.data()!;
       const sentAt = data.volunteerInvites?.[eventId]?.sentAt as FirebaseFirestore.Timestamp | undefined;
@@ -189,8 +199,10 @@ export function verifyVolunteerOptOutToken(token: string): string | null {
   return timingSafeEqual(expected, provided) ? profileId : null;
 }
 
-// One person in the volunteer pool (/admin/volunteer-pool): everyone with a volunteer
-// profile except organisers, which works like a mailing list for invites. Per event: whether they signed up
+// One person on /admin/volunteer-pool: everyone with a volunteer profile except organisers.
+// The pool itself is the ones with `inPool`, set by an admin for people who said they'd like
+// to hear about future events: it works like a mailing list, so nobody is on it by default.
+// Only pool members can be invited. Per event: whether they signed up
 // (and how that went) and when they were invited.
 export interface VolunteerPoolMember {
   profileId: string;
@@ -199,6 +211,7 @@ export interface VolunteerPoolMember {
   crewedEventNames: string[]; // events they were accepted onto the crew of
   signupStatusByEvent: Record<string, string>;
   invitedAtByEvent: Record<string, string>;
+  inPool: boolean;
   optedOut: boolean;
 }
 
@@ -230,7 +243,7 @@ export async function fetchVolunteerPool(): Promise<{ members: VolunteerPoolMemb
 
   const organiserIds = organiserProfileIds(signups.docs);
   const members = profiles.docs
-    .filter((profile) => !organiserIds.has(profile.id))
+    .filter((profile) => !organiserIds.has(profile.id) && !isOrganiserProfile(profile.data()))
     .map((profile): VolunteerPoolMember => {
       const data = profile.data();
       const own = signupsByProfile.get(profile.id) ?? [];
@@ -246,6 +259,7 @@ export async function fetchVolunteerPool(): Promise<{ members: VolunteerPoolMemb
             .filter(([, invite]) => invite?.sentAt)
             .map(([eventId, invite]) => [eventId, invite.sentAt!.toDate().toISOString()])
         ),
+        inPool: data.inPool === true,
         optedOut: data.inviteOptOut === true,
       };
     })

@@ -223,6 +223,8 @@ export async function addOrganiser(fields: NewOrganiserFields): Promise<{ error?
     // The person on their GDG-wide profile (stage 4d), reused if they have been on a crew
     // before under the same name and email; this event's role and roster on the signup.
     const profileId = await findOrCreateVolunteerProfile({ name, email, phone, linkedinUrl: linkedin.value });
+    // GDG-wide as well as for this event, so the volunteer pool leaves them out from now on.
+    await adminDb.collection('volunteerProfiles').doc(profileId).update({ isOrganiser: true });
     await adminDb.collection('volunteers').add({
       eventId,
       profileId,

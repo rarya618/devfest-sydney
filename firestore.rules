@@ -78,8 +78,9 @@ rules_version='2';
 // there is no public create path (there was until 2026-11-13).
 // volunteerProfiles (a GDG-wide person, stage 4d): name, email, emailNormalised, phone,
 //   priorExperience, googleTechExperience, isTorrensStudentOrStaff, hasBeenGdgOnCampusExec,
-//   gdgOnCampusChapter, dietaryRequirements, photoUrl, linkedinUrl, volunteerInvites,
-//   inviteOptOut, createdAt, updatedAt
+//   gdgOnCampusChapter, dietaryRequirements, photoUrl, linkedinUrl, inPool/At/By,
+//   isOrganiser, organiserRole, organiserSince, volunteerInvites, inviteOptOut, createdAt,
+//   updatedAt
 // volunteers (one signup per person per event): eventId, profileId, motivation,
 //   areasOfInterest, tracking, submittedAt, status, reviewerNotes, assignedArea,
 //   assignedShift, showOnCrewPage, acceptanceEmailSentAt/By, confirmByDate,

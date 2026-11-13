@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState, useTransition } from 'react';
 import Alert from '@/components/Alert';
-import { restoreVolunteerInvites, sendVolunteerInvite } from './volunteerInviteActions';
+import { sendVolunteerInvite, setVolunteerPoolMembership } from './volunteerInviteActions';
 import { formatDate } from '@/lib/format';
 import { EVENT_TYPE_LABELS } from '@/lib/eventLabels';
 import { VOLUNTEER_STATUS_LABELS } from '@/lib/volunteerLabels';
@@ -10,21 +10,16 @@ import type { VolunteerPoolEvent, VolunteerPoolMember } from '@/lib/volunteerInv
 import type { VolunteerStatus } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
 
-// The volunteer pool (stage 4d-2, PM.md): everyone who has volunteered or signed up to, kept
-// like a mailing list. Pick an event, tick people, and each gets a "Want to crew X?" email
-// whose link asks only that event's questions. Anyone who used "Don't invite me again" stays
-// listed but can't be ticked.
+// The volunteer pool (stage 4d-2, PM.md): the volunteers who said they'd like to hear about
+// future events, kept like a mailing list. Nobody is in it by default: an admin adds them from
+// "Everyone else", which lists every other volunteer profile. Pick an event, tick people in the
+// pool, and each gets a "Want to crew X?" email whose link asks only that event's questions.
+// "Don't invite me again" in that email takes them out of the pool.
 
 // Matches the other bulk sends: one at a time, spaced out to stay under Resend's rate limit.
 const SEND_SPACING_MS = 600;
 
-type PoolFilter = 'all' | 'crewed' | 'not-invited';
-
-const FILTER_TABS: { value: PoolFilter; label: string }[] = [
-  { value: 'all', label: 'Everyone' },
-  { value: 'crewed', label: 'Crewed before' },
-  { value: 'not-invited', label: 'Not invited yet' },
-];
+type PoolFilter = 'pool' | 'not-invited' | 'others';
 
 interface Props {
   members: VolunteerPoolMember[];
@@ -34,7 +29,7 @@ interface Props {
 export default function VolunteerPoolDashboard({ members, events }: Props) {
   const mobileBarHidden = useMobileBarHidden();
   const [eventId, setEventId] = useState(events[0]?.id ?? '');
-  const [filter, setFilter] = useState<PoolFilter>('all');
+  const [filter, setFilter] = useState<PoolFilter>('pool');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [progress, setProgress] = useState<{ sent: number; total: number } | null>(null);
@@ -44,17 +39,26 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
 
   const chosenEvent = events.find((event) => event.id === eventId) ?? null;
 
-  // Who can be ticked for the chosen event: not opted out, and not already signed up for it.
+  // Who can be ticked for the chosen event: in the pool, not opted out, and not already signed
+  // up for it.
   const canInvite = useCallback(
-    (member: VolunteerPoolMember) => Boolean(chosenEvent) && !member.optedOut && !member.signupStatusByEvent[eventId],
+    (member: VolunteerPoolMember) =>
+      Boolean(chosenEvent) && member.inPool && !member.optedOut && !member.signupStatusByEvent[eventId],
     [chosenEvent, eventId]
   );
+
+  const poolMembers = members.filter((member) => member.inPool);
+  const filterTabs: { value: PoolFilter; label: string }[] = [
+    { value: 'pool', label: `In the pool (${poolMembers.length})` },
+    { value: 'not-invited', label: 'Not invited yet' },
+    { value: 'others', label: `Everyone else (${members.length - poolMembers.length})` },
+  ];
 
   const query = search.trim().toLowerCase();
   const visible = useMemo(
     () =>
       members
-        .filter((member) => filter !== 'crewed' || member.crewedEventNames.length > 0)
+        .filter((member) => (filter === 'others' ? !member.inPool : member.inPool))
         .filter((member) => filter !== 'not-invited' || (!member.invitedAtByEvent[eventId] && canInvite(member)))
         .filter((member) => !query || member.name.toLowerCase().includes(query) || member.email.toLowerCase().includes(query)),
     [members, filter, eventId, query, canInvite]
@@ -64,8 +68,7 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
     const member = members.find((candidate) => candidate.profileId === profileId);
     return member && canInvite(member);
   });
-  const signedUpCount = members.filter((member) => member.signupStatusByEvent[eventId]).length;
-  const optedOutCount = members.filter((member) => member.optedOut).length;
+  const signedUpCount = poolMembers.filter((member) => member.signupStatusByEvent[eventId]).length;
   const allVisibleSelected = selectableVisible.length > 0 && selectableVisible.every((member) => selected.has(member.profileId));
 
   function toggle(profileId: string) {
@@ -114,15 +117,17 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
     });
   }
 
-  function handleRestore(profileId: string) {
+  function handleMembership(profileId: string, inPool: boolean) {
     startTransition(async () => {
-      const result = await restoreVolunteerInvites(profileId);
+      const result = await setVolunteerPoolMembership(profileId, inPool);
       if (result.error) setAlertMessage(result.error);
+      else if (!inPool) setSelected((current) => new Set([...current].filter((id) => id !== profileId)));
     });
   }
 
   function statusFor(member: VolunteerPoolMember): string | null {
     if (member.optedOut) return 'Asked not to be invited';
+    if (!member.inPool) return null;
     const status = member.signupStatusByEvent[eventId] as VolunteerStatus | undefined;
     if (status) return `Signed up · ${VOLUNTEER_STATUS_LABELS[status] ?? status}`;
     if (member.invitedAtByEvent[eventId]) return `Invited ${formatDate(member.invitedAtByEvent[eventId])}`;
@@ -138,9 +143,8 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
           <div className="min-w-0">
             <h1 className="text-xl font-bold text-white tracking-tight">Volunteer pool</h1>
             <p className="mt-0.5 text-sm text-white/55">
-              {members.length} {members.length === 1 ? 'person' : 'people'}
+              {poolMembers.length} {poolMembers.length === 1 ? 'person' : 'people'} in the pool
               {chosenEvent && <> &middot; {signedUpCount} signed up for {chosenEvent.name}</>}
-              {optedOutCount > 0 && <> &middot; {optedOutCount} asked not to be invited</>}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 min-w-0">
@@ -180,7 +184,7 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <div role="group" aria-label="Filter the pool" className="flex items-center gap-2 overflow-x-auto">
-            {FILTER_TABS.map((tab) => (
+            {filterTabs.map((tab) => (
               <button
                 key={tab.value}
                 type="button"
@@ -216,11 +220,15 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
 
         {visible.length === 0 ? (
           <div className="bg-surface border border-white/10 rounded-2xl p-12 text-center">
-            <p className="text-sm text-white/50">{members.length === 0 ? 'Nobody in the pool yet.' : 'Nobody matches this filter.'}</p>
+            <p className="text-sm text-white/50">
+              {filter === 'pool' && poolMembers.length === 0
+                ? 'Nobody in the pool yet. Add the volunteers who asked to hear about future events from Everyone else.'
+                : 'Nobody matches this filter.'}
+            </p>
           </div>
         ) : (
           <div className="bg-surface rounded-2xl border border-white/10 overflow-hidden">
-            {chosenEvent && selectableVisible.length > 0 && (
+            {filter !== 'others' && chosenEvent && selectableVisible.length > 0 && (
               <label className="flex items-center gap-3 px-4 py-3 border-b border-white/10 text-sm font-semibold text-white">
                 <input
                   type="checkbox"
@@ -237,14 +245,16 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
                 const selectable = canInvite(member);
                 return (
                   <li key={member.profileId} className="flex items-start gap-3 px-4 py-3 border-b border-white/[0.06] last:border-b-0">
-                    <input
-                      type="checkbox"
-                      className="mt-1 h-4 w-4 accent-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue disabled:opacity-30"
-                      checked={selectable && selected.has(member.profileId)}
-                      disabled={!selectable || isPending}
-                      onChange={() => toggle(member.profileId)}
-                      aria-label={`Invite ${member.name}`}
-                    />
+                    {member.inPool && (
+                      <input
+                        type="checkbox"
+                        className="mt-1 h-4 w-4 accent-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue disabled:opacity-30"
+                        checked={selectable && selected.has(member.profileId)}
+                        disabled={!selectable || isPending}
+                        onChange={() => toggle(member.profileId)}
+                        aria-label={`Invite ${member.name}`}
+                      />
+                    )}
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-white">
                         {member.name}
@@ -256,17 +266,15 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
                     </div>
                     <div className="shrink-0 text-right">
                       {status && <p className={`text-xs ${member.optedOut ? 'text-google-yellow' : 'text-white/65'}`}>{status}</p>}
-                      {member.optedOut && (
-                        <button
-                          type="button"
-                          onClick={() => handleRestore(member.profileId)}
-                          disabled={isPending}
-                          aria-label={`Put ${member.name} back on the invite list`}
-                          className="mt-1 text-xs text-white/70 underline underline-offset-2 hover:text-white"
-                        >
-                          Put back on the list
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleMembership(member.profileId, !member.inPool)}
+                        disabled={isPending}
+                        aria-label={member.inPool ? `Take ${member.name} out of the volunteer pool` : `Add ${member.name} to the volunteer pool`}
+                        className="mt-1 text-xs text-white/70 underline underline-offset-2 hover:text-white disabled:opacity-50"
+                      >
+                        {member.inPool ? 'Remove from pool' : 'Add to pool'}
+                      </button>
                     </div>
                   </li>
                 );
