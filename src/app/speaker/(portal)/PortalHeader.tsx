@@ -9,7 +9,7 @@ import { secondaryButton } from './portalStyles';
 // Same logo file the emails use (src/lib/eventCopy.ts), served by gdgsydney.com.
 const GDG_LOGO_URL = 'https://gdgsydney.com/gdg-logo-dark.png';
 
-// The header's way to the profile editor: the first profile on the address (the only one, for
+// The header's way to the profile editor, which opens in place on the dashboard (?edit=): the first profile on the address (the only one, for
 // nearly everyone; a shared address picks between them on the dashboard). Hidden when the
 // address has no profile yet, or the read fails: the header shouldn't take the page down.
 async function ProfileButton({ email }: { email: string }) {
@@ -24,7 +24,7 @@ async function ProfileButton({ email }: { email: string }) {
   const firstName = profile.name.trim().split(/\s+/)[0] || profile.name;
   return (
     <Link
-      href={`/speaker/profile/${profile.id}`}
+      href={`/speaker?edit=${profile.id}`}
       aria-label={`Your profile, ${profile.name}`}
       className="inline-flex items-center gap-2.5 rounded-full border border-white/35 py-1 pl-1 pr-4 text-sm font-bold text-off-white transition-colors hover:border-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
     >

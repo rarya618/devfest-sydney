@@ -46,25 +46,6 @@ export function DashboardSkeleton() {
   );
 }
 
-export function ProfileSkeleton() {
-  return (
-    <div aria-busy="true" aria-label="Loading your profile" className={`${portalMainClass('wide')} animate-pulse`}>
-      <Bar className="h-4 w-24" />
-      <Bar className="h-12 sm:h-14 w-72 max-w-full mt-6" />
-      <Bar className="h-4 w-full max-w-xl mt-5" />
-      <Bar className="h-4 w-2/3 max-w-md mt-2 mb-12" />
-      <div className="grid gap-12 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-16">
-        <CardSkeleton />
-        <div className="space-y-7 max-w-2xl">
-          <div><Bar className="h-4 w-20 mb-2" /><Bar className="h-11 w-full" /></div>
-          <div><Bar className="h-4 w-12 mb-2" /><Bar className="h-48 w-full" /></div>
-          <div><Bar className="h-4 w-14 mb-2" /><Bar className="h-11 w-full" /></div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // For the single-column pages: proposing, saved talks, signing in.
 export function FormSkeleton() {
   return (

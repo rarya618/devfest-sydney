@@ -1,16 +1,25 @@
 'use client';
 
-import { useCallback, useRef, useState, useTransition, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, useTransition, type FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
 import Alert from '@/components/Alert';
 import { hintClass, inputNormal, labelClass } from '@/lib/formStyles';
 import { PORTAL_PROFILE_LIMITS, type PortalProfileFields } from '@/lib/portalLabels';
-import type { PortalProfile } from '@/lib/portalData';
-import { removePortalPhoto, updatePortalProfile, uploadPortalPhoto } from '../../actions';
-import SpeakerCard from '../../SpeakerCard';
-import { dangerOutlineButton, primaryButton, secondaryButton } from '../../portalStyles';
+import { removePortalPhoto, updatePortalProfile, uploadPortalPhoto } from './actions';
+import type { SpeakerCardProfile } from './SpeakerCard';
+import { dangerOutlineButton, primaryButton, secondaryButton } from './portalStyles';
 
-interface ProfileEditorProps {
-  profile: Omit<PortalProfile, 'talks'>;
+export interface EditableProfile extends SpeakerCardProfile {
+  id: string;
+}
+
+interface ProfileEditorPanelProps {
+  profile: EditableProfile;
+  // What the card beside the form should show while editing: the unsaved text, and the photo
+  // (which saves as soon as it's chosen).
+  onPreviewChange: (preview: SpeakerCardProfile, isPhotoBusy: boolean) => void;
+  onDone: () => void;
+  onCancel: () => void;
 }
 
 const LINK_FIELDS: { key: 'linkedinUrl' | 'githubUrl' | 'websiteUrl'; label: string; placeholder: string }[] = [
@@ -26,7 +35,10 @@ function previewUrl(raw: string): string {
   return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
 }
 
-export default function ProfileEditor({ profile }: ProfileEditorProps) {
+// The profile form, opened in place on the dashboard (ProfileWorkspace). The card beside it is
+// the preview. Saving publishes and closes the form; Cancel drops unsaved text.
+export default function ProfileEditorPanel({ profile, onPreviewChange, onDone, onCancel }: ProfileEditorPanelProps) {
+  const router = useRouter();
   const [fields, setFields] = useState<PortalProfileFields>({
     tagline: profile.tagline,
     bio: profile.bio,
@@ -34,30 +46,52 @@ export default function ProfileEditor({ profile }: ProfileEditorProps) {
     githubUrl: profile.githubUrl,
     websiteUrl: profile.websiteUrl,
   });
-  const [savedFields, setSavedFields] = useState<PortalProfileFields>(fields);
   const [photoUrl, setPhotoUrl] = useState(profile.photoUrl);
-  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [photoMessage, setPhotoMessage] = useState<string | null>(null);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [isSaving, startSaving] = useTransition();
   const [isPhotoBusy, startPhoto] = useTransition();
   const fileInput = useRef<HTMLInputElement>(null);
+  const taglineInput = useRef<HTMLInputElement>(null);
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
 
-  const hasUnsavedChanges = (Object.keys(fields) as (keyof PortalProfileFields)[]).some((key) => fields[key] !== savedFields[key]);
+  const hasUnsavedChanges = (Object.keys(fields) as (keyof PortalProfileFields)[]).some((key) => fields[key] !== profile[key]);
+
+  useEffect(() => {
+    taglineInput.current?.focus({ preventScroll: true });
+  }, []);
+
+  useEffect(() => {
+    onPreviewChange(
+      {
+        name: profile.name,
+        tagline: fields.tagline.trim(),
+        bio: fields.bio.trim(),
+        photoUrl,
+        linkedinUrl: previewUrl(fields.linkedinUrl),
+        githubUrl: previewUrl(fields.githubUrl),
+        websiteUrl: previewUrl(fields.websiteUrl),
+      },
+      isPhotoBusy
+    );
+  }, [fields, photoUrl, isPhotoBusy, profile.name, onPreviewChange]);
 
   function update(key: keyof PortalProfileFields, value: string) {
     setFields((previous) => ({ ...previous, [key]: value }));
-    setStatusMessage(null);
   }
 
   function handleSave(event: FormEvent) {
     event.preventDefault();
+    if (!hasUnsavedChanges) {
+      onDone();
+      return;
+    }
     startSaving(async () => {
       const result = await updatePortalProfile(profile.id, fields);
       if (result.error) setAlertMessage(result.error);
       else {
-        setSavedFields(fields);
-        setStatusMessage('Saved. Your profile is live.');
+        router.refresh();
+        onDone();
       }
     });
   }
@@ -75,7 +109,8 @@ export default function ProfileEditor({ profile }: ProfileEditorProps) {
       if (result.error) setAlertMessage(result.error);
       else if (result.photoUrl) {
         setPhotoUrl(result.photoUrl);
-        setStatusMessage('Photo updated. It is live now.');
+        setPhotoMessage('Photo updated. It is live now.');
+        router.refresh();
       }
       if (fileInput.current) fileInput.current.value = '';
     });
@@ -87,53 +122,41 @@ export default function ProfileEditor({ profile }: ProfileEditorProps) {
       if (result.error) setAlertMessage(result.error);
       else {
         setPhotoUrl('');
-        setStatusMessage('Photo removed.');
+        setPhotoMessage('Photo removed.');
+        router.refresh();
       }
     });
   }
 
   return (
-    <div className="grid gap-12 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-16">
-      <div className="lg:sticky lg:top-28 lg:self-start">
-        <SpeakerCard
-          profile={{
-            name: profile.name,
-            tagline: fields.tagline.trim(),
-            bio: fields.bio.trim(),
-            photoUrl,
-            linkedinUrl: previewUrl(fields.linkedinUrl),
-            githubUrl: previewUrl(fields.githubUrl),
-            websiteUrl: previewUrl(fields.websiteUrl),
-          }}
-          showFullBio
-          isPhotoLoading={isPhotoBusy}
+    <>
+      <div className="flex flex-wrap items-center gap-3">
+        <input
+          ref={fileInput}
+          id="portal-photo"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="sr-only"
+          tabIndex={-1}
+          onChange={(event) => handlePhotoChosen(event.target.files?.[0])}
         />
-        <div className="mt-4 flex flex-wrap gap-2">
-          <input
-            ref={fileInput}
-            id="portal-photo"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="sr-only"
-            tabIndex={-1}
-            onChange={(event) => handlePhotoChosen(event.target.files?.[0])}
-          />
-          <button type="button" disabled={isPhotoBusy} onClick={() => fileInput.current?.click()} aria-label={photoUrl ? 'Replace your photo' : 'Upload a photo'} className={secondaryButton}>
-            {photoUrl ? 'Replace photo' : 'Upload photo'}
+        <button type="button" disabled={isPhotoBusy} onClick={() => fileInput.current?.click()} aria-label={photoUrl ? 'Replace your photo' : 'Upload a photo'} className={secondaryButton}>
+          {isPhotoBusy ? 'Uploading…' : photoUrl ? 'Replace photo' : 'Upload photo'}
+        </button>
+        {photoUrl && (
+          <button type="button" disabled={isPhotoBusy} onClick={handlePhotoRemove} aria-label="Remove your photo" className={dangerOutlineButton}>
+            Remove photo
           </button>
-          {photoUrl && (
-            <button type="button" disabled={isPhotoBusy} onClick={handlePhotoRemove} aria-label="Remove your photo" className={dangerOutlineButton}>
-              Remove photo
-            </button>
-          )}
-        </div>
-        <p className={hintClass}>A square headshot works best. JPEG, PNG or WebP, up to 5 MB. Photo changes go live straight away.</p>
+        )}
+        {photoMessage && <p role="status" className="text-sm text-google-green">{photoMessage}</p>}
       </div>
+      <p className={hintClass}>A square headshot works best. JPEG, PNG or WebP, up to 5 MB. Photo changes go live straight away.</p>
 
-      <form onSubmit={handleSave} noValidate className="space-y-7 max-w-2xl">
+      <form onSubmit={handleSave} noValidate className="mt-8 space-y-7">
         <div>
           <label htmlFor="portal-tagline" className={labelClass}>Tagline</label>
           <input
+            ref={taglineInput}
             id="portal-tagline"
             value={fields.tagline}
             maxLength={PORTAL_PROFILE_LIMITS.tagline}
@@ -149,7 +172,7 @@ export default function ProfileEditor({ profile }: ProfileEditorProps) {
           <label htmlFor="portal-bio" className={labelClass}>Bio</label>
           <textarea
             id="portal-bio"
-            rows={8}
+            rows={7}
             value={fields.bio}
             maxLength={PORTAL_PROFILE_LIMITS.bio}
             aria-describedby="portal-bio-hint"
@@ -180,21 +203,23 @@ export default function ProfileEditor({ profile }: ProfileEditorProps) {
           ))}
         </fieldset>
 
-        <div className="flex flex-wrap items-center gap-4 pt-2">
-          <button type="submit" disabled={isSaving || !hasUnsavedChanges} aria-label="Save and publish your profile" className={primaryButton}>
-            {isSaving ? 'Saving…' : 'Save profile'}
+        <p className="text-sm text-white/60">
+          To change your name or email address, write to{' '}
+          <a href="mailto:hello@gdgsydney.com" className="text-google-blue-light underline hover:no-underline">hello@gdgsydney.com</a>.
+        </p>
+
+        <div className="flex flex-wrap items-center gap-3 pt-1">
+          <button type="submit" disabled={isSaving || isPhotoBusy} aria-label="Save and publish your profile" className={primaryButton}>
+            {isSaving ? 'Saving…' : hasUnsavedChanges ? 'Save profile' : 'Done'}
           </button>
-          <p role="status" className="text-sm">
-            {statusMessage ? (
-              <span className="text-google-green">{statusMessage}</span>
-            ) : hasUnsavedChanges ? (
-              <span className="text-google-yellow">Unsaved changes</span>
-            ) : null}
-          </p>
+          <button type="button" disabled={isSaving} onClick={onCancel} aria-label="Stop editing without saving" className={secondaryButton}>
+            Cancel
+          </button>
+          {hasUnsavedChanges && <p className="text-sm text-google-yellow">Unsaved changes</p>}
         </div>
       </form>
 
       {alertMessage && <Alert message={alertMessage} onDismiss={dismissAlert} />}
-    </div>
+    </>
   );
 }
