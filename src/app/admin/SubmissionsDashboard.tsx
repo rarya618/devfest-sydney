@@ -1623,7 +1623,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               </div>
             ) : (
               <div key="title" className="animate-fade-in-fast">
-                <h1 className="text-xl font-bold text-white tracking-tight">Submissions</h1>
+                <h1 className="text-xl font-bold text-white tracking-tight">Talk proposals</h1>
                 <p className="mt-0.5 text-sm text-white/55">
                   {counts.all} total &middot; {counts.pending} pending review
                 </p>

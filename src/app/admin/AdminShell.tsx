@@ -9,15 +9,28 @@ import Alert from '@/components/Alert';
 import { MobileBarContext } from './MobileBarContext';
 import { selectAdminDevfest } from './eventActions';
 
-interface NavItem {
+interface NavLinkItem {
   href: string;
   label: string;
 }
+
+// A dropdown in the nav: a button that opens to its links. Open on its own while one of its
+// pages is the current one.
+interface NavDropdownItem {
+  label: string;
+  children: NavLinkItem[];
+}
+
+type NavItem = NavLinkItem | NavDropdownItem;
 
 interface NavGroup {
   label: string;
   items: NavItem[];
   hasDevfestPicker?: boolean;
+}
+
+function isDropdown(item: NavItem): item is NavDropdownItem {
+  return 'children' in item;
 }
 
 // DevFest and general events are kept apart (stage 4b, PM.md). The DevFest group shows one
@@ -28,14 +41,20 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'DevFest',
     hasDevfestPicker: true,
     items: [
-      { href: '/admin', label: 'Submissions' },
+      // Everything that arrives through one of DevFest's public forms, in one place.
+      {
+        label: 'Forms',
+        children: [
+          { href: '/admin', label: 'Talk proposals' },
+          { href: '/admin/volunteers', label: 'Volunteers' },
+          { href: '/admin/showcase', label: 'Showcase' },
+          { href: '/admin/feedback', label: 'Feedback' },
+          { href: '/admin/credits', label: 'Credits' },
+          { href: '/admin/speaker-gifts', label: 'Speaker gifts' },
+        ],
+      },
       { href: '/admin/speakers', label: 'Speakers' },
-      { href: '/admin/volunteers', label: 'Volunteers' },
       { href: '/admin/crew', label: 'Crew' },
-      { href: '/admin/showcase', label: 'Showcase' },
-      { href: '/admin/speaker-gifts', label: 'Speaker gifts' },
-      { href: '/admin/credits', label: 'Credits' },
-      { href: '/admin/feedback', label: 'Feedback' },
       { href: '/admin/analytics', label: 'Analytics' },
     ],
   },
@@ -128,6 +147,78 @@ interface NavLinksProps {
   devfestPicker: ReactNode;
 }
 
+function navLinkClasses(active: boolean, rounded: boolean, nested = false): string {
+  return `block text-sm transition-colors ${nested ? 'pl-8 pr-4' : 'px-4'} ${rounded ? 'py-2 rounded-lg' : 'py-2.5'} ${
+    active ? 'bg-white/10 text-white font-bold' : 'text-white/55 font-medium hover:text-white hover:bg-white/[0.08]'
+  }`;
+}
+
+interface NavDropdownProps {
+  item: NavDropdownItem;
+  pathname: string;
+  onNavigate?: () => void;
+  rounded: boolean;
+}
+
+function NavDropdown({ item, pathname, onNavigate, rounded }: NavDropdownProps) {
+  const containsActivePage = item.children.some((child) => isActive(child.href, pathname));
+  const [isOpen, setIsOpen] = useState(containsActivePage);
+
+  // Arriving on one of its pages (from a link elsewhere) opens it; it is never closed for you.
+  useEffect(() => {
+    if (containsActivePage) setIsOpen(true);
+  }, [containsActivePage]);
+
+  const listId = `nav-dropdown-${item.label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${rounded ? 'sidebar' : 'menu'}`;
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={() => setIsOpen((open) => !open)}
+        aria-expanded={isOpen}
+        aria-controls={listId}
+        aria-label={`${isOpen ? 'Hide' : 'Show'} ${item.label.toLowerCase()}`}
+        className={`w-full flex items-center justify-between text-left text-sm px-4 transition-colors ${rounded ? 'py-2 rounded-lg' : 'py-2.5'} ${
+          containsActivePage && !isOpen
+            ? 'bg-white/10 text-white font-bold'
+            : `${containsActivePage ? 'text-white font-bold' : 'text-white/55 font-medium'} hover:text-white hover:bg-white/[0.08]`
+        }`}
+      >
+        {item.label}
+        <svg
+          className={`w-3 h-3 text-white/55 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          viewBox="0 0 12 12"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.75}
+          aria-hidden="true"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
+        </svg>
+      </button>
+      {isOpen && (
+        <ul id={listId} className={rounded ? 'mt-0.5 space-y-0.5' : undefined}>
+          {item.children.map((child) => {
+            const active = isActive(child.href, pathname);
+            return (
+              <li key={child.href}>
+                <Link
+                  href={child.href}
+                  onClick={onNavigate}
+                  aria-current={active ? 'page' : undefined}
+                  className={navLinkClasses(active, rounded, true)}
+                >
+                  {child.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </li>
+  );
+}
+
 function NavLinks({ pathname, onNavigate, rounded, devfestPicker }: NavLinksProps) {
   return (
     <nav aria-label="Admin sections" className={rounded ? 'space-y-5' : 'space-y-2'}>
@@ -139,6 +230,9 @@ function NavLinks({ pathname, onNavigate, rounded, devfestPicker }: NavLinksProp
           </div>
           <ul className={rounded ? 'space-y-0.5' : undefined}>
             {group.items.map((item) => {
+              if (isDropdown(item)) {
+                return <NavDropdown key={item.label} item={item} pathname={pathname} onNavigate={onNavigate} rounded={rounded} />;
+              }
               const active = isActive(item.href, pathname);
               return (
                 <li key={item.href}>
@@ -146,11 +240,7 @@ function NavLinks({ pathname, onNavigate, rounded, devfestPicker }: NavLinksProp
                     href={item.href}
                     onClick={onNavigate}
                     aria-current={active ? 'page' : undefined}
-                    className={`block text-sm px-4 transition-colors ${rounded ? 'py-2 rounded-lg' : 'py-2.5'} ${
-                      active
-                        ? 'bg-white/10 text-white font-bold'
-                        : 'text-white/55 font-medium hover:text-white hover:bg-white/[0.08]'
-                    }`}
+                    className={navLinkClasses(active, rounded)}
                   >
                     {item.label}
                   </Link>
