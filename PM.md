@@ -92,7 +92,7 @@ All sends are explicit admin actions, never side effects of a status change. Eac
 ### Volunteers
 - Public form → `volunteers` (creates or reuses the profile) → accept → acceptance email (2-day `confirmByDate`) → `/volunteer/confirm` → ticket and WhatsApp links from the signup's event
 - Roster on DevFest > Crew: area, shift, photo (`crew-photos/<id>/`), ticket-sent mark (manual, sends nothing), CSV export, Add organiser
-- **Inviting back:** "Invite past volunteers" on Crew, or the Volunteer pool for any event with volunteers enabled that hasn't ended. Each invite links to `/volunteer/join` and carries an opt-out link. A reply files a pending signup (`tracking.ref` = `volunteer-invite`)
+- **Inviting back:** "Invite past volunteers" on Crew, or the Volunteer pool for any event with volunteers enabled that hasn't ended. Organisers (anyone with an organiser signup at any event) are in neither list and can't be invited; they're added with Add organiser. Each invite links to `/volunteer/join` and carries an opt-out link. A reply files a pending signup (`tracking.ref` = `volunteer-invite`)
 - Public listing needs `showOnCrewPage` (admin-ticked, off by default) plus confirmation. A consent question belongs on the gdgsydney.com form when it's built
 
 ### Builder Showcase (DevFest only)

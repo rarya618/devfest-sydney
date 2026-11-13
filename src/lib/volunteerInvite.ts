@@ -97,8 +97,19 @@ export async function loadVolunteerInvite(token: string): Promise<VolunteerInvit
   };
 }
 
+// Organisers are added to a crew directly (Add organiser on /admin/crew) and are never invited
+// like volunteers, so anyone who has been one at any event is left out of both invite lists.
+function organiserProfileIds(signups: FirebaseFirestore.QueryDocumentSnapshot[]): Set<string> {
+  return new Set(
+    signups
+      .map((signup) => signup.data())
+      .filter((data) => data.isOrganiser === true && typeof data.profileId === 'string')
+      .map((data) => data.profileId as string)
+  );
+}
+
 // Someone who could be invited to an event: on the crew of an earlier one (accepted there),
-// and with no signup for this one yet. `invitedAt` is set once an invite has gone out.
+// not an organiser, and with no signup for this one yet. `invitedAt` is set once an invite has gone out.
 export interface InvitablePastVolunteer {
   profileId: string;
   name: string;
@@ -129,7 +140,8 @@ export async function fetchInvitablePastVolunteers(eventId: string): Promise<Inv
     }
   }
 
-  const candidateIds = [...pastEventsByProfile.keys()].filter((profileId) => !alreadyIn.has(profileId));
+  const organiserIds = organiserProfileIds(signups.docs);
+  const candidateIds = [...pastEventsByProfile.keys()].filter((profileId) => !alreadyIn.has(profileId) && !organiserIds.has(profileId));
   if (candidateIds.length === 0) return [];
   const profiles = await adminDb.getAll(...candidateIds.map((id) => adminDb.collection('volunteerProfiles').doc(id)));
 
@@ -178,14 +190,13 @@ export function verifyVolunteerOptOutToken(token: string): string | null {
 }
 
 // One person in the volunteer pool (/admin/volunteer-pool): everyone with a volunteer
-// profile, which works like a mailing list for invites. Per event: whether they signed up
+// profile except organisers, which works like a mailing list for invites. Per event: whether they signed up
 // (and how that went) and when they were invited.
 export interface VolunteerPoolMember {
   profileId: string;
   name: string;
   email: string;
   crewedEventNames: string[]; // events they were accepted onto the crew of
-  hasBeenOrganiser: boolean;
   signupStatusByEvent: Record<string, string>;
   invitedAtByEvent: Record<string, string>;
   optedOut: boolean;
@@ -217,7 +228,9 @@ export async function fetchVolunteerPool(): Promise<{ members: VolunteerPoolMemb
     }
   }
 
+  const organiserIds = organiserProfileIds(signups.docs);
   const members = profiles.docs
+    .filter((profile) => !organiserIds.has(profile.id))
     .map((profile): VolunteerPoolMember => {
       const data = profile.data();
       const own = signupsByProfile.get(profile.id) ?? [];
@@ -227,7 +240,6 @@ export async function fetchVolunteerPool(): Promise<{ members: VolunteerPoolMemb
         name: String(data.name ?? ''),
         email: String(data.email ?? ''),
         crewedEventNames: [...new Set(own.filter((signup) => signup.status === 'accepted').map((signup) => eventNames.get(signup.eventId) ?? String(signup.eventId)))],
-        hasBeenOrganiser: own.some((signup) => signup.isOrganiser),
         signupStatusByEvent: Object.fromEntries(own.map((signup) => [String(signup.eventId), String(signup.status ?? 'pending')])),
         invitedAtByEvent: Object.fromEntries(
           Object.entries(invites)

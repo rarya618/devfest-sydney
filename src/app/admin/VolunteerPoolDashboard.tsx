@@ -248,7 +248,6 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-white">
                         {member.name}
-                        {member.hasBeenOrganiser && <span className="ml-2 text-xs font-normal text-white/55">organiser</span>}
                       </p>
                       <p className="text-xs text-white/55 truncate">{member.email}</p>
                       <p className="text-xs text-white/55">

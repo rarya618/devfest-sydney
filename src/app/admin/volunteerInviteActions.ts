@@ -13,7 +13,7 @@ import { buildVolunteerInviteEmail, volunteerInviteEmailSubject } from '@/lib/vo
 // Emails one person from the volunteer pool an invite to crew an event, a DevFest or a general
 // one (stage 4d-2, PM.md). Sent from /admin/volunteer-pool, and from /admin/crew for the
 // selected DevFest. Recorded on their profile as volunteerInvites.<eventId>, so both lists
-// show who has been asked. Someone who has used the "stop inviting me" link is refused. A second send is allowed, for someone who lost the
+// show who has been asked. Someone who has used the "stop inviting me" link, or who has been an organiser, is refused. A second send is allowed, for someone who lost the
 // first. `emailSent` is set on the one failure where the email did go out, so the bulk send
 // can tell the admin not to retry that person.
 export async function sendVolunteerInvite(profileId: string, eventId: string): Promise<{ error?: string; emailSent?: boolean }> {
@@ -28,13 +28,19 @@ export async function sendVolunteerInvite(profileId: string, eventId: string): P
   let profile: FirebaseFirestore.DocumentData;
   let event;
   try {
-    const [profileSnapshot, loadedEvent, existing] = await Promise.all([
+    const [profileSnapshot, loadedEvent, ownSignups] = await Promise.all([
       profileRef.get(),
       loadEvent(eventId),
-      adminDb.collection('volunteers').where('profileId', '==', profileId).where('eventId', '==', eventId).limit(1).get(),
+      adminDb.collection('volunteers').where('profileId', '==', profileId).get(),
     ]);
     if (!profileSnapshot.exists) return { error: 'This volunteer\'s profile no longer exists.' };
-    if (!existing.empty) return { error: 'This person has already signed up for this event.' };
+    if (ownSignups.docs.some((signup) => signup.data().eventId === eventId)) {
+      return { error: 'This person has already signed up for this event.' };
+    }
+    // Organisers are added to a crew directly, never invited (see organiserProfileIds).
+    if (ownSignups.docs.some((signup) => signup.data().isOrganiser === true)) {
+      return { error: 'This person is an organiser. Add them to the crew with Add organiser instead.' };
+    }
     profile = profileSnapshot.data()!;
     if (profile.inviteOptOut) return { error: `${profile.name ?? 'This person'} has asked not to be invited again.` };
     event = loadedEvent;
