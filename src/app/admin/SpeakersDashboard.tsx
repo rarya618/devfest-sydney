@@ -249,8 +249,8 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
   }
 
   const quietIcon = 'text-white/60 hover:text-white hover:bg-white/[0.08]';
-  const neutralChip = 'inline-flex items-center text-[11px] leading-none px-2 py-1 rounded-full bg-white/[0.06] text-white/70 font-medium';
-  const warningChip = 'inline-flex items-center text-[11px] leading-none px-2 py-1 rounded-full font-bold bg-google-yellow/15 text-google-yellow';
+  const neutralChip = 'inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full bg-white/[0.06] text-white/70 font-medium';
+  const warningChip = 'inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full font-bold bg-google-yellow/15 text-google-yellow';
 
   // Compact by default (redesigned 2026-11-14: the card had seven stacked action buttons and six
   // lines before the talk title). Collapsed: who, what, and one row of chips with every gap
@@ -259,12 +259,12 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
   return (
     <div
       onClick={handleCardClick}
-      className={`relative cursor-pointer bg-surface border-l-4 ${TRACK_BORDER_COLORS[speaker.track]} rounded-2xl px-3 py-3 sm:px-4 transition-colors hover:bg-white/[0.07] ${
+      className={`relative cursor-pointer bg-surface border-l-4 ${TRACK_BORDER_COLORS[speaker.track]} rounded-2xl px-4 py-4 sm:px-5 transition-colors hover:bg-white/[0.07] ${
         isPending ? 'opacity-50 pointer-events-none' : ''
       }`}
       aria-label={`Speaker ${speaker.name}`}
     >
-      <div className="flex items-start gap-3 sm:gap-4">
+      <div className="flex items-start gap-4">
         <SpeakerAvatar speaker={speaker} />
 
         <div className="flex-1 min-w-0">
@@ -285,11 +285,11 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
             )}
           </div>
 
-          <p className={`mt-0.5 text-sm text-white/85 leading-snug ${isOpen ? '' : 'truncate'}`} title={speaker.talkTitle}>
+          <p className={`mt-1 text-sm text-white/85 leading-snug ${isOpen ? '' : 'truncate'}`} title={speaker.talkTitle}>
             {speaker.talkTitle}
           </p>
 
-          <div className="flex flex-wrap items-center gap-1 mt-2">
+          <div className="flex flex-wrap items-center gap-1.5 mt-3">
             <span className={`${neutralChip} gap-1.5 font-bold ${TRACK_CHIP_COLORS[speaker.track]}`}>
               <span className={`w-1.5 h-1.5 rounded-full ${TRACK_DOT_COLORS[speaker.track]}`} aria-hidden="true" />
               {TRACK_LABELS[speaker.track]}
@@ -360,7 +360,7 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
         </div>
 
         {/* One row of actions rather than a column: the column set the card's height. */}
-        <div className="relative flex flex-wrap items-center justify-end gap-0.5 shrink-0 max-w-[8.5rem] sm:max-w-none">
+        <div className="relative flex flex-wrap items-center justify-end gap-1 shrink-0 max-w-[8.75rem] sm:max-w-none">
           <button onClick={() => setEditing(true)} aria-label={`Edit ${speaker.name}`} title="Edit speaker" className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${quietIcon}`}>
             <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" />
@@ -979,7 +979,7 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
             <p className="text-sm text-white/50">No speakers match this filter.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-2.5 items-start">
+          <div className="grid grid-cols-1 gap-3 items-start">
             {filtered.map((speaker) => (
               <SpeakerCard
                 key={speaker.rowId}
