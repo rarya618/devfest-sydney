@@ -267,7 +267,7 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
 
   if (submitted) {
     return (
-      <div role="status" className="rounded-3xl bg-google-green/10 px-7 py-8 sm:px-10">
+      <div role="status" className="rounded-3xl bg-google-green/10 px-6 py-6 sm:px-8">
         <p className="text-xl font-bold text-google-green mb-3">Proposal sent</p>
         <p className="text-white/70 leading-relaxed mb-6">
           Thanks! We&rsquo;ve emailed you a copy. Our organisers will read it and get back to you by email.

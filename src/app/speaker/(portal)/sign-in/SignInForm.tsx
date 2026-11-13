@@ -32,7 +32,7 @@ export default function SignInForm() {
 
   if (sentTo) {
     return (
-      <div role="status" className="rounded-3xl bg-google-green/10 px-7 py-8 sm:px-10">
+      <div role="status" className="rounded-3xl bg-google-green/10 px-6 py-6 sm:px-8">
         <p className="text-xl font-bold text-google-green mb-3">Check your inbox</p>
         <p className="text-white/70 leading-relaxed">
           We&rsquo;ve sent a sign-in link to <span className="text-white font-bold">{sentTo}</span>. It works
