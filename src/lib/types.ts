@@ -292,6 +292,10 @@ export interface MeetupProposal {
   confirmation: SpeakerConfirmation;
   // Set when the speaker last edited the proposal from the speaker portal; null if never.
   editedAt: string | null;
+  // Where it came from: a MeetupProposalSource (src/lib/proposalFiling.ts). `api` means it was
+  // sent from outside a browser, usually by an AI agent following gdgsydney.com/llms.txt, and is
+  // labelled on /admin/meetups. Older proposals without one came from gdgsydney.com/speak.
+  source: string;
 }
 
 // Whether the speaker behind a promoted talk has actually been told and has confirmed.

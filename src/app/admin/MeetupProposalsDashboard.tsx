@@ -247,6 +247,14 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
                 {CONFIRMATION_CHIPS[proposal.confirmation].label}
               </span>
             )}
+            {proposal.source === 'api' && (
+              <span
+                title="Sent through the proposal API rather than the gdgsydney.com/speak form, usually by an AI agent on the speaker's behalf. Check it reads like them before accepting."
+                className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25"
+              >
+                Sent by an agent
+              </span>
+            )}
             {!proposal.speakingExperience && (
               <span
                 title="They left speaking experience blank, which may mean this would be their first talk."

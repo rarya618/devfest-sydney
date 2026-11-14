@@ -270,6 +270,7 @@ export type MeetupProposalFields = Omit<
   | 'speakerConfirmedAt'
   | 'confirmation'
   | 'editedAt'
+  | 'source'
 >;
 
 
