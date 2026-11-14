@@ -12,7 +12,8 @@ import { normaliseProfileUrl } from '@/lib/speakers';
 import { EMAIL_PATTERN } from '@/lib/emailPattern';
 import { confirmDeadlineFrom, confirmUrl } from '@/lib/speakerConfirm';
 import { acceptanceEmailSubject, buildAcceptanceEmail } from '@/lib/acceptanceEmail';
-import type { MeetupFormat, MeetupProposalStatus, TalkFormat } from '@/lib/types';
+import { editMeetupProposal, MEETUP_TO_TALK_FORMAT } from '@/lib/proposalFiling';
+import type { MeetupFormat, MeetupProposalStatus } from '@/lib/types';
 
 // Review of /speak proposals for general events. Stage 4f: accepting one files it under a
 // general event and makes it a talk (talks/{proposal id}) given by a person (`speakers`), the
@@ -81,7 +82,6 @@ function profileLinksFrom(profileUrl: string): { linkedinUrl: string; websiteUrl
   return /(^|\.)linkedin\.com\//i.test(url.replace(/^https?:\/\//, '')) ? { linkedinUrl: url, websiteUrl: '' } : { linkedinUrl: '', websiteUrl: url };
 }
 
-const MEETUP_TO_TALK_FORMAT: Record<MeetupFormat, TalkFormat> = { standard: 'talk', workshop: 'workshop' };
 
 // Accepts a proposal into a general event: the talk is created under that event, given by the
 // proposer (an existing person is reused when the name and email both match). Nothing is
@@ -275,5 +275,29 @@ export async function addMeetupReviewerNote(proposalId: string, text: string): P
     return {};
   } catch {
     return { error: 'Could not save this note. Please try again.' };
+  }
+}
+
+// An organiser's edit from the card's More menu: the same fields a speaker can change (not the
+// name or email, which belong to the person), written to the proposal and, once accepted, to
+// its talk. Allowed at any status and any time; it doesn't mark the proposal as edited, since
+// that mark tells organisers the speaker changed something.
+export async function updateMeetupProposal(proposalId: string, fields: Record<string, unknown>): Promise<{ error?: string }> {
+  try {
+    await verifyAdminSession();
+  } catch {
+    return { error: 'Your session has expired. Please sign in again.' };
+  }
+
+  try {
+    const result = await editMeetupProposal(proposalId, fields, { kind: 'organiser' });
+    if (result.outcome === 'invalid') return { error: result.message };
+    if (result.outcome === 'not-found') return { error: 'This proposal no longer exists.' };
+    revalidateMeetupPages();
+    revalidatePath('/speaker', 'layout');
+    return {};
+  } catch (error) {
+    console.error('Meetup proposal edit failed:', error);
+    return { error: 'Could not save these changes. Please try again.' };
   }
 }

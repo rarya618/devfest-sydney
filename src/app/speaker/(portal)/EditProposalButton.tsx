@@ -12,7 +12,7 @@ export default function EditProposalButton({ proposalId, talkTitle }: { proposal
       id={`edit-proposal-${proposalId}`}
       type="button"
       onClick={() => panels.openEditProposal(proposalId, `edit-proposal-${proposalId}`)}
-      aria-label={`Edit your proposal: ${talkTitle}`}
+      aria-label={`Edit ${talkTitle}`}
       className={`${secondaryButton} self-start`}
     >
       Edit

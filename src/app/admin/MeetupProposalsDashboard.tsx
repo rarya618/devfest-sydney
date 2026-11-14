@@ -10,6 +10,7 @@ import {
   sendMeetupAcceptanceEmail,
 } from './meetupProposalActions';
 import Alert from '@/components/Alert';
+import EditMeetupProposalModal from './EditMeetupProposalModal';
 import { formatDate } from '@/lib/format';
 import {
   MEETUP_FORMATS,
@@ -155,6 +156,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
   const [confirmingTakeBack, setConfirmingTakeBack] = useState<null | 'pending' | 'archived'>(null);
   const isAccepted = proposal.status === 'accepted';
   const [notesOpen, setNotesOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement>(null);
@@ -189,6 +191,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
   }
 
   return (
+    <>
     <div
       onClick={handleCardClick}
       className={`relative cursor-pointer bg-surface border-l-4 border-l-google-blue rounded-lg pt-4 pb-4 pl-5 pr-4 sm:pt-5 sm:pb-6 sm:pl-6 sm:pr-5 transition-colors hover:bg-white/[0.07] ${
@@ -398,6 +401,17 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
                 <button
                   role="menuitem"
                   onClick={() => {
+                    setIsEditing(true);
+                    setMoreOpen(false);
+                  }}
+                  aria-label={`Edit ${isAccepted ? 'the talk' : 'the proposal'}: ${proposal.talkTitle}`}
+                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                >
+                  Edit
+                </button>
+                <button
+                  role="menuitem"
+                  onClick={() => {
                     setNotesOpen((open) => !open);
                     setMoreOpen(false);
                   }}
@@ -480,6 +494,10 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
 
       {notesOpen && <ReviewerNotesPanel proposalId={proposal.id} notes={proposal.reviewerNotes} onError={onError} />}
     </div>
+    {/* Beside the card, not inside it: the modal is a portal, but React still bubbles its clicks
+        to the card's own click handler, which would open and close the card. */}
+    {isEditing && <EditMeetupProposalModal proposal={proposal} onClose={() => setIsEditing(false)} onError={onError} />}
+    </>
   );
 }
 

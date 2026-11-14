@@ -331,8 +331,9 @@ export async function submitPortalProposal(input: PortalProposalInput): Promise<
   return {};
 }
 
-// Saves changes to one of the address's own proposals, while nobody has decided on it yet.
-// Organisers aren't emailed; the admin marks the proposal as edited (decided 2026-11-14).
+// Saves changes to one of the address's own proposals: while nobody has decided on it yet, or,
+// for a meetup talk, after acceptance until the event. Organisers aren't emailed; the admin
+// marks the proposal as edited (decided 2026-11-14).
 export async function updatePortalProposal(
   kind: ProposalKind,
   proposalId: string,
@@ -349,12 +350,14 @@ export async function updatePortalProposal(
         return { error: "We couldn't find this proposal under your email address." };
       case 'decided':
         return { error: 'Our organisers have already made a decision on this proposal, so it can no longer be changed. Reply to any of our emails if something needs fixing.' };
+      case 'event-ended':
+        return { error: 'This event has already happened, so the talk can no longer be changed.' };
       case 'invalid':
         return { error: result.message };
       case 'unchanged':
         return {};
       case 'saved':
-        revalidatePath('/speaker');
+        revalidatePath('/speaker', 'layout');
         revalidatePath('/admin');
         revalidatePath('/admin/meetups');
         return {};

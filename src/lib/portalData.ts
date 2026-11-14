@@ -59,17 +59,19 @@ export interface PortalProposal {
   confirmUrl: string | null;
   // The saved talk it was proposed from (src/lib/portalSavedTalks.ts), if any.
   savedTalkId: string | null;
-  // What the edit form starts from, while the speaker can still change it: only a proposal
-  // nobody has decided on yet (pending), at an event that hasn't passed. Null otherwise.
+  // What the edit form starts from, while the speaker can still change it: a proposal nobody
+  // has decided on yet (pending), at an event that hasn't passed, or an accepted meetup talk
+  // until its event ends (editMeetupProposal). Null otherwise.
   editable: PortalEditableProposal | null;
 }
 
 export type DevfestEditableFields = Pick<DevfestProposalPayload, (typeof DEVFEST_EDITABLE_FIELDS)[number]>;
 export type MeetupEditableFields = Pick<MeetupProposalFields, (typeof MEETUP_EDITABLE_FIELDS)[number]>;
 
+// isAccepted: an accepted talk, whose edits show on the event page at once.
 export type PortalEditableProposal =
-  | { kind: 'devfest'; name: string; fields: DevfestEditableFields }
-  | { kind: 'meetup'; name: string; fields: MeetupEditableFields };
+  | { kind: 'devfest'; name: string; isAccepted: false; fields: DevfestEditableFields }
+  | { kind: 'meetup'; name: string; isAccepted: boolean; fields: MeetupEditableFields };
 
 const DEVFEST_BOOLEAN_FIELDS: ReadonlySet<string> = new Set([
   'requiresTravelSupport',
@@ -89,10 +91,10 @@ function toEditableProposal(kind: 'devfest' | 'meetup', proposal: FirebaseFirest
     const fields = Object.fromEntries(
       DEVFEST_EDITABLE_FIELDS.map((key) => [key, DEVFEST_BOOLEAN_FIELDS.has(key) ? proposal[key] === true : text(proposal[key])])
     ) as DevfestEditableFields;
-    return { kind, name, fields };
+    return { kind, name, isAccepted: false, fields };
   }
   const fields = Object.fromEntries(MEETUP_EDITABLE_FIELDS.map((key) => [key, text(proposal[key])])) as MeetupEditableFields;
-  return { kind, name, fields };
+  return { kind, name, isAccepted: proposal.status === 'accepted', fields };
 }
 
 export interface PortalOverview {
@@ -128,6 +130,22 @@ async function loadEventsById(eventIds: string[]): Promise<Map<string, GdgEvent>
   return new Map(snapshots.filter((snapshot) => snapshot.exists).map((snapshot) => [snapshot.id, toGdgEvent(snapshot.id, snapshot.data()!)]));
 }
 
+// Mirrors the rules editOwnProposal and editMeetupProposal enforce, so the Edit button only
+// shows where saving would work.
+function isEditableBySpeaker(
+  kind: 'devfest' | 'meetup',
+  proposal: FirebaseFirestore.DocumentData,
+  status: PortalProposalStatus,
+  event: GdgEvent | undefined,
+  now: Date
+): boolean {
+  if (proposal.status === 'pending') return status === 'under-review';
+  // An accepted talk the speaker hasn't been told about still reads "Under review", and stays
+  // locked like any decision, so the Edit button can't give it away.
+  const isToldAccepted = status === 'accepted' || status === 'confirmed';
+  return kind === 'meetup' && isToldAccepted && event !== undefined && now.getTime() < Date.parse(event.endAt);
+}
+
 function proposalStatus(proposal: FirebaseFirestore.DocumentData, event: GdgEvent | undefined, now: Date): PortalProposalStatus {
   // A talk agreed with the speaker outside the form is confirmed without an acceptance email
   // (scripts/add-agreed-meetup-talks.mjs): they already know, since they agreed to it.
@@ -136,6 +154,30 @@ function proposalStatus(proposal: FirebaseFirestore.DocumentData, event: GdgEven
   if (proposal.status === 'rejected' && proposal.rejectionEmailSentAt) return 'not-selected';
   if (event && now.getTime() >= Date.parse(event.endAt)) return 'closed';
   return 'under-review';
+}
+
+function isAnnounced(proposal: FirebaseFirestore.DocumentData | undefined): boolean {
+  return Boolean(proposal?.acceptanceEmailSentAt || proposal?.speakerConfirmedAt);
+}
+
+async function keepAnnouncedTalks(
+  talkDocs: FirebaseFirestore.QueryDocumentSnapshot[],
+  ownProposalDocs: FirebaseFirestore.QueryDocumentSnapshot[]
+): Promise<FirebaseFirestore.QueryDocumentSnapshot[]> {
+  const proposalPath = (talk: FirebaseFirestore.DocumentData): string | null =>
+    text(talk.submissionId) ? `submissions/${text(talk.submissionId)}` : text(talk.meetupProposalId) ? `meetupProposals/${text(talk.meetupProposalId)}` : null;
+
+  const proposalsByPath = new Map<string, FirebaseFirestore.DocumentData | undefined>(ownProposalDocs.map((doc) => [doc.ref.path, doc.data()]));
+  // Proposals filed under another address: a co-speaker's talk, proposed by the lead.
+  const missingPaths = [...new Set(talkDocs.map((talk) => proposalPath(talk.data())).filter((path): path is string => path !== null && !proposalsByPath.has(path)))];
+  if (missingPaths.length) {
+    const snapshots = await adminDb.getAll(...missingPaths.map((path) => adminDb.doc(path)));
+    for (const snapshot of snapshots) proposalsByPath.set(snapshot.ref.path, snapshot.data());
+  }
+  return talkDocs.filter((talk) => {
+    const path = proposalPath(talk.data());
+    return path === null || isAnnounced(proposalsByPath.get(path));
+  });
 }
 
 export async function loadPortalOverview(email: string): Promise<PortalOverview> {
@@ -150,7 +192,12 @@ export async function loadPortalOverview(email: string): Promise<PortalOverview>
   const talksSnapshot = profileIds.length
     ? await adminDb.collection('talks').where('speakerIds', 'array-contains-any', profileIds.slice(0, 30)).get()
     : null;
-  const talkDocs = talksSnapshot?.docs ?? [];
+  // Only talks the speaker has been told about: accepting a proposal creates its talk at once,
+  // but the speaker hears with the acceptance email (or, for a talk agreed outside the form,
+  // is recorded as confirmed). Until then the talk would give the decision away, just as the
+  // proposal's status would. A co-speaker follows the lead's proposal; a talk with no proposal
+  // behind it is shown.
+  const talkDocs = await keepAnnouncedTalks(talksSnapshot?.docs ?? [], [...submissionsSnapshot.docs, ...meetupSnapshot.docs]);
 
   const coSpeakerIds = [...new Set(talkDocs.flatMap((talk) => (talk.data().speakerIds ?? []) as string[]))].filter(
     (speakerId) => !profileIds.includes(speakerId)
@@ -219,7 +266,7 @@ export async function loadPortalOverview(email: string): Promise<PortalOverview>
         status,
         confirmUrl: status === 'accepted' ? confirmUrl(doc.id) : null,
         savedTalkId: text(proposal.savedTalkId) || null,
-        editable: proposal.status === 'pending' && status === 'under-review' ? toEditableProposal(kind, proposal) : null,
+        editable: isEditableBySpeaker(kind, proposal, status, event, now) ? toEditableProposal(kind, proposal) : null,
       };
     })
     .sort((first, second) => String(second.submittedAt).localeCompare(String(first.submittedAt)));

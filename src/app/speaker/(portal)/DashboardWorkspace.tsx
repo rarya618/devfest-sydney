@@ -247,9 +247,13 @@ export default function DashboardWorkspace({
                 </>
               ) : editingProposal ? (
                 <>
-                  <h2 id="dashboard-panel-heading" className="mb-2 text-xl font-bold text-off-white">Edit your proposal</h2>
+                  <h2 id="dashboard-panel-heading" className="mb-2 text-xl font-bold text-off-white">
+                    {editingProposal.editable.isAccepted ? 'Edit your talk' : 'Edit your proposal'}
+                  </h2>
                   <p className="mb-8 text-sm text-white/60 leading-relaxed">
-                    You can change it until our organisers make a decision. They&rsquo;ll see that it was edited.
+                    {editingProposal.editable.isAccepted
+                      ? 'Changes show on the event page straight away, until the event. Our organisers will see that it was edited.'
+                      : <>You can change it until our organisers make a decision. They&rsquo;ll see that it was edited.</>}
                   </p>
                   <ProposalForm
                     key={`edit:${editingProposal.id}:${panelOpenedAt}`}

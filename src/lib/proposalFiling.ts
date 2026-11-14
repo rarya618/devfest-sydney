@@ -3,9 +3,10 @@ import { Resend } from 'resend';
 import { adminDb } from '@/lib/firebase-admin';
 import { escapeHtml } from '@/lib/escapeHtml';
 import { portalSignInUrl } from '@/lib/portalAuth';
+import { hasEventEnded, loadEvent } from '@/lib/events';
 import { normaliseProfileUrl } from '@/lib/speakers';
 import { MEETUP_FORMATS, MEETUP_FORMAT_LABELS, MEETUP_PROPOSAL_LIMITS } from '@/lib/meetupProposalLabels';
-import type { MeetupFormat, MeetupProposal } from '@/lib/types';
+import type { MeetupFormat, MeetupProposal, TalkFormat } from '@/lib/types';
 
 // Filing a talk proposal, shared by the form endpoints (/api/submit-proposal for a DevFest
 // Call for Speakers, /api/submit-meetup-proposal for gdgsydney.com/speak) and the speaker
@@ -404,8 +405,6 @@ export async function fileMeetupProposal(
 
 export type ProposalKind = 'devfest' | 'meetup';
 
-const PROPOSAL_COLLECTIONS: Record<ProposalKind, string> = { devfest: 'submissions', meetup: 'meetupProposals' };
-
 // What a speaker may change on their own proposal: everything they typed except who it is from
 // (name and email, which stay with organisers as on profiles). Where it came from (tracking,
 // source, savedTalkId) and the review record are never touched.
@@ -446,13 +445,88 @@ export const MEETUP_EDITABLE_FIELDS = [
 ] as const satisfies readonly (keyof MeetupProposalFields)[];
 
 export type ProposalEditOutcome =
-  | { outcome: 'saved' | 'unchanged' | 'not-found' | 'decided' }
+  | { outcome: 'saved' | 'unchanged' | 'not-found' | 'decided' | 'event-ended' }
   | { outcome: 'invalid'; message: string };
 
 class ProposalDecidedError extends Error {}
+class ProposalEditRefused extends Error {
+  constructor(readonly outcome: 'not-found' | 'decided' | 'event-ended') {
+    super(outcome);
+  }
+}
 
-// Rewrites a speaker's own proposal in place while it is still pending (decided 2026-11-14:
-// DevFest ones too, after the CfS has closed). Checked by the same validator as filing, with the
+// An accepted meetup proposal's talk is talks/{proposal id} (acceptMeetupProposal).
+export const MEETUP_TO_TALK_FORMAT: Record<MeetupFormat, TalkFormat> = { standard: 'talk', workshop: 'workshop' };
+
+// Who is editing a meetup proposal: the speaker from the portal (their own only, and only while
+// it can still change), or an organiser from /admin/meetups (any, any time).
+export type MeetupProposalEditor = { kind: 'speaker'; email: string } | { kind: 'organiser' };
+
+// Saves edits to a meetup proposal and, once it is accepted, to its talk, which is what the
+// portal and the public API show, so the two never disagree. A speaker may edit while it is
+// pending, and after acceptance (once told) until the event ends (decided 2026-11-14); their edits stamp
+// editedAt, which the admin card shows. An organiser's don't. Name and email aren't editable
+// here by either: the person's profile owns those. Throws when Firestore fails.
+export async function editMeetupProposal(
+  proposalId: string,
+  fields: Record<string, unknown>,
+  editor: MeetupProposalEditor
+): Promise<ProposalEditOutcome> {
+  if (!proposalId || proposalId.includes('/')) return { outcome: 'not-found' };
+  const reference = adminDb.collection('meetupProposals').doc(proposalId);
+  const talkReference = adminDb.collection('talks').doc(proposalId);
+
+  // Whether this editor may change the proposal as it now stands. Run before validating, and
+  // again inside the transaction, so a decision or a passed event in between still stops it.
+  async function refusal(stored: FirebaseFirestore.DocumentData | undefined): Promise<'not-found' | 'decided' | 'event-ended' | null> {
+    if (!stored) return 'not-found';
+    if (editor.kind === 'organiser') return null;
+    if (stored.email !== editor.email) return 'not-found';
+    if (stored.status === 'pending') return null;
+    // Accepted counts only once the speaker knows (the email has gone, or they are confirmed):
+    // until then it is a decision like any other, and editing must not give it away.
+    if (stored.status !== 'accepted' || !(stored.acceptanceEmailSentAt || stored.speakerConfirmedAt)) return 'decided';
+    const event = stored.eventId ? await loadEvent(String(stored.eventId)) : null;
+    return !event || hasEventEnded(event) ? 'event-ended' : null;
+  }
+
+  const stored = (await reference.get()).data();
+  const refused = await refusal(stored);
+  if (refused) return { outcome: refused };
+
+  let changes: Record<string, unknown>;
+  try {
+    const validated = validateMeetupProposal({ ...fields, name: String(stored!.name ?? ''), email: String(stored!.email ?? '') });
+    changes = Object.fromEntries(MEETUP_EDITABLE_FIELDS.map((key) => [key, validated[key]]));
+  } catch (error) {
+    return { outcome: 'invalid', message: error instanceof Error ? error.message : 'Please check the proposal and try again.' };
+  }
+  if (!Object.entries(changes).some(([key, value]) => (stored![key] ?? '') !== value)) return { outcome: 'unchanged' };
+
+  try {
+    await adminDb.runTransaction(async (transaction) => {
+      const [current, talk] = await Promise.all([transaction.get(reference), transaction.get(talkReference)]);
+      const currentRefusal = await refusal(current.data());
+      if (currentRefusal) throw new ProposalEditRefused(currentRefusal);
+      transaction.update(reference, { ...changes, ...(editor.kind === 'speaker' ? { editedAt: FieldValue.serverTimestamp() } : {}) });
+      if (current.data()?.status === 'accepted' && talk.exists) {
+        transaction.update(talkReference, {
+          talkTitle: changes.talkTitle,
+          abstract: changes.abstract,
+          format: MEETUP_TO_TALK_FORMAT[changes.format as MeetupFormat],
+        });
+      }
+    });
+  } catch (error) {
+    if (error instanceof ProposalEditRefused) return { outcome: error.outcome };
+    throw error;
+  }
+  return { outcome: 'saved' };
+}
+
+// A speaker editing their own proposal from the portal. Meetup ones go to editMeetupProposal
+// (editable after acceptance too, until the event). A DevFest one is rewritten in place while
+// it is still pending (decided 2026-11-14: after the CfS has closed too). Checked by the same validator as filing, with the
 // stored name and the owner's email, and stamped with editedAt so the admin shows it was changed.
 // The status check and the write share a transaction, so an edit can't land on a proposal an
 // organiser accepted or rejected a moment earlier. Throws when Firestore fails.
@@ -462,23 +536,18 @@ export async function editOwnProposal(
   ownerEmail: string,
   fields: Record<string, unknown>
 ): Promise<ProposalEditOutcome> {
+  if (kind === 'meetup') return editMeetupProposal(proposalId, fields, { kind: 'speaker', email: ownerEmail });
   if (!proposalId || proposalId.includes('/')) return { outcome: 'not-found' };
-  const reference = adminDb.collection(PROPOSAL_COLLECTIONS[kind]).doc(proposalId);
+  const reference = adminDb.collection('submissions').doc(proposalId);
   const snapshot = await reference.get();
   const stored = snapshot.data();
   if (!stored || stored.email !== ownerEmail) return { outcome: 'not-found' };
   if (stored.status !== 'pending') return { outcome: 'decided' };
 
-  const body = { ...fields, name: String(stored.name ?? ''), email: ownerEmail };
   let changes: Record<string, unknown>;
   try {
-    if (kind === 'devfest') {
-      const validated = validateDevfestProposal(body);
-      changes = Object.fromEntries(DEVFEST_EDITABLE_FIELDS.map((key) => [key, validated[key]]));
-    } else {
-      const validated = validateMeetupProposal(body);
-      changes = Object.fromEntries(MEETUP_EDITABLE_FIELDS.map((key) => [key, validated[key]]));
-    }
+    const validated = validateDevfestProposal({ ...fields, name: String(stored.name ?? ''), email: ownerEmail });
+    changes = Object.fromEntries(DEVFEST_EDITABLE_FIELDS.map((key) => [key, validated[key]]));
   } catch (error) {
     return { outcome: 'invalid', message: error instanceof Error ? error.message : 'Please check your proposal and try again.' };
   }
