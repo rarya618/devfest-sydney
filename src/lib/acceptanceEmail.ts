@@ -2,6 +2,7 @@ import { formatDeadlineDate } from '@/lib/format';
 import type { ExperienceLevel, TalkFormat, Track } from '@/lib/types';
 import { escapeHtml } from '@/lib/escapeHtml';
 import { emailLogoTag, formatEventWhen, type EventCopy } from '@/lib/eventCopy';
+import { portalSignInUrl } from '@/lib/portalAuth';
 
 // Built to the "Email template - Confirmed Speaker" frame in the DevFest Figma file.
 // Table-based and inline-styled throughout: email clients strip stylesheets, and several
@@ -166,8 +167,17 @@ export function buildAcceptanceEmail(details: AcceptanceEmailDetails): string {
               </p>
               ${ticketShareParagraph}` : ''}
 
-              <!-- Event scale -->
+              <!-- Speaker portal: accepting a proposal creates the speaker's profile -->
               <div style="height:24px;"></div>
+              ${card(`
+                <h3 style="margin:0 0 12px;${sectionHeading}">Your speaker profile</h3>
+                <p style="margin:0 0 20px;${bodyText}">Add your photo, tagline and bio in the speaker portal. It's how you'll appear next to your talk on our event page. Sign in with this email address.</p>
+                <div style="text-align:center;">
+                  <a href="${portalSignInUrl()}" style="display:inline-block;background:#1967d2;border-radius:8px;padding:14px 28px;${FONT}font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;">Open the speaker portal</a>
+                </div>
+              `)}
+
+              <!-- Event scale -->
               ${card(`
                 <h3 style="margin:0 0 12px;${sectionHeading}">If you are a GDE</h3>
                 <p style="margin:0;${bodyText}">${escapeHtml(details.event.name)} is on ${escapeHtml(formatEventWhen(details.event))}. Reply to this email if you need attendance figures for your report and we'll send our latest estimate.</p>

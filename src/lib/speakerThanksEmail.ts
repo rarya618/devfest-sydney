@@ -1,4 +1,5 @@
 import { escapeHtml } from '@/lib/escapeHtml';
+import { portalSignInUrl } from '@/lib/portalAuth';
 
 // The post-event thank-you to every speaker and co-speaker: the photos from the day, and
 // a link to /speaker/thanks to claim a speaker mug and an Asana trial. Same table-based,
@@ -82,6 +83,13 @@ export function buildSpeakerThanksEmail(details: SpeakerThanksEmailDetails): str
                 <p style="margin:0 0 20px;${bodyText}"><strong style="color:#ffffff;">An Asana Enterprise trial</strong>, courtesy of our sponsor Asana, set up on your work email.</p>
                 <div style="text-align:center;">${button(thanksUrl, 'Claim your mug and trial', '#188038')}</div>
                 <p style="margin:20px 0 0;${smallText}text-align:center;">It takes about a minute. Take one, the other or both. We use your address only to post the mug and delete it once it ships, and pass your work email to Asana only if you say so.</p>
+              `)}
+
+              <!-- Speaker portal -->
+              ${card(`
+                <h3 style="margin:0 0 12px;${sectionHeading}">Your next talk</h3>
+                <p style="margin:0 0 20px;${bodyText}">Keep your speaker profile up to date and propose your next talk, for a meetup or the next DevFest, in the speaker portal. Sign in with this email address.</p>
+                <div style="text-align:center;">${button(portalSignInUrl(), 'Open the speaker portal', '#1967d2')}</div>
               `)}
 
               <!-- Questions -->
