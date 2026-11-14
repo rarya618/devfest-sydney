@@ -147,6 +147,8 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
   // An accepted DevFest talk: only its title and abstract are the speaker's to change
   // (editAcceptedDevfestTalk); track, format and level are the organisers'.
   const isAcceptedDevfestTalk = editing?.proposal.kind === 'devfest' && editing.proposal.isAccepted;
+  // An accepted meetup talk keeps its format: it's on the night's running order.
+  const isAcceptedMeetupTalk = editing?.proposal.kind === 'meetup' && editing.proposal.isAccepted;
   const initialSavedTalk = isEditing ? null : savedTalks.find((savedTalk) => savedTalk.id === initialSavedTalkId) ?? null;
   const [savedTalkId, setSavedTalkId] = useState<string | null>(initialSavedTalk?.id ?? null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
@@ -239,7 +241,7 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
     if (!talkTitle.trim()) return 'Please give your talk a title.';
     if (!abstract.trim()) return 'Please add an abstract.';
     if (kind === 'meetup') {
-      if (!meetupFormat) return 'Please choose a talk format.';
+      if (!meetupFormat && !isAcceptedMeetupTalk) return 'Please choose a talk format.';
       if (!audience.trim()) return 'Please tell us who the talk is for.';
       if (!bio.trim()) return 'Please add a short bio.';
     } else {
@@ -385,13 +387,21 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
           </p>
         ) : kind === 'meetup' ? (
           <>
-            <Choice
-              name="meetup-format"
-              legend={<>Format{required}</>}
-              options={MEETUP_FORMATS.map((format) => ({ value: format, label: MEETUP_FORMAT_LABELS[format] }))}
-              selected={meetupFormat}
-              onSelect={setMeetupFormat}
-            />
+            {isAcceptedMeetupTalk ? (
+              <div>
+                <p className={labelClass}>Format</p>
+                <p className="text-white/85">{meetupFormat ? MEETUP_FORMAT_LABELS[meetupFormat] : 'Not set'}</p>
+                <p className={hintClass}>Set by our organisers now that your talk is on the programme. Reply to any of our emails to change it.</p>
+              </div>
+            ) : (
+              <Choice
+                name="meetup-format"
+                legend={<>Format{required}</>}
+                options={MEETUP_FORMATS.map((format) => ({ value: format, label: MEETUP_FORMAT_LABELS[format] }))}
+                selected={meetupFormat}
+                onSelect={setMeetupFormat}
+              />
+            )}
             <TextField id="proposal-audience" label="Who is it for?" value={audience} onChange={setAudience} isRequired rows={3} maxLength={MEETUP_PROPOSAL_LIMITS.audience} hint="The level and background you have in mind." />
             <TextField id="proposal-bio" label="Speaker bio" value={bio} onChange={setBio} isRequired rows={5} maxLength={MEETUP_PROPOSAL_LIMITS.bio} hint={profile && !isEditing ? 'Filled in from your profile. Changing it here changes only this proposal.' : undefined} />
             <TextField id="proposal-profile-url" label="LinkedIn or website" value={profileUrl} onChange={setProfileUrl} maxLength={MEETUP_PROPOSAL_LIMITS.profileUrl} />

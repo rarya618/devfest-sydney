@@ -464,7 +464,7 @@ export type MeetupProposalEditor = { kind: 'speaker'; email: string } | { kind: 
 
 // Saves edits to a meetup proposal and, once it is accepted, to its talk, which is what the
 // portal and the public API show, so the two never disagree. A speaker may edit while it is
-// pending, and after acceptance (once told) until the event ends (decided 2026-11-14); their edits stamp
+// pending, and after acceptance (once told, and not the format) until the event ends (decided 2026-11-14); their edits stamp
 // editedAt, which the admin card shows. An organiser's don't. Name and email aren't editable
 // here by either: the person's profile owns those. Throws when Firestore fails.
 export async function editMeetupProposal(
@@ -494,9 +494,17 @@ export async function editMeetupProposal(
   const refused = await refusal(stored);
   if (refused) return { outcome: refused };
 
+  // Once a talk is on a meetup's running order its format is the organisers' (decided
+  // 2026-11-14): a speaker's edit keeps the stored one, whatever the form sent.
+  const keepsFormat = (proposal: FirebaseFirestore.DocumentData | undefined) => editor.kind === 'speaker' && proposal?.status === 'accepted';
   let changes: Record<string, unknown>;
   try {
-    const validated = validateMeetupProposal({ ...fields, name: String(stored!.name ?? ''), email: String(stored!.email ?? '') });
+    const validated = validateMeetupProposal({
+      ...fields,
+      ...(keepsFormat(stored) ? { format: stored!.format } : {}),
+      name: String(stored!.name ?? ''),
+      email: String(stored!.email ?? ''),
+    });
     changes = Object.fromEntries(MEETUP_EDITABLE_FIELDS.map((key) => [key, validated[key]]));
   } catch (error) {
     return { outcome: 'invalid', message: error instanceof Error ? error.message : 'Please check the proposal and try again.' };
@@ -508,6 +516,8 @@ export async function editMeetupProposal(
       const [current, talk] = await Promise.all([transaction.get(reference), transaction.get(talkReference)]);
       const currentRefusal = await refusal(current.data());
       if (currentRefusal) throw new ProposalEditRefused(currentRefusal);
+      // Accepted since the first read: the format still isn't the speaker's to change.
+      if (keepsFormat(current.data())) changes.format = current.data()!.format;
       transaction.update(reference, { ...changes, ...(editor.kind === 'speaker' ? { editedAt: FieldValue.serverTimestamp() } : {}) });
       if (current.data()?.status === 'accepted' && talk.exists) {
         transaction.update(talkReference, {
