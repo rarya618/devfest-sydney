@@ -83,6 +83,11 @@ rules_version='2';
 // link token, the email address and the session cookie respectively, and each document has
 // an expiresAt for a TTL policy.
 //
+// Collection: meetupProposalRequests
+// Rate limits for /api/submit-meetup-proposal (src/lib/meetupProposalLimits.ts): recent
+// submission times per address (id: SHA-256 of the email) and site-wide (id: `site`).
+// Admin SDK only, with no match block. Each document has an expiresAt for a TTL policy.
+//
 // Collections: volunteers, volunteerProfiles
 // Admin SDK only (no match block for volunteerProfiles; volunteers is admin-only). Signups
 // arrive through /api/submit-volunteer, /volunteer/join and Add organiser on the server, so

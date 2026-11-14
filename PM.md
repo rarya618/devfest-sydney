@@ -66,6 +66,7 @@ Every collection is read and written through the Admin SDK; no client code uses 
 - **`sponsors`**, **`partners`** (community partners, empty), **`admins`**
 - **`savedTalks`:** talks a portal user keeps to propose later: `ownerEmail`, title, abstract, audience. Private to the address until proposed; a proposal made from one records `savedTalkId` and is a copy
 - **`portalSignInLinks`, `portalSignInRequests`, `portalSessions`:** the speaker portal's sign-in (`src/lib/portalAuth.ts`). Ids are SHA-256 hashes (of the link token, the email, the cookie), so the collections hold nothing that signs anyone in. Each has `expiresAt`; used links and signed-out sessions are deleted, expired ones linger until a TTL policy is set (see Next tasks)
+- **`meetupProposalRequests`:** rate limits for `/api/submit-meetup-proposal`, which gdgsydney.com/llms.txt documents for AI agents (`src/lib/meetupProposalLimits.ts`): 3 per address a day, 20 site-wide an hour, answered with 429 and `Retry-After`. Ids are a SHA-256 of the email plus one `site` document, so no addresses are stored. Requests with no `Origin` (agents, scripts) file with `source: 'api'`. Has `expiresAt` for a TTL policy
 - **Pinned to DevFest 2026, due for deletion** (see Next tasks): `speakerGifts`, `creditRequests`, `jobSeekers`, `jobListings`
 - `feedback`: survey answers, `eventId` on each
 

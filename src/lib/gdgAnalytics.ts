@@ -65,6 +65,7 @@ const SOURCE_LABELS: Record<string, string> = {
   'gdgsydney.com/speak': 'gdgsydney.com/speak',
   'speaker-portal': 'Speaker portal',
   organiser: 'Added by an organiser',
+  api: 'Agent or API',
 };
 
 function text(value: unknown): string {

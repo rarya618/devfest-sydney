@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { gdgSiteCorsHeaders } from '@/lib/gdgSiteOrigins';
+import { claimMeetupProposalSlot, type MeetupProposalAllowance } from '@/lib/meetupProposalLimits';
 import { fileMeetupProposal, validateMeetupProposal, type MeetupProposalFields } from '@/lib/proposalFiling';
 
 // Talk proposals for GDG Sydney's monthly meetups, from the /speak form on gdgsydney.com
@@ -51,9 +52,34 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Documented for AI agents (gdgsydney.com/llms.txt), so limited per address and site-wide;
+  // see src/lib/meetupProposalLimits.ts.
+  let allowance: MeetupProposalAllowance;
   try {
-    // The bcc on the confirmation is how organisers hear about new proposals.
-    await fileMeetupProposal(proposal, 'gdgsydney.com/speak');
+    allowance = await claimMeetupProposalSlot(proposal.email);
+  } catch (err) {
+    console.error('Rate limit check failed for meetup proposal:', proposal.email, err);
+    return NextResponse.json(
+      { message: "We couldn't save your proposal. Please try again in a moment." },
+      { status: 500, headers }
+    );
+  }
+  if (!allowance.allowed) {
+    return NextResponse.json(
+      {
+        message:
+          "We've had a lot of proposals in a short time, from this address or from everyone. Please try again later, or email hello@gdgsydney.com.",
+        retryAfterSeconds: allowance.retryAfterSeconds,
+      },
+      { status: 429, headers: { ...headers, 'Retry-After': String(allowance.retryAfterSeconds) } }
+    );
+  }
+
+  try {
+    // The bcc on the confirmation is how organisers hear about new proposals. A request
+    // with no Origin came from outside a browser (an agent or script using the documented
+    // API), so it is filed under its own source for organisers to tell apart.
+    await fileMeetupProposal(proposal, origin ? 'gdgsydney.com/speak' : 'api');
   } catch (err) {
     console.error('Firestore write failed for meetup proposal:', proposal.email, err);
     return NextResponse.json(
