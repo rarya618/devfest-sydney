@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 interface AlertProps {
   message: string;
@@ -9,6 +10,13 @@ interface AlertProps {
 
 export default function Alert({ message, onDismiss }: AlertProps) {
   const [visible, setVisible] = useState(false);
+  // The portal target only exists in the browser, and an alert can be in the server render
+  // (SpeakersDashboard starts with one), so it appears after hydration.
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     // Trigger entrance animation
@@ -29,7 +37,11 @@ export default function Alert({ message, onDismiss }: AlertProps) {
     setTimeout(onDismiss, 300);
   }
 
-  return (
+  // Rendered into <body>: `fixed` is relative to the nearest transformed ancestor, and
+  // animate-page-in leaves a transform on the page shells and the portal's panels, which would
+  // otherwise pin the alert inside them instead of to the bottom-left of the screen.
+  if (!isMounted) return null;
+  return createPortal(
     <div
       role="alert"
       aria-live="assertive"
@@ -53,6 +65,7 @@ export default function Alert({ message, onDismiss }: AlertProps) {
           <path d="M4.47 4.47a.75.75 0 0 1 1.06 0L8 6.94l2.47-2.47a.75.75 0 1 1 1.06 1.06L9.06 8l2.47 2.47a.75.75 0 1 1-1.06 1.06L8 9.06l-2.47 2.47a.75.75 0 0 1-1.06-1.06L6.94 8 4.47 5.53a.75.75 0 0 1 0-1.06z" />
         </svg>
       </button>
-    </div>
+    </div>,
+    document.body
   );
 }
