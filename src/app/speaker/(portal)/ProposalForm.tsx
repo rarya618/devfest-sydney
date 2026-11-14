@@ -6,10 +6,10 @@ import Alert from '@/components/Alert';
 import { hintClass, inputNormal, labelClass, optionButtonClass } from '@/lib/formStyles';
 import { primaryButton, secondaryButton } from './portalStyles';
 import { MEETUP_FORMAT_LABELS, MEETUP_FORMATS, MEETUP_PROPOSAL_LIMITS } from '@/lib/meetupProposalLabels';
-import type { PortalProfile } from '@/lib/portalData';
+import type { PortalEditableProposal, PortalProfile } from '@/lib/portalData';
 import { findSavedTalkError, type SavedTalkFields } from '@/lib/portalLabels';
 import type { MeetupFormat } from '@/lib/types';
-import { saveTalkForLater, submitPortalProposal } from './actions';
+import { saveTalkForLater, submitPortalProposal, updatePortalProposal } from './actions';
 
 type ProposalKind = 'meetup' | 'devfest';
 type DevfestTrack = 'developer' | 'builder' | 'workshop';
@@ -25,6 +25,9 @@ interface ProposalFormProps {
   initialSavedTalkId: string | null;
   // Closes the panel the form sits in on the dashboard.
   onClose: () => void;
+  // A pending proposal of the speaker's to change instead of filing a new one. The event, the
+  // name and the saved talk it came from are fixed; everything else starts from what was sent.
+  editing?: { proposalId: string; proposal: PortalEditableProposal } | null;
 }
 
 const DEVFEST_ABSTRACT_MAX = 2000;
@@ -54,6 +57,12 @@ const DEVFEST_CHECKBOXES: { key: string; label: string }[] = [
   { key: 'optOutOfRecording', label: 'I would prefer my session not be recorded' },
   { key: 'requiresTravelSupport', label: 'I would need travel support to attend' },
 ];
+
+// A stored choice, if it is still one of the options; otherwise none, so the speaker picks again.
+function knownChoice<Value extends string>(options: readonly { value: Value }[] | readonly Value[], stored: string | undefined): Value | '' {
+  const values = options.map((option) => (typeof option === 'string' ? option : option.value));
+  return values.find((value) => value === stored) ?? '';
+}
 
 const required = <span className="text-google-red-light" aria-hidden="true"> *</span>;
 const checkboxClass = 'mt-0.5 w-5 h-5 shrink-0 accent-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue';
@@ -128,13 +137,16 @@ function TextField({
   );
 }
 
-export default function ProposalForm({ profiles, openDevfest, savedTalks, initialSavedTalkId, onClose }: ProposalFormProps) {
+export default function ProposalForm({ profiles, openDevfest, savedTalks, initialSavedTalkId, onClose, editing = null }: ProposalFormProps) {
   const router = useRouter();
-  const initialSavedTalk = savedTalks.find((savedTalk) => savedTalk.id === initialSavedTalkId) ?? null;
+  const isEditing = editing !== null;
+  const editingMeetup = editing?.proposal.kind === 'meetup' ? editing.proposal.fields : null;
+  const editingDevfest = editing?.proposal.kind === 'devfest' ? editing.proposal.fields : null;
+  const initialSavedTalk = isEditing ? null : savedTalks.find((savedTalk) => savedTalk.id === initialSavedTalkId) ?? null;
   const [savedTalkId, setSavedTalkId] = useState<string | null>(initialSavedTalk?.id ?? null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const firstProfile = profiles[0] ?? null;
-  const [kind, setKind] = useState<ProposalKind>('meetup');
+  const [kind, setKind] = useState<ProposalKind>(editing?.proposal.kind ?? 'meetup');
   const [profileId, setProfileId] = useState<string>(firstProfile?.id ?? '');
   const [name, setName] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -145,31 +157,35 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
   const profile = profiles.find((candidate) => candidate.id === profileId) ?? null;
 
   // Shared between both kinds.
-  const [talkTitle, setTalkTitle] = useState(initialSavedTalk?.talkTitle ?? '');
-  const [abstract, setAbstract] = useState(initialSavedTalk?.abstract ?? '');
-  const [bio, setBio] = useState(firstProfile?.bio ?? '');
+  const [talkTitle, setTalkTitle] = useState(editing?.proposal.fields.talkTitle ?? initialSavedTalk?.talkTitle ?? '');
+  const [abstract, setAbstract] = useState(editing?.proposal.fields.abstract ?? initialSavedTalk?.abstract ?? '');
+  const [bio, setBio] = useState(editingMeetup?.bio ?? editingDevfest?.speakerBio ?? firstProfile?.bio ?? '');
 
   // Meetup.
-  const [meetupFormat, setMeetupFormat] = useState<MeetupFormat | ''>('');
-  const [audience, setAudience] = useState(initialSavedTalk?.audience ?? '');
-  const [profileUrl, setProfileUrl] = useState(firstProfile?.linkedinUrl || firstProfile?.websiteUrl || '');
-  const [speakingExperience, setSpeakingExperience] = useState('');
-  const [notes, setNotes] = useState('');
+  const [meetupFormat, setMeetupFormat] = useState<MeetupFormat | ''>(knownChoice(MEETUP_FORMATS, editingMeetup?.format));
+  const [audience, setAudience] = useState(editingMeetup?.audience ?? initialSavedTalk?.audience ?? '');
+  const [profileUrl, setProfileUrl] = useState(editingMeetup ? editingMeetup.profileUrl : firstProfile?.linkedinUrl || firstProfile?.websiteUrl || '');
+  const [speakingExperience, setSpeakingExperience] = useState(editingMeetup?.speakingExperience ?? '');
+  const [notes, setNotes] = useState(editingMeetup?.notes ?? '');
 
   // DevFest.
-  const [track, setTrack] = useState<DevfestTrack | ''>('');
-  const [devfestFormat, setDevfestFormat] = useState<DevfestFormat | ''>('');
-  const [level, setLevel] = useState<DevfestLevel | ''>('');
-  const [tagline, setTagline] = useState(firstProfile?.tagline ?? '');
-  const [linkedinUrl, setLinkedinUrl] = useState(firstProfile?.linkedinUrl ?? '');
-  const [githubUrl, setGithubUrl] = useState(firstProfile?.githubUrl ?? '');
-  const [websiteUrl, setWebsiteUrl] = useState(firstProfile?.websiteUrl ?? '');
-  const [previousTalkLink, setPreviousTalkLink] = useState('');
-  const [howDidYouHear, setHowDidYouHear] = useState('');
-  const [coSpeakerEmails, setCoSpeakerEmails] = useState('');
-  const [accessibilityNeeds, setAccessibilityNeeds] = useState('');
-  const [travelSupportLocation, setTravelSupportLocation] = useState('');
-  const [checks, setChecks] = useState<Record<string, boolean>>({ isOpenToAudienceQuestions: true });
+  const [track, setTrack] = useState<DevfestTrack | ''>(knownChoice(DEVFEST_TRACKS, editingDevfest?.track));
+  const [devfestFormat, setDevfestFormat] = useState<DevfestFormat | ''>(knownChoice(DEVFEST_FORMATS, editingDevfest?.format));
+  const [level, setLevel] = useState<DevfestLevel | ''>(knownChoice(DEVFEST_LEVELS, editingDevfest?.experienceLevel));
+  const [tagline, setTagline] = useState(editingDevfest ? editingDevfest.speakerTagline : firstProfile?.tagline ?? '');
+  const [linkedinUrl, setLinkedinUrl] = useState(editingDevfest ? editingDevfest.linkedinUrl : firstProfile?.linkedinUrl ?? '');
+  const [githubUrl, setGithubUrl] = useState(editingDevfest ? editingDevfest.githubUrl : firstProfile?.githubUrl ?? '');
+  const [websiteUrl, setWebsiteUrl] = useState(editingDevfest ? editingDevfest.websiteUrl : firstProfile?.websiteUrl ?? '');
+  const [previousTalkLink, setPreviousTalkLink] = useState(editingDevfest?.previousTalkLink ?? '');
+  const [howDidYouHear, setHowDidYouHear] = useState(editingDevfest?.howDidYouHear ?? '');
+  const [coSpeakerEmails, setCoSpeakerEmails] = useState(editingDevfest?.coSpeakerEmails ?? '');
+  const [accessibilityNeeds, setAccessibilityNeeds] = useState(editingDevfest?.accessibilityNeeds ?? '');
+  const [travelSupportLocation, setTravelSupportLocation] = useState(editingDevfest?.travelSupportLocation ?? '');
+  const [checks, setChecks] = useState<Record<string, boolean>>(
+    editingDevfest
+      ? Object.fromEntries(DEVFEST_CHECKBOXES.map((box) => [box.key, editingDevfest[box.key as keyof typeof editingDevfest] === true]))
+      : { isOpenToAudienceQuestions: true }
+  );
 
   function chooseProfile(nextId: string) {
     setProfileId(nextId);
@@ -214,7 +230,7 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
   }
 
   function missingRequired(): string | null {
-    if (!profile && !name.trim()) return 'Please enter your name.';
+    if (!isEditing && !profile && !name.trim()) return 'Please enter your name.';
     if (!talkTitle.trim()) return 'Please give your talk a title.';
     if (!abstract.trim()) return 'Please add an abstract.';
     if (kind === 'meetup') {
@@ -259,8 +275,15 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
             ...Object.fromEntries(DEVFEST_CHECKBOXES.map((box) => [box.key, checks[box.key] === true])),
           };
     startTransition(async () => {
-      const result = await submitPortalProposal({ kind, profileId: profile?.id ?? null, name, savedTalkId, fields });
-      if (result.error) setAlertMessage(result.error);
+      const result = editing
+        ? await updatePortalProposal(editing.proposal.kind, editing.proposalId, fields)
+        : await submitPortalProposal({ kind, profileId: profile?.id ?? null, name, savedTalkId, fields });
+      if (result.error) {
+        setAlertMessage(result.error);
+        // An edit can be refused because an organiser has just decided; the list underneath then
+        // drops its Edit button.
+        if (editing) router.refresh();
+      }
       else {
         setSubmitted(true);
         // The new proposal appears in the list underneath straight away.
@@ -272,9 +295,11 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
   if (submitted) {
     return (
       <div role="status" className="rounded-3xl bg-google-green/10 px-6 py-6 sm:px-8">
-        <p className="text-xl font-bold text-google-green mb-3">Proposal sent</p>
+        <p className="text-xl font-bold text-google-green mb-3">{isEditing ? 'Changes saved' : 'Proposal sent'}</p>
         <p className="text-white/70 leading-relaxed mb-6">
-          Thanks! We&rsquo;ve emailed you a copy. Our organisers will read it and get back to you by email.
+          {isEditing
+            ? 'Our organisers will read the updated version. You can keep changing it until they make a decision.'
+            : <>Thanks! We&rsquo;ve emailed you a copy. Our organisers will read it and get back to you by email.</>}
         </p>
         <button type="button" onClick={onClose} aria-label="Close the proposal form" className={secondaryButton}>
           Close
@@ -293,10 +318,16 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
   return (
     <>
       <form onSubmit={handleSubmit} noValidate className="space-y-8">
-        <Choice name="kind" legend="Where would you like to speak?" options={kindOptions} selected={kind} onSelect={setKind} />
-        {!openDevfest && <p className={`${hintClass} -mt-5`}>DevFest&rsquo;s Call for Speakers isn&rsquo;t open right now. It will appear here when it is.</p>}
+        {editing ? (
+          <p className="text-white/70">Proposed as <span className="font-bold text-white">{editing.proposal.name}</span>.</p>
+        ) : (
+          <>
+            <Choice name="kind" legend="Where would you like to speak?" options={kindOptions} selected={kind} onSelect={setKind} />
+            {!openDevfest && <p className={`${hintClass} -mt-5`}>DevFest&rsquo;s Call for Speakers isn&rsquo;t open right now. It will appear here when it is.</p>}
+          </>
+        )}
 
-        {profiles.length > 1 ? (
+        {isEditing ? null : profiles.length > 1 ? (
           <div>
             <label htmlFor="proposal-profile" className={labelClass}>Proposing as</label>
             <select id="proposal-profile" value={profileId} onChange={(event) => chooseProfile(event.target.value)} className={inputNormal}>
@@ -309,7 +340,7 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
           <TextField id="proposal-name" label="Your full name" value={name} onChange={setName} isRequired maxLength={MEETUP_PROPOSAL_LIMITS.name} />
         )}
 
-        {savedTalks.length > 0 && (
+        {!isEditing && savedTalks.length > 0 && (
           <div>
             <label htmlFor="proposal-saved-talk" className={labelClass}>Start from a saved talk</label>
             <select id="proposal-saved-talk" value={savedTalkId ?? ''} onChange={(event) => startFromSavedTalk(event.target.value)} className={inputNormal}>
@@ -344,7 +375,7 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
               onSelect={setMeetupFormat}
             />
             <TextField id="proposal-audience" label="Who is it for?" value={audience} onChange={setAudience} isRequired rows={3} maxLength={MEETUP_PROPOSAL_LIMITS.audience} hint="The level and background you have in mind." />
-            <TextField id="proposal-bio" label="Speaker bio" value={bio} onChange={setBio} isRequired rows={5} maxLength={MEETUP_PROPOSAL_LIMITS.bio} hint={profile ? 'Filled in from your profile. Changing it here changes only this proposal.' : undefined} />
+            <TextField id="proposal-bio" label="Speaker bio" value={bio} onChange={setBio} isRequired rows={5} maxLength={MEETUP_PROPOSAL_LIMITS.bio} hint={profile && !isEditing ? 'Filled in from your profile. Changing it here changes only this proposal.' : undefined} />
             <TextField id="proposal-profile-url" label="LinkedIn or website" value={profileUrl} onChange={setProfileUrl} maxLength={MEETUP_PROPOSAL_LIMITS.profileUrl} />
             <TextField id="proposal-experience" label="Speaking experience" value={speakingExperience} onChange={setSpeakingExperience} rows={3} maxLength={MEETUP_PROPOSAL_LIMITS.speakingExperience} hint="Optional. Links to past talks are welcome. First-timers too." />
             <TextField id="proposal-notes" label="Anything else?" value={notes} onChange={setNotes} rows={3} maxLength={MEETUP_PROPOSAL_LIMITS.notes} hint="Optional. Dates that suit you, equipment you need, anything we should know." />
@@ -355,7 +386,7 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
             <Choice name="devfest-format" legend={<>Format{required}</>} options={DEVFEST_FORMATS} selected={devfestFormat} onSelect={setDevfestFormat} />
             <Choice name="devfest-level" legend={<>Level{required}</>} options={DEVFEST_LEVELS} selected={level} onSelect={setLevel} />
             <TextField id="proposal-tagline" label="Tagline" value={tagline} onChange={setTagline} maxLength={200} hint="Your role and company, or a one-line intro." />
-            <TextField id="proposal-devfest-bio" label="Speaker bio" value={bio} onChange={setBio} rows={5} maxLength={1000} hint={profile ? 'Filled in from your profile. Changing it here changes only this proposal.' : undefined} />
+            <TextField id="proposal-devfest-bio" label="Speaker bio" value={bio} onChange={setBio} rows={5} maxLength={1000} hint={profile && !isEditing ? 'Filled in from your profile. Changing it here changes only this proposal.' : undefined} />
             <div className="grid gap-6 sm:grid-cols-3">
               <TextField id="proposal-linkedin" label="LinkedIn" value={linkedinUrl} onChange={setLinkedinUrl} maxLength={500} />
               <TextField id="proposal-github" label="GitHub" value={githubUrl} onChange={setGithubUrl} maxLength={500} />
@@ -387,19 +418,27 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
         )}
 
         <div className="flex flex-wrap items-center gap-3">
-          <button type="submit" disabled={isPending} aria-label="Send your proposal" className={primaryButton}>
-            {isPending ? 'Working…' : 'Send proposal'}
+          <button type="submit" disabled={isPending} aria-label={isEditing ? 'Save the changes to your proposal' : 'Send your proposal'} className={primaryButton}>
+            {isPending ? 'Working…' : isEditing ? 'Save changes' : 'Send proposal'}
           </button>
+          {!isEditing && (
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={handleSaveForLater}
+              aria-label={savedTalkId ? 'Save changes to this saved talk without sending it' : 'Save this talk for later without sending it'}
+              className={`${secondaryButton} text-base px-6 py-2.5`}
+            >
+              {savedTalkId ? 'Update saved talk' : 'Save for later'}
+            </button>
+          )}
           <button
             type="button"
             disabled={isPending}
-            onClick={handleSaveForLater}
-            aria-label={savedTalkId ? 'Save changes to this saved talk without sending it' : 'Save this talk for later without sending it'}
+            onClick={onClose}
+            aria-label={isEditing ? 'Close the form without saving your changes' : 'Close the proposal form without sending'}
             className={`${secondaryButton} text-base px-6 py-2.5`}
           >
-            {savedTalkId ? 'Update saved talk' : 'Save for later'}
-          </button>
-          <button type="button" disabled={isPending} onClick={onClose} aria-label="Close the proposal form without sending" className={`${secondaryButton} text-base px-6 py-2.5`}>
             Cancel
           </button>
           {savedMessage && <p role="status" className="text-sm text-google-green">{savedMessage}</p>}

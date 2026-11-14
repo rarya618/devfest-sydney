@@ -260,6 +260,7 @@ export type MeetupProposalFields = Omit<
   | 'confirmByDate'
   | 'speakerConfirmedAt'
   | 'confirmation'
+  | 'editedAt'
 >;
 
 
@@ -382,4 +383,105 @@ export async function fileMeetupProposal(
     console.error('Resend email failed for meetup proposal:', proposal.email);
   }
   return created.id;
+}
+
+// ---------------------------------------------------------------------------------------
+// Editing a proposal from the speaker portal
+// ---------------------------------------------------------------------------------------
+
+export type ProposalKind = 'devfest' | 'meetup';
+
+const PROPOSAL_COLLECTIONS: Record<ProposalKind, string> = { devfest: 'submissions', meetup: 'meetupProposals' };
+
+// What a speaker may change on their own proposal: everything they typed except who it is from
+// (name and email, which stay with organisers as on profiles). Where it came from (tracking,
+// source, savedTalkId) and the review record are never touched.
+export const DEVFEST_EDITABLE_FIELDS = [
+  'talkTitle',
+  'abstract',
+  'format',
+  'track',
+  'experienceLevel',
+  'linkedinUrl',
+  'githubUrl',
+  'websiteUrl',
+  'speakerTagline',
+  'speakerBio',
+  'previousTalkLink',
+  'howDidYouHear',
+  'coSpeakerEmails',
+  'accessibilityNeeds',
+  'requiresTravelSupport',
+  'travelSupportLocation',
+  'isGoogleDeveloperExpert',
+  'isFirstTimeSpeaker',
+  'wantsMentoring',
+  'hasSpokenAtGdgSydneyBefore',
+  'isOpenToAudienceQuestions',
+  'optOutOfRecording',
+] as const satisfies readonly (keyof DevfestProposalPayload)[];
+
+export const MEETUP_EDITABLE_FIELDS = [
+  'talkTitle',
+  'format',
+  'abstract',
+  'audience',
+  'bio',
+  'profileUrl',
+  'speakingExperience',
+  'notes',
+] as const satisfies readonly (keyof MeetupProposalFields)[];
+
+export type ProposalEditOutcome =
+  | { outcome: 'saved' | 'unchanged' | 'not-found' | 'decided' }
+  | { outcome: 'invalid'; message: string };
+
+class ProposalDecidedError extends Error {}
+
+// Rewrites a speaker's own proposal in place while it is still pending (decided 2026-11-14:
+// DevFest ones too, after the CfS has closed). Checked by the same validator as filing, with the
+// stored name and the owner's email, and stamped with editedAt so the admin shows it was changed.
+// The status check and the write share a transaction, so an edit can't land on a proposal an
+// organiser accepted or rejected a moment earlier. Throws when Firestore fails.
+export async function editOwnProposal(
+  kind: ProposalKind,
+  proposalId: string,
+  ownerEmail: string,
+  fields: Record<string, unknown>
+): Promise<ProposalEditOutcome> {
+  if (!proposalId || proposalId.includes('/')) return { outcome: 'not-found' };
+  const reference = adminDb.collection(PROPOSAL_COLLECTIONS[kind]).doc(proposalId);
+  const snapshot = await reference.get();
+  const stored = snapshot.data();
+  if (!stored || stored.email !== ownerEmail) return { outcome: 'not-found' };
+  if (stored.status !== 'pending') return { outcome: 'decided' };
+
+  const body = { ...fields, name: String(stored.name ?? ''), email: ownerEmail };
+  let changes: Record<string, unknown>;
+  try {
+    if (kind === 'devfest') {
+      const validated = validateDevfestProposal(body);
+      changes = Object.fromEntries(DEVFEST_EDITABLE_FIELDS.map((key) => [key, validated[key]]));
+    } else {
+      const validated = validateMeetupProposal(body);
+      changes = Object.fromEntries(MEETUP_EDITABLE_FIELDS.map((key) => [key, validated[key]]));
+    }
+  } catch (error) {
+    return { outcome: 'invalid', message: error instanceof Error ? error.message : 'Please check your proposal and try again.' };
+  }
+
+  const hasChanges = Object.entries(changes).some(([key, value]) => (stored[key] ?? (typeof value === 'boolean' ? false : '')) !== value);
+  if (!hasChanges) return { outcome: 'unchanged' };
+
+  try {
+    await adminDb.runTransaction(async (transaction) => {
+      const current = (await transaction.get(reference)).data();
+      if (!current || current.email !== ownerEmail || current.status !== 'pending') throw new ProposalDecidedError();
+      transaction.update(reference, { ...changes, editedAt: FieldValue.serverTimestamp() });
+    });
+  } catch (error) {
+    if (error instanceof ProposalDecidedError) return { outcome: 'decided' };
+    throw error;
+  }
+  return { outcome: 'saved' };
 }

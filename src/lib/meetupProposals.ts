@@ -34,6 +34,7 @@ export async function fetchMeetupProposals(): Promise<MeetupProposal[]> {
       acceptanceEmailSentBy: proposalData.acceptanceEmailSentBy ?? '',
       confirmByDate: toIsoOrNull(proposalData.confirmByDate),
       speakerConfirmedAt: toIsoOrNull(proposalData.speakerConfirmedAt),
+      editedAt: toIsoOrNull(proposalData.editedAt),
       confirmation: proposalData.speakerConfirmedAt ? 'confirmed' : proposalData.acceptanceEmailSentAt ? 'awaiting' : 'not-emailed',
       reviewerNotes: ((proposalData.reviewerNotes ?? []) as Array<{
         text?: string;

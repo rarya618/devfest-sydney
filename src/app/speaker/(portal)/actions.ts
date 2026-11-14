@@ -18,7 +18,14 @@ import {
   type SavedTalkFields,
 } from '@/lib/portalLabels';
 import { loadOwnedSavedTalk } from '@/lib/portalSavedTalks';
-import { fileDevfestProposal, fileMeetupProposal, validateDevfestProposal, validateMeetupProposal } from '@/lib/proposalFiling';
+import {
+  editOwnProposal,
+  fileDevfestProposal,
+  fileMeetupProposal,
+  validateDevfestProposal,
+  validateMeetupProposal,
+  type ProposalKind,
+} from '@/lib/proposalFiling';
 import { normaliseProfileUrl } from '@/lib/speakers';
 
 const SESSION_EXPIRED = 'You have been signed out. Please sign in again to carry on.';
@@ -322,4 +329,38 @@ export async function submitPortalProposal(input: PortalProposalInput): Promise<
 
   revalidatePath('/speaker');
   return {};
+}
+
+// Saves changes to one of the address's own proposals, while nobody has decided on it yet.
+// Organisers aren't emailed; the admin marks the proposal as edited (decided 2026-11-14).
+export async function updatePortalProposal(
+  kind: ProposalKind,
+  proposalId: string,
+  fields: Record<string, unknown>
+): Promise<{ error?: string }> {
+  if (kind !== 'devfest' && kind !== 'meetup') return { error: "We couldn't find this proposal under your email address." };
+  try {
+    const session = await getPortalSession();
+    if (!session) return { error: SESSION_EXPIRED };
+
+    const result = await editOwnProposal(kind, proposalId, session.email, fields);
+    switch (result.outcome) {
+      case 'not-found':
+        return { error: "We couldn't find this proposal under your email address." };
+      case 'decided':
+        return { error: 'Our organisers have already made a decision on this proposal, so it can no longer be changed. Reply to any of our emails if something needs fixing.' };
+      case 'invalid':
+        return { error: result.message };
+      case 'unchanged':
+        return {};
+      case 'saved':
+        revalidatePath('/speaker');
+        revalidatePath('/admin');
+        revalidatePath('/admin/meetups');
+        return {};
+    }
+  } catch (error) {
+    console.error('Portal proposal edit failed:', error);
+    return { error: "We couldn't save your changes just now. Please try again in a moment." };
+  }
 }

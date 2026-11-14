@@ -114,6 +114,8 @@ export interface Submission {
   // speaker on its own, for the same reason acceptance doesn't.
   rejectionEmailSentAt: string | null; // ISO date string
   rejectionEmailSentBy: string;
+  // Set when the speaker last edited the proposal from the speaker portal; null if never.
+  editedAt: string | null; // ISO date string
 }
 
 // One person's signup for one event, with their GDG-wide profile (`volunteerProfiles`, stage
@@ -288,6 +290,8 @@ export interface MeetupProposal {
   confirmByDate: string | null;
   speakerConfirmedAt: string | null;
   confirmation: SpeakerConfirmation;
+  // Set when the speaker last edited the proposal from the speaker portal; null if never.
+  editedAt: string | null;
 }
 
 // Whether the speaker behind a promoted talk has actually been told and has confirmed.

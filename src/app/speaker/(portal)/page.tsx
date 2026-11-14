@@ -12,6 +12,7 @@ import type { GdgEvent } from '@/lib/types';
 import PortalShell from './PortalShell';
 import SavedTalksSection, { type SavedTalkRow } from './SavedTalksSection';
 import DashboardWorkspace from './DashboardWorkspace';
+import EditProposalButton from './EditProposalButton';
 import { pageHeading, sectionHeading } from './portalStyles';
 
 export const dynamic = 'force-dynamic';
@@ -115,6 +116,7 @@ function Proposals({ proposals }: { proposals: PortalProposal[] }) {
                   Confirm your spot
                 </a>
               )}
+              {proposal.editable && <EditProposalButton proposalId={proposal.id} talkTitle={proposal.talkTitle} />}
             </div>
             <div className="mt-4">
               <ProposalProgress proposal={proposal} />
@@ -184,6 +186,9 @@ export default async function PortalHomePage({ searchParams }: PortalHomePagePro
           greeting={firstName ? `Hi, ${firstName}.` : 'Welcome.'}
           openDevfest={devfest && isFlowOpen(devfest, 'cfs') ? { name: devfest.name, closesAt: devfest.cfs.closesAt } : null}
           savedTalks={savedTalks.map(({ id, talkTitle, abstract, audience }) => ({ id, talkTitle, abstract, audience }))}
+          editableProposals={overview.proposals.flatMap((proposal) =>
+            proposal.editable ? [{ id: proposal.id, talkTitle: proposal.talkTitle, editable: proposal.editable }] : []
+          )}
           requestedPanel={
             edit ? { type: 'profile', profileId: edit } : propose !== undefined ? { type: 'propose', savedTalkId: propose || null } : null
           }

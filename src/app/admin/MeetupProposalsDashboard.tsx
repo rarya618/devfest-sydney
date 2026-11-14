@@ -288,6 +288,11 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
             </span>
             <span className="text-white/50 text-xs font-bold">&middot;</span>
             <span className="text-xs font-bold text-white/55">{formatDate(proposal.submittedAt)}</span>
+            {proposal.editedAt && (
+              <span className="text-xs font-bold text-google-yellow" title={`The speaker edited this proposal on ${formatDate(proposal.editedAt)}`}>
+                Edited {formatDate(proposal.editedAt)}
+              </span>
+            )}
           </div>
         </div>
 

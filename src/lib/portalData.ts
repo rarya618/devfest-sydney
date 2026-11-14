@@ -3,6 +3,12 @@ import { adminDb } from '@/lib/firebase-admin';
 import { toGdgEvent } from '@/lib/events';
 import { normaliseProfileUrl } from '@/lib/speakers';
 import { confirmUrl } from '@/lib/speakerConfirm';
+import {
+  DEVFEST_EDITABLE_FIELDS,
+  MEETUP_EDITABLE_FIELDS,
+  type DevfestProposalPayload,
+  type MeetupProposalFields,
+} from '@/lib/proposalFiling';
 import type { GdgEvent, GdgEventType } from '@/lib/types';
 
 // What the speaker portal shows a signed-in address (see portalAuth.ts): the people in
@@ -53,6 +59,40 @@ export interface PortalProposal {
   confirmUrl: string | null;
   // The saved talk it was proposed from (src/lib/portalSavedTalks.ts), if any.
   savedTalkId: string | null;
+  // What the edit form starts from, while the speaker can still change it: only a proposal
+  // nobody has decided on yet (pending), at an event that hasn't passed. Null otherwise.
+  editable: PortalEditableProposal | null;
+}
+
+export type DevfestEditableFields = Pick<DevfestProposalPayload, (typeof DEVFEST_EDITABLE_FIELDS)[number]>;
+export type MeetupEditableFields = Pick<MeetupProposalFields, (typeof MEETUP_EDITABLE_FIELDS)[number]>;
+
+export type PortalEditableProposal =
+  | { kind: 'devfest'; name: string; fields: DevfestEditableFields }
+  | { kind: 'meetup'; name: string; fields: MeetupEditableFields };
+
+const DEVFEST_BOOLEAN_FIELDS: ReadonlySet<string> = new Set([
+  'requiresTravelSupport',
+  'isGoogleDeveloperExpert',
+  'isFirstTimeSpeaker',
+  'wantsMentoring',
+  'hasSpokenAtGdgSydneyBefore',
+  'isOpenToAudienceQuestions',
+  'optOutOfRecording',
+]);
+
+// The stored values of the fields a speaker may edit. Choices that are missing or unknown come
+// through as text the form doesn't recognise, so the speaker picks again.
+function toEditableProposal(kind: 'devfest' | 'meetup', proposal: FirebaseFirestore.DocumentData): PortalEditableProposal {
+  const name = text(proposal.name);
+  if (kind === 'devfest') {
+    const fields = Object.fromEntries(
+      DEVFEST_EDITABLE_FIELDS.map((key) => [key, DEVFEST_BOOLEAN_FIELDS.has(key) ? proposal[key] === true : text(proposal[key])])
+    ) as DevfestEditableFields;
+    return { kind, name, fields };
+  }
+  const fields = Object.fromEntries(MEETUP_EDITABLE_FIELDS.map((key) => [key, text(proposal[key])])) as MeetupEditableFields;
+  return { kind, name, fields };
 }
 
 export interface PortalOverview {
@@ -178,6 +218,7 @@ export async function loadPortalOverview(email: string): Promise<PortalOverview>
         status,
         confirmUrl: status === 'accepted' ? confirmUrl(doc.id) : null,
         savedTalkId: text(proposal.savedTalkId) || null,
+        editable: proposal.status === 'pending' && status === 'under-review' ? toEditableProposal(kind, proposal) : null,
       };
     })
     .sort((first, second) => String(second.submittedAt).localeCompare(String(first.submittedAt)));

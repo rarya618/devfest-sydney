@@ -20,6 +20,15 @@ import { applicantKey, rejectionEmailBlocker, type RejectionEmailBlocker } from 
 import { csvFilename, downloadCsv, formatCsvBoolean } from '@/lib/csv';
 import { useMobileBarHidden } from './MobileBarContext';
 
+// The speaker changed the proposal from the speaker portal after sending it.
+function EditedMark({ editedAt }: { editedAt: string }) {
+  return (
+    <span className="text-xs font-bold text-google-yellow" title={`The speaker edited this proposal on ${formatDate(editedAt)}`}>
+      Edited {formatDate(editedAt)}
+    </span>
+  );
+}
+
 function toHref(value: string): string | null {
   const trimmed = value.trim();
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
@@ -627,6 +636,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         </span>
         <span className="text-white/50 text-xs font-bold">&middot;</span>
         <span className="text-xs font-bold text-white/55">{formatDate(submission.submittedAt)}</span>
+        {submission.editedAt && <EditedMark editedAt={submission.editedAt} />}
         {submission.status === 'accepted' && <AcceptanceState submission={submission} />}
         {submission.status === 'rejected' && <RejectionEmailState submission={submission} blocker={rejectionBlocker} />}
       </div>
@@ -894,6 +904,7 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
         <span className="hidden sm:flex flex-col items-end shrink-0 text-[11px] text-white/55 leading-snug text-right">
           <span className={`font-bold ${STATUS_DOT_STYLES[submission.status].text}`}>{STATUS_LABELS[submission.status]}</span>
           {formatDate(submission.submittedAt)}
+          {submission.editedAt && <EditedMark editedAt={submission.editedAt} />}
         </span>
 
         {submission.status === 'accepted' && (
@@ -1073,6 +1084,7 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
               <span className={`font-bold ${STATUS_DOT_STYLES[submission.status].text}`}>{STATUS_LABELS[submission.status]}</span>
               <span>&middot;</span>
               <span>{formatDate(submission.submittedAt)}</span>
+              {submission.editedAt && <EditedMark editedAt={submission.editedAt} />}
             </div>
             <p className="text-sm text-white/65 leading-relaxed whitespace-pre-wrap break-words">{submission.abstract}</p>
             {submission.speakerBio && (

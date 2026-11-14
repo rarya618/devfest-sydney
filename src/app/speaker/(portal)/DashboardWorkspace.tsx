@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import type { PortalEditableProposal } from '@/lib/portalData';
 import type { SavedTalkFields } from '@/lib/portalLabels';
 import ProfileEditorPanel, { type EditableProfile } from './ProfileEditorPanel';
 import ProposalForm from './ProposalForm';
@@ -9,14 +10,27 @@ import SpeakerCard, { type SpeakerCardProfile } from './SpeakerCard';
 import { revealPanel } from './revealPanel';
 import { pageHeading, primaryButton, secondaryButton } from './portalStyles';
 
-// The dashboard is one page: editing a profile and proposing a talk open in a panel at the top
+// The dashboard is one page: editing a profile, proposing a talk and editing a proposal open in a panel at the top
 // of the right-hand column rather than on pages of their own, so nothing else moves away. One
 // panel at a time. Saved-talk forms open in their own section (SavedTalksSection).
 
-type Panel = null | { type: 'profile'; profileId: string } | { type: 'propose'; savedTalkId: string | null };
+type Panel =
+  | null
+  | { type: 'profile'; profileId: string }
+  | { type: 'propose'; savedTalkId: string | null }
+  // The proposal as it was when opened, so the form stays put if a refresh drops it from the list.
+  | { type: 'edit-proposal'; proposal: EditableProposalEntry };
 
 interface DashboardPanels {
   openPropose: (savedTalkId: string | null, openerId: string) => void;
+  openEditProposal: (proposalId: string, openerId: string) => void;
+}
+
+// A proposal the speaker can still change (see PortalProposal.editable).
+export interface EditableProposalEntry {
+  id: string;
+  talkTitle: string;
+  editable: PortalEditableProposal;
 }
 
 const DashboardPanelsContext = createContext<DashboardPanels | null>(null);
@@ -34,6 +48,7 @@ interface DashboardWorkspaceProps {
   // The current DevFest, when its Call for Speakers is open.
   openDevfest: { name: string; closesAt: string | null } | null;
   savedTalks: (SavedTalkFields & { id: string })[];
+  editableProposals: EditableProposalEntry[];
   // From the URL: ?edit=<speakerId> (the header's profile button) or ?propose (optionally
   // =<savedTalkId>) opens that panel straight away.
   requestedPanel: Panel;
@@ -53,7 +68,15 @@ function isValidPanel(panel: Panel, profiles: EditableProfile[]): boolean {
   return true;
 }
 
-export default function DashboardWorkspace({ greeting, profiles, openDevfest, savedTalks, requestedPanel, children }: DashboardWorkspaceProps) {
+export default function DashboardWorkspace({
+  greeting,
+  profiles,
+  openDevfest,
+  savedTalks,
+  editableProposals,
+  requestedPanel,
+  children,
+}: DashboardWorkspaceProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [panel, setPanel] = useState<Panel>(isValidPanel(requestedPanel, profiles) ? requestedPanel : null);
@@ -93,6 +116,10 @@ export default function DashboardWorkspace({ greeting, profiles, openDevfest, sa
 
   const panels: DashboardPanels = {
     openPropose: (savedTalkId, openerId) => open({ type: 'propose', savedTalkId }, openerId),
+    openEditProposal: (proposalId, openerId) => {
+      const proposal = editableProposals.find((candidate) => candidate.id === proposalId);
+      if (proposal) open({ type: 'edit-proposal', proposal }, openerId);
+    },
   };
 
   const handlePreviewChange = useCallback((profile: SpeakerCardProfile, isPhotoBusy: boolean) => {
@@ -100,7 +127,12 @@ export default function DashboardWorkspace({ greeting, profiles, openDevfest, sa
   }, []);
 
   function close() {
-    const fallbackFocus = panel?.type === 'profile' ? `edit-profile-${panel.profileId}` : 'propose-button';
+    const fallbackFocus =
+      panel?.type === 'profile'
+        ? `edit-profile-${panel.profileId}`
+        : panel?.type === 'edit-proposal'
+          ? `edit-proposal-${panel.proposal.id}`
+          : 'propose-button';
     setPanel(null);
     setPreview(null);
     // Drop ?edit= or ?propose so a reload doesn't reopen the panel.
@@ -111,6 +143,7 @@ export default function DashboardWorkspace({ greeting, profiles, openDevfest, sa
   }
 
   const editingProfile = panel?.type === 'profile' ? profiles.find((profile) => profile.id === panel.profileId) ?? null : null;
+  const editingProposal = panel?.type === 'edit-proposal' ? panel.proposal : null;
 
   return (
     <DashboardPanelsContext.Provider value={panels}>
@@ -209,6 +242,22 @@ export default function DashboardWorkspace({ greeting, profiles, openDevfest, sa
                     openDevfest={openDevfest}
                     savedTalks={savedTalks}
                     initialSavedTalkId={panel.savedTalkId}
+                    onClose={close}
+                  />
+                </>
+              ) : editingProposal ? (
+                <>
+                  <h2 id="dashboard-panel-heading" className="mb-2 text-xl font-bold text-off-white">Edit your proposal</h2>
+                  <p className="mb-8 text-sm text-white/60 leading-relaxed">
+                    You can change it until our organisers make a decision. They&rsquo;ll see that it was edited.
+                  </p>
+                  <ProposalForm
+                    key={`edit:${editingProposal.id}:${panelOpenedAt}`}
+                    profiles={profiles}
+                    openDevfest={openDevfest}
+                    savedTalks={savedTalks}
+                    initialSavedTalkId={null}
+                    editing={{ proposalId: editingProposal.id, proposal: editingProposal.editable }}
                     onClose={close}
                   />
                 </>
