@@ -6,7 +6,7 @@ import Alert from '@/components/Alert';
 import { hintClass, inputNormal, labelClass } from '@/lib/formStyles';
 import { PORTAL_PROFILE_LIMITS, type PortalProfileFields } from '@/lib/portalLabels';
 import { removePortalPhoto, updatePortalProfile, uploadPortalPhoto } from './actions';
-import type { SpeakerCardProfile } from './SpeakerCard';
+import type { SpeakerCardProfile } from '@/components/SpeakerCard';
 import { dangerOutlineButton, primaryButton, secondaryButton } from './portalStyles';
 
 export interface EditableProfile extends SpeakerCardProfile {

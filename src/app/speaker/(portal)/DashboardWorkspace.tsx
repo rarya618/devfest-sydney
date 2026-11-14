@@ -6,7 +6,7 @@ import type { PortalEditableProposal } from '@/lib/portalData';
 import type { SavedTalkFields } from '@/lib/portalLabels';
 import ProfileEditorPanel, { type EditableProfile } from './ProfileEditorPanel';
 import ProposalForm from './ProposalForm';
-import SpeakerCard, { type SpeakerCardProfile } from './SpeakerCard';
+import SpeakerCard, { type SpeakerCardProfile } from '@/components/SpeakerCard';
 import { revealPanel } from './revealPanel';
 import { pageHeading, primaryButton, secondaryButton } from './portalStyles';
 

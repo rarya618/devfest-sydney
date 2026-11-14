@@ -2,8 +2,9 @@ import Image from 'next/image';
 import { getInitials } from '@/lib/format';
 
 // How a speaker appears next to their talks on our public pages, drawn from their profile.
-// Shared by the dashboard and the profile editor, where it updates as they type. No hooks
-// and no server imports, so it renders on either side.
+// Shared by the speaker portal (the dashboard, and the profile editor, where it updates as
+// they type) and the admin's preview on All speakers. No hooks and no server imports, so it
+// renders on either side.
 
 export interface SpeakerCardProfile {
   name: string;
@@ -21,6 +22,9 @@ interface SpeakerCardProps {
   showFullBio?: boolean;
   // Replaces the photo with a pulsing placeholder while a new one uploads.
   isPhotoLoading?: boolean;
+  // Who is looking: the speaker at their own card (the portal), or an organiser (the admin).
+  // Only the screen-reader wording changes.
+  viewer?: 'speaker' | 'organiser';
 }
 
 const LINK_LABELS: { key: 'linkedinUrl' | 'githubUrl' | 'websiteUrl'; label: string }[] = [
@@ -29,13 +33,17 @@ const LINK_LABELS: { key: 'linkedinUrl' | 'githubUrl' | 'websiteUrl'; label: str
   { key: 'websiteUrl', label: 'Website' },
 ];
 
-export default function SpeakerCard({ profile, showFullBio = false, isPhotoLoading = false }: SpeakerCardProps) {
+export default function SpeakerCard({ profile, showFullBio = false, isPhotoLoading = false, viewer = 'speaker' }: SpeakerCardProps) {
   const links = LINK_LABELS.filter((link) => profile[link.key]);
+  const isOwnCard = viewer === 'speaker';
   return (
-    <article aria-label={`Your public speaker card, as ${profile.name}`} className="rounded-3xl bg-white/[0.05] p-3">
+    <article
+      aria-label={isOwnCard ? `Your public speaker card, as ${profile.name}` : `${profile.name}'s public speaker card`}
+      className="rounded-3xl bg-white/[0.05] p-3"
+    >
       <div className="relative aspect-square w-full overflow-hidden rounded-[1.25rem] bg-white/[0.06]">
         {isPhotoLoading ? (
-          <div aria-label="Uploading your photo" className="absolute inset-0 animate-pulse bg-white/10" />
+          <div aria-label={isOwnCard ? 'Uploading your photo' : 'Uploading the photo'} className="absolute inset-0 animate-pulse bg-white/10" />
         ) : profile.photoUrl ? (
           <Image src={profile.photoUrl} alt={`Photo of ${profile.name}`} fill sizes="(min-width: 1024px) 320px, 100vw" className="object-cover" />
         ) : (
@@ -56,14 +64,14 @@ export default function SpeakerCard({ profile, showFullBio = false, isPhotoLoadi
           <p className={`mt-4 text-sm text-white/65 leading-relaxed whitespace-pre-line ${showFullBio ? '' : 'line-clamp-4'}`}>{profile.bio}</p>
         )}
         {links.length > 0 && (
-          <ul className="mt-4 flex flex-wrap gap-2" aria-label="Your links">
+          <ul className="mt-4 flex flex-wrap gap-2" aria-label={isOwnCard ? 'Your links' : `${profile.name}'s links`}>
             {links.map((link) => (
               <li key={link.key}>
                 <a
                   href={profile[link.key]}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={`Your ${link.label} link, opens in a new tab`}
+                  aria-label={`${isOwnCard ? 'Your' : `${profile.name}'s`} ${link.label} link, opens in a new tab`}
                   className="inline-flex px-3 py-1 rounded-full border border-white/20 text-xs font-bold text-white/80 hover:border-white/60"
                 >
                   {link.label}

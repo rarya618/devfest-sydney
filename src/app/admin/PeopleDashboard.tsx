@@ -1,8 +1,10 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import Alert from '@/components/Alert';
+import SpeakerCard from '@/components/SpeakerCard';
 import EditSpeakerModal from './EditSpeakerModal';
 import { getInitials } from '@/lib/format';
 import type { PersonWithTalks } from '@/lib/people';
@@ -12,7 +14,56 @@ import { useMobileBarHidden } from './MobileBarContext';
 // profile per person, and the talks they have given. The profile edited here is the one
 // every one of their talks shows; a talk itself is edited on DevFest > Speakers.
 
-function PersonCard({ person, onEdit }: { person: PersonWithTalks; onEdit: () => void }) {
+// The speaker's public card, exactly as the speaker portal shows it to them ("This is how you
+// appear next to your talks"), with the full bio. Escape or the backdrop closes it.
+function SpeakerPreviewDialog({ person, onClose }: { person: PersonWithTalks; onClose: () => void }) {
+  const closeButton = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    closeButton.current?.focus();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  return createPortal(
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Preview of ${person.name}'s speaker card`}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-40 flex justify-center bg-black/70 p-4 overflow-y-auto"
+    >
+      {/* my-auto rather than items-center: centred when it fits, and scrollable from its top
+          when the card (a long bio) is taller than the screen, instead of cut off above. */}
+      <div className="w-full max-w-sm my-auto py-4">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <p className="text-sm text-white/70">How {person.name} appears next to their talks</p>
+          <button
+            ref={closeButton}
+            type="button"
+            onClick={onClose}
+            aria-label="Close the preview"
+            className="shrink-0 inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.08] text-white/70 hover:bg-white/[0.14] hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <path d="M4.47 4.47a.75.75 0 0 1 1.06 0L8 6.94l2.47-2.47a.75.75 0 1 1 1.06 1.06L9.06 8l2.47 2.47a.75.75 0 1 1-1.06 1.06L8 9.06l-2.47 2.47a.75.75 0 0 1-1.06-1.06L6.94 8 4.47 5.53a.75.75 0 0 1 0-1.06z" />
+            </svg>
+          </button>
+        </div>
+        <div className="rounded-3xl bg-black-02">
+          <SpeakerCard profile={person} showFullBio viewer="organiser" />
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+function PersonCard({ person, onEdit, onPreview }: { person: PersonWithTalks; onEdit: () => void; onPreview: () => void }) {
   return (
     <div className="bg-surface border-l-4 border-l-google-blue rounded-lg p-5 sm:p-6" aria-label={`Speaker: ${person.name}`}>
       <div className="flex items-start gap-4">
@@ -34,14 +85,25 @@ function PersonCard({ person, onEdit }: { person: PersonWithTalks; onEdit: () =>
           <p className="text-sm text-white/55 truncate">{person.email}</p>
           {person.tagline && <p className="mt-1 text-sm text-white/65">{person.tagline}</p>}
         </div>
-        <button
-          type="button"
-          onClick={onEdit}
-          aria-label={`Edit ${person.name}'s profile`}
-          className="shrink-0 text-xs font-semibold px-3 py-2 rounded-lg border border-white/40 text-white/70 hover:border-white/60 hover:text-white transition-colors"
-        >
-          Edit profile
-        </button>
+        <div className="flex shrink-0 flex-wrap justify-end gap-2">
+          <button
+            id={`preview-${person.id}`}
+            type="button"
+            onClick={onPreview}
+            aria-label={`Preview ${person.name}'s public speaker card`}
+            className="text-xs font-semibold px-3 py-2 rounded-lg border border-white/40 text-white/70 hover:border-white/60 hover:text-white transition-colors"
+          >
+            Preview
+          </button>
+          <button
+            type="button"
+            onClick={onEdit}
+            aria-label={`Edit ${person.name}'s profile`}
+            className="text-xs font-semibold px-3 py-2 rounded-lg border border-white/40 text-white/70 hover:border-white/60 hover:text-white transition-colors"
+          >
+            Edit profile
+          </button>
+        </div>
       </div>
 
       {person.talks.length > 0 ? (
@@ -66,6 +128,14 @@ export default function PeopleDashboard({ people }: { people: PersonWithTalks[] 
   const mobileBarHidden = useMobileBarHidden();
   const [search, setSearch] = useState('');
   const [editing, setEditing] = useState<PersonWithTalks | null>(null);
+  const [previewing, setPreviewing] = useState<PersonWithTalks | null>(null);
+  // Focus goes back to the Preview button that opened it.
+  const closePreview = useCallback(() => {
+    setPreviewing((current) => {
+      if (current) requestAnimationFrame(() => document.getElementById(`preview-${current.id}`)?.focus());
+      return null;
+    });
+  }, []);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
 
@@ -117,7 +187,7 @@ export default function PeopleDashboard({ people }: { people: PersonWithTalks[] 
         ) : (
           <div className="grid grid-cols-1 gap-5 items-start">
             {visiblePeople.map((person) => (
-              <PersonCard key={person.id} person={person} onEdit={() => setEditing(person)} />
+              <PersonCard key={person.id} person={person} onEdit={() => setEditing(person)} onPreview={() => setPreviewing(person)} />
             ))}
           </div>
         )}
@@ -152,6 +222,8 @@ export default function PeopleDashboard({ people }: { people: PersonWithTalks[] 
           }}
         />
       )}
+
+      {previewing && <SpeakerPreviewDialog person={previewing} onClose={closePreview} />}
 
       {alertMessage && <Alert message={alertMessage} onDismiss={dismissAlert} />}
     </>
