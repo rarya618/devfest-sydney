@@ -177,7 +177,7 @@ Event settings (open/closed, deadlines, ticket links) are not env vars: they liv
 | 4f | Meetup talks accepted into general events | Done. Not exercised end to end: no general event exists yet |
 | 4g | Starter guides into Firestore | **Not started** |
 | 5 | Meetups through the pipeline | Intake, review, acceptance and confirmation done (via 4f). Rejection emails, tickets, invites and thank-yous for meetups not done |
-| 6 | Speaker portal | **Built 2026-11-14, not yet exercised in production** (see below) |
+| 6 | Speaker portal | Built 2026-11-14, checked in production the same day (see below). Not yet linked from anywhere |
 
 ### Remaining stage 4 work
 - **4c and 4d cleanup passes (written 2026-11-13):** `scripts/cleanup-speaker-fields.mjs` removes the talk fields, `submissionId`, `promotedAt`, `eventId`, `coSpeakerOf` and the per-speaker sends from all 23 `speakers` documents, and `speakerIds` from all 28 slots. `scripts/cleanup-volunteer-fields.mjs` removes the person fields from all 52 signups; it refuses if a signup has no profile or holds a value its profile lacks (placeholders like "N/A" don't count). Both dry runs pass against production. The code no longer falls back to a signup's own copy: `loadVolunteerRecord` returns null without a profile, and the crew editor writes only to the profile. `firestore.rules` drops the `speakers` and `schedule` blocks (until now `speakers`, emails included, was **publicly readable**) and the public create on `volunteers`. Old code works with the cleaned data and new code with the old data, so the scripts, the push and the rules deploy (`firebase deploy --only firestore:rules`) can happen in any order.
@@ -203,7 +203,7 @@ At `/speaker`, its own area outside `/admin`. Decided 2026-11-14:
 
 ## Next tasks (as of 2026-11-14)
 
-0. **Speaker portal, before telling anyone about it:** deploy, then sign in with an organiser address in production and check the `portal_session` cookie survives App Hosting's CDN (the `admin-devfest` cookie does, so it should). Edit a profile and propose to a meetup end to end. Optionally add TTL policies on `expiresAt` for the three portal collections (`gcloud firestore fields ttls update expiresAt --collection-group=portalSessions --enable-ttl --project devfest-sydney-2026`, and the same for `portalSignInLinks` and `portalSignInRequests`). Then link to it from gdgsydney.com/speak and from the acceptance and thank-you emails.
+0. **Speaker portal, linking it up.** Checked in production 2026-11-14 with an organiser address: the sign-in link, the `portal_session` cookie surviving a fresh load behind the CDN, a profile edit reaching Firestore, and a meetup proposal filed with `source = speaker-portal` (then deleted). Optionally add TTL policies on `expiresAt` for the three portal collections (`gcloud firestore fields ttls update expiresAt --collection-group=portalSessions --enable-ttl --project devfest-sydney-2026`, and the same for `portalSignInLinks` and `portalSignInRequests`). Then link to it from gdgsydney.com/speak and from the acceptance and thank-you emails.
 
 1. **Stage 0, the 2026 clean-up.** Each item waits on something outside the app:
    - **Job board data** (`jobSeekers` 34, `jobListings` 6, still in Firestore): share the two CSVs in `~/Desktop/devfest-2026/` with employers, then delete both collections and the Desktop copies. The open-to-work CSV deliberately has no emails and only the 29 approved profiles, which is what the consent tick covered.
