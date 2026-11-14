@@ -30,6 +30,7 @@ This may include your name, email address, phone number, talk or session details
   },
   {
     slug: 'meetup-proposals',
+    title: 'Meetup talk proposals',
     content: `Talk proposals for our monthly meetups are sent from the Speak page on gdgsydney.com, or by an AI assistant on a speaker's behalf, and are stored and reviewed here. The gdgsydney.com privacy policy (gdgsydney.com/privacy) describes what they contain.
 
 To stop the form being used to flood someone's inbox, we keep a one-way fingerprint of the email address on each proposal for a day. We also note whether a proposal came from the Speak page or from an AI assistant, so our organisers know when they read it.`,
