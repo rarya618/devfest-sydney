@@ -342,7 +342,9 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
               aria-label={`${proposal.acceptanceEmailSentAt ? 'Resend' : 'Send'} the acceptance email for ${proposal.talkTitle}`}
               title={proposal.acceptanceEmailSentAt ? 'Resend acceptance email' : 'Send acceptance email'}
               className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-60 ${
-                proposal.acceptanceEmailSentAt
+                // Highlighted only while the speaker still needs telling: not once sent, nor for a
+                // talk agreed outside the form and confirmed without an email.
+                proposal.acceptanceEmailSentAt || proposal.confirmation === 'confirmed'
                   ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
                   : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
               }`}

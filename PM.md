@@ -90,6 +90,7 @@ All sends are explicit admin actions, never side effects of a status change. Eac
 - **Rejection:** never automatic. Sent per person, not per proposal, within one event (`src/lib/rejectionEligibility.ts`); refused for anyone speaking or with a proposal still pending. Invites them to a meetup instead
 - **Co-speakers:** a second id in a talk's `speakerIds`. No acceptance email (the lead answered); they get their own ticket, invite and thank-you
 - **Meetups:** `/speak` → `meetupProposals` → `/admin/meetups` Accept picks an upcoming general event and creates the talk → acceptance email → `/speaker/confirm`. Moving an accepted proposal back deletes the talk (and the person if they give no other talk)
+- **Talks agreed outside the form** (invited speakers): `scripts/add-agreed-meetup-talks.mjs <talks.json> [--dry-run]` files each as a meetup proposal (`source: organiser`), accepted into a general event and confirmed, with no email, doing what Accept does. The JSON holds emails, so it stays out of the repo. A proposal confirmed this way shows as Confirmed in the portal and the admin
 - `/admin/speakers` rows are (talk, speaker) pairs; profile edits go to the person, talk edits only from the lead's row. Photos upload to `speaker-photos/<id>/` (5 MB JPEG/PNG/WebP; `serverActions.bodySizeLimit` is 6 MB for this)
 
 ### Volunteers
@@ -174,7 +175,7 @@ Event settings (open/closed, deadlines, ticket links) are not env vars: they liv
 | 4c | Speakers split into people and talks | Done and migrated. Cleanup pass written 2026-11-13 (see below) |
 | 4d | Volunteer profiles, invites, volunteer pool, general-event volunteers | Done and migrated (49 profiles, 52 signups). Cleanup pass written 2026-11-13 (see below) |
 | 4e | Copy reads from the event | Done |
-| 4f | Meetup talks accepted into general events | Done. Not exercised end to end: no general event exists yet |
+| 4f | Meetup talks accepted into general events | Done. First general event: `devfest-extended-android-for-the-agentic-era` (1 Dec 2026), with three talks added by script on 2026-11-14 (Jonathon Reid, Katie Barnett, Kartik Arora). Accept from `/admin/meetups` not yet exercised |
 | 4g | Starter guides into Firestore | **Not started** |
 | 5 | Meetups through the pipeline | Intake, review, acceptance and confirmation done (via 4f). Rejection emails, tickets, invites and thank-yous for meetups not done |
 | 6 | Speaker portal | Built 2026-11-14, checked in production the same day (see below). Not yet linked from anywhere |
@@ -214,5 +215,5 @@ At `/speaker`, its own area outside `/admin`. Decided 2026-11-14:
    - **`creditRequests`:** once workshop credits are sent, delete on `/admin/credits`.
    - Then reword the matching `/privacy` sections (Job Board still says "We take the job board down ... after the event") to say the data has been deleted.
 2. **Security leftovers:** rotate the reCAPTCHA key's secret (it once sat in `.env.local` under the site key's name), and decide whether to switch App Check on in production.
-3. **Verify before relying on them** (never exercised with a real send, since every recipient was real): a volunteer invite and `/volunteer/join` submission, and the meetup acceptance flow. Create the first general event in `/admin/events`, then send one of each to an organiser inbox.
+3. **Verify before relying on them** (never exercised with a real send, since every recipient was real): a volunteer invite and `/volunteer/join` submission, and the meetup acceptance flow. Use the Android event (or a test general event), and send one of each to an organiser inbox.
 4. If not yet done: run the two cleanup scripts and deploy the rules (see Remaining stage 4 work). Then 4g.

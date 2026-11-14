@@ -363,8 +363,9 @@ function buildMeetupConfirmationEmail(proposal: MeetupProposalFields): string {
 </html>`;
 }
 
-// Where a meetup proposal came from, shown to admins: the /speak form or the portal.
-export type MeetupProposalSource = 'gdgsydney.com/speak' | 'speaker-portal';
+// Where a meetup proposal came from, shown to admins: the /speak form, the portal, or an
+// organiser adding a talk agreed outside both (scripts/add-agreed-meetup-talks.mjs).
+export type MeetupProposalSource = 'gdgsydney.com/speak' | 'speaker-portal' | 'organiser';
 
 // Stores a meetup proposal (no event yet: one is picked on acceptance) and emails the speaker
 // a copy, bcc hello@. Throws when the write fails; a failed email is logged and swallowed.

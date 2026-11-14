@@ -129,9 +129,10 @@ async function loadEventsById(eventIds: string[]): Promise<Map<string, GdgEvent>
 }
 
 function proposalStatus(proposal: FirebaseFirestore.DocumentData, event: GdgEvent | undefined, now: Date): PortalProposalStatus {
-  if (proposal.status === 'accepted' && proposal.acceptanceEmailSentAt) {
-    return proposal.speakerConfirmedAt ? 'confirmed' : 'accepted';
-  }
+  // A talk agreed with the speaker outside the form is confirmed without an acceptance email
+  // (scripts/add-agreed-meetup-talks.mjs): they already know, since they agreed to it.
+  if (proposal.status === 'accepted' && proposal.speakerConfirmedAt) return 'confirmed';
+  if (proposal.status === 'accepted' && proposal.acceptanceEmailSentAt) return 'accepted';
   if (proposal.status === 'rejected' && proposal.rejectionEmailSentAt) return 'not-selected';
   if (event && now.getTime() >= Date.parse(event.endAt)) return 'closed';
   return 'under-review';
