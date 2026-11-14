@@ -55,6 +55,12 @@ function siteUrl(): string {
   return (process.env.NEXT_PUBLIC_SITE_URL || 'https://app.gdgsydney.com').replace(/\/$/, '');
 }
 
+// The portal's sign-in page, for links in emails. Not a sign-in link itself: those last 30
+// minutes and work once, so one sitting in an inbox would almost always be dead.
+export function portalSignInUrl(): string {
+  return `${siteUrl()}/speaker/sign-in`;
+}
+
 export type SignInLinkRequest = { status: 'sent' } | { status: 'rate-limited'; retryAfterSeconds: number };
 
 // Emails a sign-in link to any well-formed address (the caller validates it). The answer is

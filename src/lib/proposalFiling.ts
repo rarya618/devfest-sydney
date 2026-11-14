@@ -2,6 +2,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { Resend } from 'resend';
 import { adminDb } from '@/lib/firebase-admin';
 import { escapeHtml } from '@/lib/escapeHtml';
+import { portalSignInUrl } from '@/lib/portalAuth';
 import { normaliseProfileUrl } from '@/lib/speakers';
 import { MEETUP_FORMATS, MEETUP_FORMAT_LABELS, MEETUP_PROPOSAL_LIMITS } from '@/lib/meetupProposalLabels';
 import type { MeetupFormat, MeetupProposal } from '@/lib/types';
@@ -75,9 +76,9 @@ const FORMAT_LABELS: Record<DevfestProposalFormat, string> = {
 };
 
 const TRACK_LABELS: Record<DevfestProposalTrack, string> = {
-  developer: 'Developer DevfestProposalTrack',
-  builder: 'Builder DevfestProposalTrack',
-  workshop: 'Workshops DevfestProposalTrack',
+  developer: 'Developer Track',
+  builder: 'Builder Track',
+  workshop: 'Workshops Track',
 };
 
 const TRACK_DOT_COLOR: Record<DevfestProposalTrack, string> = {
@@ -189,6 +190,13 @@ function buildDevfestConfirmationEmail(submission: DevfestProposalPayload, event
                   </td>
                 </tr>
               </table>
+
+              <!-- Speaker portal -->
+              <div style="margin-top:40px;">
+                <p style="margin:0 0 8px;${font}font-size:24px;font-weight:700;color:#ffffff;line-height:1.5;">Follow your proposal</p>
+                <p style="margin:0 0 24px;${font}font-size:20px;font-weight:400;color:#ffffff;line-height:1.5;">See where it's up to, and make changes until we've decided, in the speaker portal. Sign in with this email address.</p>
+                <a href="${portalSignInUrl()}" style="display:inline-block;background:#1967d2;color:#ffffff;${font}font-size:18px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 28px;">Open the speaker portal</a>
+              </div>
 
               <!-- Questions -->
               <div style="margin-top:40px;">
@@ -335,6 +343,10 @@ function buildMeetupConfirmationEmail(proposal: MeetupProposalFields): string {
                   </td>
                 </tr>
               </table>
+              <p style="margin:24px 0 16px;${font}font-size:15px;line-height:1.7;color:#d6d6d4;">
+                See where it's up to, and make changes until we've decided, in the speaker portal. Sign in with this email address.
+              </p>
+              <a href="${portalSignInUrl()}" style="display:inline-block;background:#1967d2;color:#ffffff;${font}font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:12px 24px;">Open the speaker portal</a>
               <p style="margin:24px 0 0;${font}font-size:15px;line-height:1.7;color:#d6d6d4;">
                 Questions? Reply to this email.
               </p>
