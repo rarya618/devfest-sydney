@@ -216,4 +216,3 @@ At `/speaker`, its own area outside `/admin`. Decided 2026-11-14:
 2. **Security leftovers:** rotate the reCAPTCHA key's secret (it once sat in `.env.local` under the site key's name), and decide whether to switch App Check on in production.
 3. **Verify before relying on them** (never exercised with a real send, since every recipient was real): a volunteer invite and `/volunteer/join` submission, and the meetup acceptance flow. Create the first general event in `/admin/events`, then send one of each to an organiser inbox.
 4. If not yet done: run the two cleanup scripts and deploy the rules (see Remaining stage 4 work). Then 4g.
-5. Optional: point the `/speak` form's `PROPOSAL_URL` in `gdg-sydney` at `app.gdgsydney.com` (the old host still works).
