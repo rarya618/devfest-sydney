@@ -33,7 +33,7 @@ Sidebar groups:
 - **DevFest** (heading doubles as an edition picker once there are two DevFests; `admin-devfest` cookie, defaults to the current DevFest, `src/lib/adminEvent.ts`)
   - **Forms:** Talk proposals (`/admin`), Volunteers, Showcase, Feedback, Credits (not edition-filtered: 2026 only), Speaker gifts
   - Speakers (`/admin/speakers`), Crew (`/admin/crew`), Analytics
-- **GDG Sydney:** All speakers (`/admin/people`; Preview shows a speaker's public card exactly as the portal shows it to them, `src/components/SpeakerCard.tsx`), Volunteer pool (`/admin/volunteer-pool`)
+- **GDG Sydney:** All speakers (`/admin/people`; Preview shows a speaker's public card exactly as the portal shows it to them, `src/components/SpeakerCard.tsx`; Edit profile here and on DevFest > Speakers shows the same card live as you type), Volunteer pool (`/admin/volunteer-pool`)
 - **General events:** Meetup talks (`/admin/meetups`), Volunteers (`/admin/event-volunteers?event=<id>`)
 - **Tools:** Links (UTM tracking links)
 - **Settings:** Events (`/admin/events`), Admins

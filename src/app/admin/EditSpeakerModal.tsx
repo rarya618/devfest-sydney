@@ -2,6 +2,7 @@
 
 import { useRef, useState, useTransition, type ChangeEvent, type FormEvent } from 'react';
 import { MARKDOWN_HINT } from '@/components/MarkdownText';
+import SpeakerCard, { type SpeakerCardProfile } from '@/components/SpeakerCard';
 import Image from 'next/image';
 import { createPortal } from 'react-dom';
 import { removeSpeakerPhoto, updateSpeaker, updateSpeakerProfile, uploadSpeakerPhoto, type SpeakerEditableFields } from './speakerActions';
@@ -89,6 +90,18 @@ export default function EditSpeakerModal({ speaker, leadSpeakerName, profileOnly
     setFields((previous) => ({ ...previous, [key]: value }));
   }
 
+  // The public card as it will look once saved, the same one the speaker sees in the portal.
+  const previewProfile: SpeakerCardProfile = {
+    name: fields.name.trim() || 'Name',
+    tagline: fields.tagline.trim(),
+    bio: fields.bio.trim(),
+    photoUrl: fields.photoUrl,
+    linkedinUrl: fields.linkedinUrl.trim(),
+    githubUrl: fields.githubUrl.trim(),
+    websiteUrl: fields.websiteUrl.trim(),
+  };
+  const preview = <SpeakerCard profile={previewProfile} showFullBio isPhotoLoading={isUploadingPhoto} viewer="organiser" />;
+
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
     startTransition(async () => {
@@ -105,12 +118,12 @@ export default function EditSpeakerModal({ speaker, leadSpeakerName, profileOnly
 
   return createPortal(
     <div
-      className="fixed inset-0 z-40 flex items-start sm:items-center justify-center bg-black/70 p-4 overflow-y-auto"
+      className="fixed inset-0 z-[60] flex items-start sm:items-center justify-center bg-black/70 p-4 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-label={`Edit speaker: ${speaker.name}`}
     >
-      <div className="w-full max-w-xl bg-surface-raised rounded-2xl shadow-xl my-8">
+      <div className="w-full max-w-xl lg:max-w-4xl bg-surface-raised rounded-2xl shadow-xl my-8">
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <h2 className="text-lg font-bold text-white">{profileOnly ? 'Edit profile' : isCoSpeaker ? 'Edit co-speaker' : 'Edit speaker'}</h2>
@@ -127,13 +140,21 @@ export default function EditSpeakerModal({ speaker, leadSpeakerName, profileOnly
             </button>
           </div>
 
+          {/* The form beside a live preview of the public card on wide screens; above it, folded,
+              on narrow ones. */}
+          <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
+            <details className="lg:hidden rounded-xl border border-white/10 px-4 py-3">
+              <summary className="cursor-pointer text-sm font-semibold text-white/80">Preview the public card</summary>
+              <div className="mt-3">{preview}</div>
+            </details>
+
             <p className="text-xs text-white/50">
               {profileOnly
                 ? 'This profile is shared by every talk this person gives, at any event. Talks are edited on DevFest > Speakers.'
                 : isCoSpeaker
                   ? `This is what the public speakers section shows. The session is ${leadSpeakerName ?? 'the lead speaker'}'s: edit the talk on their card. The profile is shared by every talk they give.`
-                  : 'This is what the public speakers section shows. The profile is shared by every talk they give; the session is this talk only. Changes here don\'t touch the original proposal.'}
+                  : 'This is what the public speakers section shows. The profile is shared by every talk they give; the session is this talk only. A new title or abstract also goes to the original proposal.'}
             </p>
 
             <div className="space-y-4">
@@ -347,6 +368,12 @@ export default function EditSpeakerModal({ speaker, leadSpeakerName, profileOnly
                 </div>
               </div>
             )}
+          </div>
+
+          <aside aria-label="Live preview of the public speaker card" className="hidden lg:block border-l border-white/10 px-5 py-5 max-h-[70vh] overflow-y-auto">
+            <p className="mb-3 text-xs text-white/60">Preview: how the card looks once saved.</p>
+            {preview}
+          </aside>
           </div>
 
           <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-white/10">
