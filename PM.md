@@ -33,7 +33,7 @@ Sidebar groups:
 - **DevFest**, every page under `/admin/devfest/` (moved 2026-11-14; the old paths 308 there from `next.config.ts`, and `/admin` itself redirects to talk proposals). The heading doubles as an edition picker once there are two DevFests (`admin-devfest` cookie, defaults to the current DevFest, `src/lib/adminEvent.ts`)
   - **Forms:** Talk proposals (`/admin/devfest/proposals`), Volunteers, Showcase, Feedback, Credits (not edition-filtered: 2026 only), Speaker gifts
   - Speakers (`/admin/devfest/speakers`), Crew (`/admin/devfest/crew`), Analytics
-- **GDG Sydney:** All speakers (`/admin/people`; Preview shows a speaker's public card exactly as the portal shows it to them, `src/components/SpeakerCard.tsx`; Edit profile here and on DevFest > Speakers shows the same card live as you type), Volunteer pool (`/admin/volunteer-pool`)
+- **GDG Sydney:** All speakers (`/admin/people`; Preview shows a speaker's public card exactly as the portal shows it to them, `src/components/SpeakerCard.tsx`; Edit profile here and on DevFest > Speakers shows the same card live as you type), Volunteer pool (`/admin/volunteer-pool`), Analytics (`/admin/analytics`: every event side by side, speakers, meetup proposals and volunteers across events, from `src/lib/gdgAnalytics.ts`; DevFest > Analytics stays one DevFest's forms)
 - **General events:** Meetup talks (`/admin/meetups`), Volunteers (`/admin/event-volunteers?event=<id>`)
 - **Tools:** Links (UTM tracking links)
 - **Settings:** Events (`/admin/events`), Admins

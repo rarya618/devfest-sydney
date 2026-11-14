@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PointerEvent } from 'react';
-import { ACCENT_CHART_CLASSES, type AnalyticsAccent } from './shared';
+import { ACCENT_CHART_CLASSES, type AnalyticsAccent } from './analyticsShared';
 
 interface DatedEntry {
   submittedAt: string; // ISO date string

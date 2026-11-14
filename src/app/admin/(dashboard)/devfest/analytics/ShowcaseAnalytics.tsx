@@ -1,7 +1,7 @@
 import { SHOWCASE_STAGE_LABELS } from '@/lib/showcaseLabels';
 import type { ShowcaseSubmission, ShowcaseStatus, ShowcaseStage } from '@/lib/types';
-import SubmissionsOverTimeChart from './SubmissionsOverTimeChart';
-import { ACCENT_CHART_CLASSES, BarRow, BreakdownCard, EmptyState, StatusTiles, countChannels, countUniqueEmails } from './shared';
+import SubmissionsOverTimeChart from '../../../SubmissionsOverTimeChart';
+import { ACCENT_CHART_CLASSES, BarRow, BreakdownCard, EmptyState, StatusTiles, countChannels, countUniqueEmails } from '../../../analyticsShared';
 
 interface Props {
   entries: ShowcaseSubmission[];

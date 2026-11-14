@@ -1,7 +1,7 @@
 import { TRACK_LABELS, TRACK_DOT_COLORS, FORMAT_LABELS, EXPERIENCE_LABELS } from '@/lib/submissionLabels';
 import type { Submission, SubmissionStatus, Track, TalkFormat, ExperienceLevel } from '@/lib/types';
-import SubmissionsOverTimeChart from './SubmissionsOverTimeChart';
-import { BarRow, BreakdownCard, EmptyState, StatusTiles, countChannels, countUniqueEmails } from './shared';
+import SubmissionsOverTimeChart from '../../../SubmissionsOverTimeChart';
+import { BarRow, BreakdownCard, EmptyState, StatusTiles, countChannels, countUniqueEmails } from '../../../analyticsShared';
 
 interface Props {
   submissions: Submission[];

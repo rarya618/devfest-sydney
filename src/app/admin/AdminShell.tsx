@@ -108,6 +108,8 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/admin/people', label: 'All speakers' },
       { href: '/admin/volunteer-pool', label: 'Volunteer pool' },
+      // Every event side by side; one DevFest's forms are in DevFest > Analytics.
+      { href: '/admin/analytics', label: 'Analytics' },
     ],
   },
   {

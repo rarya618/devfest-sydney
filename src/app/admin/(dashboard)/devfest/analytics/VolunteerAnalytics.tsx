@@ -1,7 +1,7 @@
 import { VOLUNTEER_AREA_LABELS, GDG_ON_CAMPUS_CHAPTER_LABELS } from '@/lib/volunteerLabels';
 import type { VolunteerSubmission, VolunteerStatus, VolunteerArea, GdgOnCampusChapter } from '@/lib/types';
-import SubmissionsOverTimeChart from './SubmissionsOverTimeChart';
-import { ACCENT_CHART_CLASSES, BarRow, BreakdownCard, EmptyState, StatusTiles, countChannels, countUniqueEmails } from './shared';
+import SubmissionsOverTimeChart from '../../../SubmissionsOverTimeChart';
+import { ACCENT_CHART_CLASSES, BarRow, BreakdownCard, EmptyState, StatusTiles, countChannels, countUniqueEmails } from '../../../analyticsShared';
 
 interface Props {
   volunteers: VolunteerSubmission[];
