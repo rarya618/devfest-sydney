@@ -354,9 +354,23 @@ export async function updateSubmission(
     const snap = await submissionRef.get();
     if (!snap.exists) return { error: 'Submission not found.' };
 
-    await submissionRef.update({ ...validated.values });
+    const batch = adminDb.batch();
+    batch.update(submissionRef, { ...validated.values });
+    // Once accepted, the talk is what the lineup and the speaker portal show. A changed title or
+    // abstract goes to it too; unchanged ones are left alone, so saving a flag here can't
+    // overwrite an edit made to the talk on /admin/speakers or by the speaker.
+    const stored = snap.data() ?? {};
+    const talkRef = adminDb.collection('talks').doc(submissionId);
+    if (stored.status === 'accepted' && (await talkRef.get()).exists) {
+      const talkChanges: Record<string, string> = {};
+      if (validated.values.talkTitle !== stored.talkTitle) talkChanges.talkTitle = validated.values.talkTitle;
+      if (validated.values.abstract !== stored.abstract) talkChanges.abstract = validated.values.abstract;
+      if (Object.keys(talkChanges).length) batch.update(talkRef, talkChanges);
+    }
+    await batch.commit();
 
     revalidatePath('/admin');
+    revalidatePath('/admin/speakers');
     return {};
   } catch {
     return { error: 'Could not save these changes. Please try again.' };

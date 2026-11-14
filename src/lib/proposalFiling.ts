@@ -524,9 +524,56 @@ export async function editMeetupProposal(
   return { outcome: 'saved' };
 }
 
+// /admin/speakers' limit on a talk title; a DevFest proposal has none of its own.
+export const DEVFEST_TALK_TITLE_MAX = 150;
+
+// Once a DevFest proposal is accepted, its talk (talks/{submission id}) is what the portal,
+// the schedule and the public API show, and organisers own its track, format and level (they
+// move talks onto Spotlight and Keynote, and fit formats to slots). So the speaker can change
+// only the title and abstract, once told, until the event ends (decided 2026-11-14). Both go
+// to the talk and to the submission, so the proposals page agrees; editedAt marks the edit.
+async function editAcceptedDevfestTalk(proposalId: string, ownerEmail: string, fields: Record<string, unknown>): Promise<ProposalEditOutcome> {
+  const submissionReference = adminDb.collection('submissions').doc(proposalId);
+  const talkReference = adminDb.collection('talks').doc(proposalId);
+
+  async function refusal(stored: FirebaseFirestore.DocumentData | undefined, talkExists: boolean): Promise<'not-found' | 'decided' | 'event-ended' | null> {
+    if (!stored || stored.email !== ownerEmail) return 'not-found';
+    if (stored.status !== 'accepted' || !(stored.acceptanceEmailSentAt || stored.speakerConfirmedAt)) return 'decided';
+    if (!talkExists) return 'decided';
+    const event = stored.eventId ? await loadEvent(String(stored.eventId)) : null;
+    return !event || hasEventEnded(event) ? 'event-ended' : null;
+  }
+
+  const talkTitle = typeof fields.talkTitle === 'string' ? fields.talkTitle.trim() : '';
+  const abstract = typeof fields.abstract === 'string' ? fields.abstract.trim() : '';
+  if (!talkTitle) return { outcome: 'invalid', message: 'Talk title is required.' };
+  if (talkTitle.length > DEVFEST_TALK_TITLE_MAX) return { outcome: 'invalid', message: `Talk title must be ${DEVFEST_TALK_TITLE_MAX} characters or fewer.` };
+  if (!abstract) return { outcome: 'invalid', message: 'Abstract is required.' };
+  if (abstract.length > DEVFEST_ABSTRACT_MAX) return { outcome: 'invalid', message: `Abstract must be ${DEVFEST_ABSTRACT_MAX} characters or fewer.` };
+
+  const [submission, talk] = await Promise.all([submissionReference.get(), talkReference.get()]);
+  const refused = await refusal(submission.data(), talk.exists);
+  if (refused) return { outcome: refused };
+  if (talk.data()?.talkTitle === talkTitle && talk.data()?.abstract === abstract) return { outcome: 'unchanged' };
+
+  try {
+    await adminDb.runTransaction(async (transaction) => {
+      const [currentSubmission, currentTalk] = await Promise.all([transaction.get(submissionReference), transaction.get(talkReference)]);
+      const currentRefusal = await refusal(currentSubmission.data(), currentTalk.exists);
+      if (currentRefusal) throw new ProposalEditRefused(currentRefusal);
+      transaction.update(talkReference, { talkTitle, abstract });
+      transaction.update(submissionReference, { talkTitle, abstract, editedAt: FieldValue.serverTimestamp() });
+    });
+  } catch (error) {
+    if (error instanceof ProposalEditRefused) return { outcome: error.outcome };
+    throw error;
+  }
+  return { outcome: 'saved' };
+}
+
 // A speaker editing their own proposal from the portal. Meetup ones go to editMeetupProposal
-// (editable after acceptance too, until the event). A DevFest one is rewritten in place while
-// it is still pending (decided 2026-11-14: after the CfS has closed too). Checked by the same validator as filing, with the
+// (editable after acceptance too, until the event). An accepted DevFest one goes to
+// editAcceptedDevfestTalk. A pending DevFest one is rewritten in place while it is still pending (decided 2026-11-14: after the CfS has closed too). Checked by the same validator as filing, with the
 // stored name and the owner's email, and stamped with editedAt so the admin shows it was changed.
 // The status check and the write share a transaction, so an edit can't land on a proposal an
 // organiser accepted or rejected a moment earlier. Throws when Firestore fails.
@@ -542,6 +589,7 @@ export async function editOwnProposal(
   const snapshot = await reference.get();
   const stored = snapshot.data();
   if (!stored || stored.email !== ownerEmail) return { outcome: 'not-found' };
+  if (stored.status === 'accepted') return editAcceptedDevfestTalk(proposalId, ownerEmail, fields);
   if (stored.status !== 'pending') return { outcome: 'decided' };
 
   let changes: Record<string, unknown>;

@@ -31,6 +31,8 @@ interface ProposalFormProps {
 }
 
 const DEVFEST_ABSTRACT_MAX = 2000;
+// /admin/speakers' limit, which an accepted DevFest talk's title is held to (proposalFiling.ts).
+const DEVFEST_TALK_TITLE_MAX = 150;
 
 const DEVFEST_TRACKS: { value: DevfestTrack; label: string; description: string }[] = [
   { value: 'developer', label: 'Developer Track', description: 'Technical sessions for professional engineers.' },
@@ -142,6 +144,9 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
   const isEditing = editing !== null;
   const editingMeetup = editing?.proposal.kind === 'meetup' ? editing.proposal.fields : null;
   const editingDevfest = editing?.proposal.kind === 'devfest' ? editing.proposal.fields : null;
+  // An accepted DevFest talk: only its title and abstract are the speaker's to change
+  // (editAcceptedDevfestTalk); track, format and level are the organisers'.
+  const isAcceptedDevfestTalk = editing?.proposal.kind === 'devfest' && editing.proposal.isAccepted;
   const initialSavedTalk = isEditing ? null : savedTalks.find((savedTalk) => savedTalk.id === initialSavedTalkId) ?? null;
   const [savedTalkId, setSavedTalkId] = useState<string | null>(initialSavedTalk?.id ?? null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
@@ -355,7 +360,14 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
           </div>
         )}
 
-        <TextField id="proposal-title" label="Talk title" value={talkTitle} onChange={setTalkTitle} isRequired maxLength={MEETUP_PROPOSAL_LIMITS.talkTitle} />
+        <TextField
+          id="proposal-title"
+          label="Talk title"
+          value={talkTitle}
+          onChange={setTalkTitle}
+          isRequired
+          maxLength={isAcceptedDevfestTalk ? DEVFEST_TALK_TITLE_MAX : MEETUP_PROPOSAL_LIMITS.talkTitle}
+        />
         <TextField
           id="proposal-abstract"
           label="Abstract"
@@ -367,7 +379,11 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
           hint="What is your session about, and what will people take away?"
         />
 
-        {kind === 'meetup' ? (
+        {isAcceptedDevfestTalk ? (
+          <p className={hintClass}>
+            Your track, format and level are set by our organisers: reply to any of our emails to change them. Your bio, photo and links are on your profile, under Edit profile.
+          </p>
+        ) : kind === 'meetup' ? (
           <>
             <Choice
               name="meetup-format"

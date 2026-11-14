@@ -360,6 +360,7 @@ export async function updatePortalProposal(
         revalidatePath('/speaker', 'layout');
         revalidatePath('/admin');
         revalidatePath('/admin/meetups');
+        revalidatePath('/admin/speakers');
         return {};
     }
   } catch (error) {

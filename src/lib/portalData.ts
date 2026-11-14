@@ -68,9 +68,11 @@ export interface PortalProposal {
 export type DevfestEditableFields = Pick<DevfestProposalPayload, (typeof DEVFEST_EDITABLE_FIELDS)[number]>;
 export type MeetupEditableFields = Pick<MeetupProposalFields, (typeof MEETUP_EDITABLE_FIELDS)[number]>;
 
-// isAccepted: an accepted talk, whose edits show on the event page at once.
+// isAccepted: an accepted talk, whose edits show on the event page at once. For an accepted
+// DevFest talk only the title and abstract can change (editAcceptedDevfestTalk), and they
+// start from the talk, which organisers may have edited on /admin/speakers since.
 export type PortalEditableProposal =
-  | { kind: 'devfest'; name: string; isAccepted: false; fields: DevfestEditableFields }
+  | { kind: 'devfest'; name: string; isAccepted: boolean; fields: DevfestEditableFields }
   | { kind: 'meetup'; name: string; isAccepted: boolean; fields: MeetupEditableFields };
 
 const DEVFEST_BOOLEAN_FIELDS: ReadonlySet<string> = new Set([
@@ -85,13 +87,22 @@ const DEVFEST_BOOLEAN_FIELDS: ReadonlySet<string> = new Set([
 
 // The stored values of the fields a speaker may edit. Choices that are missing or unknown come
 // through as text the form doesn't recognise, so the speaker picks again.
-function toEditableProposal(kind: 'devfest' | 'meetup', proposal: FirebaseFirestore.DocumentData): PortalEditableProposal {
+function toEditableProposal(
+  kind: 'devfest' | 'meetup',
+  proposal: FirebaseFirestore.DocumentData,
+  talk: FirebaseFirestore.DocumentData | undefined
+): PortalEditableProposal {
   const name = text(proposal.name);
   if (kind === 'devfest') {
     const fields = Object.fromEntries(
       DEVFEST_EDITABLE_FIELDS.map((key) => [key, DEVFEST_BOOLEAN_FIELDS.has(key) ? proposal[key] === true : text(proposal[key])])
     ) as DevfestEditableFields;
-    return { kind, name, isAccepted: false, fields };
+    const isAccepted = proposal.status === 'accepted';
+    if (isAccepted && talk) {
+      fields.talkTitle = text(talk.talkTitle);
+      fields.abstract = text(talk.abstract);
+    }
+    return { kind, name, isAccepted, fields };
   }
   const fields = Object.fromEntries(MEETUP_EDITABLE_FIELDS.map((key) => [key, text(proposal[key])])) as MeetupEditableFields;
   return { kind, name, isAccepted: proposal.status === 'accepted', fields };
@@ -137,13 +148,16 @@ function isEditableBySpeaker(
   proposal: FirebaseFirestore.DocumentData,
   status: PortalProposalStatus,
   event: GdgEvent | undefined,
-  now: Date
+  now: Date,
+  hasTalk: boolean
 ): boolean {
   if (proposal.status === 'pending') return status === 'under-review';
   // An accepted talk the speaker hasn't been told about still reads "Under review", and stays
-  // locked like any decision, so the Edit button can't give it away.
+  // locked like any decision, so the Edit button can't give it away. Meetup and DevFest talks
+  // alike, until the event ends; a DevFest one also needs its talk (editAcceptedDevfestTalk).
   const isToldAccepted = status === 'accepted' || status === 'confirmed';
-  return kind === 'meetup' && isToldAccepted && event !== undefined && now.getTime() < Date.parse(event.endAt);
+  if (!isToldAccepted || event === undefined || now.getTime() >= Date.parse(event.endAt)) return false;
+  return kind === 'meetup' || hasTalk;
 }
 
 function proposalStatus(proposal: FirebaseFirestore.DocumentData, event: GdgEvent | undefined, now: Date): PortalProposalStatus {
@@ -247,6 +261,17 @@ export async function loadPortalOverview(email: string): Promise<PortalOverview>
     })
     .sort((first, second) => first.name.localeCompare(second.name));
 
+  // The talks of this address's accepted DevFest proposals, for their edit forms. Usually
+  // already loaded as the person's talks; fetched when the profile sits under another address.
+  const talksById = new Map(talkDocs.map((talk) => [talk.id, talk.data()]));
+  const acceptedDevfestIds = submissionsSnapshot.docs
+    .filter((doc) => doc.data().status === 'accepted' && !talksById.has(doc.id))
+    .map((doc) => doc.id);
+  if (acceptedDevfestIds.length) {
+    const snapshots = await adminDb.getAll(...acceptedDevfestIds.map((id) => adminDb.collection('talks').doc(id)));
+    for (const snapshot of snapshots) if (snapshot.exists) talksById.set(snapshot.id, snapshot.data()!);
+  }
+
   const proposals: PortalProposal[] = [
     ...submissionsSnapshot.docs.map((doc) => ({ doc, kind: 'devfest' as const })),
     ...meetupSnapshot.docs.map((doc) => ({ doc, kind: 'meetup' as const })),
@@ -266,7 +291,9 @@ export async function loadPortalOverview(email: string): Promise<PortalOverview>
         status,
         confirmUrl: status === 'accepted' ? confirmUrl(doc.id) : null,
         savedTalkId: text(proposal.savedTalkId) || null,
-        editable: isEditableBySpeaker(kind, proposal, status, event, now) ? toEditableProposal(kind, proposal) : null,
+        editable: isEditableBySpeaker(kind, proposal, status, event, now, talksById.has(doc.id))
+          ? toEditableProposal(kind, proposal, talksById.get(doc.id))
+          : null,
       };
     })
     .sort((first, second) => String(second.submittedAt).localeCompare(String(first.submittedAt)));

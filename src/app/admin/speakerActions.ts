@@ -167,7 +167,20 @@ export async function updateSpeaker(talkId: string, speakerId: string, fields: S
 
     const profileError = await saveProfile(speakerId, validated.values);
     if (profileError) return profileError;
-    if (isLead) await talkSnapshot.ref.update({ ...talkFieldsOf(validated.values as SpeakerEditableFields) });
+    if (isLead) {
+      const talkFields = talkFieldsOf(validated.values as SpeakerEditableFields);
+      const batch = adminDb.batch();
+      batch.update(talkSnapshot.ref, { ...talkFields });
+      // The title and abstract also go to the proposal behind it, which the speaker portal's
+      // edit form and the proposals page read. Track, format and level stay the talk's alone:
+      // a talk can be on a track (Spotlight, Keynote) nobody can propose into.
+      const submissionId = String(talkSnapshot.data()?.submissionId ?? '');
+      if (submissionId) {
+        const submissionRef = adminDb.collection('submissions').doc(submissionId);
+        if ((await submissionRef.get()).exists) batch.update(submissionRef, { talkTitle: talkFields.talkTitle, abstract: talkFields.abstract });
+      }
+      await batch.commit();
+    }
 
     revalidateLineup();
     return {};
