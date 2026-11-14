@@ -29,6 +29,12 @@ This may include your name, email address, phone number, talk or session details
     ],
   },
   {
+    slug: 'meetup-proposals',
+    content: `Talk proposals for our monthly meetups are sent from the Speak page on gdgsydney.com, or by an AI assistant on a speaker's behalf, and are stored and reviewed here. The gdgsydney.com privacy policy (gdgsydney.com/privacy) describes what they contain.
+
+To stop the form being used to flood someone's inbox, we keep a one-way fingerprint of the email address on each proposal for a day. We also note whether a proposal came from the Speak page or from an AI assistant, so our organisers know when they read it.`,
+  },
+  {
     slug: 'speaker-portal',
     title: 'Speaker portal',
     content: `Speakers can sign in to our speaker portal with a link we email them. To send it, we keep the address you sign in with for as long as the link is valid (30 minutes), and a one-way fingerprint of it for an hour so we can stop the form being used to flood someone's inbox. While you are signed in, we keep a record of your session for up to 30 days, or until you sign out.
