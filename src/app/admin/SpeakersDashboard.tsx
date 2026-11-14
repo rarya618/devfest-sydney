@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition, useEffect, useRef, useCallback } from 'react';
+import MarkdownText from '@/components/MarkdownText';
 import Image from 'next/image';
 import { removeSpeaker } from './speakerActions';
 import { sendAcceptanceEmail, sendCoSpeakerTicketEmail, sendSpeakerTicketEmail } from './actions';
@@ -339,7 +340,7 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
                 </p>
               </div>
 
-              <p className="mt-3 text-sm text-white/65 leading-relaxed whitespace-pre-wrap">{speaker.abstract}</p>
+              <MarkdownText text={speaker.abstract} className="mt-3 text-sm text-white/65 leading-relaxed" />
 
               <div className="mt-4 text-sm text-white/65 bg-white/[0.04] rounded-xl px-4 py-3 leading-relaxed">
                 <span className="font-bold text-white/85">Bio: </span>

@@ -3,6 +3,7 @@
 import { useCallback, useState, useTransition, type FormEvent, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import Alert from '@/components/Alert';
+import { MARKDOWN_HINT } from '@/components/MarkdownText';
 import { hintClass, inputNormal, labelClass, optionButtonClass } from '@/lib/formStyles';
 import { primaryButton, secondaryButton } from './portalStyles';
 import { MEETUP_FORMAT_LABELS, MEETUP_FORMATS, MEETUP_PROPOSAL_LIMITS } from '@/lib/meetupProposalLabels';
@@ -378,7 +379,7 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
           isRequired
           rows={7}
           maxLength={kind === 'meetup' ? MEETUP_PROPOSAL_LIMITS.abstract : DEVFEST_ABSTRACT_MAX}
-          hint="What is your session about, and what will people take away?"
+          hint={`What is your session about, and what will people take away? ${MARKDOWN_HINT}`}
         />
 
         {isAcceptedDevfestTalk ? (

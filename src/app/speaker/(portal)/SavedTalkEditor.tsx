@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState, useTransition, type FormEvent } from 'react';
+import { MARKDOWN_HINT } from '@/components/MarkdownText';
 import { useRouter } from 'next/navigation';
 import Alert from '@/components/Alert';
 import { hintClass, inputNormal, labelClass } from '@/lib/formStyles';
@@ -84,7 +85,7 @@ export default function SavedTalkEditor({ savedTalkId, initialFields, proposedCo
           <label htmlFor="saved-abstract" className={labelClass}>Abstract</label>
           <textarea id="saved-abstract" rows={5} value={fields.abstract} maxLength={SAVED_TALK_LIMITS.abstract} aria-describedby="saved-abstract-hint" onChange={(event) => update('abstract', event.target.value)} className={`${inputNormal} resize-y`} />
           <p id="saved-abstract-hint" className={hintClass}>
-            What the session is about and what people take away. {fields.abstract.length} of {SAVED_TALK_LIMITS.abstract} characters.
+            What the session is about and what people take away. {fields.abstract.length} of {SAVED_TALK_LIMITS.abstract} characters. {MARKDOWN_HINT}
           </p>
         </div>
         <div>

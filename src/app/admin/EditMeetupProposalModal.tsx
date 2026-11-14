@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { updateMeetupProposal } from './meetupProposalActions';
 import { MEETUP_FORMATS, MEETUP_FORMAT_LABELS, MEETUP_PROPOSAL_LIMITS } from '@/lib/meetupProposalLabels';
 import type { MeetupFormat, MeetupProposal } from '@/lib/types';
+import { MARKDOWN_HINT } from '@/components/MarkdownText';
 
 // Edits a meetup proposal from /admin/meetups. The same fields a speaker can change from the
 // portal; once accepted, saving updates its talk too (editMeetupProposal). Name and email stay
@@ -61,8 +62,9 @@ export default function EditMeetupProposalModal({ proposal, onClose, onError }: 
     });
   }
 
-  function textField(key: keyof Omit<MeetupProposalFormFields, 'format'>, label: string, options: { rows?: number; isRequired?: boolean } = {}) {
+  function textField(key: keyof Omit<MeetupProposalFormFields, 'format'>, label: string, options: { rows?: number; isRequired?: boolean; hint?: string } = {}) {
     const id = `edit-meetup-${key}`;
+    const hintId = options.hint ? `${id}-hint` : undefined;
     return (
       <div>
         <label className={labelClasses} htmlFor={id}>
@@ -77,6 +79,7 @@ export default function EditMeetupProposalModal({ proposal, onClose, onError }: 
             value={fields[key]}
             maxLength={MEETUP_PROPOSAL_LIMITS[key]}
             required={options.isRequired}
+            aria-describedby={hintId}
             onChange={(event) => update(key, event.target.value)}
           />
         ) : (
@@ -89,6 +92,7 @@ export default function EditMeetupProposalModal({ proposal, onClose, onError }: 
             onChange={(event) => update(key, event.target.value)}
           />
         )}
+        {options.hint && <p id={hintId} className="mt-1 text-xs text-white/60">{options.hint}</p>}
       </div>
     );
   }
@@ -139,7 +143,7 @@ export default function EditMeetupProposalModal({ proposal, onClose, onError }: 
               </select>
             </div>
 
-            {textField('abstract', 'Abstract', { rows: 8, isRequired: true })}
+            {textField('abstract', 'Abstract', { rows: 8, isRequired: true, hint: MARKDOWN_HINT })}
             {textField('audience', 'Target audience', { rows: 3, isRequired: true })}
             {textField('bio', 'Speaker bio on this proposal', { rows: 4, isRequired: true })}
             {textField('profileUrl', 'LinkedIn or website')}

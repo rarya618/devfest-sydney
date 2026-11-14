@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useTransition, type ChangeEvent, type FormEvent } from 'react';
+import { MARKDOWN_HINT } from '@/components/MarkdownText';
 import Image from 'next/image';
 import { createPortal } from 'react-dom';
 import { removeSpeakerPhoto, updateSpeaker, updateSpeakerProfile, uploadSpeakerPhoto, type SpeakerEditableFields } from './speakerActions';
@@ -298,7 +299,9 @@ export default function EditSpeakerModal({ speaker, leadSpeakerName, profileOnly
                     onChange={(event) => update('abstract', event.target.value)}
                     maxLength={2000}
                     required
+                    aria-describedby="speaker-abstract-hint"
                   />
+                  <p id="speaker-abstract-hint" className="mt-1 text-xs text-white/60">{MARKDOWN_HINT}</p>
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">

@@ -11,6 +11,7 @@ import {
 } from './meetupProposalActions';
 import Alert from '@/components/Alert';
 import EditMeetupProposalModal from './EditMeetupProposalModal';
+import MarkdownText from '@/components/MarkdownText';
 import { formatDate } from '@/lib/format';
 import {
   MEETUP_FORMATS,
@@ -258,7 +259,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
 
           <div className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
             <div className="overflow-hidden">
-              <p className="text-sm text-white/65 leading-relaxed mb-5 whitespace-pre-wrap break-words">{proposal.abstract}</p>
+              <MarkdownText text={proposal.abstract} className="text-sm text-white/65 leading-relaxed mb-5" />
               <div className="space-y-3 mb-5">
                 <DetailBlock label="Who it's for" text={proposal.audience} />
                 <DetailBlock label="About the speaker" text={proposal.bio} />

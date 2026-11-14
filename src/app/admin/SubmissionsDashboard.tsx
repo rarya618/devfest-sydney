@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useMemo, useRef, useTransition, type FormEvent, type ReactNode } from 'react';
 import { promoteSubmission, rejectSubmission, restoreSubmission, undoPromotion, archiveSubmission, addReviewerNote, deleteReviewerNote, sendAcceptanceEmail, sendSpeakerTicketEmail, sendRejectionEmail } from './actions';
 import EditSubmissionModal from './EditSubmissionModal';
+import MarkdownText from '@/components/MarkdownText';
 import Alert from '@/components/Alert';
 import { formatDate } from '@/lib/format';
 import {
@@ -504,7 +505,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         <span className="text-xs text-white/55 capitalize">{submission.experienceLevel}</span>
       </div>
 
-      <p className="text-sm text-white/65 leading-relaxed mb-5 pl-8 whitespace-pre-wrap break-words">{submission.abstract}</p>
+      <MarkdownText text={submission.abstract} className="text-sm text-white/65 leading-relaxed mb-5 pl-8" />
 
       {(submission.speakerBio ||
         submission.accessibilityNeeds ||
@@ -1086,7 +1087,7 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
               <span>{formatDate(submission.submittedAt)}</span>
               {submission.editedAt && <EditedMark editedAt={submission.editedAt} />}
             </div>
-            <p className="text-sm text-white/65 leading-relaxed whitespace-pre-wrap break-words">{submission.abstract}</p>
+            <MarkdownText text={submission.abstract} className="text-sm text-white/65 leading-relaxed" />
             {submission.speakerBio && (
               <p className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
                 <span className="font-bold text-white/85">Bio: </span>

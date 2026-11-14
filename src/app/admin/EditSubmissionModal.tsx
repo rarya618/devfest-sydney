@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { createSubmission, updateSubmission, type SubmissionEditableFields } from './actions';
 import { TRACK_LABELS, FORMAT_LABELS, EXPERIENCE_LABELS } from '@/lib/submissionLabels';
 import type { Submission } from '@/lib/types';
+import { MARKDOWN_HINT } from '@/components/MarkdownText';
 
 interface Props {
   // Absent means create mode: a proposal that arrived outside the form is entered here
@@ -202,7 +203,9 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
                 value={fields.abstract}
                 onChange={(e) => update('abstract', e.target.value)}
                 required
+                aria-describedby="edit-abstract-hint"
               />
+              <p id="edit-abstract-hint" className="mt-1 text-xs text-white/60">{MARKDOWN_HINT}</p>
             </div>
 
             <div className="grid grid-cols-3 gap-3">
