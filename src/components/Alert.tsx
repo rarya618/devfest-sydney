@@ -37,6 +37,8 @@ export default function Alert({ message, onDismiss }: AlertProps) {
     setTimeout(onDismiss, 300);
   }
 
+  // z-[70]: above the admin's modals (z-[60]), which sit above its sidebar (z-50), so an error
+  // raised from inside a modal still shows.
   // Rendered into <body>: `fixed` is relative to the nearest transformed ancestor, and
   // animate-page-in leaves a transform on the page shells and the portal's panels, which would
   // otherwise pin the alert inside them instead of to the bottom-left of the screen.
@@ -45,7 +47,7 @@ export default function Alert({ message, onDismiss }: AlertProps) {
     <div
       role="alert"
       aria-live="assertive"
-      className={`fixed bottom-6 left-6 z-50 flex items-start gap-3 max-w-sm w-full
+      className={`fixed bottom-6 left-6 z-[70] flex items-start gap-3 max-w-sm w-full
         bg-surface-raised border border-google-red/40 rounded-xl px-4 py-3 shadow-xl
         transition-all duration-300
         ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}

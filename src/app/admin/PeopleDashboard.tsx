@@ -35,7 +35,7 @@ function SpeakerPreviewDialog({ person, onClose }: { person: PersonWithTalks; on
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
-      className="fixed inset-0 z-40 flex justify-center bg-black/70 p-4 overflow-y-auto"
+      className="fixed inset-0 z-[60] flex justify-center bg-black/70 p-4 overflow-y-auto"
     >
       {/* my-auto rather than items-center: centred when it fits, and scrollable from its top
           when the card (a long bio) is taller than the screen, instead of cut off above. */}

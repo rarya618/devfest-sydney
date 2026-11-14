@@ -26,7 +26,7 @@ export default function InviteAdminForm({ onDone, onError }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 px-4" role="dialog" aria-modal="true" aria-label="Invite admin">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 px-4" role="dialog" aria-modal="true" aria-label="Invite admin">
       <div className="w-full max-w-sm bg-surface-raised border border-white/10 rounded-2xl p-6">
         <h2 className="font-bold text-white text-lg tracking-tight mb-1">Invite an admin</h2>
         <p className="text-sm text-white/50 mb-5 leading-relaxed">

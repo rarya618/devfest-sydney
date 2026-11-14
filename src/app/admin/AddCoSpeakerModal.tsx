@@ -51,7 +51,7 @@ export default function AddCoSpeakerModal({ lead, onClose, onError }: Props) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-40 flex items-start sm:items-center justify-center bg-black/70 p-4 overflow-y-auto"
+      className="fixed inset-0 z-[60] flex items-start sm:items-center justify-center bg-black/70 p-4 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-label={`Add a co-speaker to ${lead.name}'s session`}
