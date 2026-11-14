@@ -1,8 +1,10 @@
-# DevFest Sydney
+# GDG Sydney back office
 
-Public-facing website for DevFest Sydney, GDG Sydney's annual conference, including a full Call for Speakers (CfS) flow, a volunteer signup flow, and an admin review panel.
+The server side of GDG Sydney, at [app.gdgsydney.com](https://app.gdgsydney.com): the organiser admin, the speaker portal, the endpoints behind the forms on [gdgsydney.com](https://gdgsydney.com), the signed-link pages in our emails, and a read-only public API.
 
-See [`EVENT.md`](./EVENT.md) for event details (theme, tracks, special features) and [`PM.md`](./PM.md) for project scope, milestones, and current status.
+It started as the DevFest Sydney 2026 website. Since the event, the public pages live on the static Astro site [gdgsydney.com](https://gdgsydney.com) (repo `gdg-sydney`), and this app keeps everything that needs a server. The repo and Firebase project keep the `devfest-sydney` name.
+
+[`PM.md`](./PM.md) is the full reference: every route, the data model, the flows, environment variables and what's next. [`EVENT.md`](./EVENT.md) has the DevFest 2026 event details.
 
 ## Stack
 
@@ -10,28 +12,33 @@ See [`EVENT.md`](./EVENT.md) for event details (theme, tracks, special features)
 - **Styling:** Tailwind CSS v4 (config lives in `globals.css` via `@theme`, no `tailwind.config.ts`)
 - **Database:** Firestore, via Firebase Admin SDK (server) and Firebase client SDK (client)
 - **Storage:** Firebase Storage, for images referenced from Firestore documents
-- **Auth:** Firebase Auth, Google sign-in, restricted to emails in the `admins` Firestore collection
+- **Auth:** Firebase Auth with Google sign-in for organisers (emails in the `admins` collection); a single-use emailed link for speakers
 - **Email:** Resend
 - **Analytics:** Google Analytics 4
-- **Hosting:** Firebase App Hosting (Cloud Run backed)
+- **Hosting:** Firebase App Hosting, backend `devfest-sydney`, project `devfest-sydney-2026`. Pushing to `main` deploys.
 - **Ticketing:** Humanitix (external, no in-house payments)
 
-## Pages
+## What's here
 
-| Route | Purpose |
-|---|---|
-| `/` | Hero, About, Tracks, FAQ (Speakers, Schedule, Venue, Sponsors, Team pending real content) |
-| `/call-for-speakers` | CfS form, open/closed based on `CFS_OPEN` |
-| `/volunteer` | Volunteer signup form, open/closed based on `VOLUNTEER_OPEN` |
-| `/faq` | Dedicated FAQ page |
-| `/conduct` | Code of Conduct, static page |
-| `/privacy` | Privacy policy |
-| `/admin/login` | Google sign-in, restricted to authorised emails |
-| `/admin` | Review CfS submissions, promote accepted speakers |
-| `/admin/volunteers` | Review volunteer signups (accept, reject, restore, archive) |
-| `/admin/admins` | Manage authorised admin emails |
-| `/admin/analytics` | Submission stats and trends |
-| `/admin/links` | Generate UTM-tagged tracking links for the homepage and CfS page |
+| Area | Where | What it does |
+|---|---|---|
+| Landing | `/` | Choose speaker sign-in or organiser sign-in |
+| Admin | `/admin` | DevFest proposals, speakers, volunteers and showcase; meetup talks; all speakers; the volunteer pool; events; analytics; admins |
+| Speaker portal | `/speaker` | Speakers sign in with an emailed link to see their talks and proposals, edit their profile and propose new talks |
+| Signed-link pages | `/speaker/confirm`, `/volunteer/confirm`, `/volunteer/join`, `/builder-showcase/confirm`, and others | Pages reached from links in our emails. Each acts behind a button, so mail scanners can't answer for someone |
+| Form endpoints | `/api/submit-*` | Receive the forms on gdgsydney.com, across origins (CORS in `src/lib/gdgSiteOrigins.ts`) |
+| Public API | `/api/public/*` | Read-only speakers, schedule, partners, labels and status, for gdgsydney.com builds. Never emails or internal ids |
+| Privacy | `/privacy` | Privacy policy for the data this app holds, and the only page in the sitemap |
+
+### Meetup talk proposals
+
+The Speak page on gdgsydney.com posts to `/api/submit-meetup-proposal`, which validates the proposal, saves it to `meetupProposals` and emails the speaker a confirmation, bcc'd to hello@gdgsydney.com. Organisers review it at `/admin/meetups`.
+
+It's also the one endpoint documented for AI agents, in [gdgsydney.com/llms.txt](https://gdgsydney.com/llms.txt), so an agent can propose a talk for the person it's working with. Because of that:
+
+- **It's rate limited** (`src/lib/meetupProposalLimits.ts`): 3 proposals per email address a day and 20 site-wide an hour, answered with `429` and `Retry-After`. If you change the numbers, change them in `llms.txt` in the `gdg-sydney` repo too.
+- **Agent proposals are labelled.** A request with no `Origin` header (from outside a browser) is filed with `source: 'api'`, and its card on `/admin/meetups` shows a "Sent by an agent" chip.
+- **The honeypot still applies.** A filled-in `companyWebsite` field is accepted and silently dropped.
 
 ## Getting started
 
@@ -40,30 +47,9 @@ npm install
 npm run dev
 ```
 
-Requires a `.env.local` with the variables below. See [`PM.md`](./PM.md#milestone-3--responsibility-split) for who sets up the underlying Firebase project.
+Requires a `.env.local` with the variables listed in [PM.md, Required Environment Variables](./PM.md#required-environment-variables). Local development reads production's Firestore, so be careful with writes. Forms stay closed locally unless you set `DEV_OPEN_FLOWS=true`.
 
-## Environment variables
-
-| Variable | Purpose |
-|---|---|
-| `CFS_OPEN` | `true` to show the CfS form, `false` to show the closed message |
-| `CFS_CLOSE_DATE` | Optional ISO datetime the CfS closes; powers the countdown timer, hidden if unset |
-| `VOLUNTEER_OPEN` | `true` to show the volunteer signup form, `false` to show the closed message |
-| `FIREBASE_PROJECT_ID` | Firebase project identifier |
-| `FIREBASE_CLIENT_EMAIL` | Firebase Admin SDK service account email |
-| `FIREBASE_PRIVATE_KEY` | Firebase Admin SDK private key |
-| `NEXT_PUBLIC_FIREBASE_API_KEY` | Firebase client SDK |
-| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | Firebase client SDK |
-| `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | Firebase client SDK |
-| `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` | Firebase client SDK |
-| `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | Firebase client SDK |
-| `NEXT_PUBLIC_FIREBASE_APP_ID` | Firebase client SDK |
-| `RESEND_API_KEY` | Resend email sending |
-| `RESEND_FROM_EMAIL` | Sender address for confirmation emails |
-| `NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY` | Firebase App Check (reCAPTCHA Enterprise site key) |
-| `NEXT_PUBLIC_APP_CHECK_DEBUG_TOKEN` | App Check debug token for local dev (`true` to auto-generate, or a registered UUID) |
-| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 measurement ID |
-| `NEXT_PUBLIC_SITE_URL` | Canonical site URL for metadata, sitemap, and robots.txt; defaults to `https://devfest.gdgsydney.com` |
+Event settings (open or closed, deadlines, ticket links) aren't environment variables: they live on each event, edited at `/admin/events`.
 
 ## Scripts
 
@@ -71,6 +57,8 @@ Requires a `.env.local` with the variables below. See [`PM.md`](./PM.md#mileston
 - `npm run build`: production build
 - `npm run start`: run the production build
 - `npm run lint`: lint the codebase
+
+One-off data scripts (seeding, migrations, uploads) are in `scripts/`. Most explain themselves in a comment at the top; the Firestore ones are also described in PM.md.
 
 ## Contributing
 
