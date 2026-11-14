@@ -6,7 +6,7 @@ import Alert from '@/components/Alert';
 import { csvFilename, downloadCsv } from '@/lib/csv';
 import { formatDate } from '@/lib/format';
 import type { CreditRequest } from '@/lib/types';
-import { EmptyState } from './(dashboard)/analytics/shared';
+import { EmptyState } from './(dashboard)/devfest/analytics/shared';
 import { deleteCreditRequest } from './creditRequestActions';
 import StickyAdminHeader from './StickyAdminHeader';
 

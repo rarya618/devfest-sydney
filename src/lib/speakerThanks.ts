@@ -156,7 +156,7 @@ export async function fetchSpeakerGift(speakerId: string): Promise<SpeakerGift |
   return snap.exists ? toGift(snap.id, snap.data()!) : null;
 }
 
-// For /admin/speaker-gifts.
+// For /admin/devfest/speaker-gifts.
 export async function fetchSpeakerGifts(): Promise<SpeakerGift[]> {
   const snapshot = await adminDb.collection('speakerGifts').orderBy('submittedAt', 'desc').get();
   return snapshot.docs.map((doc) => toGift(doc.id, doc.data()));

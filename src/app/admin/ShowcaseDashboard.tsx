@@ -754,7 +754,7 @@ export default function ShowcaseDashboard({ entries }: Props) {
           </div>
         </div>
 
-        {/* Stage as a tab row, matching /admin/volunteers: status is a menu because an entry
+        {/* Stage as a tab row, matching /admin/devfest/volunteers: status is a menu because an entry
             is in exactly one state, while stage is a lens on the queue and the row shows how
             much of it is still an idea without opening anything. */}
         <div

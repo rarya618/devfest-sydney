@@ -3,11 +3,11 @@ import type { SpeakerGiftFormFields } from './speakerGiftLabels';
 export type TalkFormat = 'talk' | 'lightning-talk' | 'workshop';
 export type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced';
 // Spotlight is the Auditorium's track. Nobody proposes into it (the CfS offers only the
-// first three); an organiser moves a speaker onto it from /admin/speakers.
+// first three); an organiser moves a speaker onto it from /admin/devfest/speakers.
 export type Track = 'keynote' | 'spotlight' | 'developer' | 'builder' | 'workshop' | 'showcase';
 export type SubmissionStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
 export type SponsorTier = 'diamond' | 'platinum' | 'gold' | 'silver' | 'community';
-// The last two are roster-only: an admin assigns them on /admin/crew, and the signup form
+// The last two are roster-only: an admin assigns them on /admin/devfest/crew, and the signup form
 // (which keeps its own list) never offers them as an area of interest.
 export type VolunteerArea = 'registration' | 'av-tech' | 'speaker-support' | 'workshop-facilitator' | 'mc' | 'general-floater' | 'setup-packdown' | 'photography' | 'social-media' | 'merch-table' | 'videography' | 'lead-volunteer';
 export type VolunteerStatus = 'pending' | 'accepted' | 'rejected' | 'archived';
@@ -139,7 +139,7 @@ export interface VolunteerSubmission {
   submittedAt: string; // ISO date string (serialized from Firestore Timestamp)
   status: VolunteerStatus;
   reviewerNotes: ReviewerNote[];
-  // Everything below is set by an admin after the signup is accepted, on /admin/crew.
+  // Everything below is set by an admin after the signup is accepted, on /admin/devfest/crew.
   // The roster: what they are actually doing on the day, as opposed to areasOfInterest,
   // which is what they asked for.
   assignedArea: VolunteerArea | '';
@@ -154,14 +154,14 @@ export interface VolunteerSubmission {
   acceptanceEmailSentBy: string;
   confirmByDate: string | null; // ISO date string; the volunteer's deadline to confirm
   volunteerConfirmedAt: string | null; // ISO date string; set from /volunteer/confirm
-  // Set by hand from /admin/crew once a volunteer's ticket has gone out some other way
+  // Set by hand from /admin/devfest/crew once a volunteer's ticket has gone out some other way
   // (the organisers issuing it straight from Humanitix, say). While it is set,
   // /volunteer/confirm stops showing the volunteer ticket link, so nobody claims twice.
   ticketSentAt: string | null; // ISO date string
   ticketSentBy: string;
   // Derived from the three fields above rather than stored, so it can never disagree.
   confirmation: VolunteerConfirmation;
-  // Organisers are added by an admin from /admin/crew rather than arriving through the
+  // Organisers are added by an admin from /admin/devfest/crew rather than arriving through the
   // signup form. They live in the same collection because the crew is one roster, but
   // they never went near the form, so every field above that the form fills is empty and
   // the acceptance/confirmation flow does not apply to them.
@@ -298,7 +298,7 @@ export interface MeetupProposal {
 // Derived from the source submission, since that is where the acceptance email is recorded.
 export type SpeakerConfirmation = 'not-emailed' | 'awaiting' | 'confirmed' | 'unknown';
 
-// One presenter on one talk: what /admin/speakers lists, a row per (talk, speaker) for the
+// One presenter on one talk: what /admin/devfest/speakers lists, a row per (talk, speaker) for the
 // selected DevFest. Since stage 4c the person (`speakers/{id}`, GDG-wide) and the talk
 // (`talks/{talkId}`, one event) are separate documents, joined here. The profile fields
 // (name to photoUrl, previousSlugs) are the person's; the talk fields and the sends are this
@@ -474,7 +474,7 @@ export interface PublicScheduleSlot {
 }
 
 // The post-event survey (/feedback). Written only by /api/submit-feedback and read only on
-// /admin/feedback, so `feedback` has no block in firestore.rules. Anonymous unless the
+// /admin/devfest/feedback, so `feedback` has no block in firestore.rules. Anonymous unless the
 // attendee leaves an email to hear back.
 export type FeedbackRole = 'developer' | 'builder' | 'student' | 'other';
 export type FeedbackAspect = 'talks' | 'workshops' | 'venue' | 'food' | 'organisation' | 'networking';
@@ -505,7 +505,7 @@ export interface FeedbackResponse {
 
 // Credit requests (/credits), for attendees of a workshop that couldn't run as planned on
 // the day: they leave a name and email and the organisers send credits later. Written
-// only by /api/submit-credit-request and read only on /admin/credits, so `creditRequests`
+// only by /api/submit-credit-request and read only on /admin/devfest/credits, so `creditRequests`
 // has no block in firestore.rules.
 export interface CreditRequest {
   id: string;

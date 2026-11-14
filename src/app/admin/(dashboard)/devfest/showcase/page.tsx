@@ -1,7 +1,7 @@
 import { SITE_OG_IMAGE } from '@/lib/metadata';
 import { getVerifiedSession } from '@/lib/adminSession';
 import { fetchShowcaseSubmissions } from '@/lib/showcaseSubmissions';
-import ShowcaseDashboard from '../../ShowcaseDashboard';
+import ShowcaseDashboard from '../../../ShowcaseDashboard';
 import { getAdminDevfestId } from '@/lib/adminEvent';
 
 export const metadata = {

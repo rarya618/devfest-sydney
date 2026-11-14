@@ -312,7 +312,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
               </button>
             </div>
           )}
-          {/* The same send this volunteer's card offers on /admin/crew, so an organiser
+          {/* The same send this volunteer's card offers on /admin/devfest/crew, so an organiser
               working through the review queue doesn't have to change pages to tell someone. */}
           {volunteer.status === 'accepted' && (
             <button

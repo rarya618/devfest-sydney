@@ -97,7 +97,7 @@ export async function loadVolunteerInvite(token: string): Promise<VolunteerInvit
   };
 }
 
-// Organisers are added to a crew directly (Add organiser on /admin/crew) and are never invited
+// Organisers are added to a crew directly (Add organiser on /admin/devfest/crew) and are never invited
 // like volunteers, so anyone who is one is left out of both invite lists. An organiser is
 // someone with an organiser signup at any event, or whose profile says so (`isOrganiser`,
 // GDG-wide: someone who joined the team between events, with no event crew to be on yet).
@@ -124,7 +124,7 @@ export interface InvitablePastVolunteer {
   invitedAt: string | null;
 }
 
-// For the "Invite past volunteers" list on /admin/crew. Reads every signup: a few hundred
+// For the "Invite past volunteers" list on /admin/devfest/crew. Reads every signup: a few hundred
 // documents a year at most.
 export async function fetchInvitablePastVolunteers(eventId: string): Promise<InvitablePastVolunteer[]> {
   if (!eventId) return [];

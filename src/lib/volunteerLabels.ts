@@ -51,7 +51,7 @@ export const VOLUNTEER_SHIFT_LABELS: Record<VolunteerShift, string> = {
 };
 
 // The three stages of telling an accepted volunteer and hearing back. Shared by the
-// chips on /admin/volunteers and /admin/crew so the two can't describe them differently.
+// chips on /admin/devfest/volunteers and /admin/devfest/crew so the two can't describe them differently.
 export const VOLUNTEER_CONFIRMATION_CHIPS: Record<VolunteerConfirmation, { label: string; className: string; title: string }> = {
   confirmed: {
     label: 'Confirmed',

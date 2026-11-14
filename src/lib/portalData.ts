@@ -70,7 +70,7 @@ export type MeetupEditableFields = Pick<MeetupProposalFields, (typeof MEETUP_EDI
 
 // isAccepted: an accepted talk, whose edits show on the event page at once. For an accepted
 // DevFest talk only the title and abstract can change (editAcceptedDevfestTalk), and they
-// start from the talk, which organisers may have edited on /admin/speakers since.
+// start from the talk, which organisers may have edited on /admin/devfest/speakers since.
 export type PortalEditableProposal =
   | { kind: 'devfest'; name: string; isAccepted: boolean; fields: DevfestEditableFields }
   | { kind: 'meetup'; name: string; isAccepted: boolean; fields: MeetupEditableFields };

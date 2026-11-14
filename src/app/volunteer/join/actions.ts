@@ -21,7 +21,7 @@ const VALID_AREAS = Object.keys(VOLUNTEER_AREA_LABELS) as VolunteerArea[];
 
 // Files a pending signup for the invited event, linked to the person's profile, which takes
 // the phone number and dietary needs they confirmed. It lands in the normal review queue on
-// /admin/volunteers; there is no confirmation email, since the page says what happens next
+// /admin/devfest/volunteers; there is no confirmation email, since the page says what happens next
 // and the acceptance email is still the organisers' step to send.
 export async function acceptVolunteerInvite(token: string, answers: InviteAnswers): Promise<{ error?: string }> {
   let invite;

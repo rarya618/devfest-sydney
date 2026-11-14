@@ -60,7 +60,7 @@ export async function validateCreditRequest(body: unknown): Promise<CreditReques
   return { name, email, workshopSlotId: workshop.id, workshopTitle: workshop.label, note };
 }
 
-// For /admin/credits.
+// For /admin/devfest/credits.
 export async function fetchCreditRequests(): Promise<CreditRequest[]> {
   const snapshot = await adminDb.collection('creditRequests').orderBy('submittedAt', 'desc').get();
   return snapshot.docs.map((doc) => {

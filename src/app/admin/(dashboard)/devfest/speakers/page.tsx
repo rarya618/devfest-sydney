@@ -2,7 +2,7 @@ import { SITE_OG_IMAGE } from '@/lib/metadata';
 import { getVerifiedSession } from '@/lib/adminSession';
 import { fetchSpeakers } from '@/lib/speakers';
 import { fetchSessionTimesByTalkId } from '@/lib/schedule';
-import SpeakersDashboard from '../../SpeakersDashboard';
+import SpeakersDashboard from '../../../SpeakersDashboard';
 import { getAdminDevfestId } from '@/lib/adminEvent';
 
 export const metadata = {

@@ -10,7 +10,7 @@ import { getInitials } from '@/lib/format';
 import { TRACK_LABELS, FORMAT_LABELS, EXPERIENCE_LABELS } from '@/lib/submissionLabels';
 import type { Speaker } from '@/lib/types';
 
-// What the modal edits: the person, and on /admin/speakers the talk too. /admin/people passes
+// What the modal edits: the person, and on /admin/devfest/speakers the talk too. /admin/people passes
 // a person with blank talk fields and profileOnly.
 export type EditSpeakerTarget = Pick<Speaker, 'id' | 'talkId' | 'coSpeakerOf'> & SpeakerEditableFields;
 

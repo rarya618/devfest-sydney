@@ -158,6 +158,6 @@ export async function sendCalendarInvite(talkId: string, speakerId: string): Pro
     };
   }
 
-  revalidatePath('/admin/speakers');
+  revalidatePath('/admin/devfest/speakers');
   return {};
 }

@@ -3,7 +3,7 @@ import { emailLogoTag } from '@/lib/eventCopy';
 import type { GdgEventType } from '@/lib/types';
 
 // The speaker's calendar invite for their session: an email with an iCalendar file attached,
-// sent from /admin/speakers. The .ics goes out as `text/calendar; method=REQUEST`, which is
+// sent from /admin/devfest/speakers. The .ics goes out as `text/calendar; method=REQUEST`, which is
 // what makes Gmail and Outlook treat it as an invitation (added to the calendar, with
 // Yes / Maybe / No) rather than a file to download.
 //

@@ -15,7 +15,7 @@ export async function deleteFeedbackResponse(responseId: string): Promise<{ erro
 
   try {
     await adminDb.collection('feedback').doc(responseId).delete();
-    revalidatePath('/admin/feedback');
+    revalidatePath('/admin/devfest/feedback');
     return {};
   } catch {
     return { error: 'Could not delete this response. Please try again.' };

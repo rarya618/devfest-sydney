@@ -126,7 +126,7 @@ export async function updatePortalProfile(speakerId: string, fields: PortalProfi
     await adminDb.collection('speakers').doc(speakerId).update({ ...validated.values });
     revalidatePath('/speaker', 'layout');
     revalidatePath('/admin/people');
-    revalidatePath('/admin/speakers');
+    revalidatePath('/admin/devfest/speakers');
     return {};
   } catch (error) {
     console.error('Portal profile save failed:', error);
@@ -145,7 +145,7 @@ export async function uploadPortalPhoto(speakerId: string, formData: FormData): 
     if ('error' in result) return result;
     revalidatePath('/speaker', 'layout');
     revalidatePath('/admin/people');
-    revalidatePath('/admin/speakers');
+    revalidatePath('/admin/devfest/speakers');
     return { photoUrl: result.photoUrl };
   } catch (error) {
     console.error('Portal photo upload failed:', error);
@@ -164,7 +164,7 @@ export async function removePortalPhoto(speakerId: string): Promise<{ error?: st
     if (failure) return failure;
     revalidatePath('/speaker', 'layout');
     revalidatePath('/admin/people');
-    revalidatePath('/admin/speakers');
+    revalidatePath('/admin/devfest/speakers');
     return {};
   } catch (error) {
     console.error('Portal photo removal failed:', error);
@@ -358,9 +358,9 @@ export async function updatePortalProposal(
         return {};
       case 'saved':
         revalidatePath('/speaker', 'layout');
-        revalidatePath('/admin');
+        revalidatePath('/admin/devfest/proposals');
         revalidatePath('/admin/meetups');
-        revalidatePath('/admin/speakers');
+        revalidatePath('/admin/devfest/speakers');
         return {};
     }
   } catch (error) {

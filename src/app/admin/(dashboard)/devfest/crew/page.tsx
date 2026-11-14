@@ -1,7 +1,7 @@
 import { SITE_OG_IMAGE } from '@/lib/metadata';
 import { getVerifiedSession } from '@/lib/adminSession';
 import { fetchCrew } from '@/lib/volunteers';
-import CrewDashboard from '../../CrewDashboard';
+import CrewDashboard from '../../../CrewDashboard';
 import { getAdminDevfestContext } from '@/lib/adminEvent';
 import { fetchInvitablePastVolunteers, inviteClosedReason } from '@/lib/volunteerInvite';
 

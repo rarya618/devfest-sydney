@@ -18,7 +18,7 @@ interface Props {
 // stay under Resend's rate limit.
 const SEND_SPACING_MS = 600;
 
-// "Invite past volunteers" on /admin/crew (stage 4d-2, PM.md): everyone in the volunteer pool
+// "Invite past volunteers" on /admin/devfest/crew (stage 4d-2, PM.md): everyone in the volunteer pool
 // who crewed an earlier event and hasn't signed up for this one, ticked by default unless
 // already invited.
 export default function InvitePastVolunteersModal({ eventId, eventName, people, onClose, onError }: Props) {

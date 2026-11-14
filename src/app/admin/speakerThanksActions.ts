@@ -68,8 +68,8 @@ export async function sendSpeakerThanksEmail(talkId: string, speakerId: string):
     };
   }
 
-  revalidatePath('/admin/speakers');
-  revalidatePath('/admin/speaker-gifts');
+  revalidatePath('/admin/devfest/speakers');
+  revalidatePath('/admin/devfest/speaker-gifts');
   return {};
 }
 
@@ -83,7 +83,7 @@ export async function deleteSpeakerGift(speakerId: string): Promise<{ error?: st
 
   try {
     await adminDb.collection('speakerGifts').doc(speakerId).delete();
-    revalidatePath('/admin/speaker-gifts');
+    revalidatePath('/admin/devfest/speaker-gifts');
     return {};
   } catch {
     return { error: 'Could not delete this answer. Please try again.' };
@@ -104,7 +104,7 @@ export async function deleteAllSpeakerGifts(): Promise<{ error?: string }> {
     const batch = adminDb.batch();
     snapshot.docs.forEach((doc) => batch.delete(doc.ref));
     await batch.commit();
-    revalidatePath('/admin/speaker-gifts');
+    revalidatePath('/admin/devfest/speaker-gifts');
     return {};
   } catch {
     return { error: 'Could not delete the answers. Please try again.' };

@@ -11,7 +11,7 @@ import { inviteClosedReason, isOrganiserProfile, volunteerInviteUrl, volunteerOp
 import { buildVolunteerInviteEmail, volunteerInviteEmailSubject } from '@/lib/volunteerInviteEmail';
 
 // Emails one person from the volunteer pool an invite to crew an event, a DevFest or a general
-// one (stage 4d-2, PM.md). Sent from /admin/volunteer-pool, and from /admin/crew for the
+// one (stage 4d-2, PM.md). Sent from /admin/volunteer-pool, and from /admin/devfest/crew for the
 // selected DevFest. Recorded on their profile as volunteerInvites.<eventId>, so both lists
 // show who has been asked. Only someone in the volunteer pool (inPool) can be invited; an organiser, or someone who has used the "stop inviting me" link, is refused. A second send is allowed, for someone who lost the
 // first. `emailSent` is set on the one failure where the email did go out, so the bulk send
@@ -99,7 +99,7 @@ export async function sendVolunteerInvite(profileId: string, eventId: string): P
     return { error: 'The invite was sent, but we couldn\'t record it. Refresh before sending again.', emailSent: true };
   }
 
-  revalidatePath('/admin/crew');
+  revalidatePath('/admin/devfest/crew');
   revalidatePath('/admin/volunteer-pool');
   return {};
 }
@@ -141,6 +141,6 @@ export async function setVolunteerPoolMembership(profileId: string, inPool: bool
     return { error: inPool ? 'Could not add this person to the pool. Please try again.' : 'Could not take this person out of the pool. Please try again.' };
   }
   revalidatePath('/admin/volunteer-pool');
-  revalidatePath('/admin/crew');
+  revalidatePath('/admin/devfest/crew');
   return {};
 }

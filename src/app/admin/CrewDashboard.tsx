@@ -741,7 +741,7 @@ export default function CrewDashboard({ crew, invites }: Props) {
           </div>
         </div>
 
-        {/* Assigned area as a tab row, matching /admin/volunteers and /admin/showcase:
+        {/* Assigned area as a tab row, matching /admin/devfest/volunteers and /admin/devfest/showcase:
             confirmation is a menu because a crew member is in exactly one state, while the
             area row doubles as the roster at a glance. */}
         <div

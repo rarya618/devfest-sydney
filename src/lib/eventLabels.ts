@@ -33,7 +33,7 @@ export const EVENT_PRIVATE_LINK_LABELS: Record<EventPrivateLinkKey, string> = {
 
 export const EVENT_PRIVATE_LINK_HINTS: Record<EventPrivateLinkKey, string> = {
   speakerTicketUrl: 'The Humanitix link with the speaker access code. Emailed to confirmed speakers and shown on /speaker/confirm.',
-  showcaseTicketUrl: 'The Humanitix link with the showcase access code. Shown on /builder-showcase/confirm and emailed from /admin/showcase.',
+  showcaseTicketUrl: 'The Humanitix link with the showcase access code. Shown on /builder-showcase/confirm and emailed from /admin/devfest/showcase.',
   volunteerTicketUrl: 'The Humanitix link with the volunteer access code. Shown on /volunteer/confirm.',
   volunteerWhatsappUrl: 'The group invite, shown on /volunteer/confirm. Anyone holding it can join.',
 };

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Submission, VolunteerSubmission, ShowcaseSubmission } from '@/lib/types';
-import StickyAdminHeader from '../../StickyAdminHeader';
+import StickyAdminHeader from '../../../StickyAdminHeader';
 import SpeakerAnalytics from './SpeakerAnalytics';
 import VolunteerAnalytics from './VolunteerAnalytics';
 import ShowcaseAnalytics from './ShowcaseAnalytics';
@@ -44,7 +44,7 @@ export default function AnalyticsView({ activeTab, submissions, volunteers, show
             return (
               <Link
                 key={tab}
-                href={tab === 'speakers' ? '/admin/analytics' : `/admin/analytics?tab=${tab}`}
+                href={tab === 'speakers' ? '/admin/devfest/analytics' : `/admin/devfest/analytics?tab=${tab}`}
                 aria-current={active ? 'page' : undefined}
                 aria-label={`Show ${TAB_LABELS[tab]} analytics`}
                 className={`inline-flex items-center gap-2 shrink-0 text-sm px-3.5 py-1.5 rounded-full border transition-colors ${

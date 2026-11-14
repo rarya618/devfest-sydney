@@ -30,9 +30,9 @@ Every confirm-style page acts behind a button, never on page load, so mail scann
 
 ### Admin (`/admin`, Google sign-in, emails in the `admins` collection)
 Sidebar groups:
-- **DevFest** (heading doubles as an edition picker once there are two DevFests; `admin-devfest` cookie, defaults to the current DevFest, `src/lib/adminEvent.ts`)
-  - **Forms:** Talk proposals (`/admin`), Volunteers, Showcase, Feedback, Credits (not edition-filtered: 2026 only), Speaker gifts
-  - Speakers (`/admin/speakers`), Crew (`/admin/crew`), Analytics
+- **DevFest**, every page under `/admin/devfest/` (moved 2026-11-14; the old paths 308 there from `next.config.ts`, and `/admin` itself redirects to talk proposals). The heading doubles as an edition picker once there are two DevFests (`admin-devfest` cookie, defaults to the current DevFest, `src/lib/adminEvent.ts`)
+  - **Forms:** Talk proposals (`/admin/devfest/proposals`), Volunteers, Showcase, Feedback, Credits (not edition-filtered: 2026 only), Speaker gifts
+  - Speakers (`/admin/devfest/speakers`), Crew (`/admin/devfest/crew`), Analytics
 - **GDG Sydney:** All speakers (`/admin/people`; Preview shows a speaker's public card exactly as the portal shows it to them, `src/components/SpeakerCard.tsx`; Edit profile here and on DevFest > Speakers shows the same card live as you type), Volunteer pool (`/admin/volunteer-pool`)
 - **General events:** Meetup talks (`/admin/meetups`), Volunteers (`/admin/event-volunteers?event=<id>`)
 - **Tools:** Links (UTM tracking links)
@@ -92,7 +92,7 @@ All sends are explicit admin actions, never side effects of a status change. Eac
 - **Co-speakers:** a second id in a talk's `speakerIds`. No acceptance email (the lead answered); they get their own ticket, invite and thank-you
 - **Meetups:** `/speak` → `meetupProposals` → `/admin/meetups` Accept picks an upcoming general event and creates the talk → acceptance email → `/speaker/confirm`. Moving an accepted proposal back deletes the talk (and the person if they give no other talk)
 - **Talks agreed outside the form** (invited speakers): `scripts/add-agreed-meetup-talks.mjs <talks.json> [--dry-run]` files each as a meetup proposal (`source: organiser`), accepted into a general event and confirmed, with no email, doing what Accept does. The JSON holds emails, so it stays out of the repo. A proposal confirmed this way shows as Confirmed in the portal and the admin
-- `/admin/speakers` rows are (talk, speaker) pairs; profile edits go to the person, talk edits only from the lead's row. Photos upload to `speaker-photos/<id>/` (5 MB JPEG/PNG/WebP; `serverActions.bodySizeLimit` is 6 MB for this)
+- `/admin/devfest/speakers` rows are (talk, speaker) pairs; profile edits go to the person, talk edits only from the lead's row. Photos upload to `speaker-photos/<id>/` (5 MB JPEG/PNG/WebP; `serverActions.bodySizeLimit` is 6 MB for this)
 
 ### Volunteers
 - Public form → `volunteers` (creates or reuses the profile) → accept → acceptance email (2-day `confirmByDate`) → `/volunteer/confirm` → ticket and WhatsApp links from the signup's event
@@ -197,7 +197,7 @@ At `/speaker`, its own area outside `/admin`. Decided 2026-11-14:
 - **Status shows only what the speaker has been told:** a decision reads "Under review" until its acceptance or rejection email has gone (or, for a talk agreed outside the form, until it is recorded as confirmed). An accepted, unconfirmed proposal links to its `/speaker/confirm`. The talk lists (Upcoming, Past) follow the same rule: a talk shows only once its proposal, the lead's for a co-speaker, has been announced.
 - **Editing a proposal** (added 2026-11-14 on request): Edit on a proposal in the dashboard reopens the proposal form, prefilled, in the panel. Allowed while the proposal is `pending`, DevFest ones included after the CfS closes; locked once an organiser accepts or rejects, even before the email (the check and the write share a transaction, `editOwnProposal` in `src/lib/proposalFiling.ts`). Everything but name, email and where it came from can change, through the same validators as filing. No email goes out; `editedAt` is stamped and the admin cards show "Edited <date>".
 - **Editing an accepted meetup talk** (added 2026-11-14): speakers can keep editing a meetup proposal after acceptance, once they have been told, until the event ends ("Edit your talk"), except its format, which is the organisers' once the talk is on a meetup's programme; organisers can edit any meetup proposal at any time from Edit in the card's More menu on `/admin/meetups`. Both go through `editMeetupProposal`, which writes the proposal and its talk together, so the portal and the public API agree. Only speaker edits mark it "Edited". Name and email are edited on the person (`/admin/people`).
-- **Editing an accepted DevFest talk** (added 2026-11-14): the same rule (once told, until the event ends), but only the title and abstract, since organisers own track, format and level (Spotlight and Keynote are talk-only tracks). The form starts from the talk; saving writes the talk and the submission and marks it "Edited" (`editAcceptedDevfestTalk`). The two admin editors keep them in step too: a lead's talk edit on `/admin/speakers` copies the title and abstract to the submission, and an accepted submission edited on the proposals page copies a changed title or abstract to the talk.
+- **Editing an accepted DevFest talk** (added 2026-11-14): the same rule (once told, until the event ends), but only the title and abstract, since organisers own track, format and level (Spotlight and Keynote are talk-only tracks). The form starts from the talk; saving writes the talk and the submission and marks it "Edited" (`editAcceptedDevfestTalk`). The two admin editors keep them in step too: a lead's talk edit on `/admin/devfest/speakers` copies the title and abstract to the submission, and an accepted submission edited on the proposals page copies a changed title or abstract to the talk.
 - Not built: withdrawing a proposal, co-speakers seeing a proposal filed under the lead's address.
 - **Linked from gdgsydney.com/speak** (`gdg-sydney`, 2026-11-14): a line under the form heading for returning speakers, and one in the message after submitting.
 - **Linked from the speaker emails** (2026-11-14): the proposal confirmations (DevFest and meetup), the acceptance email ("Your speaker profile") and the thank-you email ("Your next talk") carry an "Open the speaker portal" button to `/speaker/sign-in` (`portalSignInUrl()` in `src/lib/portalAuth.ts`), never a sign-in link, since those expire in 30 minutes.
@@ -214,8 +214,8 @@ At `/speaker`, its own area outside `/admin`. Decided 2026-11-14:
 
 1. **Stage 0, the 2026 clean-up.** Each item waits on something outside the app:
    - **Job board data** (`jobSeekers` 34, `jobListings` 6, still in Firestore): share the two CSVs in `~/Desktop/devfest-2026/` with employers, then delete both collections and the Desktop copies. The open-to-work CSV deliberately has no emails and only the 29 approved profiles, which is what the consent tick covered.
-   - **`speakerGifts`:** once the mugs have shipped and the Asana list has gone to Asana, "Delete all" on `/admin/speaker-gifts`.
-   - **`creditRequests`:** once workshop credits are sent, delete on `/admin/credits`.
+   - **`speakerGifts`:** once the mugs have shipped and the Asana list has gone to Asana, "Delete all" on `/admin/devfest/speaker-gifts`.
+   - **`creditRequests`:** once workshop credits are sent, delete on `/admin/devfest/credits`.
    - Then reword the matching `/privacy` sections (Job Board still says "We take the job board down ... after the event") to say the data has been deleted.
 2. **Security leftovers:** rotate the reCAPTCHA key's secret (it once sat in `.env.local` under the site key's name), and decide whether to switch App Check on in production.
 3. **Verify before relying on them** (never exercised with a real send, since every recipient was real): a volunteer invite and `/volunteer/join` submission, and the meetup acceptance flow. Use the Android event (or a test general event), and send one of each to an organiser inbox.

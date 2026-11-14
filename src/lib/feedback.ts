@@ -114,7 +114,7 @@ export async function validateFeedback(body: unknown): Promise<FeedbackFields> {
 }
 
 // ---------------------------------------------------------------------------------------
-// Reads, for /admin/feedback.
+// Reads, for /admin/devfest/feedback.
 // ---------------------------------------------------------------------------------------
 
 function toFeedbackResponse(id: string, data: FirebaseFirestore.DocumentData): FeedbackResponse {

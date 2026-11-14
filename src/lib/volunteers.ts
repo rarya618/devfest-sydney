@@ -90,7 +90,7 @@ export async function fetchVolunteerSignups(eventId: string): Promise<VolunteerS
   return volunteers.filter((volunteer) => !volunteer.isOrganiser);
 }
 
-// The crew: volunteers who have been accepted, which is what /admin/crew manages. They
+// The crew: volunteers who have been accepted, which is what /admin/devfest/crew manages. They
 // stay in the `volunteers` collection rather than being promoted into a second one the
 // way accepted speakers are. A speaker document exists because the public profile is
 // edited away from the proposal that produced it; a crew member's roster is just a few

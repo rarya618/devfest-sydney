@@ -1,7 +1,7 @@
 import { SITE_OG_IMAGE } from '@/lib/metadata';
 import { getVerifiedSession } from '@/lib/adminSession';
 import { fetchCreditRequests } from '@/lib/creditRequests';
-import CreditRequestsDashboard from '../../CreditRequestsDashboard';
+import CreditRequestsDashboard from '../../../CreditRequestsDashboard';
 
 export const metadata = {
   title: 'Credits',

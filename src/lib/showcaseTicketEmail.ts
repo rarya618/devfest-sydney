@@ -1,7 +1,7 @@
 import { escapeHtml } from '@/lib/escapeHtml';
 import { formatEventDay, formatVenueAddress, type EventCopy } from '@/lib/eventCopy';
 
-// The entrant-facing "here is your complimentary ticket" email, sent from /admin/showcase
+// The entrant-facing "here is your complimentary ticket" email, sent from /admin/devfest/showcase
 // once an entrant has confirmed their demo. Same table-based, inline-styled construction
 // as speakerTicketEmail.ts, and for the same reason: email clients strip stylesheets.
 

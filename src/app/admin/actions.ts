@@ -135,7 +135,7 @@ export async function promoteSubmission(submissionId: string): Promise<{ error?:
     });
     batch.update(submissionRef, { status: 'accepted' });
     await batch.commit();
-    revalidatePath('/admin');
+    revalidatePath('/admin/devfest/proposals');
     return {};
   } catch {
     return { error: 'Could not promote this submission. Please try again.' };
@@ -167,7 +167,7 @@ export async function addReviewerNote(submissionId: string, text: string): Promi
       }),
     });
 
-    revalidatePath('/admin');
+    revalidatePath('/admin/devfest/proposals');
     return {};
   } catch {
     return { error: 'Could not save this note. Please try again.' };
@@ -193,7 +193,7 @@ export async function deleteReviewerNote(submissionId: string, noteIndex: number
       reviewerNotes: notes.filter((_, index) => index !== noteIndex),
     });
 
-    revalidatePath('/admin');
+    revalidatePath('/admin/devfest/proposals');
     return {};
   } catch {
     return { error: 'Could not delete this note. Please try again.' };
@@ -358,7 +358,7 @@ export async function updateSubmission(
     batch.update(submissionRef, { ...validated.values });
     // Once accepted, the talk is what the lineup and the speaker portal show. A changed title or
     // abstract goes to it too; unchanged ones are left alone, so saving a flag here can't
-    // overwrite an edit made to the talk on /admin/speakers or by the speaker.
+    // overwrite an edit made to the talk on /admin/devfest/speakers or by the speaker.
     const stored = snap.data() ?? {};
     const talkRef = adminDb.collection('talks').doc(submissionId);
     if (stored.status === 'accepted' && (await talkRef.get()).exists) {
@@ -369,8 +369,8 @@ export async function updateSubmission(
     }
     await batch.commit();
 
-    revalidatePath('/admin');
-    revalidatePath('/admin/speakers');
+    revalidatePath('/admin/devfest/proposals');
+    revalidatePath('/admin/devfest/speakers');
     return {};
   } catch {
     return { error: 'Could not save these changes. Please try again.' };
@@ -434,7 +434,7 @@ export async function createSubmission(
     return { error: 'Could not add this submission. Please try again.' };
   }
 
-  revalidatePath('/admin');
+  revalidatePath('/admin/devfest/proposals');
   return {};
 }
 
@@ -448,7 +448,7 @@ export async function undoPromotion(submissionId: string): Promise<{ error?: str
   try {
     // The talk (id = the proposal's) goes, with everyone presenting it; anyone left giving no
     // talk at all is deleted too (removePeopleWithoutTalks), the same as Remove on
-    // /admin/speakers.
+    // /admin/devfest/speakers.
     const talkRef = adminDb.collection('talks').doc(submissionId);
     const talkSnapshot = await talkRef.get();
     const speakerIds = ((talkSnapshot.data()?.speakerIds ?? []) as string[]);
@@ -459,7 +459,7 @@ export async function undoPromotion(submissionId: string): Promise<{ error?: str
     await batch.commit();
     await removePeopleWithoutTalks(speakerIds);
 
-    revalidatePath('/admin');
+    revalidatePath('/admin/devfest/proposals');
     return {};
   } catch {
     return { error: 'Could not undo this acceptance. Please try again.' };
@@ -475,7 +475,7 @@ export async function rejectSubmission(submissionId: string): Promise<{ error?: 
 
   try {
     await adminDb.collection('submissions').doc(submissionId).update({ status: 'rejected' });
-    revalidatePath('/admin');
+    revalidatePath('/admin/devfest/proposals');
     return {};
   } catch {
     return { error: 'Could not reject this submission. Please try again.' };
@@ -491,7 +491,7 @@ export async function restoreSubmission(submissionId: string): Promise<{ error?:
 
   try {
     await adminDb.collection('submissions').doc(submissionId).update({ status: 'pending' });
-    revalidatePath('/admin');
+    revalidatePath('/admin/devfest/proposals');
     return {};
   } catch {
     return { error: 'Could not restore this submission. Please try again.' };
@@ -514,7 +514,7 @@ export async function archiveSubmission(submissionId: string): Promise<{ error?:
     }
 
     await submissionRef.update({ status: 'archived' });
-    revalidatePath('/admin');
+    revalidatePath('/admin/devfest/proposals');
     return {};
   } catch {
     return { error: 'Could not archive this submission. Please try again.' };
@@ -591,7 +591,7 @@ export async function sendAcceptanceEmail(submissionId: string): Promise<{ error
     return { error: 'Only accepted submissions can be sent an acceptance email. Accept this proposal first.' };
   }
 
-  // An admin who edits a talk title, track or address in /admin/speakers expects a resend
+  // An admin who edits a talk title, track or address in /admin/devfest/speakers expects a resend
   // to carry the correction. The speaker document is the edited, authoritative version of
   // the speaker, so it wins wherever it exists; the proposal is the fallback for a
   // submission that was accepted but never promoted.
@@ -660,8 +660,8 @@ export async function sendAcceptanceEmail(submissionId: string): Promise<{ error
   }
 
   // The speakers page shows the same chip, joined from the submission.
-  revalidatePath('/admin');
-  revalidatePath('/admin/speakers');
+  revalidatePath('/admin/devfest/proposals');
+  revalidatePath('/admin/devfest/speakers');
   return {};
 }
 
@@ -747,8 +747,8 @@ export async function sendSpeakerTicketEmail(submissionId: string): Promise<{ er
     return { error: 'The ticket email was sent, but we couldn\'t record it against this submission. Please refresh before sending again.' };
   }
 
-  revalidatePath('/admin');
-  revalidatePath('/admin/speakers');
+  revalidatePath('/admin/devfest/proposals');
+  revalidatePath('/admin/devfest/speakers');
   return {};
 }
 
@@ -827,7 +827,7 @@ export async function sendCoSpeakerTicketEmail(talkId: string, speakerId: string
     return { error: 'The ticket email was sent, but we couldn\'t record it. Please refresh before sending again.' };
   }
 
-  revalidatePath('/admin/speakers');
+  revalidatePath('/admin/devfest/speakers');
   return {};
 }
 
@@ -932,6 +932,6 @@ export async function sendRejectionEmail(submissionId: string): Promise<{ error?
     };
   }
 
-  revalidatePath('/admin');
+  revalidatePath('/admin/devfest/proposals');
   return {};
 }

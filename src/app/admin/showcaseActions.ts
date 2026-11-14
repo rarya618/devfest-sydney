@@ -25,7 +25,7 @@ async function setShowcaseStatus(
 
   try {
     await adminDb.collection('showcase').doc(entryId).update({ status });
-    revalidatePath('/admin/showcase');
+    revalidatePath('/admin/devfest/showcase');
     return {};
   } catch {
     return { error: failureMessage };
@@ -73,7 +73,7 @@ export async function addShowcaseReviewerNote(entryId: string, text: string): Pr
       }),
     });
 
-    revalidatePath('/admin/showcase');
+    revalidatePath('/admin/devfest/showcase');
     return {};
   } catch {
     return { error: 'Could not save this note. Please try again.' };
@@ -212,7 +212,7 @@ export async function updateShowcaseEntry(
 
     await entryRef.update({ ...validated.values });
 
-    revalidatePath('/admin/showcase');
+    revalidatePath('/admin/devfest/showcase');
     return {};
   } catch {
     return { error: 'Could not save these changes. Please try again.' };
@@ -320,7 +320,7 @@ export async function sendShowcaseAcceptanceEmail(entryId: string): Promise<{ er
     return { error: 'The email was sent, but we couldn\'t record it against this entry. Please refresh before sending again.' };
   }
 
-  revalidatePath('/admin/showcase');
+  revalidatePath('/admin/devfest/showcase');
   return {};
 }
 
@@ -403,6 +403,6 @@ export async function sendShowcaseTicketEmail(entryId: string): Promise<{ error?
     return { error: 'The ticket email was sent, but we couldn\'t record it against this entry. Please refresh before sending again.' };
   }
 
-  revalidatePath('/admin/showcase');
+  revalidatePath('/admin/devfest/showcase');
   return {};
 }

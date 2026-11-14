@@ -20,7 +20,7 @@ const OLD_HOST = 'devfest\\.gdgsydney\\.com';
 // the one renamed speaker comes before the general speaker rule.
 const CONTENT_MOVES: { source: string; destination: string }[] = [
   { source: '/speakers', destination: '/devfest/2026#speakers' },
-  // Renamed in /admin/speakers before the event; the Astro snapshot has no previousSlugs.
+  // Renamed in the admin's DevFest speakers page before the event; the Astro snapshot has no previousSlugs.
   { source: '/speakers/saheb-yuvraj-singh', destination: '/devfest/2026/speakers/qasim-tariq' },
   // Slugs match one for one: the snapshot was exported from the same projection.
   { source: '/speakers/:slug', destination: '/devfest/2026/speakers/:slug' },

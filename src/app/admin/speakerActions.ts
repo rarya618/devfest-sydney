@@ -143,11 +143,11 @@ export async function addCoSpeaker(talkId: string, fields: SpeakerProfileFields)
 }
 
 function revalidateLineup() {
-  revalidatePath('/admin/speakers');
+  revalidatePath('/admin/devfest/speakers');
   revalidatePath('/admin/people');
 }
 
-// Saves a row from /admin/speakers. The profile goes to the person, so it changes on every
+// Saves a row from /admin/devfest/speakers. The profile goes to the person, so it changes on every
 // talk they give; the talk fields go to the talk, and only from its lead's row: on a
 // co-speaker the modal sends the talk's own values back, and they are ignored.
 export async function updateSpeaker(talkId: string, speakerId: string, fields: SpeakerEditableFields): Promise<{ error?: string }> {
@@ -258,7 +258,7 @@ export async function removeSpeaker(talkId: string, speakerId: string): Promise<
       }
       await batch.commit();
       await removePeopleWithoutTalks(speakerIds);
-      revalidatePath('/admin');
+      revalidatePath('/admin/devfest/proposals');
     } else {
       await talkRef.update({
         speakerIds: FieldValue.arrayRemove(speakerId),

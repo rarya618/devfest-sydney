@@ -5,7 +5,7 @@ import Alert from '@/components/Alert';
 import { csvFilename, downloadCsv, formatCsvBoolean } from '@/lib/csv';
 import { formatDate } from '@/lib/format';
 import type { SpeakerGift } from '@/lib/types';
-import { EmptyState } from './(dashboard)/analytics/shared';
+import { EmptyState } from './(dashboard)/devfest/analytics/shared';
 import { deleteAllSpeakerGifts, deleteSpeakerGift } from './speakerThanksActions';
 import StickyAdminHeader from './StickyAdminHeader';
 

@@ -1,7 +1,7 @@
 export interface VolunteerLinks {
   // The Humanitix link carrying the volunteer access code. Null when the event has no
   // volunteer ticket link set, or when an admin has marked this volunteer's ticket as already sent
-  // from /admin/crew; ticketAlreadySent tells the two apart.
+  // from /admin/devfest/crew; ticketAlreadySent tells the two apart.
   ticketUrl: string | null;
   ticketAlreadySent: boolean;
   // The volunteer WhatsApp group invite, or null when the event has none set.

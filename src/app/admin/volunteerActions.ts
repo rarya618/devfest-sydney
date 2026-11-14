@@ -14,11 +14,11 @@ import { loadVolunteerRecord } from '@/lib/volunteerProfiles';
 import { loadEvent } from '@/lib/events';
 import { toEventCopy } from '@/lib/eventCopy';
 
-// Accepting or un-accepting a signup moves it on and off /admin/crew, so both pages are
+// Accepting or un-accepting a signup moves it on and off /admin/devfest/crew, so both pages are
 // revalidated wherever the status changes.
 function revalidateVolunteerPages() {
-  revalidatePath('/admin/volunteers');
-  revalidatePath('/admin/crew');
+  revalidatePath('/admin/devfest/volunteers');
+  revalidatePath('/admin/devfest/crew');
   revalidatePath('/admin/event-volunteers');
   revalidatePath('/admin/volunteer-pool');
 }

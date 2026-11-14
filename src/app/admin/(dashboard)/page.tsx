@@ -1,13 +1,7 @@
-import { getVerifiedSession } from '@/lib/adminSession';
-import { fetchSubmissions } from '@/lib/submissions';
-import SubmissionsDashboard from '../SubmissionsDashboard';
-import { getAdminDevfestId } from '@/lib/adminEvent';
+import { redirect } from 'next/navigation';
 
-export const metadata = { title: 'Talk proposals' };
-
-export default async function AdminPage() {
-  const eventId = await getAdminDevfestId();
-  const [, submissions] = await Promise.all([getVerifiedSession(), fetchSubmissions(eventId)]);
-
-  return <SubmissionsDashboard submissions={submissions} />;
+// The admin's front door. Its DevFest pages live under /admin/devfest (moved 2026-11-14);
+// signing in still lands on talk proposals, as it always has.
+export default function AdminHomePage() {
+  redirect('/admin/devfest/proposals');
 }

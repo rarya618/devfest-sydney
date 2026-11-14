@@ -71,7 +71,7 @@ function toPresenterState(value: unknown): TalkPresenterState {
   };
 }
 
-// The selected DevFest's lineup as /admin/speakers lists it: a row per presenter per talk,
+// The selected DevFest's lineup as /admin/devfest/speakers lists it: a row per presenter per talk,
 // newest promotion first, each talk's lead before its co-speakers. Since stage 4c the talk
 // (`talks`) and the person (`speakers`) are joined here, and whether the talk is going ahead
 // is read off the proposal it came from, which is where the acceptance email and

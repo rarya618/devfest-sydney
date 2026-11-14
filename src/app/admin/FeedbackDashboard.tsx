@@ -16,7 +16,7 @@ import {
   FEEDBACK_ROLE_LABELS,
 } from '@/lib/feedbackLabels';
 import type { FeedbackResponse } from '@/lib/types';
-import { BarRow, BreakdownCard, EmptyState, StatTile } from './(dashboard)/analytics/shared';
+import { BarRow, BreakdownCard, EmptyState, StatTile } from './(dashboard)/devfest/analytics/shared';
 import { deleteFeedbackResponse } from './feedbackActions';
 import StickyAdminHeader from './StickyAdminHeader';
 

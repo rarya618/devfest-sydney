@@ -69,7 +69,7 @@ export async function confirmVolunteering(token: string): Promise<ConfirmResult>
       await notifyOrganisers(record.data, confirmedAt);
     }
 
-    // Marked by an admin on /admin/crew once the ticket has gone out some other way.
+    // Marked by an admin on /admin/devfest/crew once the ticket has gone out some other way.
     const ticketAlreadySent = Boolean(record.data.ticketSentAt);
     // The links of the event they signed up for (stage 4e), not whichever DevFest is current.
     const eventId = String(record.data.eventId ?? '');

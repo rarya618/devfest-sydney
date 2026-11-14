@@ -534,7 +534,7 @@ export async function editMeetupProposal(
   return { outcome: 'saved' };
 }
 
-// /admin/speakers' limit on a talk title; a DevFest proposal has none of its own.
+// /admin/devfest/speakers' limit on a talk title; a DevFest proposal has none of its own.
 export const DEVFEST_TALK_TITLE_MAX = 150;
 
 // Once a DevFest proposal is accepted, its talk (talks/{submission id}) is what the portal,

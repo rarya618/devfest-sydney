@@ -32,7 +32,7 @@ interface ProposalFormProps {
 }
 
 const DEVFEST_ABSTRACT_MAX = 2000;
-// /admin/speakers' limit, which an accepted DevFest talk's title is held to (proposalFiling.ts).
+// /admin/devfest/speakers' limit, which an accepted DevFest talk's title is held to (proposalFiling.ts).
 const DEVFEST_TALK_TITLE_MAX = 150;
 
 const DEVFEST_TRACKS: { value: DevfestTrack; label: string; description: string }[] = [

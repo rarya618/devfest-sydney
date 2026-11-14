@@ -25,7 +25,7 @@ const VOLUNTEER_AREAS: VolunteerArea[] = [
 ];
 const VOLUNTEER_SHIFTS: VolunteerShift[] = ['', 'full-day', 'morning', 'afternoon'];
 
-// What an admin may change about an accepted volunteer from /admin/crew. Deliberately
+// What an admin may change about an accepted volunteer from /admin/devfest/crew. Deliberately
 // only the roster and announcement fields: the answers the volunteer gave on the form are
 // their words, and an organiser correcting a motivation paragraph helps nobody.
 export interface CrewEditableFields {
@@ -136,7 +136,7 @@ export async function updateCrewMember(volunteerId: string, fields: CrewEditable
 }
 
 // Takes a volunteer off the crew and puts their signup back to pending, the same as
-// Restore on /admin/volunteers, so the two entry points can't disagree. The roster fields
+// Restore on /admin/devfest/volunteers, so the two entry points can't disagree. The roster fields
 // are cleared with it: a shift and an area left behind would reappear if they were later
 // accepted again, and would quietly ride along into the next acceptance email.
 export async function removeFromCrew(volunteerId: string): Promise<{ error?: string }> {
@@ -274,7 +274,7 @@ export async function setTicketSent(volunteerId: string, ticketSent: boolean): P
         ? { ticketSentAt: FieldValue.serverTimestamp(), ticketSentBy: adminEmail }
         : { ticketSentAt: FieldValue.delete(), ticketSentBy: FieldValue.delete() }
     );
-    revalidatePath('/admin/crew');
+    revalidatePath('/admin/devfest/crew');
     return {};
   } catch {
     return { error: 'Could not update the ticket status. Please try again.' };
@@ -358,8 +358,8 @@ export async function removeCrewPhoto(volunteerId: string): Promise<{ error?: st
 }
 
 function revalidateCrewPages() {
-  revalidatePath('/admin/crew');
-  revalidatePath('/admin/volunteers');
+  revalidatePath('/admin/devfest/crew');
+  revalidatePath('/admin/devfest/volunteers');
   revalidatePath('/crew');
   // The landing page's organisers section reads the same records.
   revalidatePath('/');

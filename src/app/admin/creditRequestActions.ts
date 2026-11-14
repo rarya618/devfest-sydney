@@ -15,7 +15,7 @@ export async function deleteCreditRequest(requestId: string): Promise<{ error?: 
 
   try {
     await adminDb.collection('creditRequests').doc(requestId).delete();
-    revalidatePath('/admin/credits');
+    revalidatePath('/admin/devfest/credits');
     return {};
   } catch {
     return { error: 'Could not delete this request. Please try again.' };
