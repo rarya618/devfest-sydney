@@ -108,11 +108,12 @@ function ReviewerNotesPanel({ proposalId, notes, onError }: ReviewerNotesPanelPr
   );
 }
 
+// The speak form offers the abstract's formatting in every text box, so these render it too.
 function DetailBlock({ label, text }: { label: string; text: string }) {
   return (
     <div className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
       <p className="font-bold text-white/85 mb-1">{label}</p>
-      <p className="whitespace-pre-wrap break-words">{text}</p>
+      <MarkdownText text={text} className="break-words" />
     </div>
   );
 }
