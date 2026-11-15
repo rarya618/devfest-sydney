@@ -3,18 +3,22 @@ import { Fragment, type ReactNode } from 'react';
 // Renders the small piece of Markdown that talk abstracts use (decided 2026-11-14), as React
 // elements, never as HTML, so nothing a speaker types can inject markup or script:
 //   paragraphs (a blank line between), with single line breaks kept
+//   headings ("# ", "## " or "### " at the start of a line), all set as one small heading, since
+//   they sit inside cards; the space matters, so "#hashtag" stays as typed
 //   bullet lists ("- ", "* " or "• " at the start of a line) and numbered lists ("1. " or "1) ")
 //   **bold**, *italic* or _italic_, `code`, and [links](https://...) to http(s) addresses only
 // A list may start straight under its intro line, without a blank line, as people type them.
 // Anything else shows as typed. Stored text stays plain, and the public API returns it as is.
 
 // The line under every abstract box, so speakers and organisers know what will be formatted.
-export const MARKDOWN_HINT = 'Formatting: start a line with - for a bullet point, wrap words in **two asterisks** for bold, and write links as [text](https://…).';
+export const MARKDOWN_HINT = 'Formatting: start a line with ## for a heading or - for a bullet point, wrap words in **two asterisks** for bold, and write links as [text](https://…).';
 
 type Block =
+  | { kind: 'heading'; text: string }
   | { kind: 'paragraph'; lines: string[] }
   | { kind: 'bullets' | 'numbers'; items: string[] };
 
+const HEADING_LINE = /^\s{0,3}#{1,3}\s+(.+?)(?:\s+#+)?\s*$/;
 const BULLET_LINE = /^\s*[-*•]\s+(.*)$/;
 const NUMBER_LINE = /^\s*\d{1,3}[.)]\s+(.*)$/;
 
@@ -30,6 +34,13 @@ function toBlocks(text: string): Block[] {
   for (const line of text.replace(/\r\n?/g, '\n').split('\n')) {
     if (!line.trim()) {
       finish();
+      continue;
+    }
+    // A heading stands alone: it ends whatever came before, and the next line starts afresh.
+    const heading = HEADING_LINE.exec(line);
+    if (heading) {
+      finish();
+      blocks.push({ kind: 'heading', text: heading[1] });
       continue;
     }
     const bullet = BULLET_LINE.exec(line);
@@ -90,6 +101,14 @@ export default function MarkdownText({ text, className = '' }: { text: string; c
     <div className={`space-y-3 break-words ${className}`}>
       {toBlocks(text).map((block, blockIndex) => {
         const key = `block-${blockIndex}`;
+        if (block.kind === 'heading') {
+          // h4 whatever the speaker typed: the text sits under the page's own headings.
+          return (
+            <h4 key={key} className="font-bold text-white/90 text-[1.05em] leading-snug">
+              {renderInline(block.text, key)}
+            </h4>
+          );
+        }
         if (block.kind === 'paragraph') {
           return (
             <p key={key}>
