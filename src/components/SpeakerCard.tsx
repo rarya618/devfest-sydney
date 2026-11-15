@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { getInitials } from '@/lib/format';
+import MarkdownText from '@/components/MarkdownText';
 
 // How a speaker appears next to their talks on our public pages, drawn from their profile.
 // Shared by the speaker portal (the dashboard, and the profile editor, where it updates as
@@ -61,7 +62,7 @@ export default function SpeakerCard({ profile, showFullBio = false, isPhotoLoadi
           <p className="mt-1.5 text-white/50 leading-snug">No tagline yet</p>
         )}
         {profile.bio && (
-          <p className={`mt-4 text-sm text-white/65 leading-relaxed whitespace-pre-line ${showFullBio ? '' : 'line-clamp-4'}`}>{profile.bio}</p>
+          <MarkdownText text={profile.bio} className={`mt-4 text-sm text-white/65 leading-relaxed ${showFullBio ? '' : 'line-clamp-4'}`} />
         )}
         {links.length > 0 && (
           <ul className="mt-4 flex flex-wrap gap-2" aria-label={isOwnCard ? 'Your links' : `${profile.name}'s links`}>

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, useTransition, type FormEvent
 import { useRouter } from 'next/navigation';
 import Alert from '@/components/Alert';
 import { hintClass, inputNormal, labelClass } from '@/lib/formStyles';
+import FormattingHelp from '@/components/FormattingHelp';
 import { PORTAL_PROFILE_LIMITS, type PortalProfileFields } from '@/lib/portalLabels';
 import { removePortalPhoto, updatePortalProfile, uploadPortalPhoto } from './actions';
 import type { SpeakerCardProfile } from '@/components/SpeakerCard';
@@ -175,13 +176,14 @@ export default function ProfileEditorPanel({ profile, onPreviewChange, onDone, o
             rows={7}
             value={fields.bio}
             maxLength={PORTAL_PROFILE_LIMITS.bio}
-            aria-describedby="portal-bio-hint"
+            aria-describedby="portal-bio-hint portal-bio-format"
             onChange={(event) => update('bio', event.target.value)}
             className={`${inputNormal} resize-y`}
           />
           <p id="portal-bio-hint" className={hintClass}>
             A few sentences in the third person. {fields.bio.length} of {PORTAL_PROFILE_LIMITS.bio} characters.
           </p>
+          <FormattingHelp id="portal-bio-format" label="speaker bio" value={fields.bio} />
         </div>
 
         <fieldset className="space-y-5">

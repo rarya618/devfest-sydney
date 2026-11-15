@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { createSubmission, updateSubmission, type SubmissionEditableFields } from './actions';
 import { TRACK_LABELS, FORMAT_LABELS, EXPERIENCE_LABELS } from '@/lib/submissionLabels';
 import type { Submission } from '@/lib/types';
-import { MARKDOWN_HINT } from '@/components/MarkdownText';
+import FormattingHelp from '@/components/FormattingHelp';
 
 interface Props {
   // Absent means create mode: a proposal that arrived outside the form is entered here
@@ -203,9 +203,9 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
                 value={fields.abstract}
                 onChange={(e) => update('abstract', e.target.value)}
                 required
-                aria-describedby="edit-abstract-hint"
+                aria-describedby="edit-abstract-format"
               />
-              <p id="edit-abstract-hint" className="mt-1 text-xs text-white/60">{MARKDOWN_HINT}</p>
+              <FormattingHelp id="edit-abstract-format" label="talk abstract" value={fields.abstract} hintClassName="text-xs text-white/60" />
             </div>
 
             <div className="grid grid-cols-3 gap-3">
@@ -306,7 +306,9 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
                 className={`${inputClasses} min-h-[80px]`}
                 value={fields.speakerBio}
                 onChange={(e) => update('speakerBio', e.target.value)}
+                aria-describedby="edit-bio-format"
               />
+              <FormattingHelp id="edit-bio-format" label="speaker bio" value={fields.speakerBio} hintClassName="text-xs text-white/60" />
             </div>
 
             <div className="grid grid-cols-2 gap-3">

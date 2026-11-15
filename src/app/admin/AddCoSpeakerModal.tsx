@@ -2,6 +2,7 @@
 
 import { useState, useTransition, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
+import FormattingHelp from '@/components/FormattingHelp';
 import { addCoSpeaker, type SpeakerProfileFields } from './speakerActions';
 import type { Speaker } from '@/lib/types';
 
@@ -125,7 +126,9 @@ export default function AddCoSpeakerModal({ lead, onClose, onError }: Props) {
                 value={fields.bio}
                 onChange={(event) => update('bio', event.target.value)}
                 maxLength={1000}
+                aria-describedby="co-speaker-bio-format"
               />
+              <FormattingHelp id="co-speaker-bio-format" label="speaker bio" value={fields.bio} hintClassName="text-xs text-white/60" />
             </div>
 
             <div className="grid grid-cols-3 gap-3">

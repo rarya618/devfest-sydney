@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useTransition, type ChangeEvent, type FormEvent } from 'react';
-import { MARKDOWN_HINT } from '@/components/MarkdownText';
+import FormattingHelp from '@/components/FormattingHelp';
 import SpeakerCard, { type SpeakerCardProfile } from '@/components/SpeakerCard';
 import Image from 'next/image';
 import { createPortal } from 'react-dom';
@@ -205,7 +205,9 @@ export default function EditSpeakerModal({ speaker, leadSpeakerName, profileOnly
                   value={fields.bio}
                   onChange={(event) => update('bio', event.target.value)}
                   maxLength={1000}
+                  aria-describedby="speaker-bio-format"
                 />
+                <FormattingHelp id="speaker-bio-format" label="speaker bio" value={fields.bio} hintClassName="text-xs text-white/60" />
               </div>
 
               <div>
@@ -320,9 +322,9 @@ export default function EditSpeakerModal({ speaker, leadSpeakerName, profileOnly
                     onChange={(event) => update('abstract', event.target.value)}
                     maxLength={2000}
                     required
-                    aria-describedby="speaker-abstract-hint"
+                    aria-describedby="speaker-abstract-format"
                   />
-                  <p id="speaker-abstract-hint" className="mt-1 text-xs text-white/60">{MARKDOWN_HINT}</p>
+                  <FormattingHelp id="speaker-abstract-format" label="talk abstract" value={fields.abstract} hintClassName="text-xs text-white/60" />
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">

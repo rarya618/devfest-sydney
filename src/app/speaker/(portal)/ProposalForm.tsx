@@ -422,7 +422,7 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
             <Choice name="devfest-format" legend={<>Format{required}</>} options={DEVFEST_FORMATS} selected={devfestFormat} onSelect={setDevfestFormat} />
             <Choice name="devfest-level" legend={<>Level{required}</>} options={DEVFEST_LEVELS} selected={level} onSelect={setLevel} />
             <TextField id="proposal-tagline" label="Tagline" value={tagline} onChange={setTagline} maxLength={200} hint="Your role and company, or a one-line intro." />
-            <TextField id="proposal-devfest-bio" label="Speaker bio" value={bio} onChange={setBio} rows={5} maxLength={1000} hint={profile && !isEditing ? 'Filled in from your profile. Changing it here changes only this proposal.' : undefined} />
+            <TextField id="proposal-devfest-bio" label="Speaker bio" value={bio} onChange={setBio} rows={5} maxLength={1000} hint={profile && !isEditing ? 'Filled in from your profile. Changing it here changes only this proposal.' : undefined} formatLabel="speaker bio" />
             <div className="grid gap-6 sm:grid-cols-3">
               <TextField id="proposal-linkedin" label="LinkedIn" value={linkedinUrl} onChange={setLinkedinUrl} maxLength={500} />
               <TextField id="proposal-github" label="GitHub" value={githubUrl} onChange={setGithubUrl} maxLength={500} />

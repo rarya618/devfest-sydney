@@ -343,8 +343,8 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
               <MarkdownText text={speaker.abstract} className="mt-3 text-sm text-white/65 leading-relaxed" />
 
               <div className="mt-4 text-sm text-white/65 bg-white/[0.04] rounded-xl px-4 py-3 leading-relaxed">
-                <span className="font-bold text-white/85">Bio: </span>
-                {speaker.bio ? <span className="whitespace-pre-wrap">{speaker.bio}</span> : <span className="text-white/50">not written yet</span>}
+                <p className="font-bold text-white/85 mb-1">Bio</p>
+                {speaker.bio ? <MarkdownText text={speaker.bio} /> : <p className="text-white/50">Not written yet</p>}
               </div>
 
               {(speaker.linkedinUrl || speaker.githubUrl || speaker.websiteUrl) && (

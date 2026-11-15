@@ -519,10 +519,10 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         submission.isOpenToAudienceQuestions) && (
         <div className="space-y-3 mb-5 pl-8">
           {submission.speakerBio && (
-            <p className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
-              <span className="font-bold text-white/85">Bio: </span>
-              {submission.speakerBio}
-            </p>
+            <div className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
+              <p className="font-bold text-white/85 mb-1">Bio</p>
+              <MarkdownText text={submission.speakerBio} />
+            </div>
           )}
 
           {submission.accessibilityNeeds && (
@@ -1089,10 +1089,10 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
             </div>
             <MarkdownText text={submission.abstract} className="text-sm text-white/65 leading-relaxed" />
             {submission.speakerBio && (
-              <p className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
-                <span className="font-bold text-white/85">Bio: </span>
-                {submission.speakerBio}
-              </p>
+              <div className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
+                <p className="font-bold text-white/85 mb-1">Bio</p>
+                <MarkdownText text={submission.speakerBio} />
+              </div>
             )}
             {links.length > 0 && (
               <div className="flex flex-wrap gap-2">
