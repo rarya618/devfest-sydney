@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { updateMeetupProposal } from './meetupProposalActions';
 import { MEETUP_FORMATS, MEETUP_FORMAT_LABELS, MEETUP_PROPOSAL_LIMITS } from '@/lib/meetupProposalLabels';
 import type { MeetupFormat, MeetupProposal } from '@/lib/types';
-import { MARKDOWN_HINT } from '@/components/MarkdownText';
+import FormattingHelp from '@/components/FormattingHelp';
 
 // Edits a meetup proposal from /admin/meetups. The same fields a speaker can change from the
 // portal; once accepted, saving updates its talk too (editMeetupProposal). Name and email stay
@@ -31,6 +31,16 @@ interface MeetupProposalFormFields {
 const inputClasses =
   'w-full rounded-lg border border-white/35 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40';
 const labelClasses = 'block text-xs font-semibold text-white/60 mb-1';
+// What each text box holds, as the copied formatting prompt names it.
+const FORMAT_LABELS: Record<keyof Omit<MeetupProposalFormFields, 'format'>, string> = {
+  talkTitle: 'talk title',
+  abstract: 'talk abstract',
+  audience: 'target audience',
+  bio: 'speaker bio',
+  profileUrl: 'website',
+  speakingExperience: 'speaking experience',
+  notes: 'notes',
+};
 
 export default function EditMeetupProposalModal({ proposal, onClose, onError }: Props) {
   const [fields, setFields] = useState<MeetupProposalFormFields>({
@@ -65,6 +75,9 @@ export default function EditMeetupProposalModal({ proposal, onClose, onError }: 
   function textField(key: keyof Omit<MeetupProposalFormFields, 'format'>, label: string, options: { rows?: number; isRequired?: boolean; hint?: string } = {}) {
     const id = `edit-meetup-${key}`;
     const hintId = options.hint ? `${id}-hint` : undefined;
+    // Every text box here is shown with MarkdownText on the dashboard, so each gets the formatting help.
+    const formatId = options.rows ? `${id}-format` : undefined;
+    const describedBy = [hintId, formatId].filter(Boolean).join(' ') || undefined;
     return (
       <div>
         <label className={labelClasses} htmlFor={id}>
@@ -79,7 +92,7 @@ export default function EditMeetupProposalModal({ proposal, onClose, onError }: 
             value={fields[key]}
             maxLength={MEETUP_PROPOSAL_LIMITS[key]}
             required={options.isRequired}
-            aria-describedby={hintId}
+            aria-describedby={describedBy}
             onChange={(event) => update(key, event.target.value)}
           />
         ) : (
@@ -93,6 +106,7 @@ export default function EditMeetupProposalModal({ proposal, onClose, onError }: 
           />
         )}
         {options.hint && <p id={hintId} className="mt-1 text-xs text-white/60">{options.hint}</p>}
+        {formatId && <FormattingHelp id={formatId} label={FORMAT_LABELS[key]} value={fields[key]} hintClassName="text-xs text-white/60" />}
       </div>
     );
   }
@@ -143,7 +157,7 @@ export default function EditMeetupProposalModal({ proposal, onClose, onError }: 
               </select>
             </div>
 
-            {textField('abstract', 'Abstract', { rows: 8, isRequired: true, hint: MARKDOWN_HINT })}
+            {textField('abstract', 'Abstract', { rows: 8, isRequired: true })}
             {textField('audience', 'Target audience', { rows: 3, isRequired: true })}
             {textField('bio', 'Speaker bio on this proposal', { rows: 4, isRequired: true })}
             {textField('profileUrl', 'LinkedIn or website')}

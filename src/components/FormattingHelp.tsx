@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { MARKDOWN_HINT } from '@/components/MarkdownText';
-import { hintClass } from '@/lib/formStyles';
 
 // The formatting line under a text box that MarkdownText renders, with a button that copies a
 // prompt asking the speaker's own AI tool to put the box's text into that formatting. The
@@ -23,7 +22,19 @@ export function formattingPrompt(label: string, text: string): string {
 
 const IDLE = 'Copy a prompt to format this with your AI tool';
 
-export default function FormattingHelp({ id, label, value }: { id: string; label: string; value: string }) {
+export default function FormattingHelp({
+  id,
+  label,
+  value,
+  // formStyles' hintClass without its top margin: the wrapper below spaces this from the box.
+  hintClassName = 'text-xs text-white/50',
+}: {
+  id: string;
+  label: string;
+  value: string;
+  /** The formatting line's text classes, to match the form's other hints. No margin. */
+  hintClassName?: string;
+}) {
   const [status, setStatus] = useState(IDLE);
   const resetTimer = useRef<number | undefined>(undefined);
   useEffect(() => () => window.clearTimeout(resetTimer.current), []);
@@ -43,7 +54,7 @@ export default function FormattingHelp({ id, label, value }: { id: string; label
 
   return (
     <div className="mt-1.5 flex flex-col items-start gap-1">
-      <p id={id} className={`${hintClass} mt-0`}>{MARKDOWN_HINT}</p>
+      <p id={id} className={hintClassName}>{MARKDOWN_HINT}</p>
       <button
         type="button"
         onClick={copy}

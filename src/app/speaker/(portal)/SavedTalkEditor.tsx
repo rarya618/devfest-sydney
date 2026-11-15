@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState, useTransition, type FormEvent } from 'react';
-import { MARKDOWN_HINT } from '@/components/MarkdownText';
+import FormattingHelp from '@/components/FormattingHelp';
 import { useRouter } from 'next/navigation';
 import Alert from '@/components/Alert';
 import { hintClass, inputNormal, labelClass } from '@/lib/formStyles';
@@ -83,15 +83,17 @@ export default function SavedTalkEditor({ savedTalkId, initialFields, proposedCo
         </div>
         <div>
           <label htmlFor="saved-abstract" className={labelClass}>Abstract</label>
-          <textarea id="saved-abstract" rows={5} value={fields.abstract} maxLength={SAVED_TALK_LIMITS.abstract} aria-describedby="saved-abstract-hint" onChange={(event) => update('abstract', event.target.value)} className={`${inputNormal} resize-y`} />
+          <textarea id="saved-abstract" rows={5} value={fields.abstract} maxLength={SAVED_TALK_LIMITS.abstract} aria-describedby="saved-abstract-hint saved-abstract-format" onChange={(event) => update('abstract', event.target.value)} className={`${inputNormal} resize-y`} />
           <p id="saved-abstract-hint" className={hintClass}>
-            What the session is about and what people take away. {fields.abstract.length} of {SAVED_TALK_LIMITS.abstract} characters. {MARKDOWN_HINT}
+            What the session is about and what people take away. {fields.abstract.length} of {SAVED_TALK_LIMITS.abstract} characters.
           </p>
+          <FormattingHelp id="saved-abstract-format" label="talk abstract" value={fields.abstract} />
         </div>
         <div>
           <label htmlFor="saved-audience" className={labelClass}>Who is it for?</label>
-          <textarea id="saved-audience" rows={3} value={fields.audience} maxLength={SAVED_TALK_LIMITS.audience} aria-describedby="saved-audience-hint" onChange={(event) => update('audience', event.target.value)} className={`${inputNormal} resize-y`} />
+          <textarea id="saved-audience" rows={3} value={fields.audience} maxLength={SAVED_TALK_LIMITS.audience} aria-describedby="saved-audience-hint saved-audience-format" onChange={(event) => update('audience', event.target.value)} className={`${inputNormal} resize-y`} />
           <p id="saved-audience-hint" className={hintClass}>Optional. The level and background you have in mind.</p>
+          <FormattingHelp id="saved-audience-format" label="target audience" value={fields.audience} />
         </div>
 
         {proposedCount > 0 && (
