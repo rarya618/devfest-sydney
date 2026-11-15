@@ -205,7 +205,7 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
                 required
                 aria-describedby="edit-abstract-format"
               />
-              <FormattingHelp id="edit-abstract-format" label="talk abstract" value={fields.abstract} hintClassName="text-xs text-white/60" />
+              <FormattingHelp id="edit-abstract-format" label="talk abstract" value={fields.abstract} tone="admin" />
             </div>
 
             <div className="grid grid-cols-3 gap-3">
@@ -308,7 +308,7 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
                 onChange={(e) => update('speakerBio', e.target.value)}
                 aria-describedby="edit-bio-format"
               />
-              <FormattingHelp id="edit-bio-format" label="speaker bio" value={fields.speakerBio} hintClassName="text-xs text-white/60" />
+              <FormattingHelp id="edit-bio-format" label="speaker bio" value={fields.speakerBio} tone="admin" />
             </div>
 
             <div className="grid grid-cols-2 gap-3">

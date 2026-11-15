@@ -1,12 +1,16 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { MARKDOWN_HINT } from '@/components/MarkdownText';
 
-// The formatting line under a text box that MarkdownText renders, with a button that copies a
-// prompt asking the speaker's own AI tool to put the box's text into that formatting. The
-// speak page on gdgsydney.com (src/components/FormattingHelp.astro there) offers the same
-// prompt, so keep the two worded alike.
+// The row under a text box that MarkdownText renders:
+//   "Formatting": a tooltip with the formatting MarkdownText understands. It shows on hover
+//     where there is hover (Tailwind's hover variants only apply there), and a click or tap pins
+//     it open; Escape or a click outside closes it. Give the textarea aria-describedby={id}, so
+//     screen readers hear the guide on the box without opening it.
+//   "Copy a prompt…": copies a prompt asking the speaker's own AI tool to put the box's text
+//     into that formatting.
+// The speak page on gdgsydney.com (src/components/FormattingHelp.astro there) has the same
+// tooltip and prompt, so keep the two worded alike.
 export function formattingPrompt(label: string, text: string): string {
   return (
     `Reformat my ${label} for a talk proposal form. The form supports only this formatting:\n` +
@@ -24,22 +28,50 @@ export function formattingPrompt(label: string, text: string): string {
 
 const IDLE = 'Copy a prompt to format this with your AI tool';
 
+// The admin modals' hints are a shade lighter than the portal's.
+const TRIGGER_TONES = {
+  portal: 'text-white/50 hover:text-white/75',
+  admin: 'text-white/60 hover:text-white/85',
+};
+
 export default function FormattingHelp({
   id,
   label,
   value,
-  // formStyles' hintClass without its top margin: the wrapper below spaces this from the box.
-  hintClassName = 'text-xs text-white/50',
+  tone = 'portal',
 }: {
+  /** The tooltip's id: point the textarea's aria-describedby at it. */
   id: string;
+  /** What the box holds, as the copied prompt names it ("talk abstract"). */
   label: string;
   value: string;
-  /** The formatting line's text classes, to match the form's other hints. No margin. */
-  hintClassName?: string;
+  tone?: keyof typeof TRIGGER_TONES;
 }) {
   const [status, setStatus] = useState(IDLE);
+  const [isOpen, setIsOpen] = useState(false);
+  const tipRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const resetTimer = useRef<number | undefined>(undefined);
   useEffect(() => () => window.clearTimeout(resetTimer.current), []);
+
+  // Closes the pinned tooltip on an outside click or Escape, as the admin popovers do.
+  useEffect(() => {
+    if (!isOpen) return;
+    function handlePointerDown(event: MouseEvent) {
+      if (tipRef.current && !tipRef.current.contains(event.target as Node)) setIsOpen(false);
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return;
+      setIsOpen(false);
+      if (tipRef.current?.contains(document.activeElement)) triggerRef.current?.focus();
+    }
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
 
   const copy = async () => {
     let copied = false;
@@ -54,9 +86,41 @@ export default function FormattingHelp({
     resetTimer.current = window.setTimeout(() => setStatus(IDLE), 4000);
   };
 
+  const code = 'font-mono text-[0.95em] text-white/90 rounded bg-white/[0.08] px-1 py-px';
+
   return (
-    <div className="mt-1.5 flex flex-col items-start gap-1">
-      <p id={id} className={hintClassName}>{MARKDOWN_HINT}</p>
+    <div className="mt-1.5 flex flex-wrap items-center gap-x-5 gap-y-1">
+      <div ref={tipRef} className="group relative">
+        <button
+          ref={triggerRef}
+          type="button"
+          aria-expanded={isOpen}
+          aria-controls={id}
+          onClick={() => setIsOpen((open) => !open)}
+          className={`inline-flex items-center gap-1.5 text-xs underline decoration-dotted underline-offset-[3px] cursor-help rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-google-blue-light ${isOpen ? 'text-white/85' : TRIGGER_TONES[tone]}`}
+        >
+          <svg viewBox="0 0 20 20" fill="currentColor" width="13" height="13" aria-hidden="true" className="shrink-0">
+            <path fillRule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clipRule="evenodd" />
+          </svg>
+          Formatting
+        </button>
+        {/* Below the trigger, over the next field's label rather than this box's own text. The
+            after: strip keeps the hover alive across the gap. */}
+        <div
+          id={id}
+          className={`absolute left-0 top-[calc(100%+8px)] z-30 w-max max-w-[min(22rem,calc(100vw-32px))] rounded-lg border border-white/15 bg-[#303030] px-3.5 py-3 text-xs leading-relaxed text-white/70 shadow-[0_10px_30px_rgba(0,0,0,0.45)] transition duration-100 motion-reduce:transition-none after:absolute after:inset-x-0 after:bottom-full after:h-2.5 after:content-[''] ${
+            isOpen ? 'visible opacity-100 translate-y-0' : 'invisible opacity-0 -translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0'
+          }`}
+        >
+          <p className="font-bold text-white/90 mb-1.5">Formatting you can use</p>
+          <ul className="space-y-1">
+            <li><code className={code}>## Heading</code> at the start of a line for a heading</li>
+            <li><code className={code}>- item</code> at the start of a line for a bullet point</li>
+            <li><code className={code}>**words**</code> for <strong className="font-bold text-white/90">bold</strong></li>
+            <li><code className={code}>[text](https://…)</code> for a link</li>
+          </ul>
+        </div>
+      </div>
       <button
         type="button"
         onClick={copy}

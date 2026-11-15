@@ -128,7 +128,7 @@ export default function AddCoSpeakerModal({ lead, onClose, onError }: Props) {
                 maxLength={1000}
                 aria-describedby="co-speaker-bio-format"
               />
-              <FormattingHelp id="co-speaker-bio-format" label="speaker bio" value={fields.bio} hintClassName="text-xs text-white/60" />
+              <FormattingHelp id="co-speaker-bio-format" label="speaker bio" value={fields.bio} tone="admin" />
             </div>
 
             <div className="grid grid-cols-3 gap-3">

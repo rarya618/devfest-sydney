@@ -106,7 +106,7 @@ export default function EditMeetupProposalModal({ proposal, onClose, onError }: 
           />
         )}
         {options.hint && <p id={hintId} className="mt-1 text-xs text-white/60">{options.hint}</p>}
-        {formatId && <FormattingHelp id={formatId} label={FORMAT_LABELS[key]} value={fields[key]} hintClassName="text-xs text-white/60" />}
+        {formatId && <FormattingHelp id={formatId} label={FORMAT_LABELS[key]} value={fields[key]} tone="admin" />}
       </div>
     );
   }

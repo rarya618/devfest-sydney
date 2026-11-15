@@ -207,7 +207,7 @@ export default function EditSpeakerModal({ speaker, leadSpeakerName, profileOnly
                   maxLength={1000}
                   aria-describedby="speaker-bio-format"
                 />
-                <FormattingHelp id="speaker-bio-format" label="speaker bio" value={fields.bio} hintClassName="text-xs text-white/60" />
+                <FormattingHelp id="speaker-bio-format" label="speaker bio" value={fields.bio} tone="admin" />
               </div>
 
               <div>
@@ -324,7 +324,7 @@ export default function EditSpeakerModal({ speaker, leadSpeakerName, profileOnly
                     required
                     aria-describedby="speaker-abstract-format"
                   />
-                  <FormattingHelp id="speaker-abstract-format" label="talk abstract" value={fields.abstract} hintClassName="text-xs text-white/60" />
+                  <FormattingHelp id="speaker-abstract-format" label="talk abstract" value={fields.abstract} tone="admin" />
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">

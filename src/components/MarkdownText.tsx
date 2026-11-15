@@ -10,8 +10,7 @@ import { Fragment, type ReactNode } from 'react';
 // A list may start straight under its intro line, without a blank line, as people type them.
 // Anything else shows as typed. Stored text stays plain, and the public API returns it as is.
 
-// The line under every abstract box, so speakers and organisers know what will be formatted.
-export const MARKDOWN_HINT = 'Formatting: start a line with ## for a heading or - for a bullet point, wrap words in **two asterisks** for bold, and write links as [text](https://…).';
+// Every box whose text this renders offers FormattingHelp, the tooltip explaining these rules.
 
 type Block =
   | { kind: 'heading'; text: string }
