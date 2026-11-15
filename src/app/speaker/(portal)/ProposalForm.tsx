@@ -3,7 +3,7 @@
 import { useCallback, useState, useTransition, type FormEvent, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import Alert from '@/components/Alert';
-import { MARKDOWN_HINT } from '@/components/MarkdownText';
+import FormattingHelp from '@/components/FormattingHelp';
 import { hintClass, inputNormal, labelClass, optionButtonClass } from '@/lib/formStyles';
 import { primaryButton, secondaryButton } from './portalStyles';
 import { MEETUP_FORMAT_LABELS, MEETUP_FORMATS, MEETUP_PROPOSAL_LIMITS } from '@/lib/meetupProposalLabels';
@@ -112,6 +112,7 @@ function TextField({
   hint,
   rows,
   placeholder,
+  formatLabel,
 }: {
   id: string;
   label: string;
@@ -122,8 +123,12 @@ function TextField({
   hint?: string;
   rows?: number;
   placeholder?: string;
+  /** For a text box whose text is rendered with MarkdownText: what it holds, as the copied
+      prompt names it ("talk abstract"). Adds the formatting line and the copy-prompt button. */
+  formatLabel?: string;
 }) {
-  const hintId = hint ? `${id}-hint` : undefined;
+  const formatId = rows && formatLabel ? `${id}-format` : undefined;
+  const describedBy = [hint ? `${id}-hint` : '', formatId ?? ''].filter(Boolean).join(' ') || undefined;
   return (
     <div>
       <label htmlFor={id} className={labelClass}>
@@ -131,11 +136,12 @@ function TextField({
         {isRequired && required}
       </label>
       {rows ? (
-        <textarea id={id} rows={rows} value={value} maxLength={maxLength} required={isRequired} placeholder={placeholder} aria-describedby={hintId} onChange={(event) => onChange(event.target.value)} className={`${inputNormal} resize-y`} />
+        <textarea id={id} rows={rows} value={value} maxLength={maxLength} required={isRequired} placeholder={placeholder} aria-describedby={describedBy} onChange={(event) => onChange(event.target.value)} className={`${inputNormal} resize-y`} />
       ) : (
-        <input id={id} value={value} maxLength={maxLength} required={isRequired} placeholder={placeholder} aria-describedby={hintId} onChange={(event) => onChange(event.target.value)} className={inputNormal} />
+        <input id={id} value={value} maxLength={maxLength} required={isRequired} placeholder={placeholder} aria-describedby={hint ? `${id}-hint` : undefined} onChange={(event) => onChange(event.target.value)} className={inputNormal} />
       )}
-      {hint && <p id={hintId} className={hintClass}>{hint}</p>}
+      {hint && <p id={`${id}-hint`} className={hintClass}>{hint}</p>}
+      {formatId && formatLabel && <FormattingHelp id={formatId} label={formatLabel} value={value} />}
     </div>
   );
 }
@@ -379,7 +385,8 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
           isRequired
           rows={7}
           maxLength={kind === 'meetup' ? MEETUP_PROPOSAL_LIMITS.abstract : DEVFEST_ABSTRACT_MAX}
-          hint={`What is your session about, and what will people take away? ${MARKDOWN_HINT}`}
+          hint="What is your session about, and what will people take away?"
+          formatLabel="talk abstract"
         />
 
         {isAcceptedDevfestTalk ? (
@@ -403,11 +410,11 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
                 onSelect={setMeetupFormat}
               />
             )}
-            <TextField id="proposal-audience" label="Who is it for?" value={audience} onChange={setAudience} isRequired rows={3} maxLength={MEETUP_PROPOSAL_LIMITS.audience} hint="The level and background you have in mind." />
-            <TextField id="proposal-bio" label="Speaker bio" value={bio} onChange={setBio} isRequired rows={5} maxLength={MEETUP_PROPOSAL_LIMITS.bio} hint={profile && !isEditing ? 'Filled in from your profile. Changing it here changes only this proposal.' : undefined} />
+            <TextField id="proposal-audience" label="Who is it for?" value={audience} onChange={setAudience} isRequired rows={3} maxLength={MEETUP_PROPOSAL_LIMITS.audience} hint="The level and background you have in mind." formatLabel="target audience" />
+            <TextField id="proposal-bio" label="Speaker bio" value={bio} onChange={setBio} isRequired rows={5} maxLength={MEETUP_PROPOSAL_LIMITS.bio} hint={profile && !isEditing ? 'Filled in from your profile. Changing it here changes only this proposal.' : undefined} formatLabel="speaker bio" />
             <TextField id="proposal-profile-url" label="LinkedIn or website" value={profileUrl} onChange={setProfileUrl} maxLength={MEETUP_PROPOSAL_LIMITS.profileUrl} />
-            <TextField id="proposal-experience" label="Speaking experience" value={speakingExperience} onChange={setSpeakingExperience} rows={3} maxLength={MEETUP_PROPOSAL_LIMITS.speakingExperience} hint="Optional. Links to past talks are welcome. First-timers too." />
-            <TextField id="proposal-notes" label="Anything else?" value={notes} onChange={setNotes} rows={3} maxLength={MEETUP_PROPOSAL_LIMITS.notes} hint="Optional. Dates that suit you, equipment you need, anything we should know." />
+            <TextField id="proposal-experience" label="Speaking experience" value={speakingExperience} onChange={setSpeakingExperience} rows={3} maxLength={MEETUP_PROPOSAL_LIMITS.speakingExperience} hint="Optional. Links to past talks are welcome. First-timers too." formatLabel="speaking experience" />
+            <TextField id="proposal-notes" label="Anything else?" value={notes} onChange={setNotes} rows={3} maxLength={MEETUP_PROPOSAL_LIMITS.notes} hint="Optional. Dates that suit you, equipment you need, anything we should know." formatLabel="notes" />
           </>
         ) : (
           <>
