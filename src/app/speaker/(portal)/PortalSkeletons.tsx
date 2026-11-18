@@ -30,20 +30,24 @@ export function DashboardSkeleton() {
     <div aria-busy="true" aria-label="Loading your agenda" className={`${portalMainClass('wide')} animate-pulse`}>
       <div className="grid gap-8 sm:gap-12 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)] lg:gap-20">
         <BadgeSkeleton />
+        {/* The agenda: heading, the year ruler, then the card. */}
         <div>
           <Bar className="h-9 w-48" />
-          <div className="mt-10 space-y-14">
-            {[0, 1].map((index) => (
-              <div key={index}>
-                <Bar className="h-5 w-32" />
-                {[0, 1].map((row) => (
-                  <div key={row} className="mt-4 grid grid-cols-[5.75rem_minmax(0,1fr)] sm:grid-cols-[7.5rem_minmax(0,1fr)] gap-x-4 border-t border-white/10 pt-5">
-                    <Bar className="h-8 w-16" />
-                    <div className="space-y-2"><Bar className="h-5 w-3/4" /><Bar className="h-4 w-1/3" /></div>
-                  </div>
-                ))}
-              </div>
-            ))}
+          <div className="mt-12 sm:mt-14 pt-12 sm:pt-14">
+            <div className="h-0.5 rounded-full bg-white/[0.12]" />
+            <div className="mt-4 flex justify-between">
+              {[0, 1, 2, 3, 4, 5].map((index) => <Bar key={index} className="h-3 w-7" />)}
+            </div>
+          </div>
+          <div className="mt-14 rounded-[28px] bg-white/[0.05] px-6 py-7 sm:px-9 sm:py-9">
+            <Bar className="h-9 w-3/4" />
+            <Bar className="h-5 w-1/3 mt-4" />
+            <div className="mt-8 grid grid-cols-4 gap-3">
+              {[0, 1, 2, 3].map((index) => (
+                <div key={index}><Bar className="h-3 w-3 rounded-full" /><Bar className="h-4 w-16 mt-3" /></div>
+              ))}
+            </div>
+            <div className="mt-9 h-11 w-44 rounded-full bg-white/[0.08]" />
           </div>
         </div>
       </div>
