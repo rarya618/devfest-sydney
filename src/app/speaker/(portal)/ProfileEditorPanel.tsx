@@ -19,7 +19,8 @@ interface ProfileEditorPanelProps {
   // What the card beside the form should show while editing: the unsaved text, and the photo
   // (which saves as soon as it's chosen).
   onPreviewChange: (preview: SpeakerCardProfile, isPhotoBusy: boolean) => void;
-  onDone: () => void;
+  // wasSaved: false when there was nothing to save ("Done").
+  onDone: (wasSaved: boolean) => void;
   onCancel: () => void;
 }
 
@@ -52,6 +53,8 @@ export default function ProfileEditorPanel({ profile, onPreviewChange, onDone, o
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [isSaving, startSaving] = useTransition();
   const [isPhotoBusy, startPhoto] = useTransition();
+  // Cancel with unsaved text asks once before dropping it.
+  const [isConfirmingDiscard, setIsConfirmingDiscard] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const taglineInput = useRef<HTMLInputElement>(null);
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
@@ -83,8 +86,9 @@ export default function ProfileEditorPanel({ profile, onPreviewChange, onDone, o
 
   function handleSave(event: FormEvent) {
     event.preventDefault();
+    setAlertMessage(null);
     if (!hasUnsavedChanges) {
-      onDone();
+      onDone(false);
       return;
     }
     startSaving(async () => {
@@ -92,13 +96,14 @@ export default function ProfileEditorPanel({ profile, onPreviewChange, onDone, o
       if (result.error) setAlertMessage(result.error);
       else {
         router.refresh();
-        onDone();
+        onDone(true);
       }
     });
   }
 
   function handlePhotoChosen(file: File | undefined) {
     if (!file) return;
+    setAlertMessage(null);
     if (file.size > 5 * 1024 * 1024) {
       setAlertMessage('That photo is over 5 MB. Choose a smaller one.');
       return;
@@ -118,6 +123,7 @@ export default function ProfileEditorPanel({ profile, onPreviewChange, onDone, o
   }
 
   function handlePhotoRemove() {
+    setAlertMessage(null);
     startPhoto(async () => {
       const result = await removePortalPhoto(profile.id);
       if (result.error) setAlertMessage(result.error);
@@ -212,12 +218,29 @@ export default function ProfileEditorPanel({ profile, onPreviewChange, onDone, o
 
         <div className="flex flex-wrap items-center gap-3 pt-1">
           <button type="submit" disabled={isSaving || isPhotoBusy} aria-label="Save and publish your profile" className={primaryButton}>
-            {isSaving ? 'Saving…' : hasUnsavedChanges ? 'Save profile' : 'Done'}
+            {isSaving ? 'Saving…' : 'Save profile'}
           </button>
-          <button type="button" disabled={isSaving} onClick={onCancel} aria-label="Stop editing without saving" className={secondaryButton}>
-            Cancel
-          </button>
-          {hasUnsavedChanges && <p className="text-sm text-google-yellow">Unsaved changes</p>}
+          {isConfirmingDiscard && hasUnsavedChanges ? (
+            <>
+              <button type="button" onClick={onCancel} aria-label="Drop your unsaved changes and stop editing" className={dangerOutlineButton}>
+                Discard changes
+              </button>
+              <button type="button" onClick={() => setIsConfirmingDiscard(false)} aria-label="Keep editing your profile" className={secondaryButton}>
+                Keep editing
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              disabled={isSaving}
+              onClick={() => (hasUnsavedChanges ? setIsConfirmingDiscard(true) : onCancel())}
+              aria-label={hasUnsavedChanges ? 'Stop editing, which asks before dropping your unsaved changes' : 'Stop editing'}
+              className={secondaryButton}
+            >
+              Cancel
+            </button>
+          )}
+          {hasUnsavedChanges && <p role="status" className="text-sm text-google-yellow">Unsaved changes</p>}
         </div>
       </form>
 

@@ -18,19 +18,12 @@ export default function Alert({ message, onDismiss }: AlertProps) {
     setIsMounted(true);
   }, []);
 
+  // Stays until dismissed: an error that disappears on a timer can go before someone has read
+  // it (WCAG 2.2.1), and the alert only ever carries errors.
   useEffect(() => {
-    // Trigger entrance animation
     const enterTimer = setTimeout(() => setVisible(true), 10);
-    // Auto-dismiss after 8 seconds
-    const dismissTimer = setTimeout(() => {
-      setVisible(false);
-      setTimeout(onDismiss, 300);
-    }, 8000);
-    return () => {
-      clearTimeout(enterTimer);
-      clearTimeout(dismissTimer);
-    };
-  }, [onDismiss]);
+    return () => clearTimeout(enterTimer);
+  }, []);
 
   function handleDismiss() {
     setVisible(false);
@@ -47,7 +40,7 @@ export default function Alert({ message, onDismiss }: AlertProps) {
     <div
       role="alert"
       aria-live="assertive"
-      className={`fixed bottom-6 left-6 z-[70] flex items-start gap-3 max-w-sm w-full
+      className={`fixed bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-auto sm:w-full z-[70] flex items-start gap-3 sm:max-w-sm
         bg-surface-raised border border-google-red/40 rounded-xl px-4 py-3 shadow-xl
         transition-all duration-300
         ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}
@@ -61,7 +54,7 @@ export default function Alert({ message, onDismiss }: AlertProps) {
       <button
         onClick={handleDismiss}
         aria-label="Dismiss error"
-        className="shrink-0 text-white/50 hover:text-white/60 transition-colors mt-0.5"
+        className="shrink-0 -m-1 p-1 rounded text-white/70 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
       >
         <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
           <path d="M4.47 4.47a.75.75 0 0 1 1.06 0L8 6.94l2.47-2.47a.75.75 0 1 1 1.06 1.06L9.06 8l2.47 2.47a.75.75 0 1 1-1.06 1.06L8 9.06l-2.47 2.47a.75.75 0 0 1-1.06-1.06L6.94 8 4.47 5.53a.75.75 0 0 1 0-1.06z" />

@@ -6,7 +6,9 @@ import type { PortalEditableProposal } from '@/lib/portalData';
 import type { SavedTalkFields } from '@/lib/portalLabels';
 import ProfileEditorPanel, { type EditableProfile } from './ProfileEditorPanel';
 import ProposalForm from './ProposalForm';
+import Image from 'next/image';
 import SpeakerCard, { type SpeakerCardProfile } from '@/components/SpeakerCard';
+import { getInitials } from '@/lib/format';
 import { revealPanel } from './revealPanel';
 import { pageHeading, primaryButton, secondaryButton } from './portalStyles';
 
@@ -52,6 +54,8 @@ interface DashboardWorkspaceProps {
   // From the URL: ?edit=<speakerId> (the header's profile button) or ?propose (optionally
   // =<savedTalkId>) opens that panel straight away.
   requestedPanel: Panel;
+  // Anything waiting on the speaker (a spot to confirm), shown above everything else.
+  actionStrip?: React.ReactNode;
   // The rest of the right-hand column (talks, proposals, saved talks), rendered on the server.
   children: React.ReactNode;
 }
@@ -75,6 +79,7 @@ export default function DashboardWorkspace({
   savedTalks,
   editableProposals,
   requestedPanel,
+  actionStrip,
   children,
 }: DashboardWorkspaceProps) {
   const router = useRouter();
@@ -84,6 +89,9 @@ export default function DashboardWorkspace({
   const [panelOpenedAt, setPanelOpenedAt] = useState(0);
   const [preview, setPreview] = useState<{ profile: SpeakerCardProfile; isPhotoBusy: boolean } | null>(null);
   const panelContainer = useRef<HTMLElement>(null);
+  const panelHeading = useRef<HTMLHeadingElement>(null);
+  // "Profile saved" under the card that was just saved, until another panel opens.
+  const [savedProfileId, setSavedProfileId] = useState<string | null>(null);
   // Where focus goes back to when the panel closes: the button that opened it.
   const returnFocusTo = useRef<string | null>(null);
 
@@ -102,14 +110,18 @@ export default function DashboardWorkspace({
   }, [requestKey]);
 
   // Bring the panel into view: on a phone the right column starts below the profile card.
+  // Focus goes with it, so a keyboard or screen-reader user lands in the panel rather than on
+  // the button below that opened it. The profile editor puts them in its first field itself.
   useEffect(() => {
     if (!panel) return;
     revealPanel(panelContainer.current);
+    if (panel.type !== 'profile') panelHeading.current?.focus({ preventScroll: true });
   }, [panel, panelOpenedAt]);
 
   const open = useCallback((next: Exclude<Panel, null>, openerId: string) => {
     returnFocusTo.current = openerId;
     setPreview(null);
+    setSavedProfileId(null);
     setPanel(next);
     setPanelOpenedAt(Date.now());
   }, []);
@@ -125,6 +137,11 @@ export default function DashboardWorkspace({
   const handlePreviewChange = useCallback((profile: SpeakerCardProfile, isPhotoBusy: boolean) => {
     setPreview({ profile, isPhotoBusy });
   }, []);
+
+  function closeAfterProfileSave(wasSaved: boolean) {
+    if (wasSaved && panel?.type === 'profile') setSavedProfileId(panel.profileId);
+    close();
+  }
 
   function close() {
     const fallbackFocus =
@@ -147,7 +164,7 @@ export default function DashboardWorkspace({
 
   return (
     <DashboardPanelsContext.Provider value={panels}>
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-10 sm:mb-12">
         <h1 className={pageHeading}>{greeting}</h1>
         <button
           id="propose-button"
@@ -160,13 +177,15 @@ export default function DashboardWorkspace({
         </button>
       </div>
 
+      {actionStrip}
+
       <div className="grid gap-12 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-16">
         <aside aria-label="Your speaker profile" className="lg:sticky lg:top-28 lg:self-start">
           {profiles.length === 0 ? (
-            <div className="rounded-3xl bg-white/[0.05] p-6">
-              <h2 className="text-xl font-bold">No speaker profile yet</h2>
+            <div className="rounded-3xl bg-surface p-6">
+              <h2 className="text-xl font-bold">Your profile comes with your first talk</h2>
               <p className="mt-3 text-white/70 leading-relaxed">
-                Your profile is set up when a talk of yours is accepted. Until then, propose a talk and follow it here.
+                We set up your speaker profile when a talk of yours is accepted, and you can edit it here from then on.
               </p>
               <p className="mt-3 text-sm text-white/60 leading-relaxed">
                 Spoken for us before under another address? Sign in with that one, or write to{' '}
@@ -186,11 +205,33 @@ export default function DashboardWorkspace({
                 const missing = listInWords([!shown.photoUrl && 'a photo', !shown.tagline && 'a tagline', !shown.bio && 'a bio']);
                 return (
                   <div key={profile.id}>
-                    <SpeakerCard profile={shown} showFullBio={isEditing} isPhotoLoading={isEditing && preview?.isPhotoBusy} />
-                    <p className="mt-4 text-sm text-white/60 leading-relaxed">
-                      {isEditing ? 'Preview: this changes as you type.' : 'This is how you appear next to your talks on our event pages.'}
-                      {missing && <span className="block mt-1 text-google-yellow">Add {missing} to finish it.</span>}
+                    {/* On a phone the full card would fill the first screen before any talk or
+                        proposal, so it shows as one row there, and in full only while editing. */}
+                    {!isEditing && (
+                      <div className="flex items-center gap-4 lg:hidden">
+                        {shown.photoUrl ? (
+                          <Image src={shown.photoUrl} alt="" width={56} height={56} className="w-14 h-14 rounded-2xl object-cover shrink-0" />
+                        ) : (
+                          <span aria-hidden="true" className="w-14 h-14 rounded-2xl bg-surface flex items-center justify-center text-lg font-bold text-white/50 shrink-0">
+                            {getInitials(shown.name)}
+                          </span>
+                        )}
+                        <div className="min-w-0">
+                          <p className="font-bold leading-snug truncate">{shown.name}</p>
+                          <p className="text-sm text-white/60 leading-snug truncate">{shown.tagline || 'No tagline yet'}</p>
+                        </div>
+                      </div>
+                    )}
+                    <div className={isEditing ? '' : 'hidden lg:block'}>
+                      <SpeakerCard profile={shown} showFullBio={isEditing} isPhotoLoading={isEditing && preview?.isPhotoBusy} />
+                    </div>
+                    <p className={`mt-4 text-sm text-white/60 leading-relaxed ${isEditing || missing ? '' : 'hidden lg:block'}`}>
+                      {isEditing ? 'Preview: this changes as you type.' : <span className="hidden lg:inline">This is how you appear next to your talks on our event pages.</span>}
+                      {missing && <span className="block lg:mt-1 text-google-yellow">Add {missing} to finish it.</span>}
                     </p>
+                    {savedProfileId === profile.id && !isEditing && (
+                      <p role="status" className="mt-2 text-sm text-google-green">Profile saved. It&rsquo;s live on our event pages now.</p>
+                    )}
                     {!isEditing && (
                       <button
                         id={`edit-profile-${profile.id}`}
@@ -214,24 +255,24 @@ export default function DashboardWorkspace({
             <section
               ref={panelContainer}
               aria-labelledby="dashboard-panel-heading"
-              className="scroll-mt-28 scroll-mb-6 rounded-3xl bg-white/[0.05] p-6 sm:p-8 animate-page-in"
+              className="scroll-mt-28 scroll-mb-6 rounded-3xl bg-surface p-6 sm:p-8 animate-page-in"
             >
               {editingProfile ? (
                 <>
-                  <h2 id="dashboard-panel-heading" className="mb-6 text-xl font-bold text-off-white">
+                  <h2 id="dashboard-panel-heading" ref={panelHeading} tabIndex={-1} className="mb-6 text-xl font-bold text-off-white focus:outline-none">
                     Edit profile{profiles.length > 1 ? `: ${editingProfile.name}` : ''}
                   </h2>
                   <ProfileEditorPanel
                     key={editingProfile.id}
                     profile={editingProfile}
                     onPreviewChange={handlePreviewChange}
-                    onDone={close}
+                    onDone={closeAfterProfileSave}
                     onCancel={close}
                   />
                 </>
               ) : panel.type === 'propose' ? (
                 <>
-                  <h2 id="dashboard-panel-heading" className="mb-2 text-xl font-bold text-off-white">Propose a talk</h2>
+                  <h2 id="dashboard-panel-heading" ref={panelHeading} tabIndex={-1} className="mb-2 text-xl font-bold text-off-white focus:outline-none">Propose a talk</h2>
                   <p className="mb-8 text-sm text-white/60 leading-relaxed">
                     We&rsquo;ll email you a copy, and you can follow it below. Not ready to send it? Save it for later.
                   </p>
@@ -247,7 +288,7 @@ export default function DashboardWorkspace({
                 </>
               ) : editingProposal ? (
                 <>
-                  <h2 id="dashboard-panel-heading" className="mb-2 text-xl font-bold text-off-white">
+                  <h2 id="dashboard-panel-heading" ref={panelHeading} tabIndex={-1} className="mb-2 text-xl font-bold text-off-white focus:outline-none">
                     {editingProposal.editable.isAccepted ? 'Edit your talk' : 'Edit your proposal'}
                   </h2>
                   <p className="mb-8 text-sm text-white/60 leading-relaxed">

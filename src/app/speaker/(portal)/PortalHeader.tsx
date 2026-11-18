@@ -25,8 +25,8 @@ async function ProfileButton({ email }: { email: string }) {
   return (
     <Link
       href={`/speaker?edit=${profile.id}`}
-      aria-label={`Your profile, ${profile.name}`}
-      className="inline-flex items-center gap-2.5 rounded-full border border-white/35 py-1 pl-1 pr-4 text-sm font-bold text-off-white transition-colors hover:border-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
+      aria-label={`Edit your speaker profile (${profile.name})`}
+      className="inline-flex items-center gap-2.5 rounded-full border border-white/35 p-1 sm:pr-4 text-sm font-bold text-off-white transition-colors hover:border-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
     >
       {profile.photoUrl ? (
         <Image src={profile.photoUrl} alt="" width={28} height={28} className="w-7 h-7 rounded-full object-cover" />
@@ -35,7 +35,8 @@ async function ProfileButton({ email }: { email: string }) {
           {getInitials(profile.name)}
         </span>
       )}
-      <span className="max-w-[10rem] truncate">{firstName}</span>
+      {/* A phone has room for the logo, the photo and Sign out, but not the name as well. */}
+      <span className="hidden sm:inline max-w-[10rem] truncate">{firstName}</span>
     </Link>
   );
 }
@@ -54,10 +55,10 @@ export default async function PortalHeader() {
           aria-label="GDG Sydney speaker portal, home"
           className="shrink-0 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
         >
-          <Image src={GDG_LOGO_URL} alt="" width={1700} height={215} priority className="h-6 sm:h-8 w-auto" />
+          <Image src={GDG_LOGO_URL} alt="" width={1700} height={215} priority className="h-5 sm:h-8 w-auto" />
         </Link>
         {session && (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <ProfileButton email={session.email} />
             <form action={signOutOfPortal}>
               <button type="submit" aria-label={`Sign out of the speaker portal (${session.email})`} className={secondaryButton}>

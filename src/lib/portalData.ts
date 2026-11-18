@@ -9,7 +9,7 @@ import {
   type DevfestProposalPayload,
   type MeetupProposalFields,
 } from '@/lib/proposalFiling';
-import type { GdgEvent, GdgEventType } from '@/lib/types';
+import type { GdgEvent, GdgEventType, Track } from '@/lib/types';
 
 // What the speaker portal shows a signed-in address (see portalAuth.ts): the people in
 // `speakers` with that email, each with their talks, and every proposal filed under it.
@@ -24,6 +24,8 @@ export interface PortalTalk {
   startAt: string | null; // ISO
   timeZone: string;
   isUpcoming: boolean;
+  // The DevFest track it's on, for the row's chip; null for a meetup talk or an unknown value.
+  track: Track | null;
   // Everyone else on the talk, by name only.
   coSpeakerNames: string[];
 }
@@ -57,6 +59,10 @@ export interface PortalProposal {
   // The signed /speaker/confirm link, for an accepted proposal not yet confirmed. The portal
   // session already proves the address, so handing it over shows nothing new.
   confirmUrl: string | null;
+  // The deadline the acceptance email gave, for an accepted proposal not yet confirmed.
+  confirmBy: string | null; // ISO
+  // The track it was proposed to (DevFest only), for the row's chip.
+  track: Track | null;
   // The saved talk it was proposed from (src/lib/portalSavedTalks.ts), if any.
   savedTalkId: string | null;
   // What the edit form starts from, while the speaker can still change it: a proposal nobody
@@ -115,6 +121,12 @@ export interface PortalOverview {
 
 function isoOrNull(value: unknown): string | null {
   return value && typeof (value as Timestamp).toDate === 'function' ? (value as Timestamp).toDate().toISOString() : null;
+}
+
+const TRACKS: readonly Track[] = ['keynote', 'spotlight', 'developer', 'builder', 'workshop', 'showcase'];
+
+function knownTrack(value: unknown): Track | null {
+  return TRACKS.find((track) => track === value) ?? null;
 }
 
 function text(value: unknown): string {
@@ -245,6 +257,7 @@ export async function loadPortalOverview(email: string): Promise<PortalOverview>
             startAt: event?.startAt ?? null,
             timeZone: event?.timeZone ?? 'Australia/Sydney',
             isUpcoming: event ? now.getTime() < Date.parse(event.endAt) : false,
+            track: knownTrack(talkData.track),
             coSpeakerNames: ((talkData.speakerIds ?? []) as string[])
               .filter((speakerId) => speakerId !== doc.id)
               .map((speakerId) => namesById.get(speakerId) ?? '')
@@ -290,6 +303,8 @@ export async function loadPortalOverview(email: string): Promise<PortalOverview>
         submittedAt: isoOrNull(proposal.submittedAt),
         status,
         confirmUrl: status === 'accepted' ? confirmUrl(doc.id) : null,
+        confirmBy: status === 'accepted' ? isoOrNull(proposal.confirmByDate) : null,
+        track: kind === 'devfest' ? knownTrack(proposal.track) : null,
         savedTalkId: text(proposal.savedTalkId) || null,
         editable: isEditableBySpeaker(kind, proposal, status, event, now, talksById.has(doc.id))
           ? toEditableProposal(kind, proposal, talksById.get(doc.id))

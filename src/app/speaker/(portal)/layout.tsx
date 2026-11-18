@@ -5,7 +5,7 @@ import PortalHeader from './PortalHeader';
 // kept apart from /admin, which uses Google sign-in and its own cookie. A route group, so this
 // layout wraps the portal's pages but not /speaker/confirm or /speaker/thanks.
 export const metadata: Metadata = {
-  title: { default: 'Speaker portal', template: '%s — GDG Sydney speaker portal' },
+  title: { default: 'Speaker portal', template: '%s | GDG Sydney speaker portal' },
   // Personal pages behind a sign-in: nothing here belongs in search results.
   robots: { index: false, follow: false },
 };

@@ -18,9 +18,11 @@ export const dangerOutlineButton =
 export const dangerButton =
   'inline-flex items-center justify-center gap-2 px-5 py-2 rounded-full bg-google-red-deep text-white text-sm font-bold transition-opacity hover:opacity-85 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-red-light';
 
-export const pageHeading = 'text-[clamp(2.25rem,6vw,3.5rem)] font-bold leading-[1.02] tracking-[-0.02em] text-off-white';
+export const pageHeading = 'text-[clamp(2.25rem,6vw,3.5rem)] font-bold leading-[1.02] tracking-[-0.02em] text-balance text-off-white';
 
 export const sectionHeading = 'text-xl font-bold text-off-white';
+
+export const subsectionHeading = 'text-base font-bold text-off-white';
 
 export const backLink =
   'inline-flex items-center gap-1.5 text-sm text-white/65 hover:text-off-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue rounded';
