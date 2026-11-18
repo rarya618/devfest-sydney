@@ -54,6 +54,9 @@ export interface PortalProposal {
   // The event it was filed under (DevFest) or accepted into (meetup); null for a meetup
   // proposal still waiting for one.
   eventName: string | null;
+  // When that event starts, to place it on the dashboard's year ruler; null without an event.
+  eventStartAt: string | null; // ISO
+  eventTimeZone: string;
   submittedAt: string | null; // ISO
   status: PortalProposalStatus;
   // The signed /speaker/confirm link, for an accepted proposal not yet confirmed. The portal
@@ -61,6 +64,9 @@ export interface PortalProposal {
   confirmUrl: string | null;
   // The deadline the acceptance email gave, for an accepted proposal not yet confirmed.
   confirmBy: string | null; // ISO
+  // When the speaker was told it was accepted (the acceptance email), and when they confirmed.
+  acceptedAt: string | null; // ISO
+  confirmedAt: string | null; // ISO
   // The track it was proposed to (DevFest only), for the row's chip.
   track: Track | null;
   // The saved talk it was proposed from (src/lib/portalSavedTalks.ts), if any.
@@ -300,10 +306,14 @@ export async function loadPortalOverview(email: string): Promise<PortalOverview>
         kind,
         talkTitle: text(proposal.talkTitle),
         eventName: event?.name ?? null,
+        eventStartAt: event?.startAt ?? null,
+        eventTimeZone: event?.timeZone ?? 'Australia/Sydney',
         submittedAt: isoOrNull(proposal.submittedAt),
         status,
         confirmUrl: status === 'accepted' ? confirmUrl(doc.id) : null,
         confirmBy: status === 'accepted' ? isoOrNull(proposal.confirmByDate) : null,
+        acceptedAt: status === 'accepted' || status === 'confirmed' ? isoOrNull(proposal.acceptanceEmailSentAt) : null,
+        confirmedAt: status === 'confirmed' ? isoOrNull(proposal.speakerConfirmedAt) : null,
         track: kind === 'devfest' ? knownTrack(proposal.track) : null,
         savedTalkId: text(proposal.savedTalkId) || null,
         editable: isEditableBySpeaker(kind, proposal, status, event, now, talksById.has(doc.id))
