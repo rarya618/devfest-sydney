@@ -41,6 +41,17 @@ export interface AgendaTalk extends PortalTalk {
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+const SHORT_LABEL_MAX = 18;
+
+// The ruler marker's name: the event's own short name (the part before any colon, as in
+// "DevFest Extended: Android for the Agentic Era"), when it is short enough to sit over the
+// line; otherwise what kind of event it is.
+function shortEventLabel(eventName: string | null, isDevfest: boolean): string {
+  const fallback = isDevfest ? 'DevFest' : 'Meetup';
+  if (!eventName) return fallback;
+  const lead = eventName.split(':')[0].trim();
+  return lead.length > 0 && lead.length <= SHORT_LABEL_MAX ? lead : fallback;
+}
 
 // Day, month and weekday in the event's time zone, with three-letter months to match the ruler
 // (en-AU's own short months are "July" and "Sept").
@@ -130,7 +141,7 @@ function fromProposal(proposal: PortalProposal, talk: AgendaTalk | undefined, no
     id: proposal.id,
     title: talk?.talkTitle ?? proposal.talkTitle,
     eventName: proposal.eventName ?? (isDevfest ? 'DevFest Sydney' : 'A GDG Sydney meetup'),
-    shortLabel: isDevfest ? 'DevFest' : 'Meetup',
+    shortLabel: shortEventLabel(proposal.eventName, isDevfest),
     isDevfest,
     track: proposal.track,
     dateIso,
@@ -155,7 +166,7 @@ function fromTalk(talk: AgendaTalk, now: Date): AgendaItem {
     id: `talk:${talk.talkId}:${talk.speakerName}`,
     title: talk.talkTitle,
     eventName: talk.eventName,
-    shortLabel: isDevfest ? 'DevFest' : 'Meetup',
+    shortLabel: shortEventLabel(talk.eventName, isDevfest),
     isDevfest,
     track: talk.track,
     dateIso: talk.startAt,
