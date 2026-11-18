@@ -125,6 +125,19 @@ export interface PortalOverview {
   proposals: PortalProposal[];
 }
 
+// When the speaker was first told their proposal was accepted. acceptanceEmailSentAt is the
+// latest send (a resend overwrites it), so the first send is kept separately; records from
+// before that field fall back to the earlier of the last send and the confirmation, since no
+// one confirms before being told.
+function firstToldAccepted(proposal: FirebaseFirestore.DocumentData): string | null {
+  const first = isoOrNull(proposal.acceptanceEmailFirstSentAt);
+  if (first) return first;
+  const candidates = [isoOrNull(proposal.acceptanceEmailSentAt), isoOrNull(proposal.speakerConfirmedAt)].filter(
+    (value): value is string => value !== null
+  );
+  return candidates.length ? candidates.reduce((earliest, value) => (value < earliest ? value : earliest)) : null;
+}
+
 function isoOrNull(value: unknown): string | null {
   return value && typeof (value as Timestamp).toDate === 'function' ? (value as Timestamp).toDate().toISOString() : null;
 }
@@ -312,7 +325,7 @@ export async function loadPortalOverview(email: string): Promise<PortalOverview>
         status,
         confirmUrl: status === 'accepted' ? confirmUrl(doc.id) : null,
         confirmBy: status === 'accepted' ? isoOrNull(proposal.confirmByDate) : null,
-        acceptedAt: status === 'accepted' || status === 'confirmed' ? isoOrNull(proposal.acceptanceEmailSentAt) : null,
+        acceptedAt: status === 'accepted' || status === 'confirmed' ? firstToldAccepted(proposal) : null,
         confirmedAt: status === 'confirmed' ? isoOrNull(proposal.speakerConfirmedAt) : null,
         track: kind === 'devfest' ? knownTrack(proposal.track) : null,
         savedTalkId: text(proposal.savedTalkId) || null,
