@@ -25,6 +25,7 @@ import type { MeetupFormat, MeetupProposalStatus } from '@/lib/types';
 const ACCEPTANCE_RESET = {
   eventId: FieldValue.delete(),
   acceptanceEmailSentAt: FieldValue.delete(),
+  acceptanceEmailFirstSentAt: FieldValue.delete(),
   acceptanceEmailSentBy: FieldValue.delete(),
   confirmByDate: FieldValue.delete(),
   speakerConfirmedAt: FieldValue.delete(),
@@ -225,6 +226,12 @@ export async function sendMeetupAcceptanceEmail(proposalId: string): Promise<{ e
       acceptanceEmailSentAt: Timestamp.fromDate(sentAt),
       acceptanceEmailSentBy: senderEmail,
       confirmByDate: Timestamp.fromDate(confirmBy),
+      // The first send only: a resend overwrites the fields above, but the speaker was told on
+      // the first one (the portal shows this date). A record sent before this field existed
+      // gets none, so a resend never stamps a later date as the first.
+      ...(proposal.acceptanceEmailFirstSentAt || proposal.acceptanceEmailSentAt
+        ? {}
+        : { acceptanceEmailFirstSentAt: Timestamp.fromDate(sentAt) }),
       reviewerNotes: FieldValue.arrayUnion({
         text: `Acceptance email for ${event.name} sent by ${senderName}.`,
         authorName: senderName,

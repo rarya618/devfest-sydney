@@ -85,7 +85,14 @@ export default function AgendaStage({ items, nextId, todayIso, panel }: AgendaSt
   const start = today - HALF_YEAR_MS;
   const end = today + HALF_YEAR_MS;
   const ticks = monthTicks(start, end);
-  const placed = items
+  // Proposals that didn't go ahead (the event passed, or not selected) stay findable but out of
+  // the way: off the ruler and the pills, folded into one line under them.
+  // A marker this close to Today puts its event label under the line instead of over it.
+  const isLabelBelow = (position: number) => Math.abs(position - 50) < 8;
+
+  const ended = items.filter((item) => item.state === 'passed' || item.state === 'not-selected');
+  const active = items.filter((item) => item.state !== 'passed' && item.state !== 'not-selected');
+  const placed = active
     .filter((item) => item.dateIso && Date.parse(item.dateIso) >= start && Date.parse(item.dateIso) <= end)
     .map((item) => ({ item, position: ((Date.parse(item.dateIso!) - start) / (end - start)) * 100 }))
     .sort((first, second) => first.position - second.position);
@@ -98,14 +105,18 @@ export default function AgendaStage({ items, nextId, todayIso, panel }: AgendaSt
     let pendingYear: string | null = null;
     return ticks.map((tick, index) => {
       const year = tick.year ?? pendingYear;
-      const isUnderMarker = placed.some((entry) => Math.abs(entry.position - tick.position) < 4.5);
+      // A marker's ring covers about 4.5% either side; a label moved under the line (near
+      // Today) is wider, so it clears more of the month labels around it.
+      const isUnderMarker = placed.some(
+        (entry) => Math.abs(entry.position - tick.position) < (isLabelBelow(entry.position) ? 10 : 4.5)
+      );
       if (!isShown(index)) {
         pendingYear = year;
         return null;
       }
       pendingYear = isUnderMarker ? year : null;
       if (isUnderMarker) return null;
-      return year ? `${tick.month} ’${year}` : tick.month;
+      return { month: tick.month, year };
     });
   }
   const wideLabels = withYears(() => true);
@@ -132,12 +143,10 @@ export default function AgendaStage({ items, nextId, todayIso, panel }: AgendaSt
             style={{ left: `${tick.position}%` }}
             className={`absolute top-12 sm:top-14 h-2 w-px bg-white/30 ${index % 2 === 1 ? 'max-sm:hidden' : ''}`}
           >
-            {wideLabels[index] && (
-              <span className="absolute top-3.5 left-0 -translate-x-1/2 whitespace-nowrap font-mono text-xs text-white/55 max-sm:hidden">{wideLabels[index]}</span>
-            )}
-            {phoneLabels[index] && (
-              <span className="absolute top-3.5 left-0 -translate-x-1/2 whitespace-nowrap font-mono text-xs text-white/55 sm:hidden">{phoneLabels[index]}</span>
-            )}
+            {/* The year sits on its own line under its month, so a labelled year is no wider than
+                any other month and never crowds its neighbour. */}
+            {wideLabels[index] && <TickLabel label={wideLabels[index]!} className="max-sm:hidden" />}
+            {phoneLabels[index] && <TickLabel label={phoneLabels[index]!} className="sm:hidden" />}
           </span>
         ))}
         <span aria-hidden="true" style={{ left: '50%' }} className="ruler-today absolute top-6 sm:top-7 bottom-[-0.5rem] w-0.5 -translate-x-1/2 rounded-full bg-off-white">
@@ -158,7 +167,9 @@ export default function AgendaStage({ items, nextId, todayIso, panel }: AgendaSt
                   <span
                     className={`block h-3.5 w-3.5 rounded-full ring-[5px] ring-black-02 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-125 ${STATE_DOT[item.state]} ${isSelected ? 'scale-125 outline outline-2 outline-offset-[5px] outline-off-white/70' : ''}`}
                   />
-                  <span className={`absolute bottom-full mb-1 whitespace-nowrap text-xs font-bold max-sm:hidden ${STATE_TEXT[item.state]}`}>
+                  {/* Over the line, unless it would run into "Today": then under it, where the
+                      month labels near a marker are already dropped. */}
+                  <span className={`absolute whitespace-nowrap text-xs font-bold max-sm:hidden ${isLabelBelow(position) ? 'top-full mt-0.5' : 'bottom-full mb-1'} ${STATE_TEXT[item.state]}`}>
                     {item.shortLabel}
                   </span>
                 </button>
@@ -183,10 +194,10 @@ export default function AgendaStage({ items, nextId, todayIso, panel }: AgendaSt
         </div>
       </div>
 
-      {items.length > 1 && !panel && (
+      {active.filter((item) => item.id !== selected?.id).length > 0 && !panel && (
         <nav aria-label="Your other talks" className="mt-6">
           <ul className="flex flex-wrap gap-2">
-            {items
+            {active
               .filter((item) => item.id !== selected?.id)
               .map((item) => (
                 <li key={item.id} className="min-w-0 max-w-full">
@@ -205,7 +216,44 @@ export default function AgendaStage({ items, nextId, todayIso, panel }: AgendaSt
           </ul>
         </nav>
       )}
+
+      {ended.length > 0 && !panel && (
+        <details className="group mt-6 rounded-2xl border border-white/10 open:bg-white/[0.02]">
+          <summary className="flex cursor-pointer list-none items-center gap-2 rounded-2xl px-4 py-3 text-sm text-white/70 hover:text-off-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue [&::-webkit-details-marker]:hidden">
+            <svg aria-hidden="true" viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-open:rotate-90" fill="currentColor">
+              <path d="M6 3.5 10.5 8 6 12.5V3.5Z" />
+            </svg>
+            {ended.length === 1 ? '1 earlier proposal didn’t go ahead' : `${ended.length} earlier proposals didn’t go ahead`}
+          </summary>
+          <ul className="px-2 pb-2">
+            {ended.map((item) => (
+              <li key={item.id}>
+                <button
+                  type="button"
+                  onClick={() => choose(item.id)}
+                  aria-pressed={item.id === selected?.id}
+                  aria-label={`Show ${item.title}: ${item.kicker}`}
+                  className="flex w-full min-w-0 items-baseline gap-3 rounded-xl px-2 py-2 text-left text-sm transition-colors hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue aria-pressed:bg-white/[0.06]"
+                >
+                  <span className="w-14 shrink-0 font-mono text-xs text-white/55">{item.dateLabel ?? 'No date'}</span>
+                  <span className="min-w-0 flex-1 truncate text-white/80">{item.title}</span>
+                  <span className="hidden shrink-0 text-xs text-white/55 sm:inline">{item.state === 'not-selected' ? 'Not selected' : 'Event passed'}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
     </div>
+  );
+}
+
+function TickLabel({ label, className }: { label: { month: string; year: string | null }; className: string }) {
+  return (
+    <span className={`absolute top-3.5 left-0 -translate-x-1/2 text-center font-mono text-xs leading-tight text-white/55 ${className}`}>
+      {label.month}
+      {label.year && <span className="block text-[11px] text-white/45">{`’${label.year}`}</span>}
+    </span>
   );
 }
 

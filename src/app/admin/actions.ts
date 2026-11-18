@@ -647,6 +647,12 @@ export async function sendAcceptanceEmail(submissionId: string): Promise<{ error
       acceptanceEmailSentAt: Timestamp.fromDate(sentAt),
       acceptanceEmailSentBy: senderEmail,
       confirmByDate: Timestamp.fromDate(confirmBy),
+      // The first send only: a resend overwrites the fields above, but the speaker was told on
+      // the first one (the portal shows this date). A record sent before this field existed
+      // gets none, so a resend never stamps a later date as the first.
+      ...(submission.acceptanceEmailFirstSentAt || submission.acceptanceEmailSentAt
+        ? {}
+        : { acceptanceEmailFirstSentAt: Timestamp.fromDate(sentAt) }),
       reviewerNotes: FieldValue.arrayUnion({
         text: `Acceptance email sent by ${senderName}. Confirmation due ${confirmBy.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', timeZone: 'Australia/Sydney' })}.`,
         authorName: senderName,
