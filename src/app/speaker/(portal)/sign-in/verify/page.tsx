@@ -37,7 +37,7 @@ export default async function PortalVerifyPage({ searchParams }: VerifyPageProps
       <div className="max-w-md">
         {email && token ? (
           <>
-            <h1 className={pageHeading}>Sign in</h1>
+            <h1 className={pageHeading}>Signing you in</h1>
             <p className="mt-5 mb-4 text-white/70 leading-relaxed">
               As <span className="text-white font-bold">{email}</span>.
             </p>

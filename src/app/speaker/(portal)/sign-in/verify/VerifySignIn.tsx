@@ -12,15 +12,22 @@ import { completePortalSignIn } from '../../actions';
 export default function VerifySignIn({ token, email }: { token: string; email: string }) {
   const [isPending, startTransition] = useTransition();
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  // The button is only for after an attempt has failed: before the first one starts it would
+  // make the page look broken for a moment.
+  const [hasFailed, setHasFailed] = useState(false);
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
   // React runs effects twice in development; the link works once, so only try once.
   const hasTriedAutomatically = useRef(false);
 
   const signIn = useCallback(() => {
+    setAlertMessage(null);
     startTransition(async () => {
       // Redirects on success; anything returned is a problem to show.
       const result = await completePortalSignIn(token);
-      if (result?.error) setAlertMessage(result.error);
+      if (result?.error) {
+        setAlertMessage(result.error);
+        setHasFailed(true);
+      }
     });
   }, [token]);
 
@@ -32,10 +39,12 @@ export default function VerifySignIn({ token, email }: { token: string; email: s
 
   return (
     <>
-      <p role="status" className="mb-6 text-white/70">{isPending ? 'Signing you in…' : alertMessage ? 'That didn’t work.' : ''}</p>
-      <button type="button" onClick={signIn} disabled={isPending} aria-label={`Sign in as ${email}`} className={primaryButton}>
-        {isPending ? 'Signing in…' : 'Try again'}
-      </button>
+      <p role="status" className="mb-6 text-white/70">{hasFailed && !isPending ? 'That didn’t work.' : 'Signing you in…'}</p>
+      {hasFailed && (
+        <button type="button" onClick={signIn} disabled={isPending} aria-label={`Try signing in as ${email} again`} className={primaryButton}>
+          {isPending ? 'Signing in…' : 'Try again'}
+        </button>
+      )}
       {alertMessage && <Alert message={alertMessage} onDismiss={dismissAlert} />}
     </>
   );
