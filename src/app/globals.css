@@ -168,6 +168,146 @@ body {
   animation: page-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* ---- Speaker portal motion (the badge direction, .impeccable/surfaces) ----
+   One curve throughout: an exponential ease-out that arrives confidently and settles. */
+:root {
+  --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* The badge swings in on its lanyard and settles, pivoting on the clip at its top. A damped
+   pendulum: each swing smaller than the last, ending at the badge's resting tilt. Played once
+   per visit: BadgeLanyard records the swing in sessionStorage, and the portal layout marks
+   later loads with the portal-swung class before they paint, so they fade it in instead. */
+@keyframes badge-swing {
+  0% { opacity: 0; transform: translateY(-28px) rotate(-10deg); }
+  18% { opacity: 1; }
+  38% { transform: translateY(0) rotate(5deg); }
+  58% { transform: rotate(-2.6deg); }
+  76% { transform: rotate(0.6deg); }
+  100% { transform: rotate(var(--badge-rest, -1.2deg)); }
+}
+
+@keyframes badge-arrive {
+  from { opacity: 0; transform: translateY(8px) rotate(var(--badge-rest, -1.2deg)); }
+  to { opacity: 1; transform: rotate(var(--badge-rest, -1.2deg)); }
+}
+
+.badge-hang {
+  transform-origin: 50% 0;
+  transform: rotate(var(--badge-rest, -1.2deg));
+}
+
+.badge-hang[data-swing='full'] {
+  animation: badge-swing 1.15s var(--ease-settle) both;
+}
+
+.badge-hang[data-swing='arrive'] {
+  animation: badge-arrive 0.4s var(--ease-settle) both;
+}
+
+/* The badge has already swung this visit: arrive quietly instead. */
+.portal-swung .badge-hang[data-swing='full'] {
+  animation: badge-arrive 0.4s var(--ease-settle) both;
+}
+
+/* Agenda rows arrive as a list: a short rise, staggered by --row-index and capped, so a long
+   agenda never makes anyone wait. A row added later (a new proposal) arrives the same way. */
+@keyframes row-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.row-in {
+  animation: row-in 0.45s var(--ease-settle) both;
+  animation-delay: calc(min(var(--row-index, 0), 6) * 45ms + 120ms);
+}
+
+/* The agenda's year ruler arrives in order: the today line draws up, then each talk's
+   marker pops onto the line, staggered by --marker-index. Scale only: Tailwind positions these
+   with the separate translate property, which a transform here would double. */
+@keyframes ruler-draw {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+@keyframes marker-pop {
+  from { opacity: 0; transform: scale(0.4); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.ruler-today {
+  transform-origin: 50% 100%;
+  animation: ruler-draw 0.6s var(--ease-settle) 0.15s both;
+}
+
+.ruler-marker {
+  animation: marker-pop 0.5s var(--ease-settle) both;
+  animation-delay: calc(min(var(--marker-index, 0), 6) * 70ms + 0.45s);
+}
+
+/* The agenda stage morphs between talks, and into a form and back (stageTransition.ts): the
+   card's box glides to its new size while the old content fades out and the new fades in.
+   The rest of the page doesn't move, so only the stage is named. */
+::view-transition-group(agenda-stage) {
+  animation-duration: 0.45s;
+  animation-timing-function: var(--ease-settle);
+}
+
+::view-transition-old(agenda-stage) {
+  animation: 0.18s ease-out both fade-out;
+}
+
+::view-transition-new(agenda-stage) {
+  animation: 0.32s var(--ease-settle) 0.08s both fade-in;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+@keyframes fade-out {
+  to { opacity: 0; }
+}
+
+/* Panels open and close by animating their height to and from its natural size: the grid
+   row runs from 0fr to 1fr, so nothing has to be measured, and the content below glides
+   rather than jumps. AnimatedPanel keeps a closing panel mounted until this finishes. */
+.panel-reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 0.42s var(--ease-settle),
+    opacity 0.26s var(--ease-settle);
+}
+
+.panel-reveal[data-open='true'] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.panel-reveal > * {
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Closing is quicker than opening: the speaker has finished with it. */
+.panel-reveal[data-open='false'] {
+  transition-duration: 0.3s, 0.18s;
+}
+
+/* A pressed button gives slightly under the finger. */
+.press {
+  transition-property: transform, opacity, border-color, background-color, color;
+  transition-duration: 0.16s;
+  transition-timing-function: var(--ease-settle);
+}
+
+.press:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
 @keyframes marquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
@@ -224,6 +364,19 @@ body {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+
+  /* The portal keeps its state changes (panels still open and close, colours still change)
+     but loses the swing, the tilt, the travel and the stagger. */
+  .badge-hang[data-swing],
+  .row-in,
+  .ruler-today,
+  .ruler-marker {
+    animation: none !important;
+  }
+
+  .press:active:not(:disabled) {
+    transform: none;
   }
 
   * {

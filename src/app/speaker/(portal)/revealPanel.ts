@@ -1,12 +1,13 @@
-// Brings a just-opened panel into view on the dashboard. A panel that fits on screen moves only
-// as far as it must ('nearest'); a taller one (the proposal form) is brought to its top, under
-// the sticky header (each panel's scroll-mt), so the form is read from the beginning. Instant
-// for people who prefer reduced motion.
-const HEADER_AND_MARGIN = 140;
+// Brings a just-opened panel into view on the dashboard, if it isn't already. A panel whose top
+// already sits comfortably on screen stays where it is; otherwise the page glides to its top,
+// under the sticky header (each panel's scroll-mt). Instant for people who prefer reduced motion.
+const HEADER_HEIGHT = 96;
 
 export function revealPanel(element: HTMLElement | null): void {
   if (!element) return;
+  const top = element.getBoundingClientRect().top;
+  const isComfortablyVisible = top >= HEADER_HEIGHT && top <= window.innerHeight * 0.55;
+  if (isComfortablyVisible) return;
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const isTallerThanScreen = element.offsetHeight > window.innerHeight - HEADER_AND_MARGIN;
-  element.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: isTallerThanScreen ? 'start' : 'nearest' });
+  element.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
 }

@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font",
+        "value": "material symbols outlined",
+        "createdAt": "2026-11-18T14:18:54.544Z",
+        "reason": "Claude: an icon font class (.material-symbols-outlined) predating this session, not a text face; DESIGN.md types text only"
+      }
+    ]
+  }
+}

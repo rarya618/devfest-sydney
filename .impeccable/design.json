@@ -1,0 +1,510 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-18T14:53:41+00:00",
+  "title": "Design System: GDG Sydney back office",
+  "extensions": {
+    "colorMeta": {
+      "google-blue": {
+        "role": "secondary",
+        "displayName": "Google Blue",
+        "tonalRamp": [
+          "#174ea6",
+          "#185abc",
+          "#1967d2",
+          "#1a73e8",
+          "#4285f4",
+          "#8ab4f8",
+          "#aecbfa",
+          "#e8f0fe"
+        ]
+      },
+      "google-blue-deep": {
+        "role": "primary",
+        "displayName": "Action Blue (Blue 700)",
+        "tonalRamp": [
+          "#174ea6",
+          "#185abc",
+          "#1967d2",
+          "#1a73e8",
+          "#4285f4",
+          "#8ab4f8",
+          "#aecbfa",
+          "#e8f0fe"
+        ]
+      },
+      "google-blue-light": {
+        "role": "primary",
+        "displayName": "Link Blue (Blue 300)",
+        "tonalRamp": [
+          "#174ea6",
+          "#185abc",
+          "#1967d2",
+          "#1a73e8",
+          "#4285f4",
+          "#8ab4f8",
+          "#aecbfa",
+          "#e8f0fe"
+        ]
+      },
+      "google-green": {
+        "role": "secondary",
+        "displayName": "Google Green",
+        "tonalRamp": [
+          "#0d652d",
+          "#137333",
+          "#188038",
+          "#1e8e3e",
+          "#34a853",
+          "#81c995",
+          "#a8dab5",
+          "#e6f4ea"
+        ]
+      },
+      "google-green-deep": {
+        "role": "secondary",
+        "displayName": "Confirm Green (Green 700)",
+        "tonalRamp": [
+          "#0d652d",
+          "#137333",
+          "#188038",
+          "#1e8e3e",
+          "#34a853",
+          "#81c995",
+          "#a8dab5",
+          "#e6f4ea"
+        ]
+      },
+      "google-yellow": {
+        "role": "tertiary",
+        "displayName": "Google Yellow (Yellow 600)",
+        "tonalRamp": [
+          "#b06000",
+          "#e37400",
+          "#ea8600",
+          "#f29900",
+          "#f9ab00",
+          "#fdd663",
+          "#fde293",
+          "#fef7e0"
+        ]
+      },
+      "google-red": {
+        "role": "tertiary",
+        "displayName": "Google Red",
+        "tonalRamp": [
+          "#a50e0e",
+          "#b31412",
+          "#c5221f",
+          "#d93025",
+          "#ea4335",
+          "#f28b82",
+          "#f6aea9",
+          "#fce8e6"
+        ]
+      },
+      "google-red-deep": {
+        "role": "tertiary",
+        "displayName": "Destructive Red (Red 600)",
+        "tonalRamp": [
+          "#a50e0e",
+          "#b31412",
+          "#c5221f",
+          "#d93025",
+          "#ea4335",
+          "#f28b82",
+          "#f6aea9",
+          "#fce8e6"
+        ]
+      },
+      "google-red-light": {
+        "role": "tertiary",
+        "displayName": "Error Text Red (Red 300)",
+        "tonalRamp": [
+          "#a50e0e",
+          "#b31412",
+          "#c5221f",
+          "#d93025",
+          "#ea4335",
+          "#f28b82",
+          "#f6aea9",
+          "#fce8e6"
+        ]
+      },
+      "black-02": {
+        "role": "neutral",
+        "displayName": "Black 02 Page",
+        "tonalRamp": [
+          "#121212",
+          "#1e1e1e",
+          "#282828",
+          "#303030",
+          "#5f6368",
+          "#9aa0a6",
+          "#dadce0",
+          "#f0f0f0"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Card Grey",
+        "tonalRamp": [
+          "#121212",
+          "#1e1e1e",
+          "#282828",
+          "#303030",
+          "#5f6368",
+          "#9aa0a6",
+          "#dadce0",
+          "#f0f0f0"
+        ]
+      },
+      "surface-raised": {
+        "role": "neutral",
+        "displayName": "Raised Grey",
+        "tonalRamp": [
+          "#121212",
+          "#1e1e1e",
+          "#282828",
+          "#303030",
+          "#5f6368",
+          "#9aa0a6",
+          "#dadce0",
+          "#f0f0f0"
+        ]
+      },
+      "off-white": {
+        "role": "neutral",
+        "displayName": "Off White",
+        "tonalRamp": [
+          "#121212",
+          "#1e1e1e",
+          "#282828",
+          "#303030",
+          "#5f6368",
+          "#9aa0a6",
+          "#dadce0",
+          "#f0f0f0"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Single-message full pages (the portal error state)."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "The page h1: Your agenda, Sign in to speak with us."
+      },
+      "card-title": {
+        "displayName": "Card Title",
+        "purpose": "The talk title on the agenda card and the empty-year card's line."
+      },
+      "badge-name": {
+        "displayName": "Badge Name",
+        "purpose": "The speaker name on the badge (a paragraph, not a heading)."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Panel headings."
+      },
+      "agenda-heading": {
+        "displayName": "Agenda Heading",
+        "purpose": "The Saved talks heading and the Needs you strip's heading."
+      },
+      "row-title": {
+        "displayName": "Row Title",
+        "purpose": "A talk title in a saved-talk row or the Needs you strip."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Prose and form values."
+      },
+      "body-small": {
+        "displayName": "Body Small",
+        "purpose": "Secondary lines, notes, the badge bio."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Form labels and legends, sentence case."
+      },
+      "hint": {
+        "displayName": "Hint",
+        "purpose": "Hints (white 50%) and field errors (Red 300) under the field."
+      },
+      "data": {
+        "displayName": "Data",
+        "purpose": "Saved-talk counts and deadlines."
+      },
+      "data-small": {
+        "displayName": "Data Small",
+        "purpose": "Ruler month labels, step dates, pill dates."
+      },
+      "data-chip": {
+        "displayName": "Data Chip",
+        "purpose": "Event kind and track chips."
+      }
+    },
+    "shadows": [
+      {
+        "name": "badge-hang",
+        "value": "0 24px 48px -20px rgba(0,0,0,0.7)",
+        "purpose": "The speaker badge and sign-in badge only."
+      },
+      {
+        "name": "clip",
+        "value": "0 4px 8px -2px rgba(0,0,0,0.5)",
+        "purpose": "The lanyard clip."
+      },
+      {
+        "name": "punched-slot",
+        "value": "inset 0 1px 2px rgba(0,0,0,0.6)",
+        "purpose": "The slot cut into the top of a badge."
+      },
+      {
+        "name": "alert-float",
+        "value": "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
+        "purpose": "The bottom-left error alert (Tailwind shadow-xl)."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-settle",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "The one curve for every portal transition (--ease-settle in globals.css)."
+      },
+      {
+        "name": "press",
+        "value": "160ms, scale(0.97)",
+        "purpose": "Pressed buttons (.press)."
+      },
+      {
+        "name": "page-in",
+        "value": "280ms, translateY(6px) and fade",
+        "purpose": "Portal page content arriving; the header stays put."
+      },
+      {
+        "name": "row-in",
+        "value": "450ms, translateY(10px), stagger 45ms per row after 120ms, capped at 6",
+        "purpose": "Saved-talk rows and the Needs you strip arriving."
+      },
+      {
+        "name": "ruler-draw",
+        "value": "600ms after 150ms, scaleY(0) to 1 from the foot",
+        "purpose": "The year ruler's today line arriving."
+      },
+      {
+        "name": "marker-pop",
+        "value": "500ms, scale(0.4) and fade, stagger 70ms per marker after 450ms, capped at 6",
+        "purpose": "Ruler markers arriving after the today line."
+      },
+      {
+        "name": "stage-morph",
+        "value": "view transition agenda-stage: group 450ms ease-settle; old fades out 180ms ease-out; new fades in 320ms after 80ms",
+        "purpose": "The agenda card switching talks, or turning into a form and back. Skipped without view transitions or under reduced motion."
+      },
+      {
+        "name": "panel-open",
+        "value": "grid-template-rows 0fr to 1fr 420ms, opacity 260ms",
+        "purpose": "The new saved-talk editor opening (AnimatedPanel)."
+      },
+      {
+        "name": "panel-close",
+        "value": "grid-template-rows 300ms, opacity 180ms",
+        "purpose": "The saved-talk editor closing, quicker than opening."
+      },
+      {
+        "name": "badge-swing",
+        "value": "1150ms damped pendulum from translateY(-28px) rotate(-10deg) to rest at -1.2deg",
+        "purpose": "Once per visit, the first badge."
+      },
+      {
+        "name": "badge-arrive",
+        "value": "400ms, translateY(8px) and fade",
+        "purpose": "Later loads, second badges, the sign-in badge."
+      },
+      {
+        "name": "badge-tilt",
+        "value": "max 7deg; follow 150ms, return 700ms; sheen 500ms",
+        "purpose": "Fine pointers only, never on a badge holding a form."
+      },
+      {
+        "name": "alert-enter",
+        "value": "300ms, translateY(12px) and fade",
+        "purpose": "The error alert."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "no swing, tilt, travel, stagger, ruler draw, marker pop, stage morph or press; all durations 0.01ms",
+        "purpose": "prefers-reduced-motion: reduce."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "lg-tall",
+        "value": "1024px wide and 820px tall (sticky badge column)"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one main action per view: Propose a talk, Send, Save.",
+      "html": "<button class=\"ds-btn-primary\">Propose a talk</button>",
+      "css": ".ds-btn-primary{font-family:'Google Sans',sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 24px;border:0;border-radius:9999px;background:var(--color-google-blue-deep,#1967d2);color:#fff;font-size:16px;font-weight:700;cursor:pointer;transition:transform .16s cubic-bezier(0.16,1,0.3,1),opacity .16s cubic-bezier(0.16,1,0.3,1);}.ds-btn-primary:hover{opacity:.85;}.ds-btn-primary:focus-visible{outline:none;box-shadow:0 0 0 2px #1e1e1e,0 0 0 4px #4285F4;}.ds-btn-primary:active{transform:scale(.97);}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Outline pill for every other action: Edit badge, Sign out, Edit.",
+      "html": "<button class=\"ds-btn-secondary\">Edit badge</button>",
+      "css": ".ds-btn-secondary{font-family:'Google Sans',sans-serif;display:inline-flex;align-items:center;justify-content:center;padding:8px 20px;border:1px solid rgba(255,255,255,.35);border-radius:9999px;background:transparent;color:var(--color-off-white,#f0f0f0);font-size:14px;font-weight:700;cursor:pointer;transition:border-color .16s cubic-bezier(0.16,1,0.3,1),transform .16s cubic-bezier(0.16,1,0.3,1);}.ds-btn-secondary:hover{border-color:#fff;}.ds-btn-secondary:focus-visible{outline:none;box-shadow:0 0 0 2px #4285F4;}.ds-btn-secondary:active{transform:scale(.97);}"
+    },
+    {
+      "name": "Confirm Button",
+      "kind": "button",
+      "refersTo": "button-confirm",
+      "description": "Green 700 pill, only for confirming a spot: full size on the agenda card, small in the Needs you strip.",
+      "html": "<button class=\"ds-btn-confirm\">Confirm your spot</button>",
+      "css": ".ds-btn-confirm{font-family:'Google Sans',sans-serif;display:inline-flex;padding:8px 20px;border:0;border-radius:9999px;background:var(--color-google-green-deep,#188038);color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:transform .16s cubic-bezier(0.16,1,0.3,1),opacity .16s;}.ds-btn-confirm:hover{opacity:.85;}.ds-btn-confirm:focus-visible{outline:none;box-shadow:0 0 0 2px #1e1e1e,0 0 0 4px #4285F4;}.ds-btn-confirm:active{transform:scale(.97);}"
+    },
+    {
+      "name": "Danger Outline Button",
+      "kind": "button",
+      "refersTo": "button-danger-outline",
+      "description": "Remove photo, Discard changes.",
+      "html": "<button class=\"ds-btn-danger-outline\">Remove photo</button>",
+      "css": ".ds-btn-danger-outline{font-family:'Google Sans',sans-serif;display:inline-flex;padding:8px 20px;border:1px solid rgba(255,255,255,.35);border-radius:9999px;background:transparent;color:var(--color-google-red-light,#f28b82);font-size:14px;font-weight:700;cursor:pointer;transition:border-color .16s;}.ds-btn-danger-outline:hover{border-color:#fff;}.ds-btn-danger-outline:focus-visible{outline:none;box-shadow:0 0 0 2px #4285F4;}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Labelled input with hint, blue focus and an error state under the field.",
+      "html": "<label class=\"ds-label\" for=\"ds-tagline\">Tagline</label><input id=\"ds-tagline\" class=\"ds-input\" placeholder=\"Developer advocate at Example\"><p class=\"ds-hint\">Shown under your name.</p><input class=\"ds-input ds-input-error\" value=\"not a url\" aria-invalid=\"true\"><p class=\"ds-error\">Enter a link that starts with https://</p>",
+      "css": ".ds-label{font-family:'Google Sans',sans-serif;display:block;margin-bottom:6px;font-size:14px;font-weight:700;color:rgba(255,255,255,.85);}.ds-input{font-family:'Google Sans',sans-serif;display:block;width:100%;box-sizing:border-box;padding:10px 20px;border:1px solid rgba(255,255,255,.35);border-radius:8px;background:rgba(255,255,255,.05);color:#fff;font-size:16px;outline:none;transition:border-color .15s,background-color .15s;}.ds-input::placeholder{color:rgba(255,255,255,.6);}.ds-input:focus{background:rgba(255,255,255,.08);border-color:#4285F4;box-shadow:0 0 0 2px rgba(66,133,244,.4);}.ds-input-error{margin-top:16px;border-color:#f28b82;background:rgba(234,67,53,.05);}.ds-hint{font-family:'Google Sans',sans-serif;margin:6px 0 0;font-size:12px;color:rgba(255,255,255,.5);}.ds-error{font-family:'Google Sans',sans-serif;margin:6px 0 0;font-size:12px;color:#f28b82;}"
+    },
+    {
+      "name": "Event Chips",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Mono pills for event kind and DevFest track; the dot is decoration.",
+      "html": "<span class=\"ds-chip\">DevFest</span> <span class=\"ds-chip\"><span class=\"ds-chip-dot\"></span>Developer</span>",
+      "css": ".ds-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:9999px;background:rgba(255,255,255,.06);font-family:'Google Sans Mono',monospace;font-size:12px;line-height:1;color:rgba(255,255,255,.7);}.ds-chip-dot{width:6px;height:6px;border-radius:9999px;background:#4285F4;}"
+    },
+    {
+      "name": "Speaker Badge on Lanyard",
+      "kind": "custom",
+      "refersTo": "speaker-badge",
+      "description": "The signature: the public profile as a badge on a four-colour GDG lanyard.",
+      "html": "<div class=\"ds-lanyard\"><div class=\"ds-strap\"><span style=\"background:#4285F4\"></span><span style=\"background:#EA4335\"></span><span style=\"background:#f9ab00\"></span><span style=\"background:#34A853\"></span></div><div class=\"ds-clip\"><span></span></div><article class=\"ds-badge\"><span class=\"ds-slot\"></span><div class=\"ds-photo\">AS</div><p class=\"ds-name\">Alex Speaker</p><p class=\"ds-tagline\">Android engineer</p><p class=\"ds-band\">Speaker</p></article></div>",
+      "css": ".ds-lanyard{font-family:'Google Sans',sans-serif;display:flex;flex-direction:column;align-items:center;width:280px;}.ds-strap{display:flex;width:16px;height:56px;overflow:hidden;border-radius:0 0 3px 3px;}.ds-strap span{flex:1;}.ds-clip{position:relative;z-index:1;margin-top:-2px;width:40px;height:20px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:var(--color-surface-raised,#303030);box-shadow:0 4px 8px -2px rgba(0,0,0,.5);}.ds-clip span{position:absolute;left:50%;top:50%;width:20px;height:6px;transform:translate(-50%,-50%);border-radius:9999px;background:#1e1e1e;}.ds-badge{position:relative;margin-top:-26px;width:100%;box-sizing:border-box;overflow:hidden;padding:40px 20px 24px;border-radius:28px;background:var(--color-surface,#282828);box-shadow:0 24px 48px -20px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06);text-align:center;transform-origin:50% 0;transform:rotate(-1.2deg);transition:transform .7s cubic-bezier(0.16,1,0.3,1);}.ds-badge:hover{transform:rotate(0deg);}.ds-slot{position:absolute;left:50%;top:16px;width:28px;height:8px;transform:translateX(-50%);border-radius:9999px;background:#1e1e1e;box-shadow:inset 0 1px 2px rgba(0,0,0,.6);}.ds-photo{display:flex;align-items:center;justify-content:center;margin:0 auto;width:52%;aspect-ratio:1;border-radius:22px;background:rgba(255,255,255,.06);font-size:36px;font-weight:700;color:rgba(255,255,255,.3);}.ds-name{margin:20px 0 0;font-size:24px;font-weight:700;line-height:1.25;color:#f0f0f0;}.ds-tagline{margin:6px 0 0;color:rgba(255,255,255,.7);}.ds-band{margin:20px -20px 0;padding:8px 0;background:var(--color-google-blue-deep,#1967d2);color:#fff;font-size:14px;font-weight:700;}"
+    },
+    {
+      "name": "Year Ruler",
+      "kind": "custom",
+      "refersTo": "agenda-card",
+      "description": "The speaker's year, six months each side of today, with state-coloured markers that choose the card.",
+      "html": "<div class=\"ds-ruler\"><div class=\"ds-ruler-line\"></div><span class=\"ds-tick\" style=\"left:16.6%\"><span>Sep</span></span><span class=\"ds-tick\" style=\"left:33.3%\"><span>Oct</span></span><span class=\"ds-tick\" style=\"left:66.6%\"><span>Dec</span></span><span class=\"ds-tick\" style=\"left:83.3%\"><span>Jan ’27</span></span><span class=\"ds-today\"><span>Today</span></span><button class=\"ds-marker\" style=\"left:30%\" aria-label=\"DevFest Sydney, 10 Oct: given\"><span class=\"ds-dot\" style=\"background:rgba(255,255,255,.4)\"></span><span class=\"ds-mlabel\" style=\"color:rgba(255,255,255,.6)\">DevFest</span></button><button class=\"ds-marker ds-selected\" style=\"left:58%\" aria-pressed=\"true\" aria-label=\"Meetup, 1 Dec: confirmed\"><span class=\"ds-dot\" style=\"background:#34A853\"></span><span class=\"ds-mlabel\" style=\"color:#34A853\">Meetup</span></button></div>",
+      "css": ".ds-ruler{position:relative;width:100%;min-width:320px;padding-top:56px;padding-bottom:36px;font-family:'Google Sans',sans-serif;}.ds-ruler-line{height:2px;border-radius:9999px;background:rgba(240,240,240,.85);}.ds-tick{position:absolute;top:56px;width:1px;height:8px;background:rgba(255,255,255,.3);}.ds-tick span{position:absolute;top:14px;left:0;transform:translateX(-50%);white-space:nowrap;font-family:'Google Sans Mono',monospace;font-size:12px;color:rgba(255,255,255,.55);}.ds-today{position:absolute;left:50%;top:28px;bottom:-8px;width:2px;transform:translateX(-50%);border-radius:9999px;background:#f0f0f0;}.ds-today span{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:700;color:#f0f0f0;}.ds-marker{position:absolute;top:56px;display:flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border:0;border-radius:9999px;background:none;cursor:pointer;transform:translate(-50%,-50%);}.ds-marker:focus-visible{outline:none;box-shadow:0 0 0 2px #4285F4;}.ds-dot{display:block;width:14px;height:14px;border-radius:9999px;box-shadow:0 0 0 5px #1e1e1e;transition:transform .3s cubic-bezier(0.16,1,0.3,1);}.ds-marker:hover .ds-dot,.ds-selected .ds-dot{transform:scale(1.25);}.ds-selected .ds-dot{outline:2px solid rgba(240,240,240,.7);outline-offset:5px;}.ds-mlabel{position:absolute;bottom:100%;margin-bottom:4px;white-space:nowrap;font-size:12px;font-weight:700;}"
+    },
+    {
+      "name": "Agenda Card",
+      "kind": "card",
+      "refersTo": "agenda-card",
+      "description": "One large card for the talk that matters now: title, meta, status line, dated step track, action; other talks as pills under it.",
+      "html": "<article class=\"ds-acard\"><h2>Agents on Android</h2><p class=\"ds-ameta\">DevFest Extended, 1 Dec</p><p class=\"ds-astatus\">On stage in 12 days</p><ol class=\"ds-steps\"><li class=\"done\"><div><span class=\"d\"></span><span class=\"r\"></span></div><p>Sent</p><small>20 Oct</small></li><li class=\"done\"><div><span class=\"d\"></span><span class=\"r\"></span></div><p>Accepted</p><small>2 Nov</small></li><li class=\"done\"><div><span class=\"d\"></span><span class=\"r\"></span></div><p>Confirmed</p><small>4 Nov</small></li><li class=\"current\"><div><span class=\"d\"></span></div><p>On stage</p><small>1 Dec</small></li></ol><div class=\"ds-aactions\"><button class=\"ds-aedit\">Edit your talk</button></div></article><ul class=\"ds-pills\"><li><button><span class=\"pd\"></span><span class=\"pdate\">10 Oct</span><span class=\"pt\">Shipping with Gemini</span></button></li></ul>",
+      "css": ".ds-acard{font-family:'Google Sans',sans-serif;padding:36px;border-radius:28px;background:var(--color-surface,#282828);box-shadow:0 0 0 1px rgba(255,255,255,.06);color:#f0f0f0;}.ds-acard h2{margin:0;font-size:clamp(1.5rem,3vw,2.25rem);font-weight:700;line-height:1.12;letter-spacing:-.01em;text-wrap:balance;}.ds-ameta{margin:12px 0 0;color:rgba(255,255,255,.7);}.ds-astatus{margin:20px 0 0;font-weight:700;color:#34A853;}.ds-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:32px 0 0;padding:0;list-style:none;}.ds-steps div{display:flex;align-items:center;}.ds-steps .d{width:12px;height:12px;flex-shrink:0;border-radius:9999px;box-sizing:border-box;border:1px solid rgba(255,255,255,.35);}.ds-steps .r{flex:1;height:2px;background:rgba(255,255,255,.15);}.ds-steps .done .d{border:0;background:#34A853;}.ds-steps .done .r{background:#34A853;}.ds-steps .current .d{border:0;background:#34A853;box-shadow:0 0 0 4px rgba(255,255,255,.1);}.ds-steps p{margin:10px 0 0;padding-right:12px;font-size:14px;line-height:1.25;color:rgba(255,255,255,.7);}.ds-steps .current p{font-weight:700;color:#f0f0f0;}.ds-steps small{display:block;margin-top:4px;font-family:'Google Sans Mono',monospace;font-size:12px;color:rgba(255,255,255,.55);}.ds-steps .current small{color:#34A853;}.ds-aactions{margin-top:36px;}.ds-aedit{padding:10px 24px;border:1px solid rgba(255,255,255,.35);border-radius:9999px;background:transparent;color:#f0f0f0;font:700 16px 'Google Sans',sans-serif;cursor:pointer;transition:border-color .16s cubic-bezier(0.16,1,0.3,1);}.ds-aedit:hover{border-color:#fff;}.ds-aedit:focus-visible{outline:none;box-shadow:0 0 0 2px #4285F4;}.ds-pills{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 0;padding:0;list-style:none;}.ds-pills button{display:flex;align-items:center;gap:10px;padding:8px 16px 8px 12px;border:1px solid rgba(255,255,255,.35);border-radius:9999px;background:none;font:14px 'Google Sans',sans-serif;cursor:pointer;transition:border-color .16s;}.ds-pills button:hover{border-color:rgba(255,255,255,.7);}.ds-pills button:focus-visible{outline:none;box-shadow:0 0 0 2px #4285F4;}.ds-pills .pd{width:10px;height:10px;border-radius:9999px;background:rgba(255,255,255,.4);}.ds-pills .pdate{font-family:'Google Sans Mono',monospace;font-size:12px;color:rgba(255,255,255,.6);}.ds-pills .pt{font-weight:700;color:#f0f0f0;}"
+    },
+    {
+      "name": "Needs You Strip",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Phone-only green-tinted block above the badge when a spot waits to be confirmed.",
+      "html": "<section class=\"ds-needs\"><h2>You’re in. Confirm your spot.</h2><p><b>Agents on Android</b><br>DevFest Extended. Confirm by <span>Fri 3 Oct</span></p></section>",
+      "css": ".ds-needs{font-family:'Google Sans',sans-serif;padding:20px 28px;border:1px solid rgba(52,168,83,.3);border-radius:24px;background:rgba(52,168,83,.1);color:#f0f0f0;}.ds-needs h2{margin:0 0 12px;font-size:18px;font-weight:700;}.ds-needs p{margin:0;font-size:14px;color:rgba(255,255,255,.7);}.ds-needs b{font-size:16px;color:#f0f0f0;}.ds-needs span{color:#34A853;}"
+    },
+    {
+      "name": "Error Alert",
+      "kind": "custom",
+      "refersTo": "alert",
+      "description": "Bottom-left error alert that stays until dismissed.",
+      "html": "<div class=\"ds-alert\" role=\"alert\"><span class=\"ds-alert-icon\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 12 12\" fill=\"#f28b82\"><path d=\"M6 1a5 5 0 1 0 0 10A5 5 0 0 0 6 1zm0 7.5a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5zM5.25 4.5a.75.75 0 0 1 1.5 0v2a.75.75 0 0 1-1.5 0v-2z\"/></svg></span><p>We couldn’t save your badge. Check your connection and try again.</p><button aria-label=\"Dismiss error\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"currentColor\"><path d=\"M4.47 4.47a.75.75 0 0 1 1.06 0L8 6.94l2.47-2.47a.75.75 0 1 1 1.06 1.06L9.06 8l2.47 2.47a.75.75 0 1 1-1.06 1.06L8 9.06l-2.47 2.47a.75.75 0 0 1-1.06-1.06L6.94 8 4.47 5.53a.75.75 0 0 1 0-1.06z\"/></svg></button></div>",
+      "css": ".ds-alert{font-family:'Google Sans',sans-serif;display:flex;align-items:flex-start;gap:12px;max-width:24rem;padding:12px 16px;border:1px solid rgba(234,67,53,.4);border-radius:12px;background:var(--color-surface-raised,#303030);box-shadow:0 20px 25px -5px rgb(0 0 0/.1),0 8px 10px -6px rgb(0 0 0/.1);}.ds-alert-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;width:20px;height:20px;border-radius:9999px;background:rgba(234,67,53,.2);}.ds-alert p{flex:1;margin:0;font-size:14px;line-height:1.625;color:rgba(255,255,255,.8);}.ds-alert button{flex-shrink:0;margin:-4px;padding:4px;border:0;border-radius:4px;background:none;color:rgba(255,255,255,.7);cursor:pointer;}.ds-alert button:hover{color:#fff;}.ds-alert button:focus-visible{outline:none;box-shadow:0 0 0 2px #4285F4;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Badge You'll Wear on the Day",
+    "overview": "**Creative North Star: \"The Badge You'll Wear on the Day\"**\n\nThe back office lives on the same dark Black 02 page as gdgsydney.com, so a speaker arriving from `/speak` never feels they have left. Its signature is the speaker portal's badge: the speaker's public profile drawn as a lanyard badge, striped strap and all, with their speaking year beside it: a ruler from six months back to six ahead, today in the middle, over one large card for the talk that matters now. Everything else is quiet on purpose. Flat opaque grey surfaces, pill buttons, sentence-case labels and one bright stripe of the four Google core colours do the brand work, and the content carries the rest.\n\nDensity is low and the reading is fast: a returning speaker visiting twice a year should see their badge, what needs them, and what is next on the first phone screen. Colour is functional before it is decorative. Green means something is in or waiting on you, yellow means it is being read, blue is the action, and quiet white means it is over. The motion has one curve, an exponential ease-out that arrives confidently and settles, and it all falls away for people who prefer reduced motion.\n\nBRANDING.md is the authority on the palette, the contrast variants, the surface treatment and the interactive-state rules. This file records how the shipped build applies them.",
+    "keyCharacteristics": [
+      "Dark Black 02 page with opaque `#282828` and `#303030` surfaces, no translucent cards.",
+      "Google Sans for everything people read; Google Sans Mono only for dates, times and short data labels.",
+      "Pill buttons throughout; solid fills only in the deep contrast variants.",
+      "The speaker badge on its GDG lanyard as the one signature object, with the year ruler and its agenda card as its companion.",
+      "A single ease curve, `cubic-bezier(0.16, 1, 0.3, 1)`, for every portal transition."
+    ],
+    "rules": [
+      {
+        "name": "The Deep Fill Rule",
+        "body": "A solid button with white text is always a deep variant (Blue 700, Green 700, Red 600). The core colours stay for accents, outlines, tints and text.",
+        "section": "colors"
+      },
+      {
+        "name": "The Status Colour Rule",
+        "body": "In the agenda, colour is the status, the same on the ruler marker, the pill, the card's status line and its current step: green for to confirm, confirmed or coming up, yellow for under review, white (60% text, 40% dot) for given, not selected or passed. Words always say the same thing; colour is never the only signal.",
+        "section": "colors"
+      },
+      {
+        "name": "The Four Colours, Once Rule",
+        "body": "The four core colours appear together only in the lanyard strap. Elsewhere a card or row shows at most one track colour, as a small dot inside a chip.",
+        "section": "colors"
+      },
+      {
+        "name": "The Mono Is Data Rule",
+        "body": "Google Sans Mono sets dates, deadlines, counts and short metadata. Never names, titles, labels or body copy.",
+        "section": "typography"
+      },
+      {
+        "name": "The Sentence Case Rule",
+        "body": "Labels, buttons and headings are sentence case. No ALL-CAPS mono eyebrows above headings, and no line above the agenda card's title. The small \"Idea\" or \"Proposed\" line in a saved-talk row and the \"DevFest\" or \"Meetup\" label over a ruler marker are data labels paired with their data, not kickers.",
+        "section": "typography"
+      },
+      {
+        "name": "The Only Thing That Hangs Rule",
+        "body": "Only the badge casts a shadow. Panels, cards, strips and rows stay flat and separate by tone.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** keep the page Black 02 and build depth from the `#282828` and `#303030` surfaces, not translucent white cards.",
+      "**Do** fill solid buttons with the deep variants (Blue 700, Green 700, Red 600) and keep them pills.",
+      "**Do** colour agenda status the same everywhere it shows (marker, pill, status line, current step: green, yellow, white) and say the same thing in words.",
+      "**Do** give every control boundary at least a 35% white border and every focus a solid Google Blue ring or border (BRANDING.md, Interactive States).",
+      "**Do** use `cubic-bezier(0.16, 1, 0.3, 1)` for portal motion, 150 to 300ms for state and 300 to 450ms for panels, and remove travel under reduced motion.",
+      "**Do** put field errors under the field and server errors in the bottom-left alert, which stays until dismissed.",
+      "**Do** use skeletons shaped like the content they stand in for.",
+      "**Do** open dashboard forms in the agenda card's place with the stage morph, never stacked above it."
+    ],
+    "donts": [
+      "**Don't** put white text on the core Google colours; they fail AA at button sizes.",
+      "**Don't** set names, titles or body copy in Google Sans Mono.",
+      "**Don't** add ALL-CAPS mono eyebrows or kickers above headings.",
+      "**Don't** use the four core colours together anywhere but the lanyard strap.",
+      "**Don't** give panels, cards or rows a shadow; only the badge hangs.",
+      "**Don't** tilt or animate a badge that holds a form.",
+      "**Don't** drop text below white 50% on Black 02, or below white 60% for text under 14px on `#303030`.",
+      "**Don't** use spinners or blank sections while data loads."
+    ]
+  }
+}

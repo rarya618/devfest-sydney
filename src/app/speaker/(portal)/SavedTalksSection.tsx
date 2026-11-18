@@ -5,7 +5,8 @@ import type { SavedTalkFields } from '@/lib/portalLabels';
 import { useDashboardPanels } from './DashboardWorkspace';
 import SavedTalkEditor from './SavedTalkEditor';
 import { revealPanel } from './revealPanel';
-import { primaryButtonSmall, secondaryButton, sectionHeading } from './portalStyles';
+import AnimatedPanel from './AnimatedPanel';
+import { agendaDate, agendaDateLabel, agendaHeading, agendaRow, primaryButtonSmall, secondaryButton } from './portalStyles';
 
 export interface SavedTalkRow extends SavedTalkFields {
   id: string;
@@ -53,7 +54,7 @@ export default function SavedTalksSection({ savedTalks }: { savedTalks: SavedTal
 
   function editorFor(row: SavedTalkRow | null) {
     return (
-      <div ref={formContainer} className="scroll-mt-28 scroll-mb-6 rounded-3xl bg-surface p-6 sm:p-8 animate-page-in">
+      <div ref={formContainer} className="scroll-mt-28 scroll-mb-6 rounded-3xl bg-surface p-6 sm:p-8">
         <h3 className="mb-5 font-bold text-off-white">{row ? 'Edit talk' : 'New talk'}</h3>
         <SavedTalkEditor
           savedTalkId={row?.id ?? null}
@@ -73,7 +74,7 @@ export default function SavedTalksSection({ savedTalks }: { savedTalks: SavedTal
     <section aria-labelledby="saved-talks-heading">
       {/* min-h holds the button's height when it hides, so the heading doesn't shift. */}
       <div className="flex items-center justify-between gap-4 min-h-10">
-        <h2 id="saved-talks-heading" className={sectionHeading}>Saved talks</h2>
+        <h2 id="saved-talks-heading" className={agendaHeading}>Saved talks</h2>
         {openForm !== 'new' && (
           <button
             id="add-saved-talk-button"
@@ -89,7 +90,9 @@ export default function SavedTalksSection({ savedTalks }: { savedTalks: SavedTal
       <p className="mt-2 text-sm text-white/60">Only you can see these until you propose them.</p>
       {outcomeMessage && <p role="status" className="mt-2 text-sm text-google-green">{outcomeMessage}</p>}
 
-      {openForm === 'new' && <div className="mt-5">{editorFor(null)}</div>}
+      <AnimatedPanel isOpen={openForm === 'new'}>
+        <div className="pt-5">{editorFor(null)}</div>
+      </AnimatedPanel>
 
       {savedTalks.length === 0 ? (
         openForm !== 'new' && (
@@ -99,40 +102,46 @@ export default function SavedTalksSection({ savedTalks }: { savedTalks: SavedTal
         )
       ) : (
         <ul className="mt-4">
-          {savedTalks.map((savedTalk) => (
-            <li key={savedTalk.id} className="py-5 border-t border-white/10">
+          {savedTalks.map((savedTalk, index) => (
+            <li key={savedTalk.id} style={{ '--row-index': index } as React.CSSProperties} className={openForm === savedTalk.id ? 'row-in py-5 border-t border-white/10' : agendaRow}>
               {openForm === savedTalk.id ? (
                 editorFor(savedTalk)
               ) : (
-                <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:justify-between">
-                  <div className="min-w-0">
-                    <p className="font-bold leading-snug">{savedTalk.talkTitle}</p>
-                    {savedTalk.abstract && <p className="mt-1 text-sm text-white/60 line-clamp-2">{savedTalk.abstract}</p>}
-                    <p className="mt-2 text-sm text-white/60">
-                      {savedTalk.proposedTo.length === 0 ? 'Not proposed yet' : `Proposed to ${savedTalk.proposedTo.join(', ')}`}
-                    </p>
+                <>
+                  <p className="pt-0.5">
+                    <span className={agendaDateLabel}>{savedTalk.proposedTo.length === 0 ? 'Idea' : 'Proposed'}</span>
+                    <span className={`${agendaDate} text-white/60`}>{savedTalk.proposedTo.length === 0 ? 'Not sent' : savedTalk.proposedTo.length === 1 ? 'Once' : `${savedTalk.proposedTo.length} times`}</span>
+                  </p>
+                  <div className="min-w-0 flex flex-col sm:flex-row sm:items-start gap-4 sm:justify-between">
+                    <div className="min-w-0">
+                      <p className="font-bold leading-snug">{savedTalk.talkTitle}</p>
+                      {savedTalk.abstract && <p className="mt-1 text-sm text-white/60 line-clamp-2">{savedTalk.abstract}</p>}
+                      {savedTalk.proposedTo.length > 0 && (
+                        <p className="mt-2 text-sm text-white/60">Proposed to {savedTalk.proposedTo.join(', ')}</p>
+                      )}
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <button
+                        id={`edit-saved-talk-${savedTalk.id}`}
+                        type="button"
+                        onClick={() => open(savedTalk.id, `edit-saved-talk-${savedTalk.id}`)}
+                        aria-label={`Edit ${savedTalk.talkTitle}`}
+                        className={secondaryButton}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        id={`propose-saved-talk-${savedTalk.id}`}
+                        type="button"
+                        onClick={() => panels.openPropose(savedTalk.id, `propose-saved-talk-${savedTalk.id}`)}
+                        aria-label={`Propose ${savedTalk.talkTitle}`}
+                        className={primaryButtonSmall}
+                      >
+                        Propose
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex gap-2 shrink-0">
-                    <button
-                      id={`edit-saved-talk-${savedTalk.id}`}
-                      type="button"
-                      onClick={() => open(savedTalk.id, `edit-saved-talk-${savedTalk.id}`)}
-                      aria-label={`Edit ${savedTalk.talkTitle}`}
-                      className={secondaryButton}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      id={`propose-saved-talk-${savedTalk.id}`}
-                      type="button"
-                      onClick={() => panels.openPropose(savedTalk.id, `propose-saved-talk-${savedTalk.id}`)}
-                      aria-label={`Propose ${savedTalk.talkTitle}`}
-                      className={primaryButtonSmall}
-                    >
-                      Propose
-                    </button>
-                  </div>
-                </div>
+                </>
               )}
             </li>
           ))}

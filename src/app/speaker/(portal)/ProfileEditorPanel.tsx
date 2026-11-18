@@ -217,15 +217,15 @@ export default function ProfileEditorPanel({ profile, onPreviewChange, onDone, o
         </p>
 
         <div className="flex flex-wrap items-center gap-3 pt-1">
-          <button type="submit" disabled={isSaving || isPhotoBusy} aria-label="Save and publish your profile" className={primaryButton}>
-            {isSaving ? 'Saving…' : 'Save profile'}
+          <button type="submit" disabled={isSaving || isPhotoBusy} aria-label="Save and publish your badge" className={primaryButton}>
+            {isSaving ? 'Saving…' : 'Save badge'}
           </button>
           {isConfirmingDiscard && hasUnsavedChanges ? (
             <>
               <button type="button" onClick={onCancel} aria-label="Drop your unsaved changes and stop editing" className={dangerOutlineButton}>
                 Discard changes
               </button>
-              <button type="button" onClick={() => setIsConfirmingDiscard(false)} aria-label="Keep editing your profile" className={secondaryButton}>
+              <button type="button" onClick={() => setIsConfirmingDiscard(false)} aria-label="Keep editing your badge" className={secondaryButton}>
                 Keep editing
               </button>
             </>
