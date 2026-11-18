@@ -8,7 +8,9 @@ import ProfileEditorPanel, { type EditableProfile } from './ProfileEditorPanel';
 import ProposalForm from './ProposalForm';
 import SpeakerCard, { type SpeakerCardProfile } from '@/components/SpeakerCard';
 import { revealPanel } from './revealPanel';
-import AnimatedPanel from './AnimatedPanel';
+import AgendaStage from './AgendaStage';
+import type { AgendaItem } from './agendaItems';
+import { withStageTransition } from './stageTransition';
 import BadgeLanyard from './BadgeLanyard';
 import { primaryButton, secondaryButton } from './portalStyles';
 
@@ -55,6 +57,8 @@ interface DashboardWorkspaceProps {
   requestedPanel: Panel;
   // Anything waiting on the speaker (a spot to confirm), shown above everything else.
   actionStrip?: React.ReactNode;
+  // The year ruler and its card (AgendaStage).
+  agenda: { items: AgendaItem[]; nextId: string | null; todayIso: string };
   // The rest of the right-hand column (talks, proposals, saved talks), rendered on the server.
   children: React.ReactNode;
 }
@@ -78,6 +82,7 @@ export default function DashboardWorkspace({
   editableProposals,
   requestedPanel,
   actionStrip,
+  agenda,
   children,
 }: DashboardWorkspaceProps) {
   const router = useRouter();
@@ -118,10 +123,12 @@ export default function DashboardWorkspace({
 
   const open = useCallback((next: Exclude<Panel, null>, openerId: string) => {
     returnFocusTo.current = openerId;
-    setPreview(null);
-    setSavedProfileId(null);
-    setPanel(next);
-    setPanelOpenedAt(Date.now());
+    withStageTransition(() => {
+      setPreview(null);
+      setSavedProfileId(null);
+      setPanel(next);
+      setPanelOpenedAt(Date.now());
+    });
   }, []);
 
   const panels: DashboardPanels = {
@@ -147,11 +154,15 @@ export default function DashboardWorkspace({
         ? `edit-profile-${panel.profileId}`
         : panel?.type === 'edit-proposal'
           ? `edit-proposal-${panel.proposal.id}`
-          : window.matchMedia('(min-width: 1024px)').matches
+          : agenda.items.length === 0
+            ? 'propose-from-stage'
+            : window.matchMedia('(min-width: 1024px)').matches
             ? 'propose-button-wide'
             : 'propose-button';
-    setPanel(null);
-    setPreview(null);
+    withStageTransition(() => {
+      setPanel(null);
+      setPreview(null);
+    });
     // Drop ?edit= or ?propose so a reload doesn't reopen the panel.
     if (requestedPanel) router.replace(pathname, { scroll: false });
     const openerId = returnFocusTo.current ?? fallbackFocus;
@@ -166,6 +177,8 @@ export default function DashboardWorkspace({
   // Two placements of one action: under the badge on a phone, beside "Your agenda" on a wide
   // screen, where the badge would push it below the first screen.
   function proposeButton(placement: 'badge' | 'agenda') {
+    // With nothing on the year yet, the empty agenda card's own button is the one primary action.
+    if (agenda.items.length === 0) return null;
     const id = placement === 'badge' ? 'propose-button' : 'propose-button-wide';
     return (
       <button
@@ -259,64 +272,71 @@ export default function DashboardWorkspace({
             {proposeButton('agenda')}
           </div>
 
-          <AnimatedPanel isOpen={panel !== null}>
-            <section
-              ref={panelContainer}
-              aria-labelledby="dashboard-panel-heading"
-              className="mt-8 scroll-mt-28 scroll-mb-6 rounded-3xl bg-surface p-6 sm:p-8"
-            >
-              {editingProfile ? (
-                <>
-                  <h2 id="dashboard-panel-heading" ref={panelHeading} tabIndex={-1} className="mb-6 text-xl font-bold text-off-white focus:outline-none">
-                    Edit your badge{profiles.length > 1 ? `: ${editingProfile.name}` : ''}
-                  </h2>
-                  <ProfileEditorPanel
-                    key={editingProfile.id}
-                    profile={editingProfile}
-                    onPreviewChange={handlePreviewChange}
-                    onDone={closeAfterProfileSave}
-                    onCancel={close}
-                  />
-                </>
-              ) : panel?.type === 'propose' ? (
-                <>
-                  <h2 id="dashboard-panel-heading" ref={panelHeading} tabIndex={-1} className="mb-2 text-xl font-bold text-off-white focus:outline-none">Propose a talk</h2>
-                  <p className="mb-8 text-sm text-white/60 leading-relaxed">
-                    We&rsquo;ll email you a copy, and you can follow it in your agenda. Not ready to send it? Save it for later.
-                  </p>
-                  <ProposalForm
-                    // A different saved talk's Propose starts a fresh form.
-                    key={`${panel.savedTalkId ?? 'new'}:${panelOpenedAt}`}
-                    profiles={profiles}
-                    openDevfest={openDevfest}
-                    savedTalks={savedTalks}
-                    initialSavedTalkId={panel.savedTalkId}
-                    onClose={close}
-                  />
-                </>
-              ) : editingProposal ? (
-                <>
-                  <h2 id="dashboard-panel-heading" ref={panelHeading} tabIndex={-1} className="mb-2 text-xl font-bold text-off-white focus:outline-none">
-                    {editingProposal.editable.isAccepted ? 'Edit your talk' : 'Edit your proposal'}
-                  </h2>
-                  <p className="mb-8 text-sm text-white/60 leading-relaxed">
-                    {editingProposal.editable.isAccepted
-                      ? 'Changes show on the event page straight away, until the event. Our organisers will see that it was edited.'
-                      : <>You can change it until our organisers make a decision. They&rsquo;ll see that it was edited.</>}
-                  </p>
-                  <ProposalForm
-                    key={`edit:${editingProposal.id}:${panelOpenedAt}`}
-                    profiles={profiles}
-                    openDevfest={openDevfest}
-                    savedTalks={savedTalks}
-                    initialSavedTalkId={null}
-                    editing={{ proposalId: editingProposal.id, proposal: editingProposal.editable }}
-                    onClose={close}
-                  />
-                </>
-              ) : null}
-            </section>
-          </AnimatedPanel>
+          <AgendaStage
+            items={agenda.items}
+            nextId={agenda.nextId}
+            todayIso={agenda.todayIso}
+            panel={
+              panel ? (
+                <section
+                  ref={panelContainer}
+                  aria-labelledby="dashboard-panel-heading"
+                  className="scroll-mt-28 scroll-mb-6 rounded-[28px] bg-surface p-6 sm:p-9 ring-1 ring-white/[0.06]"
+                >
+                  {editingProfile ? (
+                    <>
+                      <h2 id="dashboard-panel-heading" ref={panelHeading} tabIndex={-1} className="mb-6 text-xl font-bold text-off-white focus:outline-none">
+                        Edit your badge{profiles.length > 1 ? `: ${editingProfile.name}` : ''}
+                      </h2>
+                      <ProfileEditorPanel
+                        key={editingProfile.id}
+                        profile={editingProfile}
+                        onPreviewChange={handlePreviewChange}
+                        onDone={closeAfterProfileSave}
+                        onCancel={close}
+                      />
+                    </>
+                  ) : panel?.type === 'propose' ? (
+                    <>
+                      <h2 id="dashboard-panel-heading" ref={panelHeading} tabIndex={-1} className="mb-2 text-xl font-bold text-off-white focus:outline-none">Propose a talk</h2>
+                      <p className="mb-8 text-sm text-white/60 leading-relaxed">
+                        We&rsquo;ll email you a copy, and you can follow it in your agenda. Not ready to send it? Save it for later.
+                      </p>
+                      <ProposalForm
+                        // A different saved talk's Propose starts a fresh form.
+                        key={`${panel.savedTalkId ?? 'new'}:${panelOpenedAt}`}
+                        profiles={profiles}
+                        openDevfest={openDevfest}
+                        savedTalks={savedTalks}
+                        initialSavedTalkId={panel.savedTalkId}
+                        onClose={close}
+                      />
+                    </>
+                  ) : editingProposal ? (
+                    <>
+                      <h2 id="dashboard-panel-heading" ref={panelHeading} tabIndex={-1} className="mb-2 text-xl font-bold text-off-white focus:outline-none">
+                        {editingProposal.editable.isAccepted ? 'Edit your talk' : 'Edit your proposal'}
+                      </h2>
+                      <p className="mb-8 text-sm text-white/60 leading-relaxed">
+                        {editingProposal.editable.isAccepted
+                          ? 'Changes show on the event page straight away, until the event. Our organisers will see that it was edited.'
+                          : <>You can change it until our organisers make a decision. They&rsquo;ll see that it was edited.</>}
+                      </p>
+                      <ProposalForm
+                        key={`edit:${editingProposal.id}:${panelOpenedAt}`}
+                        profiles={profiles}
+                        openDevfest={openDevfest}
+                        savedTalks={savedTalks}
+                        initialSavedTalkId={null}
+                        editing={{ proposalId: editingProposal.id, proposal: editingProposal.editable }}
+                        onClose={close}
+                      />
+                    </>
+                  ) : null}
+                </section>
+              ) : null
+            }
+          />
 
           <div className="mt-10 space-y-14">{children}</div>
         </div>
