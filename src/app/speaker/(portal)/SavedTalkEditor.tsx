@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, useTransition, type FormEvent
 import FormattingHelp from '@/components/FormattingHelp';
 import { useRouter } from 'next/navigation';
 import Alert from '@/components/Alert';
-import { hintClass, inputNormal, labelClass } from '@/lib/formStyles';
+import { errorClass, hintClass, inputError, inputNormal, labelClass } from '@/lib/formStyles';
 import { findSavedTalkError, SAVED_TALK_LIMITS, type SavedTalkFields } from '@/lib/portalLabels';
 import { deleteSavedTalk, saveTalkForLater } from './actions';
 import { dangerButton, dangerOutlineButton, primaryButton, secondaryButton } from './portalStyles';
@@ -15,8 +15,9 @@ interface SavedTalkEditorProps {
   initialFields: SavedTalkFields;
   // Where it has been proposed, to explain that those proposals won't change.
   proposedCount: number;
-  // Called after a save or a delete, once the dashboard has been asked to refresh.
-  onDone: () => void;
+  // Called after a save or a delete, once the dashboard has been asked to refresh, with what
+  // happened, for the section to say.
+  onDone: (outcome: 'saved' | 'deleted') => void;
   onCancel: () => void;
 }
 
@@ -27,6 +28,7 @@ export default function SavedTalkEditor({ savedTalkId, initialFields, proposedCo
   const [fields, setFields] = useState<SavedTalkFields>(initialFields);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [titleError, setTitleError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
   const titleInput = useRef<HTMLInputElement>(null);
@@ -39,10 +41,17 @@ export default function SavedTalkEditor({ savedTalkId, initialFields, proposedCo
 
   function update(key: keyof SavedTalkFields, value: string) {
     setFields((previous) => ({ ...previous, [key]: value }));
+    if (key === 'talkTitle') setTitleError(null);
   }
 
   function handleSave(event: FormEvent) {
     event.preventDefault();
+    setAlertMessage(null);
+    if (!fields.talkTitle.trim()) {
+      setTitleError('Give the talk a title to save it.');
+      titleInput.current?.focus();
+      return;
+    }
     const problem = findSavedTalkError(fields);
     if (problem) {
       setAlertMessage(problem);
@@ -53,13 +62,14 @@ export default function SavedTalkEditor({ savedTalkId, initialFields, proposedCo
       if ('error' in result) setAlertMessage(result.error);
       else {
         router.refresh();
-        onDone();
+        onDone('saved');
       }
     });
   }
 
   function handleDelete() {
     if (!savedTalkId) return;
+    setAlertMessage(null);
     startTransition(async () => {
       const result = await deleteSavedTalk(savedTalkId);
       if (result.error) {
@@ -67,7 +77,7 @@ export default function SavedTalkEditor({ savedTalkId, initialFields, proposedCo
         setIsConfirmingDelete(false);
       } else {
         router.refresh();
-        onDone();
+        onDone('deleted');
       }
     });
   }
@@ -79,7 +89,18 @@ export default function SavedTalkEditor({ savedTalkId, initialFields, proposedCo
           <label htmlFor="saved-title" className={labelClass}>
             Title <span className="text-google-red-light" aria-hidden="true">*</span>
           </label>
-          <input ref={titleInput} id="saved-title" value={fields.talkTitle} required maxLength={SAVED_TALK_LIMITS.talkTitle} onChange={(event) => update('talkTitle', event.target.value)} className={inputNormal} />
+          <input
+            ref={titleInput}
+            id="saved-title"
+            value={fields.talkTitle}
+            required
+            maxLength={SAVED_TALK_LIMITS.talkTitle}
+            aria-invalid={titleError ? true : undefined}
+            aria-describedby={titleError ? 'saved-title-error' : undefined}
+            onChange={(event) => update('talkTitle', event.target.value)}
+            className={titleError ? inputError : inputNormal}
+          />
+          {titleError && <p id="saved-title-error" className={errorClass}>{titleError}</p>}
         </div>
         <div>
           <label htmlFor="saved-abstract" className={labelClass}>Abstract</label>

@@ -22,6 +22,8 @@ type OpenForm = null | 'new' | string;
 export default function SavedTalksSection({ savedTalks }: { savedTalks: SavedTalkRow[] }) {
   const panels = useDashboardPanels();
   const [openForm, setOpenForm] = useState<OpenForm>(null);
+  // What the last save or delete did, said under the heading until a form opens again.
+  const [outcomeMessage, setOutcomeMessage] = useState<string | null>(null);
   const formContainer = useRef<HTMLDivElement>(null);
   // Where focus goes back to when the form closes: the button that opened it.
   const returnFocusTo = useRef<string | null>(null);
@@ -35,6 +37,7 @@ export default function SavedTalksSection({ savedTalks }: { savedTalks: SavedTal
 
   function open(form: Exclude<OpenForm, null>, openerId: string) {
     returnFocusTo.current = openerId;
+    setOutcomeMessage(null);
     setOpenForm(form);
   }
 
@@ -50,13 +53,16 @@ export default function SavedTalksSection({ savedTalks }: { savedTalks: SavedTal
 
   function editorFor(row: SavedTalkRow | null) {
     return (
-      <div ref={formContainer} className="scroll-mt-28 scroll-mb-6 rounded-3xl bg-white/[0.05] p-6 sm:p-8 animate-page-in">
+      <div ref={formContainer} className="scroll-mt-28 scroll-mb-6 rounded-3xl bg-surface p-6 sm:p-8 animate-page-in">
         <h3 className="mb-5 font-bold text-off-white">{row ? 'Edit talk' : 'New talk'}</h3>
         <SavedTalkEditor
           savedTalkId={row?.id ?? null}
           initialFields={row ? { talkTitle: row.talkTitle, abstract: row.abstract, audience: row.audience } : { talkTitle: '', abstract: '', audience: '' }}
           proposedCount={row?.proposedTo.length ?? 0}
-          onDone={close}
+          onDone={(outcome) => {
+            setOutcomeMessage(outcome === 'saved' ? 'Talk saved. Nothing has been sent.' : 'Talk deleted.');
+            close();
+          }}
           onCancel={close}
         />
       </div>
@@ -81,6 +87,7 @@ export default function SavedTalksSection({ savedTalks }: { savedTalks: SavedTal
         )}
       </div>
       <p className="mt-2 text-sm text-white/60">Only you can see these until you propose them.</p>
+      {outcomeMessage && <p role="status" className="mt-2 text-sm text-google-green">{outcomeMessage}</p>}
 
       {openForm === 'new' && <div className="mt-5">{editorFor(null)}</div>}
 
