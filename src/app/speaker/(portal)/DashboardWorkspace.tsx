@@ -6,11 +6,11 @@ import type { PortalEditableProposal } from '@/lib/portalData';
 import type { SavedTalkFields } from '@/lib/portalLabels';
 import ProfileEditorPanel, { type EditableProfile } from './ProfileEditorPanel';
 import ProposalForm from './ProposalForm';
-import Image from 'next/image';
 import SpeakerCard, { type SpeakerCardProfile } from '@/components/SpeakerCard';
-import { getInitials } from '@/lib/format';
 import { revealPanel } from './revealPanel';
-import { pageHeading, primaryButton, secondaryButton } from './portalStyles';
+import AnimatedPanel from './AnimatedPanel';
+import BadgeLanyard from './BadgeLanyard';
+import { primaryButton, secondaryButton } from './portalStyles';
 
 // The dashboard is one page: editing a profile, proposing a talk and editing a proposal open in a panel at the top
 // of the right-hand column rather than on pages of their own, so nothing else moves away. One
@@ -45,7 +45,6 @@ export function useDashboardPanels(): DashboardPanels {
 }
 
 interface DashboardWorkspaceProps {
-  greeting: string;
   profiles: EditableProfile[];
   // The current DevFest, when its Call for Speakers is open.
   openDevfest: { name: string; closesAt: string | null } | null;
@@ -73,7 +72,6 @@ function isValidPanel(panel: Panel, profiles: EditableProfile[]): boolean {
 }
 
 export default function DashboardWorkspace({
-  greeting,
   profiles,
   openDevfest,
   savedTalks,
@@ -149,7 +147,9 @@ export default function DashboardWorkspace({
         ? `edit-profile-${panel.profileId}`
         : panel?.type === 'edit-proposal'
           ? `edit-proposal-${panel.proposal.id}`
-          : 'propose-button';
+          : window.matchMedia('(min-width: 1024px)').matches
+            ? 'propose-button-wide'
+            : 'propose-button';
     setPanel(null);
     setPreview(null);
     // Drop ?edit= or ?propose so a reload doesn't reopen the panel.
@@ -162,105 +162,113 @@ export default function DashboardWorkspace({
   const editingProfile = panel?.type === 'profile' ? profiles.find((profile) => profile.id === panel.profileId) ?? null : null;
   const editingProposal = panel?.type === 'edit-proposal' ? panel.proposal : null;
 
+  const isSingleProfile = profiles.length === 1;
+  // Two placements of one action: under the badge on a phone, beside "Your agenda" on a wide
+  // screen, where the badge would push it below the first screen.
+  function proposeButton(placement: 'badge' | 'agenda') {
+    const id = placement === 'badge' ? 'propose-button' : 'propose-button-wide';
+    return (
+      <button
+        id={id}
+        type="button"
+        onClick={() => open({ type: 'propose', savedTalkId: null }, id)}
+        aria-label="Propose a talk"
+        className={`${primaryButton} ${placement === 'badge' ? 'lg:hidden' : 'max-lg:hidden'}`}
+      >
+        Propose a talk
+      </button>
+    );
+  }
+
   return (
     <DashboardPanelsContext.Provider value={panels}>
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-10 sm:mb-12">
-        <h1 className={pageHeading}>{greeting}</h1>
-        <button
-          id="propose-button"
-          type="button"
-          onClick={() => open({ type: 'propose', savedTalkId: null }, 'propose-button')}
-          aria-label="Propose a talk"
-          className={`${primaryButton} self-start sm:self-auto`}
-        >
-          Propose a talk
-        </button>
-      </div>
-
       {actionStrip}
 
-      <div className="grid gap-12 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-16">
-        <aside aria-label="Your speaker profile" className="lg:sticky lg:top-28 lg:self-start">
+      <div className="grid gap-8 sm:gap-12 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)] lg:gap-20">
+        {/* Sticky only when the window is tall enough to show the whole badge and its buttons. */}
+        <aside aria-label="Your speaker badge" className="lg:self-start [@media(min-width:1024px)_and_(min-height:820px)]:sticky [@media(min-width:1024px)_and_(min-height:820px)]:top-24">
           {profiles.length === 0 ? (
-            <div className="rounded-3xl bg-surface p-6">
-              <h2 className="text-xl font-bold">Your profile comes with your first talk</h2>
-              <p className="mt-3 text-white/70 leading-relaxed">
-                We set up your speaker profile when a talk of yours is accepted, and you can edit it here from then on.
-              </p>
-              <p className="mt-3 text-sm text-white/60 leading-relaxed">
-                Spoken for us before under another address? Sign in with that one, or write to{' '}
-                <a href="mailto:hello@gdgsydney.com" className="text-google-blue-light underline hover:no-underline">hello@gdgsydney.com</a>.
-              </p>
+            <div className="mx-auto w-full max-w-[320px]">
+              <BadgeLanyard entrance="arrive" canTilt={false}>
+                <div className="rounded-[28px] border border-dashed border-white/35 bg-surface px-6 pt-10 pb-7 text-center">
+                  <div aria-hidden="true" className="mx-auto aspect-square w-[52%] max-w-44 rounded-[22px] bg-white/[0.05]" />
+                  <p className="mt-5 text-xl font-bold text-balance">Your badge comes with your first talk</p>
+                  <p className="mt-2 text-sm text-white/70 leading-relaxed">
+                    We set up your speaker badge when a talk of yours is accepted, and you can edit it here from then on.
+                  </p>
+                  <p className="mt-4 text-sm text-white/60 leading-relaxed">
+                    Spoken for us before under another address? Sign in with that one, or write to{' '}
+                    <a href="mailto:hello@gdgsydney.com" className="text-google-blue-light underline underline-offset-2 hover:no-underline">hello@gdgsydney.com</a>.
+                  </p>
+                </div>
+              </BadgeLanyard>
             </div>
           ) : (
-            <div className="space-y-10">
+            <div className="space-y-12">
               {profiles.length > 1 && (
-                <p className="text-sm text-white/65 leading-relaxed">
-                  {profiles.length} speakers share this email address, so you can edit each of their profiles.
+                <p className="text-center text-sm text-white/65 leading-relaxed">
+                  {profiles.length} speakers share this email address, so you can edit each of their badges.
                 </p>
               )}
-              {profiles.map((profile) => {
+              {profiles.map((profile, index) => {
                 const isEditing = editingProfile?.id === profile.id;
                 const shown = isEditing && preview ? preview.profile : profile;
                 const missing = listInWords([!shown.photoUrl && 'a photo', !shown.tagline && 'a tagline', !shown.bio && 'a bio']);
+                const editButton = !isEditing && (
+                  <button
+                    id={`edit-profile-${profile.id}`}
+                    type="button"
+                    onClick={() => open({ type: 'profile', profileId: profile.id }, `edit-profile-${profile.id}`)}
+                    aria-label={`Edit the speaker badge for ${profile.name}`}
+                    className={`${secondaryButton} text-base px-6 py-2.5`}
+                  >
+                    Edit badge
+                  </button>
+                );
                 return (
-                  <div key={profile.id}>
-                    {/* On a phone the full card would fill the first screen before any talk or
-                        proposal, so it shows as one row there, and in full only while editing. */}
-                    {!isEditing && (
-                      <div className="flex items-center gap-4 lg:hidden">
-                        {shown.photoUrl ? (
-                          <Image src={shown.photoUrl} alt="" width={56} height={56} className="w-14 h-14 rounded-2xl object-cover shrink-0" />
-                        ) : (
-                          <span aria-hidden="true" className="w-14 h-14 rounded-2xl bg-surface flex items-center justify-center text-lg font-bold text-white/50 shrink-0">
-                            {getInitials(shown.name)}
-                          </span>
-                        )}
-                        <div className="min-w-0">
-                          <p className="font-bold leading-snug truncate">{shown.name}</p>
-                          <p className="text-sm text-white/60 leading-snug truncate">{shown.tagline || 'No tagline yet'}</p>
-                        </div>
-                      </div>
-                    )}
-                    <div className={isEditing ? '' : 'hidden lg:block'}>
-                      <SpeakerCard profile={shown} showFullBio={isEditing} isPhotoLoading={isEditing && preview?.isPhotoBusy} />
+                  <div key={profile.id} className="mx-auto w-full max-w-[320px]">
+                    <BadgeLanyard entrance={index === 0 ? 'swing' : 'arrive'} strapClassName="h-10 sm:h-20">
+                      <SpeakerCard profile={shown} showFullBio={isEditing} isPhotoLoading={isEditing && preview?.isPhotoBusy} compactOnPhone={!isEditing} />
+                    </BadgeLanyard>
+                    <div className="mt-5 text-center text-sm leading-relaxed" aria-live="polite">
+                      {isEditing && <p className="text-white/60">Preview: your badge changes as you type.</p>}
+                      {missing && <p className="text-google-yellow">Add {missing} to finish it.</p>}
+                      {savedProfileId === profile.id && !isEditing && (
+                        <p className="text-google-green">Badge saved. It&rsquo;s live on our event pages now.</p>
+                      )}
                     </div>
-                    <p className={`mt-4 text-sm text-white/60 leading-relaxed ${isEditing || missing ? '' : 'hidden lg:block'}`}>
-                      {isEditing ? 'Preview: this changes as you type.' : <span className="hidden lg:inline">This is how you appear next to your talks on our event pages.</span>}
-                      {missing && <span className="block lg:mt-1 text-google-yellow">Add {missing} to finish it.</span>}
-                    </p>
-                    {savedProfileId === profile.id && !isEditing && (
-                      <p role="status" className="mt-2 text-sm text-google-green">Profile saved. It&rsquo;s live on our event pages now.</p>
-                    )}
-                    {!isEditing && (
-                      <button
-                        id={`edit-profile-${profile.id}`}
-                        type="button"
-                        onClick={() => open({ type: 'profile', profileId: profile.id }, `edit-profile-${profile.id}`)}
-                        aria-label={`Edit the speaker profile for ${profile.name}`}
-                        className={`${secondaryButton} mt-4`}
-                      >
-                        Edit profile
-                      </button>
+                    {isSingleProfile ? (
+                      <div className="mt-6 flex flex-wrap justify-center gap-3">
+                        {editButton}
+                        {proposeButton('badge')}
+                      </div>
+                    ) : (
+                      editButton && <div className="mt-5 flex justify-center">{editButton}</div>
                     )}
                   </div>
                 );
               })}
             </div>
           )}
+          {!isSingleProfile && <div className="mt-8 flex justify-center lg:hidden">{proposeButton('badge')}</div>}
         </aside>
 
-        <div className="space-y-14 min-w-0">
-          {panel && (
+        <div className="min-w-0">
+          <div className="flex items-center justify-between gap-6">
+            <h1 className="text-[clamp(1.75rem,4vw,2.25rem)] font-bold leading-tight tracking-[-0.01em] text-off-white">Your agenda</h1>
+            {proposeButton('agenda')}
+          </div>
+
+          <AnimatedPanel isOpen={panel !== null}>
             <section
               ref={panelContainer}
               aria-labelledby="dashboard-panel-heading"
-              className="scroll-mt-28 scroll-mb-6 rounded-3xl bg-surface p-6 sm:p-8 animate-page-in"
+              className="mt-8 scroll-mt-28 scroll-mb-6 rounded-3xl bg-surface p-6 sm:p-8"
             >
               {editingProfile ? (
                 <>
                   <h2 id="dashboard-panel-heading" ref={panelHeading} tabIndex={-1} className="mb-6 text-xl font-bold text-off-white focus:outline-none">
-                    Edit profile{profiles.length > 1 ? `: ${editingProfile.name}` : ''}
+                    Edit your badge{profiles.length > 1 ? `: ${editingProfile.name}` : ''}
                   </h2>
                   <ProfileEditorPanel
                     key={editingProfile.id}
@@ -270,11 +278,11 @@ export default function DashboardWorkspace({
                     onCancel={close}
                   />
                 </>
-              ) : panel.type === 'propose' ? (
+              ) : panel?.type === 'propose' ? (
                 <>
                   <h2 id="dashboard-panel-heading" ref={panelHeading} tabIndex={-1} className="mb-2 text-xl font-bold text-off-white focus:outline-none">Propose a talk</h2>
                   <p className="mb-8 text-sm text-white/60 leading-relaxed">
-                    We&rsquo;ll email you a copy, and you can follow it below. Not ready to send it? Save it for later.
+                    We&rsquo;ll email you a copy, and you can follow it in your agenda. Not ready to send it? Save it for later.
                   </p>
                   <ProposalForm
                     // A different saved talk's Propose starts a fresh form.
@@ -308,8 +316,9 @@ export default function DashboardWorkspace({
                 </>
               ) : null}
             </section>
-          )}
-          {children}
+          </AnimatedPanel>
+
+          <div className="mt-10 space-y-14">{children}</div>
         </div>
       </div>
     </DashboardPanelsContext.Provider>

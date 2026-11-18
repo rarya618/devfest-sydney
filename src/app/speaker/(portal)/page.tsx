@@ -15,7 +15,7 @@ import PortalShell from './PortalShell';
 import SavedTalksSection, { type SavedTalkRow } from './SavedTalksSection';
 import DashboardWorkspace from './DashboardWorkspace';
 import EditProposalButton from './EditProposalButton';
-import { pageHeading, sectionHeading } from './portalStyles';
+import { agendaDate, agendaDateLabel, agendaHeading, agendaRow, pageHeading } from './portalStyles';
 
 export const dynamic = 'force-dynamic';
 // The layout's title template doesn't reach a page in its own segment.
@@ -34,6 +34,9 @@ function formatDeadline(iso: string): string {
 function isStillAhead(iso: string | null): iso is string {
   return iso !== null && Date.parse(iso) > Date.now();
 }
+
+const confirmButtonClass =
+  'press inline-flex self-start sm:self-auto shrink-0 px-5 py-2 rounded-full bg-google-green-deep text-white text-sm font-bold hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue focus-visible:ring-offset-2 focus-visible:ring-offset-black-02';
 
 const chipClass = 'inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-2.5 py-1 font-mono text-xs leading-none text-white/70';
 
@@ -60,7 +63,7 @@ function ActionNeeded({ proposals }: { proposals: PortalProposal[] }) {
   const waiting = proposals.filter((proposal) => proposal.confirmUrl);
   if (waiting.length === 0) return null;
   return (
-    <section aria-labelledby="action-needed-heading" className="mb-12 rounded-3xl border border-google-green/30 bg-google-green/10 px-5 py-5 sm:px-7 sm:py-6">
+    <section aria-labelledby="action-needed-heading" className="row-in mb-10 rounded-3xl border border-google-green/30 bg-google-green/10 px-5 py-5 sm:px-7 sm:py-6">
       <h2 id="action-needed-heading" className="text-lg font-bold text-off-white">
         {waiting.length === 1 ? 'You’re in. Confirm your spot.' : 'You’re in. Confirm your spots.'}
       </h2>
@@ -79,7 +82,7 @@ function ActionNeeded({ proposals }: { proposals: PortalProposal[] }) {
             <a
               href={proposal.confirmUrl!}
               aria-label={`Confirm you will give ${proposal.talkTitle}`}
-              className="inline-flex self-start sm:self-auto shrink-0 px-5 py-2 rounded-full bg-google-green-deep text-white text-sm font-bold transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue focus-visible:ring-offset-2 focus-visible:ring-offset-black-02"
+              className={confirmButtonClass}
             >
               Confirm your spot
             </a>
@@ -101,11 +104,14 @@ function TalkSchedule({ headingId, title, talks, isPast }: { headingId: string; 
   const showSpeaker = new Set(talks.map((talk) => talk.speakerName)).size > 1;
   return (
     <section aria-labelledby={headingId}>
-      <h2 id={headingId} className={sectionHeading}>{title}</h2>
+      <h2 id={headingId} className={agendaHeading}>{title}</h2>
       <ul className="mt-4">
-        {talks.map((talk) => (
-          <li key={`${talk.talkId}:${talk.speakerName}`} className="grid grid-cols-[6.5rem_minmax(0,1fr)] sm:grid-cols-[8rem_minmax(0,1fr)] gap-4 py-4 border-t border-white/10">
-            <p className={`font-mono text-sm pt-0.5 ${isPast ? 'text-white/50' : 'text-google-green'}`}>{formatDay(talk.startAt, talk.timeZone)}</p>
+        {talks.map((talk, index) => (
+          <li key={`${talk.talkId}:${talk.speakerName}`} style={{ '--row-index': index } as React.CSSProperties} className={agendaRow}>
+            <p className="pt-0.5">
+              <span className={agendaDateLabel}>{isPast ? 'Gave it' : 'On stage'}</span>
+              <span className={`${agendaDate} ${isPast ? 'text-white/60' : 'text-google-green'}`}>{formatDay(talk.startAt, talk.timeZone)}</span>
+            </p>
             <div className="min-w-0">
               <p className={`font-bold leading-snug ${isPast ? 'text-white/75' : 'text-off-white'}`}>{talk.talkTitle}</p>
               <p className="mt-1 text-sm text-white/60">{talk.eventName}</p>
@@ -178,11 +184,23 @@ function ProposalProgress({ proposal }: { proposal: PortalProposal }) {
   );
 }
 
+// The date that matters for a proposal, and the colour of where it's up to: green once it's in,
+// yellow while it's being read, quiet once it's over.
+function proposalDate(proposal: PortalProposal): { label: string; date: string; colour: string } {
+  const sent = proposal.submittedAt ? formatDeadline(proposal.submittedAt) : 'Date unknown';
+  if (proposal.status === 'accepted' && isStillAhead(proposal.confirmBy)) {
+    return { label: 'Confirm by', date: formatDeadline(proposal.confirmBy), colour: 'text-google-green' };
+  }
+  if (proposal.status === 'accepted' || proposal.status === 'confirmed') return { label: 'Sent', date: sent, colour: 'text-google-green' };
+  if (proposal.status === 'under-review') return { label: 'Sent', date: sent, colour: 'text-google-yellow' };
+  return { label: 'Sent', date: sent, colour: 'text-white/60' };
+}
+
 function Proposals({ proposals }: { proposals: PortalProposal[] }) {
   if (proposals.length === 0) {
     return (
       <section aria-labelledby="proposals-heading">
-        <h2 id="proposals-heading" className={sectionHeading}>Proposals</h2>
+        <h2 id="proposals-heading" className={agendaHeading}>Proposals</h2>
         <p className="mt-4 py-5 border-t border-white/10 text-white/60">
           Nothing proposed yet. Each talk you propose shows here, with where it&rsquo;s up to, from sent to confirmed.
         </p>
@@ -191,36 +209,41 @@ function Proposals({ proposals }: { proposals: PortalProposal[] }) {
   }
   return (
     <section aria-labelledby="proposals-heading">
-      <h2 id="proposals-heading" className={sectionHeading}>Proposals</h2>
+      <h2 id="proposals-heading" className={agendaHeading}>Proposals</h2>
       <ul className="mt-4">
-        {proposals.map((proposal) => (
-          <li key={proposal.id} className="py-5 border-t border-white/10">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        {proposals.map((proposal, index) => {
+          const keyDate = proposalDate(proposal);
+          return (
+            <li key={proposal.id} style={{ '--row-index': index } as React.CSSProperties} className={agendaRow}>
+              <p className="pt-0.5">
+                <span className={agendaDateLabel}>{keyDate.label}</span>
+                <span className={`${agendaDate} ${keyDate.colour}`}>{keyDate.date}</span>
+              </p>
               <div className="min-w-0">
-                <p className="font-bold leading-snug">{proposal.talkTitle}</p>
-                <p className="mt-1 text-sm text-white/60">
-                  {proposal.eventName ?? (proposal.kind === 'meetup' ? 'A GDG Sydney meetup' : 'DevFest Sydney')}
-                  {proposal.submittedAt && <>, sent <span className="font-mono">{formatDay(proposal.submittedAt, 'Australia/Sydney')}</span></>}
-                </p>
-                <EventChips isDevfest={proposal.kind === 'devfest'} track={proposal.track} />
-              </div>
-              {proposal.confirmUrl && (
-                <div className="flex flex-col sm:items-end gap-1.5 shrink-0">
-                  <a href={proposal.confirmUrl} aria-label={`Confirm you will give ${proposal.talkTitle}`} className="inline-flex self-start sm:self-auto px-5 py-2 rounded-full bg-google-green-deep text-white text-sm font-bold transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue focus-visible:ring-offset-2 focus-visible:ring-offset-black-02">
-                    Confirm your spot
-                  </a>
-                  {isStillAhead(proposal.confirmBy) && (
-                    <p className="text-xs text-white/60">by <span className="font-mono">{formatDeadline(proposal.confirmBy)}</span></p>
-                  )}
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-bold leading-snug">{proposal.talkTitle}</p>
+                    <p className="mt-1 text-sm text-white/60">
+                      {proposal.eventName ?? (proposal.kind === 'meetup' ? 'A GDG Sydney meetup' : 'DevFest Sydney')}
+                    </p>
+                    <EventChips isDevfest={proposal.kind === 'devfest'} track={proposal.track} />
+                  </div>
+                  <div className="flex flex-wrap gap-2 shrink-0">
+                    {proposal.confirmUrl && (
+                      <a href={proposal.confirmUrl} aria-label={`Confirm you will give ${proposal.talkTitle}`} className={confirmButtonClass}>
+                        Confirm your spot
+                      </a>
+                    )}
+                    {proposal.editable && <EditProposalButton proposalId={proposal.id} talkTitle={proposal.talkTitle} />}
+                  </div>
                 </div>
-              )}
-              {proposal.editable && <EditProposalButton proposalId={proposal.id} talkTitle={proposal.talkTitle} />}
-            </div>
-            <div className="mt-4">
-              <ProposalProgress proposal={proposal} />
-            </div>
-          </li>
-        ))}
+                <div className="mt-4">
+                  <ProposalProgress proposal={proposal} />
+                </div>
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );
@@ -262,7 +285,6 @@ export default async function PortalHomePage({ searchParams }: PortalHomePagePro
     console.error('Portal overview failed for', session.email, error);
   }
 
-  const firstName = overview?.profiles[0]?.name.trim().split(/\s+/)[0];
   // Every talk of every profile on this address, once per presenter.
   const allTalks: TalkWithSpeaker[] = (overview?.profiles ?? []).flatMap((profile) =>
     profile.talks.map((talk) => ({ ...talk, speakerName: profile.name }))
@@ -281,7 +303,6 @@ export default async function PortalHomePage({ searchParams }: PortalHomePagePro
         </>
       ) : (
         <DashboardWorkspace
-          greeting={firstName ? `Hi, ${firstName}.` : 'Welcome.'}
           openDevfest={devfest && isFlowOpen(devfest, 'cfs') ? { name: devfest.name, closesAt: devfest.cfs.closesAt } : null}
           savedTalks={savedTalks.map(({ id, talkTitle, abstract, audience }) => ({ id, talkTitle, abstract, audience }))}
           editableProposals={overview.proposals.flatMap((proposal) =>
@@ -302,14 +323,20 @@ export default async function PortalHomePage({ searchParams }: PortalHomePagePro
             websiteUrl: profile.websiteUrl,
           }))}
         >
-            {allTalks.length === 0 && overview.profiles.length > 0 && (
-              <section aria-labelledby="talks-empty">
-                <h2 id="talks-empty" className={sectionHeading}>Talks</h2>
-                <p className="mt-4 py-5 border-t border-white/10 text-white/60">No talks on the schedule yet.</p>
+            {/* Nothing ahead at all: one line, not two empty sections in front of what exists. */}
+            {upcomingTalks.length === 0 && overview.proposals.length === 0 ? (
+              <section aria-labelledby="agenda-empty">
+                <h2 id="agenda-empty" className={agendaHeading}>Coming up</h2>
+                <p className="mt-4 py-5 border-t border-white/10 text-white/60">
+                  Nothing scheduled or proposed yet. Propose a talk and it shows here, with where it&rsquo;s up to.
+                </p>
               </section>
+            ) : (
+              <>
+                <TalkSchedule headingId="upcoming-talks" title="Coming up" talks={upcomingTalks} isPast={false} />
+                <Proposals proposals={overview.proposals} />
+              </>
             )}
-            <TalkSchedule headingId="upcoming-talks" title="Upcoming talks" talks={upcomingTalks} isPast={false} />
-            <Proposals proposals={overview.proposals} />
             <SavedTalksSection savedTalks={toSavedTalkRows(savedTalks, overview.proposals)} />
             <TalkSchedule headingId="past-talks" title="Past talks" talks={pastTalks} isPast />
         </DashboardWorkspace>

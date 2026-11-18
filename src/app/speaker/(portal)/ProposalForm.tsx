@@ -412,7 +412,7 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
       : []),
   ];
 
-  const bioHint = profile && !isEditing ? 'Filled in from your profile. Changing it here changes only this proposal.' : undefined;
+  const bioHint = profile && !isEditing ? 'Filled in from your badge. Changing it here changes only this proposal.' : undefined;
   const aboutSummary = kind === 'meetup' ? 'your bio and link' : 'your tagline, bio and links';
 
   const aboutYou = (
@@ -432,7 +432,7 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
 
       {!isAboutOpen ? (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-white/15 px-5 py-4">
-          <p className="text-sm text-white/70 leading-relaxed">We&rsquo;ll send {aboutSummary} from your profile with it.</p>
+          <p className="text-sm text-white/70 leading-relaxed">We&rsquo;ll send {aboutSummary} from your badge with it.</p>
           <button type="button" onClick={() => setIsAboutOpen(true)} aria-label={`Change ${aboutSummary} for this proposal`} className={`${secondaryButton} self-start shrink-0`}>
             Change for this proposal
           </button>
@@ -508,7 +508,7 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
 
           {isAcceptedDevfestTalk ? (
             <p className={hintClass}>
-              Your track, format and level are set by our organisers: reply to any of our emails to change them. Your bio, photo and links are on your profile, under Edit profile.
+              Your track, format and level are set by our organisers: reply to any of our emails to change them. Your bio, photo and links are on your badge, under Edit badge.
             </p>
           ) : kind === 'meetup' ? (
             <>
