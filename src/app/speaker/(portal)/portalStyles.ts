@@ -22,5 +22,7 @@ export const pageHeading = 'text-[clamp(2.25rem,6vw,3.5rem)] font-bold leading-[
 
 export const sectionHeading = 'text-xl font-bold text-off-white';
 
+export const subsectionHeading = 'text-base font-bold text-off-white';
+
 export const backLink =
   'inline-flex items-center gap-1.5 text-sm text-white/65 hover:text-off-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-google-blue rounded';
