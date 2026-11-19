@@ -91,7 +91,8 @@ export default function Select<Value extends string>({
     if (!trigger || !list) return;
     const triggerBox = trigger.getBoundingClientRect();
     const viewportHeight = window.innerHeight;
-    const viewportWidth = window.innerWidth;
+    // The visible width, without a vertical scrollbar, so the list lines up with the field.
+    const viewportWidth = document.documentElement.clientWidth;
 
     // Closes once the field has scrolled out of sight, as a native list does, rather than
     // leaving the list floating over unrelated content.
@@ -106,12 +107,17 @@ export default function Select<Value extends string>({
     const opensUpward = spaceBelow < wantedHeight && spaceAbove > spaceBelow;
     const maxHeight = Math.max(Math.min(LIST_MAX_HEIGHT, opensUpward ? spaceAbove : spaceBelow), 120);
 
-    // As wide as the field, so a long label wraps inside it rather than stretching the list
-    // across the page. A small pill picker may grow to LIST_MIN_CAP so its labels stay readable.
-    const maxWidth = Math.min(Math.max(triggerBox.width, LIST_MIN_CAP), viewportWidth - VIEWPORT_MARGIN * 2);
-    const minWidth = Math.min(triggerBox.width, maxWidth);
+    // Never narrower than the field and lined up with it, so a long label wraps inside the
+    // field's width rather than stretching the list across the page. A small pill picker may
+    // grow to LIST_MIN_CAP so its labels stay readable, and only then shifts left if growing
+    // would run it off the screen.
+    const minWidth = triggerBox.width;
+    const maxWidth = Math.max(minWidth, Math.min(LIST_MIN_CAP, viewportWidth - VIEWPORT_MARGIN * 2));
     const listWidth = Math.min(Math.max(list.offsetWidth, minWidth), maxWidth);
-    const left = Math.max(VIEWPORT_MARGIN, Math.min(triggerBox.left, viewportWidth - VIEWPORT_MARGIN - listWidth));
+    const overflowRight = triggerBox.left + listWidth - (viewportWidth - VIEWPORT_MARGIN);
+    const left = listWidth > minWidth && overflowRight > 0
+      ? Math.max(VIEWPORT_MARGIN, triggerBox.left - overflowRight)
+      : triggerBox.left;
 
     setPlacement({
       top: opensUpward ? undefined : triggerBox.bottom + LIST_GAP,
