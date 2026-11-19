@@ -131,7 +131,7 @@ function CrewCard({ member, onError, inPanel = false }: CrewCardProps) {
   return (
     <div
       onClick={handleCardClick}
-      className={`relative cursor-pointer bg-surface border-l-4 ${isOrganiser ? 'border-l-google-blue' : 'border-l-google-green'} rounded-lg p-4 sm:p-5 transition-colors hover:bg-white/[0.07] ${
+      className={`relative cursor-pointer bg-surface rounded-2xl p-4 sm:p-5 transition-colors hover:bg-white/[0.07] ${
         isPending ? 'opacity-50 pointer-events-none' : ''
       }`}
       aria-label={`${isOrganiser ? 'Organiser' : 'Crew member'} ${member.name}`}

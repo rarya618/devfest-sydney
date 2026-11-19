@@ -43,7 +43,7 @@ function SpeakerPreviewDialog({ person, onClose }: { person: PersonWithTalks; on
 
 function PersonCard({ person, onEdit, onPreview }: { person: PersonWithTalks; onEdit: () => void; onPreview: () => void }) {
   return (
-    <div className="bg-surface border-l-4 border-l-google-blue rounded-lg p-5 sm:p-6" aria-label={`Speaker: ${person.name}`}>
+    <div className="bg-surface rounded-2xl p-5 sm:p-6" aria-label={`Speaker: ${person.name}`}>
       <div className="flex items-start gap-4">
         {person.photoUrl ? (
           <Image

@@ -68,7 +68,7 @@ function EventCard({
 
   return (
     <div
-      className={`bg-surface border-l-4 ${event.type === 'devfest' ? 'border-l-google-blue' : 'border-l-google-green'} rounded-lg p-5 sm:p-6 ${
+      className={`bg-surface rounded-2xl p-5 sm:p-6 ${
         isPending ? 'opacity-50 pointer-events-none' : ''
       }`}
       aria-label={`Event: ${event.name}`}

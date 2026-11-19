@@ -1,5 +1,5 @@
 // Shown inside the shell while a dashboard page fetches its data. Mirrors the shape the
-// dashboards share: a sticky title row, a strip of stat tiles, then a stack of cards.
+// busiest dashboards share since issue #9: a title row with its controls, then a table of rows.
 export default function AdminDashboardLoading() {
   return (
     <div aria-busy="true" aria-label="Loading">
@@ -17,23 +17,21 @@ export default function AdminDashboardLoading() {
         </div>
       </div>
 
-      <div className="px-4 md:px-5 space-y-3">
-        {[0, 1, 2, 3, 4, 5].map((index) => (
-          <div key={index} className="bg-surface border-l-4 border-white/10 rounded-lg p-4 sm:p-5">
-            <div className="flex items-start gap-4">
-              <div className="h-4 w-4 rounded bg-white/[0.08] animate-pulse mt-0.5" />
-              <div className="flex-1 min-w-0 space-y-3">
-                <div className="h-5 w-2/3 max-w-md rounded-md bg-white/[0.1] animate-pulse" />
-                <div className="h-3.5 w-1/3 max-w-xs rounded-md bg-white/[0.06] animate-pulse" />
-                <div className="flex gap-2 pt-1">
-                  <div className="h-6 w-20 rounded-full bg-white/[0.06] animate-pulse" />
-                  <div className="h-6 w-16 rounded-full bg-white/[0.06] animate-pulse" />
-                  <div className="h-6 w-24 rounded-full bg-white/[0.06] animate-pulse" />
-                </div>
+      <div className="px-4 md:px-5">
+        <div className="rounded-2xl bg-surface overflow-hidden divide-y divide-white/[0.07]">
+          {[0, 1, 2, 3, 4, 5, 6, 7].map((index) => (
+            <div key={index} className="flex items-center gap-4 px-4 py-3.5">
+              <div className="h-4 w-4 shrink-0 rounded bg-white/[0.08] animate-pulse" />
+              <div className="flex-1 min-w-0 space-y-2">
+                <div className="h-4 w-2/3 max-w-md rounded-md bg-white/[0.1] animate-pulse" />
+                <div className="h-3 w-1/3 max-w-xs rounded-md bg-white/[0.06] animate-pulse" />
               </div>
+              <div className="hidden md:block h-6 w-24 rounded-full bg-white/[0.06] animate-pulse" />
+              <div className="hidden md:block h-3.5 w-28 rounded-md bg-white/[0.06] animate-pulse" />
+              <div className="hidden md:block h-8 w-32 rounded-full bg-white/[0.06] animate-pulse" />
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

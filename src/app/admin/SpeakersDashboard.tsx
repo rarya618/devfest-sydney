@@ -14,7 +14,6 @@ import { formatDate, getInitials } from '@/lib/format';
 import {
   TRACK_LABELS,
   TRACK_CHIP_COLORS,
-  TRACK_BORDER_COLORS,
   TRACK_DOT_COLORS,
   FORMAT_LABELS,
   EXPERIENCE_LABELS,
@@ -266,7 +265,7 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
   return (
     <div
       onClick={handleCardClick}
-      className={`relative cursor-pointer bg-surface border-l-4 ${TRACK_BORDER_COLORS[speaker.track]} rounded-xl px-4 py-4 sm:px-5 transition-colors hover:bg-white/[0.07] ${
+      className={`relative cursor-pointer bg-surface rounded-2xl px-4 py-4 sm:px-5 transition-colors hover:bg-white/[0.07] ${
         isPending ? 'opacity-50 pointer-events-none' : ''
       }`}
       aria-label={`Speaker ${speaker.name}`}
