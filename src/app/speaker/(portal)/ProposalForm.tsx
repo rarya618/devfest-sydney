@@ -11,6 +11,7 @@ import type { PortalEditableProposal, PortalProfile } from '@/lib/portalData';
 import { findSavedTalkError, type SavedTalkFields } from '@/lib/portalLabels';
 import type { MeetupFormat } from '@/lib/types';
 import { saveTalkForLater, submitPortalProposal, updatePortalProposal } from './actions';
+import Select from '@/components/Select';
 
 type ProposalKind = 'meetup' | 'devfest';
 type DevfestTrack = 'developer' | 'builder' | 'workshop';
@@ -420,9 +421,14 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
       {isEditing ? null : profiles.length > 1 ? (
         <div>
           <label htmlFor="proposal-profile" className={labelClass}>Proposing as</label>
-          <select id="proposal-profile" value={profileId} onChange={(event) => chooseProfile(event.target.value)} className={inputNormal}>
-            {profiles.map((candidate) => <option key={candidate.id} value={candidate.id} className="bg-black-02">{candidate.name}</option>)}
-          </select>
+          <Select
+            id="proposal-profile"
+            size="base"
+            value={profileId}
+            onChange={chooseProfile}
+            options={profiles.map((candidate) => ({ value: candidate.id, label: candidate.name }))}
+            className={inputNormal}
+          />
         </div>
       ) : profile ? (
         <p className="text-white/70">Proposing as <span className="font-bold text-white">{profile.name}</span>.</p>
@@ -474,12 +480,17 @@ export default function ProposalForm({ profiles, openDevfest, savedTalks, initia
           {!isEditing && savedTalks.length > 0 && (
             <div>
               <label htmlFor="proposal-saved-talk" className={labelClass}>Start from a saved talk</label>
-              <select id="proposal-saved-talk" value={savedTalkId ?? ''} onChange={(event) => startFromSavedTalk(event.target.value)} className={inputNormal}>
-                <option value="" className="bg-black-02">A new talk</option>
-                {savedTalks.map((savedTalk) => (
-                  <option key={savedTalk.id} value={savedTalk.id} className="bg-black-02">{savedTalk.talkTitle}</option>
-                ))}
-              </select>
+              <Select
+                id="proposal-saved-talk"
+                size="base"
+                value={savedTalkId ?? ''}
+                onChange={startFromSavedTalk}
+                options={[
+                  { value: '', label: 'A new talk' },
+                  ...savedTalks.map((savedTalk) => ({ value: savedTalk.id, label: savedTalk.talkTitle })),
+                ]}
+                className={inputNormal}
+              />
               <p className={hintClass}>Fills in the title, abstract and audience. Changes here are only for this proposal unless you save them.</p>
             </div>
           )}

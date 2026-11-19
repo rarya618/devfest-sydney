@@ -21,6 +21,7 @@ import {
 import type { ReviewerNote, VolunteerArea, VolunteerStatus, VolunteerSubmission } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
 import { useRouter } from 'next/navigation';
+import Select from '@/components/Select';
 
 interface ReviewerNotesPanelProps {
   volunteerId: string;
@@ -547,18 +548,13 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
           </div>
 
           {generalEvents && generalEvents.events.length > 0 && (
-            <select
+            <Select
               value={generalEvents.selectedId}
-              onChange={(changeEvent) => router.push(`/admin/event-volunteers?event=${encodeURIComponent(changeEvent.target.value)}`)}
+              onChange={(eventId) => router.push(`/admin/event-volunteers?event=${encodeURIComponent(eventId)}`)}
+              options={generalEvents.events.map((event) => ({ value: event.id, label: event.name }))}
               aria-label="Choose which general event's volunteers to show"
               className="h-10 rounded-full border border-white/35 bg-white/[0.06] px-4 text-sm font-semibold text-white focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
-            >
-              {generalEvents.events.map((event) => (
-                <option key={event.id} value={event.id} className="bg-surface-raised">
-                  {event.name}
-                </option>
-              ))}
-            </select>
+            />
           )}
 
           <div className="flex flex-wrap items-center gap-2 min-w-0">

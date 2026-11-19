@@ -18,6 +18,7 @@ import {
 } from '@/lib/feedbackLabels';
 import type { FeedbackActivity, FeedbackAspect, FeedbackReturnIntent, FeedbackRole } from '@/lib/types';
 import { errorClass, hintClass, inputError, inputNormal, labelClass, optionButtonClass, submitClass } from '@/lib/formStyles';
+import Select from '@/components/Select';
 
 type SubmitState = 'idle' | 'submitting' | 'success';
 
@@ -397,17 +398,17 @@ export default function FeedbackForm({ sessionOptions, eventName }: Props) {
           {sessionOptions.length > 0 && (
             <div>
               <label htmlFor="feedback-favouriteSessionId" className={labelClass}>Your favourite session</label>
-              <select
+              <Select
                 id="feedback-favouriteSessionId"
+                size="base"
                 value={fields.favouriteSessionId}
-                onChange={(event) => update('favouriteSessionId', event.target.value)}
-                className={`${inputNormal} [&>option]:bg-black-02`}
-              >
-                <option value="">Skip this one</option>
-                {sessionOptions.map((option) => (
-                  <option key={option.id} value={option.id}>{option.label}</option>
-                ))}
-              </select>
+                onChange={(sessionId) => update('favouriteSessionId', sessionId)}
+                options={[
+                  { value: '', label: 'Skip this one' },
+                  ...sessionOptions.map((option) => ({ value: option.id, label: option.label })),
+                ]}
+                className={inputNormal}
+              />
             </div>
           )}
         </section>

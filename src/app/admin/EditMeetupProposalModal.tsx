@@ -6,6 +6,7 @@ import { updateMeetupProposal } from './meetupProposalActions';
 import { MEETUP_FORMATS, MEETUP_FORMAT_LABELS, MEETUP_PROPOSAL_LIMITS } from '@/lib/meetupProposalLabels';
 import type { MeetupFormat, MeetupProposal } from '@/lib/types';
 import FormattingHelp from '@/components/FormattingHelp';
+import Select from '@/components/Select';
 
 // Edits a meetup proposal from /admin/meetups. The same fields a speaker can change from the
 // portal; once accepted, saving updates its talk too (editMeetupProposal). Name and email stay
@@ -145,16 +146,13 @@ export default function EditMeetupProposalModal({ proposal, onClose, onError }: 
 
             <div>
               <label className={labelClasses} htmlFor="edit-meetup-format">Format</label>
-              <select
+              <Select<MeetupFormat>
                 id="edit-meetup-format"
                 className={inputClasses}
                 value={fields.format}
-                onChange={(event) => update('format', event.target.value as MeetupFormat)}
-              >
-                {MEETUP_FORMATS.map((format) => (
-                  <option key={format} value={format} className="bg-surface-raised">{MEETUP_FORMAT_LABELS[format]}</option>
-                ))}
-              </select>
+                onChange={(format) => update('format', format)}
+                options={MEETUP_FORMATS.map((format) => ({ value: format, label: MEETUP_FORMAT_LABELS[format] }))}
+              />
             </div>
 
             {textField('abstract', 'Abstract', { rows: 8, isRequired: true })}

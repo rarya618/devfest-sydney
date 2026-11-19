@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { updateShowcaseEntry, type ShowcaseEditableFields } from './showcaseActions';
 import { SHOWCASE_STAGE_LABELS } from '@/lib/showcaseLabels';
 import type { ShowcaseSubmission } from '@/lib/types';
+import Select from '@/components/Select';
 
 interface Props {
   entry: ShowcaseSubmission;
@@ -167,16 +168,13 @@ export default function EditShowcaseEntryModal({ entry, onClose, onError }: Prop
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className={labelClasses} htmlFor="edit-showcase-stage">Stage</label>
-                <select
+                <Select
                   id="edit-showcase-stage"
                   className={inputClasses}
                   value={fields.stage}
-                  onChange={(e) => update('stage', e.target.value as ShowcaseEditableFields['stage'])}
-                >
-                  {Object.entries(SHOWCASE_STAGE_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
-                </select>
+                  onChange={(value) => update('stage', value as ShowcaseEditableFields['stage'])}
+                  options={Object.entries(SHOWCASE_STAGE_LABELS).map(([value, label]) => ({ value, label }))}
+                />
               </div>
               <div>
                 <label className={labelClasses} htmlFor="edit-showcase-built-with">Built with</label>

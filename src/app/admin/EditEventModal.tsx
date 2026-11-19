@@ -17,6 +17,7 @@ import {
 } from '@/lib/eventLabels';
 import { isoToWallTime } from '@/lib/zonedTime';
 import type { EventFlowKey, EventPrivateLinkKey, EventVenue, GdgEventType } from '@/lib/types';
+import Select from '@/components/Select';
 
 interface Props {
   // Null to create a new event.
@@ -189,16 +190,13 @@ export default function EditEventModal({ summary, onClose, onError }: Props) {
                 </div>
                 <div>
                   <label className={labelClasses} htmlFor="event-type">Kind</label>
-                  <select
+                  <Select<GdgEventType>
                     id="event-type"
                     className={inputClasses}
                     value={fields.type}
-                    onChange={(e) => update('type', e.target.value as GdgEventType)}
-                  >
-                    {EVENT_TYPES.map((eventType) => (
-                      <option key={eventType} value={eventType}>{EVENT_TYPE_LABELS[eventType]}</option>
-                    ))}
-                  </select>
+                    onChange={(eventType) => update('type', eventType)}
+                    options={EVENT_TYPES.map((eventType) => ({ value: eventType, label: EVENT_TYPE_LABELS[eventType] }))}
+                  />
                 </div>
               </div>
               <div>

@@ -6,6 +6,7 @@ import Alert from '@/components/Alert';
 import { EMAIL_PATTERN } from '@/lib/emailPattern';
 import { CREDIT_REQUEST_NAME_LIMIT, CREDIT_REQUEST_NOTE_LIMIT, type CreditWorkshopOption } from '@/lib/creditRequestLabels';
 import { errorClass, hintClass, inputError, inputNormal, labelClass, submitClass } from '@/lib/formStyles';
+import Select from '@/components/Select';
 
 type SubmitState = 'idle' | 'submitting' | 'success';
 
@@ -158,19 +159,19 @@ export default function CreditRequestForm({ workshopOptions }: Props) {
         ) : (
           <div>
             <label htmlFor="credits-workshopSlotId" className={labelClass}>Workshop {required}</label>
-            <select
+            <Select
               id="credits-workshopSlotId"
+              size="base"
               value={fields.workshopSlotId}
               aria-invalid={Boolean(errors.workshopSlotId)}
               aria-describedby={errors.workshopSlotId ? 'credits-workshopSlotId-error' : undefined}
-              onChange={(event) => update('workshopSlotId', event.target.value)}
-              className={`${errors.workshopSlotId ? inputError : inputNormal} [&>option]:bg-black-02`}
-            >
-              <option value="">Pick the workshop you were in</option>
-              {workshopOptions.map((option) => (
-                <option key={option.id} value={option.id}>{option.label}</option>
-              ))}
-            </select>
+              onChange={(workshopSlotId) => update('workshopSlotId', workshopSlotId)}
+              options={[
+                { value: '', label: 'Pick the workshop you were in' },
+                ...workshopOptions.map((option) => ({ value: option.id, label: option.label })),
+              ]}
+              className={errors.workshopSlotId ? inputError : inputNormal}
+            />
             {fieldError('workshopSlotId')}
           </div>
         )}
