@@ -297,6 +297,28 @@ body {
   transition-duration: 0.3s, 0.18s;
 }
 
+/* The dropdown's open list (src/components/Select.tsx) settles 4px toward its field as it
+   fades in: down from above when it opens below the field, up when it opens above. */
+.select-list {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.18) transparent;
+}
+
+.select-list:popover-open {
+  animation: select-list-in 0.18s var(--ease-settle) both;
+}
+
+.select-list[data-placement='above'] {
+  --select-list-shift: 4px;
+}
+
+@keyframes select-list-in {
+  from {
+    opacity: 0;
+    translate: 0 var(--select-list-shift, -4px);
+  }
+}
+
 /* A pressed button gives slightly under the finger. */
 .press {
   transition-property: transform, opacity, border-color, background-color, color;
