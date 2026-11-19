@@ -7,9 +7,13 @@ export const metadata = {
   title: 'Volunteers',
 };
 
-export default async function VolunteersPage() {
-  const eventId = await getAdminDevfestId();
-  const [, volunteers] = await Promise.all([getVerifiedSession(), fetchVolunteerSignups(eventId)]);
+interface Props {
+  searchParams: Promise<{ status?: string }>;
+}
 
-  return <VolunteersDashboard volunteers={volunteers} />;
+export default async function VolunteersPage({ searchParams }: Props) {
+  const eventId = await getAdminDevfestId();
+  const [, volunteers, { status }] = await Promise.all([getVerifiedSession(), fetchVolunteerSignups(eventId), searchParams]);
+
+  return <VolunteersDashboard volunteers={volunteers} initialStatus={status === 'pending' ? 'pending' : undefined} />;
 }

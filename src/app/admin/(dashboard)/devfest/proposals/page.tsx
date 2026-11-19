@@ -5,9 +5,13 @@ import { getAdminDevfestId } from '@/lib/adminEvent';
 
 export const metadata = { title: 'Talk proposals' };
 
-export default async function AdminPage() {
-  const eventId = await getAdminDevfestId();
-  const [, submissions] = await Promise.all([getVerifiedSession(), fetchSubmissions(eventId)]);
+interface Props {
+  searchParams: Promise<{ status?: string }>;
+}
 
-  return <SubmissionsDashboard submissions={submissions} />;
+export default async function AdminPage({ searchParams }: Props) {
+  const eventId = await getAdminDevfestId();
+  const [, submissions, { status }] = await Promise.all([getVerifiedSession(), fetchSubmissions(eventId), searchParams]);
+
+  return <SubmissionsDashboard submissions={submissions} initialStatus={status === 'pending' ? 'pending' : undefined} />;
 }

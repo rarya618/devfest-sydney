@@ -950,6 +950,8 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
 
 interface Props {
   submissions: Submission[];
+  // Opens the list already filtered to what is waiting (`?status=pending`, from Community overview).
+  initialStatus?: 'pending';
 }
 
 type FilterStatus = 'all' | SubmissionStatus;
@@ -1002,11 +1004,11 @@ function groupBySubmitter(list: Submission[]): SubmitterGroup[] {
   return result.sort((a, b) => b.latestAt - a.latestAt);
 }
 
-export default function SubmissionsDashboard({ submissions }: Props) {
+export default function SubmissionsDashboard({ submissions, initialStatus }: Props) {
   const mobileBarHidden = useMobileBarHidden();
   // Table by default (issue #9): one row per proposal, opening a side panel; cards on request.
   const [viewMode, setViewMode] = useState<'cards' | 'list'>('list');
-  const [filter, setFilter] = useState<FilterStatus>('all');
+  const [filter, setFilter] = useState<FilterStatus>(initialStatus ?? 'all');
   const [trackFilter, setTrackFilter] = useState<TrackFilter>('all');
   const [sort, setSort] = useState<SortOption>('newest');
   const [search, setSearch] = useState('');

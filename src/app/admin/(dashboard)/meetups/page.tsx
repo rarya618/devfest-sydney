@@ -9,8 +9,12 @@ export const metadata = {
   title: 'Meetup talks',
 };
 
-export default async function MeetupProposalsPage() {
-  const [, proposals, events] = await Promise.all([getVerifiedSession(), fetchMeetupProposals(), loadEvents()]);
+interface Props {
+  searchParams: Promise<{ status?: string }>;
+}
+
+export default async function MeetupProposalsPage({ searchParams }: Props) {
+  const [, proposals, events, { status }] = await Promise.all([getVerifiedSession(), fetchMeetupProposals(), loadEvents(), searchParams]);
 
   // What a proposal can be accepted into (stage 4f): general events that haven't ended, soonest
   // first. Every event's name, for the chip on an accepted card.
@@ -21,5 +25,5 @@ export default async function MeetupProposalsPage() {
     .map((event) => ({ id: event.id, name: event.name }));
   const eventNames = Object.fromEntries(events.map((event) => [event.id, event.name]));
 
-  return <MeetupProposalsDashboard proposals={proposals} events={upcomingGeneral} eventNames={eventNames} />;
+  return <MeetupProposalsDashboard proposals={proposals} events={upcomingGeneral} eventNames={eventNames} initialStatus={status === 'pending' ? 'pending' : undefined} />;
 }
