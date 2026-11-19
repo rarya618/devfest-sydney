@@ -73,11 +73,13 @@ export function siteRedirects(): Redirect[] {
   // connected to the backend: turning it on early would send every one of those links to a
   // host that doesn't answer. /api is never redirected: the /speak form on gdgsydney.com
   // posts across origins, and a CORS preflight can't follow a redirect, so the endpoints
-  // answer on both hosts. /_next is left alone for pages a browser already has open.
+  // answer on both hosts. /_next is left alone for pages a browser already has open, and /__
+  // (Firebase Auth's handler, proxied in next.config.ts) so a sign-in started on either host
+  // finishes where it began.
   const appOrigin = process.env.APP_ORIGIN?.replace(/\/+$/, '');
   const appRedirects: Redirect[] = appOrigin
     ? forEachHostHeader(OLD_HOST, {
-        source: '/:path((?!api/|_next/).*)',
+        source: '/:path((?!api/|_next/|__/).*)',
         destination: `${appOrigin}/:path`,
         permanent: true,
       })

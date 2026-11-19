@@ -19,8 +19,11 @@ env:
     availability:
       - BUILD
       - RUNTIME
+  # Our own host, not devfest-sydney-2026.firebaseapp.com, so Google's account chooser names
+  # GDG Sydney's app (issue #11). /__/auth is proxied to Firebase in next.config.ts, and
+  # https://app.gdgsydney.com/__/auth/handler must stay in the OAuth client's redirect URIs.
   - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
-    value: devfest-sydney-2026.firebaseapp.com
+    value: app.gdgsydney.com
     availability:
       - BUILD
       - RUNTIME
