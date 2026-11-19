@@ -312,7 +312,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
           </div>
         </div>
 
-        <div className="flex flex-col items-center gap-2 shrink-0 self-start">
+        <div className="flex flex-col items-end gap-2 shrink-0 self-start">
           <button
             onClick={() => setIsOpen((open) => !open)}
             aria-expanded={isOpen}
