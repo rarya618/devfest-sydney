@@ -85,7 +85,7 @@ Production's signing secrets are NOT the `.env.local` values, so a link minted l
 
 ## Flows
 
-All sends are explicit admin actions, never side effects of a status change. Each records `...SentAt` / `...SentBy` and a reviewer note, and surfaces a send failure to the admin. Bulk sends go one at a time 600ms apart (Resend's rate limit). Email copy reads the record's own event (`src/lib/eventCopy.ts`); DevFest emails carry the DevFest wordmark, everything else the GDG Sydney logo (`emailLogoTag`).
+All sends are explicit admin actions, never side effects of a status change, and every single send asks first (`src/app/admin/ConfirmAction.tsx`, added 2026-11-19 after a stray click on Undo acceptance deleted a confirmed speaker's talk; `scripts/restore-undone-acceptance.mjs` put it back). So do Undo acceptance, Remove admin and deleting a reviewer note. Accept and Reject change status without asking: they send nothing and can be undone. Each records `...SentAt` / `...SentBy` and a reviewer note, and surfaces a send failure to the admin. Bulk sends go one at a time 600ms apart (Resend's rate limit). Email copy reads the record's own event (`src/lib/eventCopy.ts`); DevFest emails carry the DevFest wordmark, everything else the GDG Sydney logo (`emailLogoTag`).
 
 ### Speakers
 - **DevFest:** proposal in `submissions` → accept → promote (creates or reuses the person, creates the talk) → acceptance email (6-day `confirmByDate`) → `/speaker/confirm` → ticket email (confirmed only, enforced server-side) → calendar invite once on the schedule (`text/calendar; method=REQUEST`, UTC, one UID per presenter per talk, rising SEQUENCE; update and cancellation from the card) → thank-you email after the event
