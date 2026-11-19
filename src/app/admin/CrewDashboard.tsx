@@ -23,6 +23,8 @@ import type { InvitablePastVolunteer } from '@/lib/volunteerInvite';
 import ConfirmAction from './ConfirmAction';
 import AdminSearch from './AdminSearch';
 import FilterChipRow from './FilterChipRow';
+import SidePanel from './SidePanel';
+import { Chip, StatusLabel, type StatusTone } from './Chips';
 
 // Neither 'unassigned' nor 'organisers' is a VolunteerArea. 'unassigned' is the absence
 // of one, and the filter reached for most while the roster is still being built;
@@ -30,13 +32,13 @@ import FilterChipRow from './FilterChipRow';
 type FilterArea = 'all' | 'unassigned' | 'organisers' | VolunteerArea;
 type FilterConfirmation = 'all' | VolunteerConfirmation;
 
-function CrewAvatar({ member }: { member: VolunteerSubmission }) {
+function CrewAvatar({ member, size = 'large' }: { member: VolunteerSubmission; size?: 'large' | 'small' }) {
   return (
-    <div className="w-14 h-14 rounded-full overflow-hidden bg-white/[0.06] shrink-0">
+    <div className={`${size === 'small' ? 'w-10 h-10' : 'w-14 h-14'} rounded-full overflow-hidden bg-white/[0.06] shrink-0`}>
       {member.photoUrl ? (
         <Image src={member.photoUrl} alt={member.name} width={56} height={56} className="w-full h-full object-cover" />
       ) : (
-        <div className="w-full h-full flex items-center justify-center text-white/55 text-base font-bold" aria-hidden="true">
+        <div className={`w-full h-full flex items-center justify-center text-white/60 font-bold ${size === 'small' ? 'text-xs' : 'text-base'}`} aria-hidden="true">
           {getInitials(member.name)}
         </div>
       )}
@@ -76,11 +78,13 @@ function formatGdgOnCampusExec(member: VolunteerSubmission): string {
 interface CrewCardProps {
   member: VolunteerSubmission;
   onError: (message: string) => void;
+  // Shown inside the table's side panel: opens expanded.
+  inPanel?: boolean;
 }
 
-function CrewCard({ member, onError }: CrewCardProps) {
+function CrewCard({ member, onError, inPanel = false }: CrewCardProps) {
   const [isPending, startTransition] = useTransition();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(inPanel);
   const [editing, setEditing] = useState(false);
   const confirmation = VOLUNTEER_CONFIRMATION_CHIPS[member.confirmation];
   const isOrganiser = member.isOrganiser;
@@ -409,6 +413,117 @@ function CrewCard({ member, onError }: CrewCardProps) {
   );
 }
 
+// Where a crew member stands, in the portal's state colours.
+const CREW_STATUS: Record<VolunteerConfirmation, { tone: StatusTone; label: string }> = {
+  confirmed: { tone: 'good', label: 'Confirmed' },
+  awaiting: { tone: 'waiting', label: 'Awaiting confirmation' },
+  'not-emailed': { tone: 'waiting', label: 'Not emailed' },
+};
+
+const CREW_NEXT_STEP_PILL =
+  'press inline-flex items-center justify-center h-8 px-3.5 rounded-full border border-white/35 text-sm font-bold text-off-white whitespace-nowrap hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue';
+
+// A row of the crew roster: who, their area and shift, where they stand, and the one thing to
+// do next. The full card (contact, answers, photo, edit, remove, history) opens in the side panel.
+function CrewRow({ member, onError }: CrewCardProps) {
+  const [isPending, startTransition] = useTransition();
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const isOrganiser = member.isOrganiser;
+  const status = isOrganiser ? { tone: 'done' as StatusTone, label: 'Organiser' } : CREW_STATUS[member.confirmation];
+
+  function run(send: () => Promise<{ error?: string }>) {
+    startTransition(async () => {
+      const result = await send();
+      if (result.error) onError(result.error);
+    });
+  }
+
+  function handleRowClick(event: React.MouseEvent<HTMLLIElement>) {
+    const target = event.target as HTMLElement;
+    if (target.closest('button, a, input, textarea, select, [role="menu"], [role="dialog"], [role="alertdialog"]')) return;
+    if (window.getSelection()?.toString()) return;
+    setIsPanelOpen(true);
+  }
+
+  let nextStep: React.ReactNode = null;
+  if (!isOrganiser && member.confirmation === 'not-emailed') {
+    nextStep = (
+      <ConfirmAction
+        tone="send"
+        message={`Send the volunteer acceptance email to ${member.name}?`}
+        detail="It tells them they're on the crew and asks them to confirm."
+        confirmLabel="Send email"
+        onConfirm={() => run(() => sendVolunteerAcceptanceEmail(member.id))}
+      >
+        {(triggerProps) => (
+          <button {...triggerProps} type="button" disabled={isPending} aria-label={`Send the volunteer acceptance email to ${member.name}`} className={CREW_NEXT_STEP_PILL}>
+            Send acceptance email
+          </button>
+        )}
+      </ConfirmAction>
+    );
+  } else if (!isOrganiser && member.confirmation === 'confirmed' && !member.ticketSentAt) {
+    // A mark, not a send: the ticket goes out from Humanitix. It can be unmarked from the card.
+    nextStep = (
+      <button
+        type="button"
+        onClick={() => run(() => setTicketSent(member.id, true))}
+        disabled={isPending}
+        aria-label={`Mark ${member.name}'s ticket as sent (sends nothing)`}
+        title="Records that their ticket went out from Humanitix. Sends nothing."
+        className={CREW_NEXT_STEP_PILL}
+      >
+        Mark ticket sent
+      </button>
+    );
+  }
+
+  return (
+    <li
+      onClick={handleRowClick}
+      className={`grid grid-cols-[auto_minmax(0,1fr)_auto] md:grid-cols-[auto_minmax(0,1fr)_11rem_11.5rem_12rem_auto] items-center gap-x-4 gap-y-2 px-4 py-3 cursor-pointer transition-colors hover:bg-white/[0.04] ${
+        isPending ? 'opacity-50 pointer-events-none' : ''
+      }`}
+    >
+      <CrewAvatar member={member} size="small" />
+      <div className="min-w-0">
+        <h3 className="font-bold text-off-white text-[0.9375rem] leading-snug truncate">{member.name}</h3>
+        <p className="mt-0.5 text-sm text-white/60 truncate">
+          {isOrganiser ? member.organiserRole || 'Organiser' : member.email}
+        </p>
+      </div>
+      <span className="hidden md:flex flex-col items-start gap-1">
+        {member.assignedArea ? (
+          <Chip>{VOLUNTEER_AREA_LABELS[member.assignedArea]}</Chip>
+        ) : (
+          <Chip tone="attention">No area yet</Chip>
+        )}
+        {member.assignedShift && <span className="font-mono text-xs text-white/60">{VOLUNTEER_SHIFT_LABELS[member.assignedShift]}</span>}
+      </span>
+      <span className="hidden md:flex flex-col items-start gap-1">
+        <StatusLabel tone={status.tone}>{status.label}</StatusLabel>
+        {!isOrganiser && member.ticketSentAt && <span className="font-mono text-xs text-white/60">Ticket sent</span>}
+      </span>
+      <span className="col-span-full md:col-span-1 flex justify-start md:justify-end pl-14 md:pl-0 max-md:empty:hidden">{nextStep}</span>
+      <button
+        type="button"
+        onClick={() => setIsPanelOpen(true)}
+        aria-label={`Open ${member.name}`}
+        className="press row-start-1 col-start-3 md:row-auto md:col-auto inline-flex items-center justify-center w-8 h-8 rounded-full text-white/60 hover:text-white hover:bg-white/[0.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
+      >
+        <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 3.5L10.5 8 6 12.5" />
+        </svg>
+      </button>
+      {isPanelOpen && (
+        <SidePanel title={member.name} subtitle={isOrganiser ? member.organiserRole || 'Organiser' : 'Crew'} onClose={() => setIsPanelOpen(false)}>
+          <CrewCard member={member} onError={onError} inPanel />
+        </SidePanel>
+      )}
+    </li>
+  );
+}
+
 interface Props {
   crew: VolunteerSubmission[];
   // "Invite past volunteers" (stage 4d-2). people is null when the list couldn't be read.
@@ -691,10 +806,20 @@ export default function CrewDashboard({ crew, invites }: Props) {
             <p className="text-sm text-white/50">No crew members match this filter.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 items-start">
-            {filtered.map((member) => (
-              <CrewCard key={member.id} member={member} onError={setAlertMessage} />
-            ))}
+          <div className="rounded-2xl bg-surface overflow-hidden">
+            <div aria-hidden="true" className="hidden md:grid grid-cols-[auto_minmax(0,1fr)_11rem_11.5rem_12rem_auto] gap-x-4 px-4 py-2.5 border-b border-white/10 text-xs font-bold text-white/60">
+              <span className="w-10" />
+              <span>Name</span>
+              <span>Area and shift</span>
+              <span>Status</span>
+              <span className="text-right">Next step</span>
+              <span className="w-8" />
+            </div>
+            <ul className="divide-y divide-white/[0.07]">
+              {filtered.map((member) => (
+                <CrewRow key={member.id} member={member} onError={setAlertMessage} />
+              ))}
+            </ul>
           </div>
         )}
       </div>
