@@ -11,15 +11,20 @@ import { BarRow, BreakdownCard, EmptyState, StatTile, StatusTiles } from '../../
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Analytics',
+  title: 'Community overview',
 };
 
 function formatEventDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Australia/Sydney' });
 }
 
-function SectionHeading({ id, children }: { id: string; children: React.ReactNode }) {
-  return <h2 id={id} className="text-lg font-bold text-off-white mb-4">{children}</h2>;
+function SectionHeading({ id, children, description }: { id: string; children: React.ReactNode; description?: string }) {
+  return (
+    <>
+      <h2 id={id} className={`text-lg font-bold text-off-white ${description ? '' : 'mb-4'}`}>{children}</h2>
+      {description && <p className="mt-1 mb-4 max-w-prose text-sm text-white/60">{description}</p>}
+    </>
+  );
 }
 
 function Muted({ children }: { children: React.ReactNode }) {
@@ -96,23 +101,33 @@ function AnalyticsBody({ analytics }: { analytics: GdgAnalytics }) {
   return (
     <div className="space-y-12 pb-10">
       <section aria-labelledby="events-heading">
-        <SectionHeading id="events-heading">Events</SectionHeading>
+        <SectionHeading
+          id="events-heading"
+          description="First-time speakers are giving their first talk with GDG Sydney; returning speakers spoke at an earlier event. A meetup counts only the proposals accepted into it."
+        >
+          Events
+        </SectionHeading>
         <EventsTable events={analytics.events} />
       </section>
 
       <section aria-labelledby="speakers-heading">
-        <SectionHeading id="speakers-heading">Speakers across events</SectionHeading>
+        <SectionHeading
+          id="speakers-heading"
+          description="People on file have a speaker profile. Speakers with a talk have at least one talk on an event's programme, upcoming events included."
+        >
+          Speakers across events
+        </SectionHeading>
         <div className="flex flex-wrap gap-2.5">
           <StatTile label="People on file" count={speakers.people} icon="users" accent="neutral" />
-          <StatTile label="Have given a talk" count={speakers.withTalks} icon="check" accent="blue" />
+          <StatTile label="Speakers with a talk" count={speakers.withTalks} icon="check" accent="blue" />
           <StatTile
             label="Spoke at more than one event"
             count={speakers.repeat}
-            subtext={speakers.withTalks > 0 ? `${Math.round((speakers.repeat / speakers.withTalks) * 100)}% of those who have given a talk` : undefined}
+            subtext={speakers.withTalks > 0 ? `${Math.round((speakers.repeat / speakers.withTalks) * 100)}% of speakers with a talk` : undefined}
             icon="users"
             accent="green"
           />
-          <StatTile label="Talks" count={speakers.talks} icon="layers" accent="neutral" />
+          <StatTile label="Talks across events" count={speakers.talks} icon="layers" accent="neutral" />
         </div>
       </section>
 
@@ -122,7 +137,7 @@ function AnalyticsBody({ analytics }: { analytics: GdgAnalytics }) {
           total={meetupProposals.total}
           totalLabel="Proposals"
           uniqueCount={meetupProposals.uniqueProposers}
-          uniqueLabel="Unique proposers"
+          uniqueLabel="People who proposed"
           pending={meetupProposals.pending}
           accepted={meetupProposals.accepted}
           rejected={meetupProposals.rejected}
@@ -133,7 +148,7 @@ function AnalyticsBody({ analytics }: { analytics: GdgAnalytics }) {
           <>
             <SubmissionsOverTimeChart entries={meetupProposals.submittedAt.map((submittedAt) => ({ submittedAt }))} noun="proposals" accent="green" />
             <div className="grid sm:grid-cols-2 gap-3">
-              <BreakdownCard title="Where they came from">
+              <BreakdownCard title="How proposals arrived">
                 {meetupProposals.bySource.map(([source, count]) => (
                   <BarRow key={source} label={source} count={count} total={meetupProposals.total} barClass="bg-google-green" />
                 ))}
@@ -144,7 +159,12 @@ function AnalyticsBody({ analytics }: { analytics: GdgAnalytics }) {
       </section>
 
       <section aria-labelledby="volunteers-heading">
-        <SectionHeading id="volunteers-heading">Volunteers across events</SectionHeading>
+        <SectionHeading
+          id="volunteers-heading"
+          description="Profiles are everyone who has signed up. The pool is the opt-in list we invite to new events. Each organiser is counted once, whichever events they organised."
+        >
+          Volunteers across events
+        </SectionHeading>
         <div className="flex flex-wrap gap-2.5">
           <StatTile label="Volunteer profiles" count={volunteers.profiles} icon="users" accent="neutral" />
           <StatTile label="In the volunteer pool" count={volunteers.inPool} icon="check" accent="green" />
@@ -174,11 +194,11 @@ export default async function GdgAnalyticsPage() {
   return (
     <>
       <StickyAdminHeader className="z-20 w-full px-4 md:px-5 pt-4 pb-3 md:pt-8 md:pb-4 bg-black-02/95 backdrop-blur-sm">
-        <h1 className="text-xl font-bold text-off-white tracking-[-0.01em]">Analytics</h1>
+        <h1 className="text-xl font-bold text-off-white tracking-[-0.01em]">Community overview</h1>
         <p className="mt-0.5 text-sm text-white/55">
-          Every GDG Sydney event. One DevFest&rsquo;s forms in detail are on{' '}
+          Every GDG Sydney event side by side. For one DevFest&rsquo;s forms, see{' '}
           <Link href="/admin/devfest/analytics" className="text-google-blue-light underline underline-offset-2 hover:no-underline">
-            DevFest analytics
+            Form results
           </Link>
           .
         </p>

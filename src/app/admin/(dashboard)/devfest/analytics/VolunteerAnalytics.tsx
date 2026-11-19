@@ -52,14 +52,14 @@ export default function VolunteerAnalytics({ volunteers }: Props) {
         total={total}
         totalLabel="Signups"
         uniqueCount={countUniqueEmails(volunteers)}
-        uniqueLabel="Unique volunteers"
+        uniqueLabel="People who signed up"
         pending={statusCounts.pending}
         accepted={statusCounts.accepted}
         rejected={statusCounts.rejected}
       />
 
       {total === 0 ? (
-        <EmptyState message="No volunteer signups yet." />
+        <EmptyState message="No volunteer signups for this DevFest yet." />
       ) : (
         <>
           <SubmissionsOverTimeChart entries={volunteers} noun="signups" accent="green" />
@@ -94,7 +94,7 @@ export default function VolunteerAnalytics({ volunteers }: Props) {
               </BreakdownCard>
             )}
 
-            <BreakdownCard title="Traffic sources">
+            <BreakdownCard title="Where they heard of us">
               {channels.map(([channel, count]) => (
                 <BarRow key={channel} label={channel} count={count} total={total} barClass={BAR_CLASS} />
               ))}

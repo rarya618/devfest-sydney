@@ -6,7 +6,7 @@ import AnalyticsView, { isAnalyticsTab } from './AnalyticsView';
 import { getAdminDevfestId } from '@/lib/adminEvent';
 
 export const metadata = {
-  title: 'Form analytics',
+  title: 'Form results',
 };
 
 interface AnalyticsPageProps {

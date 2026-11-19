@@ -47,14 +47,14 @@ export default function ShowcaseAnalytics({ entries }: Props) {
         total={total}
         totalLabel="Entries"
         uniqueCount={countUniqueEmails(entries)}
-        uniqueLabel="Unique entrants"
+        uniqueLabel="People who entered"
         pending={statusCounts.pending}
         accepted={statusCounts.accepted}
         rejected={statusCounts.rejected}
       />
 
       {total === 0 ? (
-        <EmptyState message="No Builder Showcase entries yet." />
+        <EmptyState message="No Builder Showcase entries for this DevFest yet." />
       ) : (
         <>
           <SubmissionsOverTimeChart entries={entries} noun="entries" accent="yellow" />
@@ -87,7 +87,7 @@ export default function ShowcaseAnalytics({ entries }: Props) {
               <BarRow label="Shared a LinkedIn profile" count={linkedinCount} total={total} barClass={BAR_CLASS} />
             </BreakdownCard>
 
-            <BreakdownCard title="Traffic sources">
+            <BreakdownCard title="Where they heard of us">
               {channels.map(([channel, count]) => (
                 <BarRow key={channel} label={channel} count={count} total={total} barClass={BAR_CLASS} />
               ))}

@@ -4,8 +4,8 @@ import { INTERNAL_UTM_SOURCE } from '@/lib/tracking';
 
 export type AnalyticsAccent = 'blue' | 'green' | 'yellow';
 
-// Full class strings so Tailwind can see them; each tab colours its chart to match the
-// left border of the matching dashboard's cards (CfS blue, volunteers green, showcase yellow).
+// Full class strings so Tailwind can see them; each tab colours its chart to match its
+// form (talk proposals blue, volunteers green, showcase yellow).
 export const ACCENT_CHART_CLASSES: Record<AnalyticsAccent, { fill: string; stroke: string; bar: string }> = {
   blue: { fill: 'fill-google-blue', stroke: 'stroke-google-blue', bar: 'bg-google-blue' },
   green: { fill: 'fill-google-green', stroke: 'stroke-google-green', bar: 'bg-google-green' },
@@ -70,7 +70,7 @@ export function StatTile({
   );
 }
 
-// The Total / Unique / Pending / Accepted / Rejected row every tab opens with.
+// The Total / People / Pending / Accepted / Not selected row every tab opens with.
 export function StatusTiles({
   total,
   totalLabel,
@@ -101,7 +101,7 @@ export function StatusTiles({
       />
       <StatTile label="Pending" count={pending} subtext={percentOfTotal(pending)} icon="clock" accent="yellow" />
       <StatTile label="Accepted" count={accepted} subtext={percentOfTotal(accepted)} icon="check" accent="green" />
-      <StatTile label="Rejected" count={rejected} subtext={percentOfTotal(rejected)} icon="x" accent="muted" />
+      <StatTile label="Not selected" count={rejected} subtext={percentOfTotal(rejected)} icon="x" accent="muted" />
     </div>
   );
 }
@@ -155,7 +155,7 @@ export function getChannel(tracking: SubmissionTracking): string {
   if (tracking.utmSource && tracking.utmSource !== INTERNAL_UTM_SOURCE) return tracking.utmSource;
   if (tracking.ref) return tracking.ref;
   if (tracking.utmSource) return tracking.utmSource;
-  return 'Direct / unknown';
+  return 'No source recorded';
 }
 
 export function countChannels(entries: { tracking: SubmissionTracking }[]): [string, number][] {

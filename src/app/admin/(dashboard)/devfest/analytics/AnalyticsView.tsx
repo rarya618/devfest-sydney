@@ -37,8 +37,8 @@ export default function AnalyticsView({ activeTab, submissions, volunteers, show
   return (
     <>
       <StickyAdminHeader className="z-20 w-full px-4 md:px-5 pt-4 pb-3 md:pt-8 md:pb-4 bg-black-02/95 backdrop-blur-sm">
-        <h1 className="text-xl font-bold text-off-white tracking-[-0.01em] mb-3">Form analytics</h1>
-        <nav aria-label="Analytics sections" className="flex gap-1.5 overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <h1 className="text-xl font-bold text-off-white tracking-[-0.01em] mb-3">Form results</h1>
+        <nav aria-label="Form results sections" className="flex gap-1.5 overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {ANALYTICS_TABS.map((tab) => {
             const active = tab === activeTab;
             return (
@@ -46,7 +46,7 @@ export default function AnalyticsView({ activeTab, submissions, volunteers, show
                 key={tab}
                 href={tab === 'speakers' ? '/admin/devfest/analytics' : `/admin/devfest/analytics?tab=${tab}`}
                 aria-current={active ? 'page' : undefined}
-                aria-label={`Show ${TAB_LABELS[tab]} analytics`}
+                aria-label={`Show ${TAB_LABELS[tab]} results`}
                 className={`inline-flex items-center gap-2 shrink-0 text-sm px-3.5 py-1.5 rounded-full border transition-colors ${
                   active
                     ? 'bg-white/[0.1] border-white/15 text-white font-bold'

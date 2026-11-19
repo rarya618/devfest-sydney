@@ -40,19 +40,19 @@ export default function SpeakerAnalytics({ submissions }: Props) {
     <>
       <StatusTiles
         total={total}
-        totalLabel="Submissions"
+        totalLabel="Proposals"
         uniqueCount={countUniqueEmails(submissions)}
-        uniqueLabel="Unique applicants"
+        uniqueLabel="People who proposed"
         pending={statusCounts.pending}
         accepted={statusCounts.accepted}
         rejected={statusCounts.rejected}
       />
 
       {total === 0 ? (
-        <EmptyState message="No submissions yet." />
+        <EmptyState message="No talk proposals for this DevFest yet." />
       ) : (
         <>
-          <SubmissionsOverTimeChart entries={submissions} noun="submissions" accent="blue" />
+          <SubmissionsOverTimeChart entries={submissions} noun="proposals" accent="blue" />
 
           <div className="grid sm:grid-cols-2 gap-3">
             <BreakdownCard title="By track">
@@ -86,7 +86,7 @@ export default function SpeakerAnalytics({ submissions }: Props) {
               <BarRow label="Requires travel support" count={requiresTravelSupportCount} total={total} />
             </BreakdownCard>
 
-            <BreakdownCard title="Traffic sources">
+            <BreakdownCard title="Where they heard of us">
               {channels.map(([channel, count]) => (
                 <BarRow key={channel} label={channel} count={count} total={total} />
               ))}
