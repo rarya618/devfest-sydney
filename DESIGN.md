@@ -391,6 +391,16 @@ The organiser admin is a working tool: dense, scannable, one signal per fact.
 - **Decision:** a pending record's choice is "Accept" (Green 700) and "Not this time" (outline), both confirmed (`DecisionButtons.tsx`).
 - **No side stripes.** Admin cards are plain `#282828` at 16px radius; track, role and type are said once, in a chip.
 
+### Analytics (2026-11-19)
+Community overview (`/admin/analytics`) and Form results (`/admin/devfest/analytics`) share `analyticsShared.tsx`.
+- **Stat strip:** one `#282828` panel at 16px radius holding the figures, not a pill each: a 14px label at white 60% over a 24px Bold off-white number, a 12px white 60% subtext (visible, never a tooltip). A 6px status dot leads the label only where the figure is a record's status (Pending yellow, Accepted green, Not selected white 40%). No icons, no tints. Zero counts drop to white 60%.
+- **Waiting for a decision:** the first thing on the overview. One row per queue with something pending on an event still to come: the count, the noun, the event, how long the oldest has waited (yellow text from a week), and a "Review" outline pill. The whole row links to that queue filtered to pending (`?status=pending`). With nothing waiting it is a single green status label.
+- **Retention bar:** a 96px by 6px bar under a speakers or volunteers count, returning in Google Green beside first-time in white 30%, always next to its words ("4 first-time, 2 returning"). The overview's definition line names the colours.
+- **Section text:** each section opens with one takeaway sentence in white 90%, then its definitions at white 60%, so no term is left undefined.
+- **A lone source** ("Where they heard of us" with one answer) is a sentence under the grid, not a bar at 100%.
+- **Phones:** the events table becomes stacked cards below 640px with the same facts. Chart axis labels are sized from the chart's on-screen scale to stay at 12px. Tabs and "View as table" are 44px tall.
+- **A failed load** raises the bottom-left Alert (`LoadFailureAlert.tsx`) over a quiet empty state.
+
 ### Alert
 - The app's only error surface, anchored bottom-left (16px inset, 24px from 640px, full width less the gutters on phones, max 24rem). `#303030` with a 40% red border, 12px radius, 12px by 16px, a small red-tinted circle icon, 14px text at white 80%, and a dismiss button. It rises 12px and fades in over 300ms and stays until dismissed.
 
