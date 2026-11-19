@@ -1,7 +1,7 @@
 import { TRACK_LABELS, TRACK_DOT_COLORS, FORMAT_LABELS, EXPERIENCE_LABELS } from '@/lib/submissionLabels';
 import type { Submission, SubmissionStatus, Track, TalkFormat, ExperienceLevel } from '@/lib/types';
 import SubmissionsOverTimeChart from '../../../SubmissionsOverTimeChart';
-import { BarRow, BreakdownCard, EmptyState, StatusTiles, countChannels, countUniqueEmails } from '../../../analyticsShared';
+import { BarRow, BreakdownCard, ChannelsCard, EmptyState, StatusTiles, countChannels, countUniqueEmails } from '../../../analyticsShared';
 
 interface Props {
   submissions: Submission[];
@@ -54,7 +54,7 @@ export default function SpeakerAnalytics({ submissions }: Props) {
         <>
           <SubmissionsOverTimeChart entries={submissions} noun="proposals" accent="blue" />
 
-          <div className="grid sm:grid-cols-2 gap-3">
+          <div className="grid items-start sm:grid-cols-2 gap-3">
             <BreakdownCard title="By track">
               {TRACK_ORDER.filter((track) => trackCounts[track]).map((track) => (
                 <BarRow
@@ -86,11 +86,7 @@ export default function SpeakerAnalytics({ submissions }: Props) {
               <BarRow label="Requires travel support" count={requiresTravelSupportCount} total={total} />
             </BreakdownCard>
 
-            <BreakdownCard title="Where they heard of us">
-              {channels.map(([channel, count]) => (
-                <BarRow key={channel} label={channel} count={count} total={total} />
-              ))}
-            </BreakdownCard>
+            <ChannelsCard title="Where they heard of us" channels={channels} total={total} noun="proposals" />
           </div>
         </>
       )}

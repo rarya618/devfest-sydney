@@ -1,7 +1,7 @@
 import { VOLUNTEER_AREA_LABELS, GDG_ON_CAMPUS_CHAPTER_LABELS } from '@/lib/volunteerLabels';
 import type { VolunteerSubmission, VolunteerStatus, VolunteerArea, GdgOnCampusChapter } from '@/lib/types';
 import SubmissionsOverTimeChart from '../../../SubmissionsOverTimeChart';
-import { ACCENT_CHART_CLASSES, BarRow, BreakdownCard, EmptyState, StatusTiles, countChannels, countUniqueEmails } from '../../../analyticsShared';
+import { ACCENT_CHART_CLASSES, BarRow, BreakdownCard, ChannelsCard, EmptyState, StatusTiles, countChannels, countUniqueEmails } from '../../../analyticsShared';
 
 interface Props {
   volunteers: VolunteerSubmission[];
@@ -64,7 +64,7 @@ export default function VolunteerAnalytics({ volunteers }: Props) {
         <>
           <SubmissionsOverTimeChart entries={volunteers} noun="signups" accent="green" />
 
-          <div className="grid sm:grid-cols-2 gap-3">
+          <div className="grid items-start sm:grid-cols-2 gap-3">
             <BreakdownCard title="Areas of interest">
               {areasWithSignups.map((area) => (
                 <BarRow key={area} label={VOLUNTEER_AREA_LABELS[area]} count={areaCounts[area] ?? 0} total={total} barClass={BAR_CLASS} />
@@ -94,11 +94,7 @@ export default function VolunteerAnalytics({ volunteers }: Props) {
               </BreakdownCard>
             )}
 
-            <BreakdownCard title="Where they heard of us">
-              {channels.map(([channel, count]) => (
-                <BarRow key={channel} label={channel} count={count} total={total} barClass={BAR_CLASS} />
-              ))}
-            </BreakdownCard>
+            <ChannelsCard title="Where they heard of us" channels={channels} total={total} noun="signups" barClass={BAR_CLASS} />
           </div>
         </>
       )}

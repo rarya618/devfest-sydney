@@ -1,7 +1,7 @@
 import { SHOWCASE_STAGE_LABELS } from '@/lib/showcaseLabels';
 import type { ShowcaseSubmission, ShowcaseStatus, ShowcaseStage } from '@/lib/types';
 import SubmissionsOverTimeChart from '../../../SubmissionsOverTimeChart';
-import { ACCENT_CHART_CLASSES, BarRow, BreakdownCard, EmptyState, StatusTiles, countChannels, countUniqueEmails } from '../../../analyticsShared';
+import { ACCENT_CHART_CLASSES, BarRow, BreakdownCard, ChannelsCard, EmptyState, StatusTiles, countChannels, countUniqueEmails } from '../../../analyticsShared';
 
 interface Props {
   entries: ShowcaseSubmission[];
@@ -59,7 +59,7 @@ export default function ShowcaseAnalytics({ entries }: Props) {
         <>
           <SubmissionsOverTimeChart entries={entries} noun="entries" accent="yellow" />
 
-          <div className="grid sm:grid-cols-2 gap-3">
+          <div className="grid items-start sm:grid-cols-2 gap-3">
             <BreakdownCard title="By stage">
               {STAGE_ORDER.filter((stage) => stageCounts[stage]).map((stage) => (
                 <BarRow key={stage} label={SHOWCASE_STAGE_LABELS[stage]} count={stageCounts[stage] ?? 0} total={total} barClass={BAR_CLASS} />
@@ -87,11 +87,7 @@ export default function ShowcaseAnalytics({ entries }: Props) {
               <BarRow label="Shared a LinkedIn profile" count={linkedinCount} total={total} barClass={BAR_CLASS} />
             </BreakdownCard>
 
-            <BreakdownCard title="Where they heard of us">
-              {channels.map(([channel, count]) => (
-                <BarRow key={channel} label={channel} count={count} total={total} barClass={BAR_CLASS} />
-              ))}
-            </BreakdownCard>
+            <ChannelsCard title="Where they heard of us" channels={channels} total={total} noun="entries" barClass={BAR_CLASS} />
           </div>
         </>
       )}

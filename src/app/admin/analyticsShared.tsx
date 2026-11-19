@@ -123,9 +123,43 @@ export function BreakdownCard({ title, children }: { title: string; children: Re
   );
 }
 
+// "Where they heard of us": a bar per source, or one plain sentence when there is only one
+// source to report, which a lone bar at 100% says worse.
+export function ChannelsCard({
+  title,
+  channels,
+  total,
+  noun,
+  barClass,
+}: {
+  title: string;
+  channels: [string, number][];
+  total: number;
+  noun: string;
+  barClass?: string;
+}) {
+  if (channels.length === 1) {
+    const [source] = channels[0];
+    return (
+      <p className="sm:col-span-2 px-1 text-sm text-white/60">
+        {source === NO_SOURCE_LABEL ? `No source was recorded for any of the ${total} ${noun}.` : `All ${total} ${noun} came from ${source}.`}
+      </p>
+    );
+  }
+  return (
+    <BreakdownCard title={title}>
+      {channels.map(([channel, count]) => (
+        <BarRow key={channel} label={channel} count={count} total={total} barClass={barClass} />
+      ))}
+    </BreakdownCard>
+  );
+}
+
 export function EmptyState({ message }: { message: string }) {
   return <div className="text-center py-16 text-white/55 text-sm">{message}</div>;
 }
+
+const NO_SOURCE_LABEL = 'No source recorded';
 
 export function getChannel(tracking: SubmissionTracking): string {
   // Internal CTAs (banner, navbar, footer, etc.) all share the same utm_source, so bucket
@@ -133,7 +167,7 @@ export function getChannel(tracking: SubmissionTracking): string {
   if (tracking.utmSource && tracking.utmSource !== INTERNAL_UTM_SOURCE) return tracking.utmSource;
   if (tracking.ref) return tracking.ref;
   if (tracking.utmSource) return tracking.utmSource;
-  return 'No source recorded';
+  return NO_SOURCE_LABEL;
 }
 
 export function countChannels(entries: { tracking: SubmissionTracking }[]): [string, number][] {

@@ -3,7 +3,7 @@ import { getVerifiedSession } from '@/lib/adminSession';
 import { loadGdgAnalytics, type EventAnalyticsRow, type GdgAnalytics, type WaitingItem } from '@/lib/gdgAnalytics';
 import StickyAdminHeader from '../../StickyAdminHeader';
 import SubmissionsOverTimeChart from '../../SubmissionsOverTimeChart';
-import { BarRow, BreakdownCard, EmptyState, StatStrip, StatTile, StatusTiles } from '../../analyticsShared';
+import { ChannelsCard, EmptyState, StatStrip, StatTile, StatusTiles } from '../../analyticsShared';
 import { Chip, StatusLabel } from '../../Chips';
 import LoadFailureAlert from '../../LoadFailureAlert';
 
@@ -126,74 +126,133 @@ function WaitingForDecision({ waiting }: { waiting: WaitingItem[] }) {
   );
 }
 
+// The same facts feed the table (from sm) and the stacked cards (below it), so a phone never
+// has to scroll sideways to reach Proposals or Volunteers.
+function SpeakersFact({ event }: { event: EventAnalyticsRow }) {
+  return (
+    <>
+      {event.speakers}
+      {event.speakers > 0 && (
+        <>
+          <RetentionBar returning={event.returningSpeakers} firstTime={event.firstTimeSpeakers} />
+          <Muted>{event.firstTimeSpeakers} first-time, {event.returningSpeakers} returning</Muted>
+        </>
+      )}
+    </>
+  );
+}
+
+function ProposalsFact({ event }: { event: EventAnalyticsRow }) {
+  if (event.type === 'devfest') {
+    return (
+      <>
+        {event.proposals}
+        {event.proposals > 0 && <Muted>{event.acceptedProposals} accepted</Muted>}
+      </>
+    );
+  }
+  return (
+    <>
+      {event.acceptedProposals}
+      <Muted>accepted from meetup proposals</Muted>
+    </>
+  );
+}
+
+function VolunteersFact({ event }: { event: EventAnalyticsRow }) {
+  return (
+    <>
+      {event.volunteerSignups}
+      {event.volunteerSignups > 0 && (
+        <>
+          <RetentionBar returning={event.returningVolunteers} firstTime={event.volunteerSignups - event.returningVolunteers} />
+          <Muted>
+            {event.acceptedVolunteers} accepted, {event.returningVolunteers} returning
+          </Muted>
+        </>
+      )}
+    </>
+  );
+}
+
+function EventHeading({ event }: { event: EventAnalyticsRow }) {
+  return (
+    <>
+      <span className="block font-bold text-white">{event.name}</span>
+      <span className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-white/60">
+        <span className="font-mono">{formatEventDate(event.startAt)}</span>
+        <Chip>{event.type === 'devfest' ? 'DevFest' : 'Meetup'}</Chip>
+        {event.isUpcoming && <StatusLabel tone="good">Upcoming</StatusLabel>}
+      </span>
+    </>
+  );
+}
+
 function EventsTable({ events }: { events: EventAnalyticsRow[] }) {
   if (events.length === 0) return <EmptyState message="No events yet." />;
   const cell = 'px-4 py-3 align-top';
   return (
-    <div className="bg-surface border border-white/10 rounded-2xl overflow-x-auto">
-      <table className="w-full min-w-[720px] text-sm text-white/80">
-        <caption className="sr-only">Every GDG Sydney event, newest first, with its talks, speakers, proposals and volunteers</caption>
-        <thead>
-          <tr className="text-left text-xs font-bold text-white/60 border-b border-white/10">
-            <th scope="col" className={cell}>Event</th>
-            <th scope="col" className={cell}>Talks</th>
-            <th scope="col" className={cell}>Speakers</th>
-            <th scope="col" className={cell}>Proposals</th>
-            <th scope="col" className={cell}>Volunteers</th>
-            <th scope="col" className={cell}>Organisers</th>
-          </tr>
-        </thead>
-        <tbody>
-          {events.map((event) => (
-            <tr key={event.eventId} className="border-b border-white/[0.06] last:border-b-0">
-              <th scope="row" className={`${cell} text-left font-normal`}>
-                <span className="block font-bold text-white">{event.name}</span>
-                <span className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-white/60">
-                  <span className="font-mono">{formatEventDate(event.startAt)}</span>
-                  <Chip>{event.type === 'devfest' ? 'DevFest' : 'Meetup'}</Chip>
-                  {event.isUpcoming && <StatusLabel tone="good">Upcoming</StatusLabel>}
-                </span>
-              </th>
-              <td className={cell}>{event.talks}</td>
-              <td className={cell}>
-                {event.speakers}
-                {event.speakers > 0 && (
-                  <>
-                    <RetentionBar returning={event.returningSpeakers} firstTime={event.firstTimeSpeakers} />
-                    <Muted>{event.firstTimeSpeakers} first-time, {event.returningSpeakers} returning</Muted>
-                  </>
-                )}
-              </td>
-              <td className={cell}>
-                {event.type === 'devfest' ? (
-                  <>
-                    {event.proposals}
-                    {event.proposals > 0 && <Muted>{event.acceptedProposals} accepted</Muted>}
-                  </>
-                ) : (
-                  <>
-                    {event.acceptedProposals}
-                    <Muted>accepted from meetup proposals</Muted>
-                  </>
-                )}
-              </td>
-              <td className={cell}>
-                {event.volunteerSignups}
-                {event.volunteerSignups > 0 && (
-                  <>
-                    <RetentionBar returning={event.returningVolunteers} firstTime={event.volunteerSignups - event.returningVolunteers} />
-                    <Muted>
-                      {event.acceptedVolunteers} accepted, {event.returningVolunteers} returning
-                    </Muted>
-                  </>
-                )}
-              </td>
-              <td className={cell}>{event.organisers}</td>
+    <>
+      <ul className="space-y-3 sm:hidden">
+        {events.map((event) => (
+          <li key={event.eventId} className="rounded-2xl bg-surface px-5 py-4">
+            <EventHeading event={event} />
+            <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-4 text-sm text-white/80">
+              <div>
+                <dt className="text-xs font-bold text-white/60">Talks</dt>
+                <dd className="mt-0.5">{event.talks}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-bold text-white/60">Organisers</dt>
+                <dd className="mt-0.5">{event.organisers}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-bold text-white/60">Speakers</dt>
+                <dd className="mt-0.5"><SpeakersFact event={event} /></dd>
+              </div>
+              <div>
+                <dt className="text-xs font-bold text-white/60">Proposals</dt>
+                <dd className="mt-0.5"><ProposalsFact event={event} /></dd>
+              </div>
+              <div>
+                <dt className="text-xs font-bold text-white/60">Volunteers</dt>
+                <dd className="mt-0.5"><VolunteersFact event={event} /></dd>
+              </div>
+            </dl>
+          </li>
+        ))}
+      </ul>
+
+      <div className="hidden sm:block bg-surface border border-white/10 rounded-2xl overflow-x-auto">
+        <table className="w-full min-w-[640px] text-sm text-white/80">
+          <caption className="sr-only">Every GDG Sydney event, newest first, with its talks, speakers, proposals and volunteers</caption>
+          <thead>
+            <tr className="text-left text-xs font-bold text-white/60 border-b border-white/10">
+              <th scope="col" className={cell}>Event</th>
+              <th scope="col" className={cell}>Talks</th>
+              <th scope="col" className={cell}>Speakers</th>
+              <th scope="col" className={cell}>Proposals</th>
+              <th scope="col" className={cell}>Volunteers</th>
+              <th scope="col" className={cell}>Organisers</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {events.map((event) => (
+              <tr key={event.eventId} className="border-b border-white/[0.06] last:border-b-0">
+                <th scope="row" className={`${cell} text-left font-normal`}>
+                  <EventHeading event={event} />
+                </th>
+                <td className={cell}>{event.talks}</td>
+                <td className={cell}><SpeakersFact event={event} /></td>
+                <td className={cell}><ProposalsFact event={event} /></td>
+                <td className={cell}><VolunteersFact event={event} /></td>
+                <td className={cell}>{event.organisers}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
 
@@ -290,12 +349,8 @@ function AnalyticsBody({ analytics }: { analytics: GdgAnalytics }) {
         ) : (
           <>
             <SubmissionsOverTimeChart entries={meetupProposals.submittedAt.map((submittedAt) => ({ submittedAt }))} noun="proposals" accent="green" />
-            <div className="grid sm:grid-cols-2 gap-3">
-              <BreakdownCard title="How proposals arrived">
-                {meetupProposals.bySource.map(([source, count]) => (
-                  <BarRow key={source} label={source} count={count} total={meetupProposals.total} barClass="bg-google-green" />
-                ))}
-              </BreakdownCard>
+            <div className="grid items-start sm:grid-cols-2 gap-3">
+              <ChannelsCard title="How proposals arrived" channels={meetupProposals.bySource} total={meetupProposals.total} noun="proposals" barClass="bg-google-green" />
             </div>
           </>
         )}

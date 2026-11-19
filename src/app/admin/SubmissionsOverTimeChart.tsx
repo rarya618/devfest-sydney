@@ -70,6 +70,8 @@ export default function SubmissionsOverTimeChart({ entries, noun, accent }: Prop
   const svgRef = useRef<SVGSVGElement>(null);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  // How far the 640-unit drawing is scaled on screen, so labels can be sized to read at 12px.
+  const [scale, setScale] = useState(1);
 
   useEffect(() => {
     const query = window.matchMedia('(max-width: 639px)');
@@ -79,8 +81,19 @@ export default function SubmissionsOverTimeChart({ entries, noun, accent }: Prop
     return () => query.removeEventListener('change', handleChange);
   }, []);
 
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const measure = () => setScale(svg.getBoundingClientRect().width / CHART_WIDTH || 1);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(svg);
+    return () => observer.disconnect();
+  }, [points.length]);
+
   const chartHeight = isMobile ? CHART_HEIGHT_MOBILE : CHART_HEIGHT;
-  const labelFontSize = isMobile ? 13 : 9;
+  // 12px on screen whatever the width: the drawing shrinks on a phone, so its units grow.
+  const labelFontSize = Math.min(Math.max(Math.ceil(12 / scale), 9), 24);
   const paddingLeft = isMobile ? 40 : PADDING_LEFT;
   const maxCumulative = points.length > 0 ? points[points.length - 1].cumulative : 0;
   const plotWidth = CHART_WIDTH - paddingLeft - PADDING_RIGHT;
@@ -206,8 +219,8 @@ export default function SubmissionsOverTimeChart({ entries, noun, accent }: Prop
         )}
       </div>
 
-      <details className="mt-4">
-        <summary className="text-xs font-normal text-white/50 cursor-pointer select-none">View as table</summary>
+      <details className="mt-2">
+        <summary className="inline-flex min-h-11 items-center text-xs font-normal text-white/60 cursor-pointer select-none">View as table</summary>
         <div className="mt-3 overflow-x-auto">
           <table className="w-full text-xs">
             <thead>

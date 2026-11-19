@@ -47,7 +47,7 @@ export default function AnalyticsView({ activeTab, submissions, volunteers, show
                 href={tab === 'speakers' ? '/admin/devfest/analytics' : `/admin/devfest/analytics?tab=${tab}`}
                 aria-current={active ? 'page' : undefined}
                 aria-label={`Show ${TAB_LABELS[tab]} results`}
-                className={`inline-flex items-center gap-2 shrink-0 text-sm px-3.5 py-1.5 rounded-full border transition-colors ${
+                className={`inline-flex min-h-11 md:min-h-0 items-center gap-2 shrink-0 text-sm px-3.5 py-1.5 rounded-full border transition-colors ${
                   active
                     ? 'bg-white/[0.1] border-white/15 text-white font-bold'
                     : 'border-white/10 text-white/70 font-bold hover:bg-white/[0.08] hover:text-white'
