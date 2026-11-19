@@ -31,7 +31,7 @@ interface DecisionButtonsProps {
 }
 
 const pillBase =
-  'press inline-flex items-center justify-center gap-1.5 w-full min-w-[7.5rem] px-3.5 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:opacity-50 disabled:cursor-not-allowed';
+  'press inline-flex items-center justify-center gap-1.5 w-full h-8 px-3.5 rounded-full text-sm font-bold whitespace-nowrap transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:opacity-50 disabled:cursor-not-allowed';
 export const ACCEPT_PILL_CLASSES = `${pillBase} bg-google-green-deep text-white hover:opacity-85 focus-visible:ring-google-blue`;
 const REJECT_PILL_CLASSES = `${pillBase} border border-white/35 text-off-white hover:border-white focus-visible:ring-google-blue`;
 
@@ -40,7 +40,7 @@ export default function DecisionButtons({ subject, accept, reject, disabled, acc
     <div
       role="group"
       aria-label={`Decide on ${subject}`}
-      className={`${layout === 'row' ? 'flex-row-reverse items-center' : 'flex-col items-stretch'} flex gap-2 ${className}`}
+      className={`${layout === 'row' ? 'flex-row-reverse items-center [&>*]:min-w-[7.5rem]' : 'flex-col items-stretch'} flex gap-2 ${className}`}
     >
       {acceptTrigger ? (
         acceptTrigger(ACCEPT_PILL_CLASSES)
