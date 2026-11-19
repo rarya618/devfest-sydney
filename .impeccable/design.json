@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-18T14:53:41+00:00",
+  "generatedAt": "2026-11-19T07:08:53+00:00",
   "title": "Design System: GDG Sydney back office",
   "extensions": {
     "colorMeta": {
@@ -265,6 +265,11 @@
         "name": "alert-float",
         "value": "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
         "purpose": "The bottom-left error alert (Tailwind shadow-xl)."
+      },
+      {
+        "name": "floating-menu",
+        "value": "0 12px 32px rgba(0,0,0,0.45)",
+        "purpose": "The admin's More menus and the dropdown's open list, which float over the content they belong to."
       }
     ],
     "motion": [
@@ -334,6 +339,11 @@
         "purpose": "The error alert."
       },
       {
+        "name": "select-list-in",
+        "value": "180ms ease-settle, fade and 4px toward the field",
+        "purpose": "The dropdown's open list arriving (.select-list in globals.css); down from above when it opens below the field, up when above."
+      },
+      {
         "name": "reduced-motion",
         "value": "no swing, tilt, travel, stagger, ruler draw, marker pop, stage morph or press; all durations 0.01ms",
         "purpose": "prefers-reduced-motion: reduce."
@@ -394,6 +404,14 @@
       "description": "Labelled input with hint, blue focus and an error state under the field.",
       "html": "<label class=\"ds-label\" for=\"ds-tagline\">Tagline</label><input id=\"ds-tagline\" class=\"ds-input\" placeholder=\"Developer advocate at Example\"><p class=\"ds-hint\">Shown under your name.</p><input class=\"ds-input ds-input-error\" value=\"not a url\" aria-invalid=\"true\"><p class=\"ds-error\">Enter a link that starts with https://</p>",
       "css": ".ds-label{font-family:'Google Sans',sans-serif;display:block;margin-bottom:6px;font-size:14px;font-weight:700;color:rgba(255,255,255,.85);}.ds-input{font-family:'Google Sans',sans-serif;display:block;width:100%;box-sizing:border-box;padding:10px 20px;border:1px solid rgba(255,255,255,.35);border-radius:8px;background:rgba(255,255,255,.05);color:#fff;font-size:16px;outline:none;transition:border-color .15s,background-color .15s;}.ds-input::placeholder{color:rgba(255,255,255,.6);}.ds-input:focus{background:rgba(255,255,255,.08);border-color:#4285F4;box-shadow:0 0 0 2px rgba(66,133,244,.4);}.ds-input-error{margin-top:16px;border-color:#f28b82;background:rgba(234,67,53,.05);}.ds-hint{font-family:'Google Sans',sans-serif;margin:6px 0 0;font-size:12px;color:rgba(255,255,255,.5);}.ds-error{font-family:'Google Sans',sans-serif;margin:6px 0 0;font-size:12px;color:#f28b82;}"
+    },
+    {
+      "name": "Dropdown",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Select.tsx: the field's own look closed, a chevron that turns over open, and a raised-grey list in the top layer with a Google Blue tick on the chosen option. Never a native <select>.",
+      "html": "<label class=\"ds-select-label\" for=\"ds-select\">Your favourite session</label><button id=\"ds-select\" type=\"button\" role=\"combobox\" aria-expanded=\"true\" class=\"ds-select-trigger\"><span>10:50 am · You built an Agent. What next?</span><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 6.25 8 10l4-3.75\"/></svg></button><ul role=\"listbox\" class=\"ds-select-list\"><li role=\"option\" aria-selected=\"false\" class=\"ds-select-option\"><span class=\"ds-select-tick\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m3.5 8.5 3 3 6-7\"/></svg></span><span>Skip this one</span></li><li role=\"option\" aria-selected=\"false\" class=\"ds-select-option ds-select-active\"><span class=\"ds-select-tick\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m3.5 8.5 3 3 6-7\"/></svg></span><span>10:15 am · AI Skills three ways</span></li><li role=\"option\" aria-selected=\"true\" class=\"ds-select-option ds-select-chosen\"><span class=\"ds-select-tick\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m3.5 8.5 3 3 6-7\"/></svg></span><span>10:50 am · You built an Agent. What next?</span></li><li role=\"option\" aria-selected=\"false\" class=\"ds-select-option\"><span class=\"ds-select-tick\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m3.5 8.5 3 3 6-7\"/></svg></span><span>10:50 am · Hands-On Android App Building with Gemini in Android Studio</span></li></ul>",
+      "css": ".ds-select-label{font-family:'Google Sans',sans-serif;display:block;margin-bottom:6px;font-size:14px;font-weight:700;color:rgba(255,255,255,.85);}.ds-select-trigger{font-family:'Google Sans',sans-serif;display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;box-sizing:border-box;padding:10px 20px;border:1px solid #4285F4;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;font-size:16px;text-align:left;cursor:pointer;box-shadow:0 0 0 2px rgba(66,133,244,.4);outline:none;}.ds-select-trigger svg{width:16px;height:16px;flex-shrink:0;opacity:.7;transform:rotate(180deg);transition:transform .2s cubic-bezier(0.16,1,0.3,1);}.ds-select-list{list-style:none;margin:6px 0 0;padding:6px;max-height:320px;overflow-y:auto;background:#303030;border:1px solid rgba(255,255,255,.1);border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.45);font-family:'Google Sans',sans-serif;font-size:16px;color:#f0f0f0;animation:ds-select-in .18s cubic-bezier(0.16,1,0.3,1) both;}.ds-select-option{display:flex;align-items:flex-start;gap:10px;padding:8px 16px 8px 10px;border-radius:8px;color:rgba(255,255,255,.8);cursor:pointer;transition:background-color .15s;}.ds-select-option:hover,.ds-select-active{background:rgba(255,255,255,.08);}.ds-select-chosen{font-weight:700;color:#f0f0f0;}.ds-select-tick{display:inline-flex;width:16px;height:16px;flex-shrink:0;margin-top:4px;color:#4285F4;visibility:hidden;}.ds-select-chosen .ds-select-tick{visibility:visible;}.ds-select-tick svg{width:16px;height:16px;}@keyframes ds-select-in{from{opacity:0;transform:translateY(-4px);}}"
     },
     {
       "name": "Event Chips",
@@ -482,7 +500,7 @@
       },
       {
         "name": "The Only Thing That Hangs Rule",
-        "body": "Only the badge casts a shadow. Panels, cards, strips and rows stay flat and separate by tone.",
+        "body": "Only the badge casts a shadow. Panels, cards, strips and rows stay flat and separate by tone. Things that float above the page for a moment (the alert, menus, the dropdown's list) are the exception.",
         "section": "elevation"
       }
     ],
