@@ -301,9 +301,10 @@ Flat by default. Cards and panels, the agenda card included, are opaque grey fil
 - **Clip** (`box-shadow: 0 4px 8px -2px rgba(0,0,0,0.5)`): the lanyard clip.
 - **Punched slot** (`box-shadow: inset 0 1px 2px rgba(0,0,0,0.6)`): the slot cut into the top of a badge.
 - **Floating alert** (Tailwind `shadow-xl`): the bottom-left error alert.
+- **Floating menu** (`box-shadow: 0 12px 32px rgba(0,0,0,0.45)`): the admin's More menus and the dropdown's open list, which float over the content they belong to.
 
 ### Named Rules
-**The Only Thing That Hangs Rule.** Only the badge casts a shadow. Panels, cards, strips and rows stay flat and separate by tone.
+**The Only Thing That Hangs Rule.** Only the badge casts a shadow. Panels, cards, strips and rows stay flat and separate by tone. Things that float above the page for a moment (the alert, menus, the dropdown's list) are the exception.
 
 ## Shapes
 
@@ -337,6 +338,7 @@ Confident pills that give slightly under the finger.
 - **Style:** 5% white fill, 35% white border, 8px radius, 10px by 20px, white 16px text, placeholders at white 60%.
 - **Focus:** fill rises to 8%, the border goes solid Google Blue and a 2px ring at 40% blue sits outside it.
 - **Error:** the border goes Red 300 over a 5% red tint, and the message sits under the field in Red 300 at 12px, tied in with `aria-describedby`.
+- **Dropdowns:** never a native `<select>`, whose open list the browser draws. `src/components/Select.tsx` (a select-only combobox) takes the field's own classes closed, with a 16px chevron at white 70% that turns over as it opens. The open list sits in the top layer, 6px from the field: `#303030`, a 10% white outline, 16px radius, 6px padding, the floating menu shadow, as wide as the field (a small pill picker may grow to 320px) and up to 320px tall, opening upward when there is more room above. Rows are 8px-radius, white at 80%, 8% white behind the highlighted one (12px tall padding on touch); the chosen one is Bold off-white with a Google Blue tick. It fades in, settling 4px toward the field, over 180ms on the settle curve. Long labels wrap.
 - **Options:** radio choices are 16px-radius cards (35% border, 4% fill); selected is a Google Blue border on a 15% blue tint. Checkboxes are 20px, `accent-color` Google Blue, with a solid blue focus ring.
 - **Labels and hints:** Bold 14px label above, 12px hint below at white 50%.
 
