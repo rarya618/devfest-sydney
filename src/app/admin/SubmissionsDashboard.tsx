@@ -1268,7 +1268,6 @@ export default function SubmissionsDashboard({ submissions }: Props) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [isBulkPending, startBulkTransition] = useTransition();
-  const [isConfirmingRejectionEmails, setIsConfirmingRejectionEmails] = useState(false);
   const [rejectionEmailProgress, setRejectionEmailProgress] = useState<{ sent: number; total: number } | null>(null);
 
   // Worked out over every submission, not just the filtered view: a person's accepted talk
@@ -1419,7 +1418,6 @@ export default function SubmissionsDashboard({ submissions }: Props) {
 
   function clearSelection() {
     setSelectedIds(new Set());
-    setIsConfirmingRejectionEmails(false);
   }
 
   function runBulkAction(
@@ -1478,7 +1476,6 @@ export default function SubmissionsDashboard({ submissions }: Props) {
 
   function handleBulkSendRejectionEmails() {
     const targets = unsentRejectionTargets;
-    setIsConfirmingRejectionEmails(false);
     if (targets.length === 0) return;
 
     startBulkTransition(async () => {
@@ -1604,58 +1601,73 @@ export default function SubmissionsDashboard({ submissions }: Props) {
             {selectedCount > 0 ? (
               <div key="bulk-actions" className="flex items-center gap-2 flex-wrap animate-fade-in-fast">
                 <span className="shrink-0 text-sm text-white/55 mr-2">{selectedCount} selected</span>
-                <button
-                  onClick={handleBulkReject}
-                  disabled={isBulkPending}
-                  aria-label={`Reject ${selectedCount} selected submissions`}
-                  className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-red-deep text-white hover:opacity-90 transition-colors disabled:opacity-60"
+                <ConfirmAction
+                  tone="danger"
+                  align="left"
+                  message={`Mark ${selectedCount} selected ${selectedCount === 1 ? 'proposal' : 'proposals'} as not selected?`}
+                  detail="Only pending ones change. No email is sent: send rejection emails afterwards."
+                  confirmLabel="Not this time"
+                  onConfirm={handleBulkReject}
+                  className="inline-flex shrink-0"
                 >
-                  Reject
-                </button>
-                <button
-                  onClick={handleBulkAccept}
-                  disabled={isBulkPending}
-                  aria-label={`Accept ${selectedCount} selected submissions`}
-                  className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-green-deep text-white hover:opacity-90 transition-colors disabled:opacity-60"
+                  {(triggerProps) => (
+                    <button
+                      {...triggerProps}
+                      disabled={isBulkPending}
+                      aria-label={`Not this time: ${selectedCount} selected submissions`}
+                      className="press shrink-0 h-10 text-sm font-bold px-4 rounded-full border border-white/35 text-off-white hover:border-white transition-colors disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
+                    >
+                      Not this time
+                    </button>
+                  )}
+                </ConfirmAction>
+                <ConfirmAction
+                  tone="accept"
+                  align="left"
+                  message={`Accept ${selectedCount} selected ${selectedCount === 1 ? 'proposal' : 'proposals'}?`}
+                  detail="Only pending ones change. Each talk joins the lineup with its speaker profile. No email is sent yet."
+                  confirmLabel="Accept"
+                  onConfirm={handleBulkAccept}
+                  className="inline-flex shrink-0"
                 >
-                  Accept
-                </button>
+                  {(triggerProps) => (
+                    <button
+                      {...triggerProps}
+                      disabled={isBulkPending}
+                      aria-label={`Accept ${selectedCount} selected submissions`}
+                      className="press shrink-0 h-10 text-sm font-bold px-4 rounded-full bg-google-green-deep text-white hover:opacity-85 transition-opacity disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue focus-visible:ring-offset-2 focus-visible:ring-offset-black-02"
+                    >
+                      Accept
+                    </button>
+                  )}
+                </ConfirmAction>
                 {rejectionEmailProgress ? (
                   <span role="status" className="shrink-0 h-10 inline-flex items-center text-sm text-white/70 px-2">
                     Sending {rejectionEmailProgress.sent} of {rejectionEmailProgress.total} rejection emails
                   </span>
-                ) : isConfirmingRejectionEmails ? (
-                  <span className="shrink-0 inline-flex items-center gap-2">
-                    <span className="text-sm text-white/70">
-                      Email {unsentRejectionTargets.length} {unsentRejectionTargets.length === 1 ? 'speaker' : 'speakers'}? This can&apos;t be undone.
-                    </span>
-                    <button
-                      onClick={() => setIsConfirmingRejectionEmails(false)}
-                      aria-label="Cancel sending rejection emails"
-                      className="shrink-0 h-10 text-sm px-4 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleBulkSendRejectionEmails}
-                      disabled={isBulkPending || unsentRejectionTargets.length === 0}
-                      aria-label={`Send rejection emails to ${unsentRejectionTargets.length} selected speakers`}
-                      className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-60"
-                    >
-                      Send
-                    </button>
-                  </span>
                 ) : (
                   unsentRejectionTargets.length > 0 && (
-                    <button
-                      onClick={() => setIsConfirmingRejectionEmails(true)}
-                      disabled={isBulkPending}
-                      aria-label={`Email ${unsentRejectionTargets.length} selected rejected ${unsentRejectionTargets.length === 1 ? 'person' : 'people'} who haven't been told yet`}
-                      title="One email per person. Skips anyone already emailed, speaking, or with a proposal still pending."
-                      className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white transition-colors disabled:opacity-60"
+                    <ConfirmAction
+                      tone="send"
+                      align="left"
+                      message={`Email ${unsentRejectionTargets.length} ${unsentRejectionTargets.length === 1 ? 'person' : 'people'} that their talk wasn't selected?`}
+                      detail="One email per person, inviting them to propose to a meetup. Anyone already emailed, speaking, or with a proposal still pending is skipped. Emails can't be unsent."
+                      confirmLabel={`Send ${unsentRejectionTargets.length}`}
+                      onConfirm={handleBulkSendRejectionEmails}
+                      className="inline-flex shrink-0"
                     >
-                      Email {unsentRejectionTargets.length} {unsentRejectionTargets.length === 1 ? 'person' : 'people'}
-                    </button>
+                      {(triggerProps) => (
+                        <button
+                          {...triggerProps}
+                          disabled={isBulkPending}
+                          aria-label={`Email ${unsentRejectionTargets.length} selected rejected ${unsentRejectionTargets.length === 1 ? 'person' : 'people'} who haven't been told yet`}
+                          title="One email per person. Skips anyone already emailed, speaking, or with a proposal still pending."
+                          className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white transition-colors disabled:opacity-60"
+                        >
+                          Email {unsentRejectionTargets.length} {unsentRejectionTargets.length === 1 ? 'person' : 'people'}
+                        </button>
+                      )}
+                    </ConfirmAction>
                   )
                 )}
                 <button
