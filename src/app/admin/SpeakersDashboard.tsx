@@ -26,7 +26,8 @@ import HistoryDisclosure, { stampedOn, type HistoryRow } from './HistoryDisclosu
 import ConfirmAction from './ConfirmAction';
 import AdminSearch from './AdminSearch';
 import SidePanel from './SidePanel';
-import { Chip, StatusLabel, type StatusTone } from './Chips';
+import { Chip, StatusLabel } from './Chips';
+import { acceptedStatus } from './recordStatus';
 
 // The speaker card's history rows. Same shape as the crew card's, so the two dashboards
 // read the same way; the dates themselves differ because a speaker is promoted from a
@@ -191,7 +192,6 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
   const [editing, setEditing] = useState(false);
   const [addingCoSpeaker, setAddingCoSpeaker] = useState(false);
   const isCoSpeaker = Boolean(speaker.coSpeakerOf);
-  const confirmation = CONFIRMATION_CHIP[speaker.confirmation];
   const missing = missingProfileParts(speaker);
 
 
@@ -278,9 +278,9 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
             <h2 className="font-bold text-white text-base leading-snug">{speaker.name}</h2>
-            <span title={confirmation.title} className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${confirmation.className}`}>
-              {confirmation.label}
-            </span>
+            <StatusLabel tone={acceptedStatus(speaker.confirmation).tone} title={acceptedStatus(speaker.confirmation).title}>
+              {acceptedStatus(speaker.confirmation).label}
+            </StatusLabel>
             {isCoSpeaker && (
               <span className="text-xs font-bold text-google-blue-light">
                 with {leadSpeaker?.name ?? 'a speaker no longer in the lineup'}
@@ -572,14 +572,6 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
   );
 }
 
-// Where a speaker stands, in the portal's state colours.
-const CONFIRMATION_STATUS: Record<SpeakerConfirmation, { tone: StatusTone; label: string }> = {
-  confirmed: { tone: 'good', label: 'Confirmed' },
-  awaiting: { tone: 'waiting', label: 'Awaiting confirmation' },
-  'not-emailed': { tone: 'waiting', label: 'Not emailed' },
-  unknown: { tone: 'done', label: 'Unknown' },
-};
-
 const NEXT_STEP_PILL =
   'press inline-flex items-center justify-center h-8 px-3.5 rounded-full border border-white/35 text-sm font-bold text-off-white whitespace-nowrap hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue';
 
@@ -591,7 +583,7 @@ function LineupRow(props: LineupCardProps) {
   const [isPending, startTransition] = useTransition();
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const isCoSpeaker = Boolean(speaker.coSpeakerOf);
-  const status = CONFIRMATION_STATUS[speaker.confirmation];
+  const status = acceptedStatus(speaker.confirmation);
   const missing = missingProfileParts(speaker);
   const canEmail = !isCoSpeaker && speaker.confirmation !== 'unknown';
   const canSendTicket = speaker.confirmation === 'confirmed';
@@ -681,7 +673,7 @@ function LineupRow(props: LineupCardProps) {
         )}
       </div>
       <span className="hidden md:block"><Chip dotClass={TRACK_DOT_COLORS[speaker.track]}>{TRACK_LABELS[speaker.track]}</Chip></span>
-      <span className="hidden md:block"><StatusLabel tone={status.tone} title={CONFIRMATION_CHIP[speaker.confirmation].title}>{status.label}</StatusLabel></span>
+      <span className="hidden md:block"><StatusLabel tone={status.tone} title={status.title}>{status.label}</StatusLabel></span>
       <span className="col-span-full md:col-span-1 flex justify-start md:justify-end pl-14 md:pl-0 max-md:empty:hidden">{nextStep}</span>
       <button
         type="button"

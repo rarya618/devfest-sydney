@@ -12,10 +12,7 @@ import {
 import Alert from '@/components/Alert';
 import { formatDate } from '@/lib/format';
 import {
-  VOLUNTEER_STATUS_DOT_STYLES,
-  VOLUNTEER_STATUS_LABELS,
   VOLUNTEER_AREA_LABELS,
-  VOLUNTEER_CONFIRMATION_CHIPS,
   GDG_ON_CAMPUS_CHAPTER_LABELS,
 } from '@/lib/volunteerLabels';
 import type { ReviewerNote, VolunteerArea, VolunteerStatus, VolunteerSubmission } from '@/lib/types';
@@ -27,6 +24,8 @@ import DecisionButtons from './DecisionButtons';
 import { ExpandButton, MoreIcon, RAIL_CLASSES, RAIL_ICON_CLASSES, RAIL_PILL_CLASSES, RAIL_TEXT_BUTTON_CLASSES } from './RailButtons';
 import AdminSearch from './AdminSearch';
 import FilterChipRow from './FilterChipRow';
+import { StatusLabel } from './Chips';
+import { decisionStatus } from './recordStatus';
 
 interface ReviewerNotesPanelProps {
   volunteerId: string;
@@ -103,6 +102,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
   const [isPending, startTransition] = useTransition();
   const [notesOpen, setNotesOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const status = decisionStatus(volunteer.status, volunteer.confirmation);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement>(null);
 
@@ -156,16 +156,6 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
       <div className="flex-1 min-w-0 flex flex-col">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
         <h2 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{volunteer.name}</h2>
-        {/* Only on accepted signups: "Not emailed" against a pending one would read as a
-            task, when the thing to do first is decide. */}
-        {volunteer.status === 'accepted' && (
-          <span
-            title={VOLUNTEER_CONFIRMATION_CHIPS[volunteer.confirmation].title}
-            className={`text-xs font-bold px-1.5 py-0.5 rounded ${VOLUNTEER_CONFIRMATION_CHIPS[volunteer.confirmation].className}`}
-          >
-            {VOLUNTEER_CONFIRMATION_CHIPS[volunteer.confirmation].label}
-          </span>
-        )}
       </div>
 
       <div className="mb-3">
@@ -264,10 +254,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
       </div>
 
       <div className="flex items-center gap-3 mt-auto pt-2">
-        <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${VOLUNTEER_STATUS_DOT_STYLES[volunteer.status].text}`}>
-          <span className={`w-[5px] h-[5px] rounded-full ${VOLUNTEER_STATUS_DOT_STYLES[volunteer.status].dot}`} />
-          {VOLUNTEER_STATUS_LABELS[volunteer.status]}
-        </span>
+        <StatusLabel tone={status.tone} title={status.title}>{status.label}</StatusLabel>
         <span className="text-white/50 text-xs font-bold">&middot;</span>
         <span className="text-xs font-bold text-white/55">{formatDate(volunteer.submittedAt)}</span>
       </div>

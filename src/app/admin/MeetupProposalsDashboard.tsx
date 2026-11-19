@@ -17,8 +17,6 @@ import {
   MEETUP_FORMATS,
   MEETUP_FORMAT_LABELS,
   MEETUP_FORMAT_SHORT_LABELS,
-  MEETUP_STATUS_DOT_STYLES,
-  MEETUP_STATUS_LABELS,
 } from '@/lib/meetupProposalLabels';
 import type { MeetupFormat, MeetupProposal, MeetupProposalStatus, ReviewerNote } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
@@ -26,6 +24,8 @@ import ConfirmAction from './ConfirmAction';
 import DecisionButtons from './DecisionButtons';
 import { ExpandButton, MoreIcon, RAIL_CLASSES, RAIL_ICON_CLASSES, RAIL_PILL_CLASSES, RAIL_TEXT_BUTTON_CLASSES } from './RailButtons';
 import FilterChipRow from './FilterChipRow';
+import { StatusLabel } from './Chips';
+import { decisionStatus } from './recordStatus';
 
 // Closes a popover on an outside click or Escape.
 function useDismissable(isOpen: boolean, containerRef: React.RefObject<HTMLDivElement | null>, onDismiss: () => void) {
@@ -128,25 +128,6 @@ export interface MeetupEventOption {
   name: string;
 }
 
-// The Not emailed / Awaiting / Confirmed chip, as on DevFest > Speakers (stage 4f).
-const CONFIRMATION_CHIPS: Record<MeetupProposal['confirmation'], { label: string; className: string; title: string }> = {
-  'not-emailed': {
-    label: 'Not emailed',
-    className: 'bg-google-yellow/15 text-google-yellow border-google-yellow/25',
-    title: 'Accepted, but the speaker hasn\'t been told. Send the acceptance email with the envelope button.',
-  },
-  awaiting: {
-    label: 'Awaiting confirmation',
-    className: 'bg-white/[0.06] text-white/70 border-white/10',
-    title: 'The acceptance email has gone; the speaker hasn\'t confirmed yet.',
-  },
-  confirmed: {
-    label: 'Confirmed',
-    className: 'bg-google-green/15 text-google-green-light border-google-green/25',
-    title: 'The speaker has confirmed. They now appear in the event\'s public lineup.',
-  },
-  unknown: { label: 'Unknown', className: 'bg-white/[0.06] text-white/70 border-white/10', title: '' },
-};
 
 interface MeetupProposalRowProps {
   proposal: MeetupProposal;
@@ -164,6 +145,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
   const [notesOpen, setNotesOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const status = decisionStatus(proposal.status, proposal.confirmation);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement>(null);
   const closeMoreMenu = useCallback(() => setMoreOpen(false), []);
@@ -244,14 +226,6 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
                 {eventNames[proposal.eventId] ?? 'Event removed'}
               </span>
             )}
-            {isAccepted && (
-              <span
-                title={CONFIRMATION_CHIPS[proposal.confirmation].title}
-                className={`inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border font-bold ${CONFIRMATION_CHIPS[proposal.confirmation].className}`}
-              >
-                {CONFIRMATION_CHIPS[proposal.confirmation].label}
-              </span>
-            )}
             {proposal.source === 'api' && (
               <span
                 title="Sent through the proposal API rather than the gdgsydney.com/speak form, usually by an AI agent on the speaker's behalf. Check it reads like them before accepting."
@@ -299,10 +273,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
           </div>
 
           <div className="flex items-center gap-3 mt-auto pt-2">
-            <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${MEETUP_STATUS_DOT_STYLES[proposal.status].text}`}>
-              <span className={`w-[5px] h-[5px] rounded-full ${MEETUP_STATUS_DOT_STYLES[proposal.status].dot}`} />
-              {MEETUP_STATUS_LABELS[proposal.status]}
-            </span>
+            <StatusLabel tone={status.tone} title={status.title}>{status.label}</StatusLabel>
             <span className="text-white/50 text-xs font-bold">&middot;</span>
             <span className="text-xs font-bold text-white/55">{formatDate(proposal.submittedAt)}</span>
             {proposal.editedAt && (

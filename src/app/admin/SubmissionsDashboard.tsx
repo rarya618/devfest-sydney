@@ -7,7 +7,6 @@ import MarkdownText from '@/components/MarkdownText';
 import Alert from '@/components/Alert';
 import { formatDate } from '@/lib/format';
 import {
-  STATUS_DOT_STYLES,
   STATUS_LABELS,
   TRACK_LABELS,
   TRACK_COLORS,
@@ -22,10 +21,11 @@ import { useMobileBarHidden } from './MobileBarContext';
 import Select from '@/components/Select';
 import ConfirmAction from './ConfirmAction';
 import SidePanel from './SidePanel';
-import { Chip, StatusLabel, type StatusTone } from './Chips';
+import { Chip, StatusLabel } from './Chips';
 import DecisionButtons from './DecisionButtons';
 import { ExpandButton, MoreIcon, RAIL_CLASSES, RAIL_ICON_CLASSES, RAIL_PILL_CLASSES, RAIL_TEXT_BUTTON_CLASSES } from './RailButtons';
 import AdminSearch from './AdminSearch';
+import { proposalStatus } from './recordStatus';
 
 // The speaker changed the proposal from the speaker portal after sending it.
 function EditedMark({ editedAt }: { editedAt: string }) {
@@ -304,85 +304,6 @@ function UndoAcceptanceButton({
   );
 }
 
-function RejectionEmailState({ submission, blocker }: { submission: Submission; blocker: RejectionEmailBlocker | null }) {
-  if (submission.rejectionEmailSentAt) {
-    return (
-      <span
-        title={`Rejection email sent ${formatDate(submission.rejectionEmailSentAt)}${submission.rejectionEmailSentBy ? ` by ${submission.rejectionEmailSentBy}` : ''}`}
-        className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
-      >
-        Emailed
-      </span>
-    );
-  }
-
-  if (blocker === 'accepted-proposal') {
-    return (
-      <span
-        title="This person has another proposal accepted, so they don't get a rejection email. Mention this talk to them yourself if you want to."
-        className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-google-green/15 text-google-green-light"
-      >
-        Speaking
-      </span>
-    );
-  }
-
-  if (blocker === 'pending-proposal') {
-    return (
-      <span
-        title="This person has another proposal waiting for review. Decide it first so they only get one email."
-        className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
-      >
-        Pending decision
-      </span>
-    );
-  }
-
-  return (
-    <span
-      title="This speaker hasn't been told yet. Send the rejection email from the action rail."
-      className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-google-yellow/15 text-google-yellow"
-    >
-      Not emailed
-    </span>
-  );
-}
-
-// Accepting a proposal and telling the speaker are separate steps, so an accepted card
-// has to show which of the two has actually happened.
-function AcceptanceState({ submission }: { submission: Submission }) {
-  if (submission.speakerConfirmedAt) {
-    return (
-      <span
-        title={`Speaker confirmed ${formatDate(submission.speakerConfirmedAt)}`}
-        className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-google-green/15 text-google-green-light"
-      >
-        Confirmed
-      </span>
-    );
-  }
-
-  if (submission.acceptanceEmailSentAt) {
-    return (
-      <span
-        title={`Acceptance email sent ${formatDate(submission.acceptanceEmailSentAt)}${submission.acceptanceEmailSentBy ? ` by ${submission.acceptanceEmailSentBy}` : ''}`}
-        className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
-      >
-        Awaiting confirmation
-      </span>
-    );
-  }
-
-  return (
-    <span
-      title="This speaker hasn't been told yet. Send the acceptance email from the actions menu."
-      className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-google-yellow/15 text-google-yellow"
-    >
-      Not emailed
-    </span>
-  );
-}
-
 interface ReviewerNotesPanelProps {
   submissionId: string;
   notes: ReviewerNote[];
@@ -504,6 +425,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
   const [isEditing, setIsEditing] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(inPanel);
+  const cardStatus = proposalStatus(submission, rejectionBlocker);
   // Content lines up under the title, past the checkbox; in the panel there's no checkbox.
   const indent = inPanel ? '' : 'pl-8';
   const [moreOpen, setMoreOpen] = useState(false);
@@ -762,15 +684,10 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
       </div>
 
       <div className={`flex items-center gap-3 mt-auto pt-2 ${indent}`}>
-        <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${STATUS_DOT_STYLES[submission.status].text}`}>
-          <span className={`w-[5px] h-[5px] rounded-full ${STATUS_DOT_STYLES[submission.status].dot}`} />
-          {STATUS_LABELS[submission.status]}
-        </span>
-        <span className="text-white/50 text-xs font-bold">&middot;</span>
-        <span className="text-xs font-bold text-white/55">{formatDate(submission.submittedAt)}</span>
+        <StatusLabel tone={cardStatus.tone} title={cardStatus.title}>{cardStatus.label}</StatusLabel>
+        <span className="text-white/50 text-xs" aria-hidden="true">&middot;</span>
+        <span className="font-mono text-xs text-white/60">Submitted {formatDate(submission.submittedAt)}</span>
         {submission.editedAt && <EditedMark editedAt={submission.editedAt} />}
-        {submission.status === 'accepted' && <AcceptanceState submission={submission} />}
-        {submission.status === 'rejected' && <RejectionEmailState submission={submission} blocker={rejectionBlocker} />}
       </div>
       </div>
 
@@ -918,24 +835,13 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
   );
 }
 
-// Where a proposal stands, in the portal's state colours, once per row.
-function submissionStatus(submission: Submission): { tone: StatusTone; label: string } {
-  if (submission.status === 'pending') return { tone: 'waiting', label: 'Pending' };
-  if (submission.status === 'archived') return { tone: 'done', label: 'Archived' };
-  if (submission.status === 'rejected') return { tone: 'done', label: submission.rejectionEmailSentAt ? 'Not selected, told' : 'Not selected' };
-  if (submission.speakerTicketEmailSentAt) return { tone: 'good', label: 'Ticket sent' };
-  if (submission.speakerConfirmedAt) return { tone: 'good', label: 'Confirmed' };
-  if (submission.acceptanceEmailSentAt) return { tone: 'waiting', label: 'Awaiting confirmation' };
-  return { tone: 'good', label: 'Accepted' };
-}
-
 // A row of the proposals table: who and what, the track, where it stands, and the one thing to
 // do next as a labelled button. Everything else (abstract, links, notes, edit, history, undo)
 // is in the side panel the row opens, which holds the full card.
 function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulkActionsPending, rejectionBlocker }: SubmissionRowProps) {
   const [isPending, startTransition] = useTransition();
   const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const status = submissionStatus(submission);
+  const status = proposalStatus(submission, rejectionBlocker);
   const disabled = isPending || bulkActionsPending;
 
   function handleAction(action: (id: string) => Promise<{ error?: string }>) {
@@ -1008,8 +914,8 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
       <span className="hidden md:block"><Chip dotClass={TRACK_DOT_COLORS[submission.track]}>{TRACK_LABELS[submission.track]}</Chip></span>
 
       <span className="hidden md:flex flex-col gap-1">
-        <StatusLabel tone={status.tone}>{status.label}</StatusLabel>
-        <span className="font-mono text-xs text-white/60">{formatDate(submission.submittedAt)}</span>
+        <StatusLabel tone={status.tone} title={status.title}>{status.label}</StatusLabel>
+        <span className="font-mono text-xs text-white/60" title="Submitted">{formatDate(submission.submittedAt)}</span>
       </span>
 
       <span className="col-span-full md:col-span-1 flex justify-start md:justify-end pl-8 md:pl-0 max-md:empty:hidden">{nextStep}</span>

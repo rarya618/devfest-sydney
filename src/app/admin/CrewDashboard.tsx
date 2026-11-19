@@ -24,7 +24,8 @@ import ConfirmAction from './ConfirmAction';
 import AdminSearch from './AdminSearch';
 import FilterChipRow from './FilterChipRow';
 import SidePanel from './SidePanel';
-import { Chip, StatusLabel, type StatusTone } from './Chips';
+import { Chip, StatusLabel } from './Chips';
+import { acceptedStatus, type RecordStatus } from './recordStatus';
 
 // Neither 'unassigned' nor 'organisers' is a VolunteerArea. 'unassigned' is the absence
 // of one, and the filter reached for most while the roster is still being built;
@@ -86,7 +87,6 @@ function CrewCard({ member, onError, inPanel = false }: CrewCardProps) {
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(inPanel);
   const [editing, setEditing] = useState(false);
-  const confirmation = VOLUNTEER_CONFIRMATION_CHIPS[member.confirmation];
   const isOrganiser = member.isOrganiser;
 
 
@@ -150,9 +150,9 @@ function CrewCard({ member, onError, inPanel = false }: CrewCardProps) {
                 Organiser
               </span>
             ) : (
-              <span title={confirmation.title} className={`text-xs font-bold px-1.5 py-0.5 rounded ${confirmation.className}`}>
-                {confirmation.label}
-              </span>
+              <StatusLabel tone={acceptedStatus(member.confirmation).tone} title={acceptedStatus(member.confirmation).title}>
+                {acceptedStatus(member.confirmation).label}
+              </StatusLabel>
             )}
           </div>
 
@@ -410,13 +410,6 @@ function CrewCard({ member, onError, inPanel = false }: CrewCardProps) {
   );
 }
 
-// Where a crew member stands, in the portal's state colours.
-const CREW_STATUS: Record<VolunteerConfirmation, { tone: StatusTone; label: string }> = {
-  confirmed: { tone: 'good', label: 'Confirmed' },
-  awaiting: { tone: 'waiting', label: 'Awaiting confirmation' },
-  'not-emailed': { tone: 'waiting', label: 'Not emailed' },
-};
-
 const CREW_NEXT_STEP_PILL =
   'press inline-flex items-center justify-center h-8 px-3.5 rounded-full border border-white/35 text-sm font-bold text-off-white whitespace-nowrap hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue';
 
@@ -426,7 +419,7 @@ function CrewRow({ member, onError }: CrewCardProps) {
   const [isPending, startTransition] = useTransition();
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const isOrganiser = member.isOrganiser;
-  const status = isOrganiser ? { tone: 'done' as StatusTone, label: 'Organiser' } : CREW_STATUS[member.confirmation];
+  const status: RecordStatus = isOrganiser ? { tone: 'done', label: 'Organiser' } : acceptedStatus(member.confirmation);
 
   function run(send: () => Promise<{ error?: string }>) {
     startTransition(async () => {
