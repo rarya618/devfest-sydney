@@ -1,5 +1,5 @@
 import { initializeApp, getApps } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { connectAuthEmulator, getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
@@ -16,6 +16,12 @@ const firebaseConfig = {
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
 const auth = getAuth(app);
+
+// Emulated local dev (`npm run dev:emulated`): admin sign-in goes to the Auth emulator.
+const authEmulatorHost = process.env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST;
+if (authEmulatorHost && !auth.emulatorConfig) {
+  connectAuthEmulator(auth, `http://${authEmulatorHost}`, { disableWarnings: true });
+}
 const db = getFirestore(app);
 const storage = getStorage(app);
 

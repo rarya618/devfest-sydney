@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test": "node --test 'src/**/*.test.ts'"
+    "test": "node --test 'src/**/*.test.ts'",
+    "emulators": "firebase emulators:start --only firestore,auth --project demo-gdg-sydney",
+    "seed:emulated": "FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 node scripts/seed-emulated.mjs",
+    "mail:emulated": "node scripts/dev-mail-catcher.mjs",
+    "dev:emulated": "FIREBASE_PROJECT_ID=demo-gdg-sydney GCLOUD_PROJECT=demo-gdg-sydney NEXT_PUBLIC_FIREBASE_PROJECT_ID=demo-gdg-sydney FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=demo-gdg-sydney.appspot.com RESEND_BASE_URL=http://127.0.0.1:3102 RESEND_API_KEY=re_emulated NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3001 NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY= NEXT_PUBLIC_GA_MEASUREMENT_ID= NEXT_DIST_DIR=.next-emulated next dev --turbopack -p 3001 -H 127.0.0.1"
   },
   "dependencies": {
     "firebase": "^12.14.0",
