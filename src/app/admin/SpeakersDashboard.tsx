@@ -407,12 +407,13 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
                   disabled={isPending}
                   aria-label={`${alreadyEmailed ? 'Resend' : 'Send'} acceptance email to ${speaker.name} for: ${speaker.talkTitle}`}
                   title={alreadyEmailed ? 'Resend acceptance email' : 'Send acceptance email'}
-                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${alreadyEmailed ? quietIcon : 'bg-google-green/15 text-google-green-light hover:bg-google-green-deep hover:text-white'}`}
+                  className={`relative inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${quietIcon}`}
                 >
                   <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                     <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
                   </svg>
+                  {!alreadyEmailed && <span aria-hidden="true" className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-google-yellow ring-2 ring-surface" />}
                 </button>
               )}
             </ConfirmAction>
@@ -432,12 +433,13 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
                   disabled={isPending}
                   aria-label={`${ticketSent ? 'Resend' : 'Send'} the complimentary speaker ticket to ${speaker.name}`}
                   title={ticketSent ? 'Resend speaker ticket' : 'Send speaker ticket'}
-                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${ticketSent ? quietIcon : 'bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white'}`}
+                  className={`relative inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${quietIcon}`}
                 >
                   <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 6.25V4.5a1 1 0 011-1h11a1 1 0 011 1v1.75a1.75 1.75 0 000 3.5V11.5a1 1 0 01-1 1h-11a1 1 0 01-1-1V9.75a1.75 1.75 0 000-3.5z" />
                     <path strokeLinecap="round" strokeDasharray="1.5 1.5" d="M10 4v8" />
                   </svg>
+                  {!ticketSent && <span aria-hidden="true" className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-google-yellow ring-2 ring-surface" />}
                 </button>
               )}
             </ConfirmAction>
@@ -457,12 +459,13 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
                   disabled={isPending}
                   aria-label={`${INVITE_BUTTON_TITLE[inviteAction]} to ${speaker.name}`}
                   title={INVITE_BUTTON_TITLE[inviteAction]}
-                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${inviteNeedsSending ? 'bg-google-yellow/15 text-google-yellow hover:bg-google-yellow hover:text-black-02' : quietIcon}`}
+                  className={`relative inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${quietIcon}`}
                 >
                   <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                     <rect x="2" y="3" width="12" height="11" rx="1.5" />
                     <path strokeLinecap="round" d="M2 6.5h12M5.5 1.75v2.5M10.5 1.75v2.5" />
                   </svg>
+                  {inviteNeedsSending && <span aria-hidden="true" className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-google-yellow ring-2 ring-surface" />}
                 </button>
               )}
             </ConfirmAction>
@@ -482,11 +485,12 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
                   disabled={isPending}
                   aria-label={`${thanksSent ? 'Resend' : 'Send'} the thank-you email with photos, mug and Asana trial to ${speaker.name}`}
                   title={thanksSent ? 'Resend thank-you' : 'Send thank-you'}
-                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${thanksSent ? quietIcon : 'bg-google-green/15 text-google-green-light hover:bg-google-green-deep hover:text-white'}`}
+                  className={`relative inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${quietIcon}`}
                 >
                   <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                     <path strokeLinejoin="round" d="M8 13.5S1.75 9.75 1.75 5.75A3 3 0 018 4a3 3 0 016.25 1.75C14.25 9.75 8 13.5 8 13.5z" />
                   </svg>
+                  {!thanksSent && <span aria-hidden="true" className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-google-yellow ring-2 ring-surface" />}
                 </button>
               )}
             </ConfirmAction>

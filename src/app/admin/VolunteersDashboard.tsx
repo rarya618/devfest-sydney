@@ -24,6 +24,7 @@ import { useRouter } from 'next/navigation';
 import Select from '@/components/Select';
 import ConfirmAction from './ConfirmAction';
 import DecisionButtons from './DecisionButtons';
+import { ExpandButton, MoreIcon, RAIL_CLASSES, RAIL_ICON_CLASSES, RAIL_PILL_CLASSES, RAIL_TEXT_BUTTON_CLASSES } from './RailButtons';
 import AdminSearch from './AdminSearch';
 import FilterChipRow from './FilterChipRow';
 
@@ -272,139 +273,125 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
       </div>
       </div>
 
-      <div className="flex flex-col items-end gap-2 shrink-0 self-start">
-          <button
-            onClick={() => setIsOpen((open) => !open)}
-            aria-expanded={isOpen}
-            aria-label={`${isOpen ? 'Collapse' : 'Expand'} details for: ${volunteer.name}`}
-            className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-          >
-            <svg
-              className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.75}
-              aria-hidden="true"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6l4 4 4-4" />
-            </svg>
-          </button>
-          {volunteer.status === 'pending' && (
-            <DecisionButtons
-              subject={`${volunteer.name}'s volunteer signup`}
-              disabled={isPending}
-              accept={{
-                message: `Accept ${volunteer.name} onto the crew?`,
-                detail: 'They move to the crew roster. No email is sent yet: send the acceptance email when you\'re ready.',
-                onConfirm: () => handleAction(acceptVolunteer),
-              }}
-              reject={{
-                message: `Turn down ${volunteer.name}'s signup?`,
-                detail: 'No email is sent, and you can move it back to pending.',
-                onConfirm: () => handleAction(rejectVolunteer),
-              }}
-            />
-          )}
-          {/* The same send this volunteer's card offers on /admin/devfest/crew, so an organiser
-              working through the review queue doesn't have to change pages to tell someone. */}
-          {volunteer.status === 'accepted' && (
-            <ConfirmAction
-              tone="send"
-              message={`${volunteer.acceptanceEmailSentAt ? 'Resend' : 'Send'} the volunteer acceptance email to ${volunteer.name}?`}
-              detail={volunteer.acceptanceEmailSentAt
-                ? `Last sent ${formatDate(volunteer.acceptanceEmailSentAt)}. They get it again, with a new date to confirm by.`
-                : 'It tells them they\'re on the crew and asks them to confirm.'}
-              confirmLabel={volunteer.acceptanceEmailSentAt ? 'Resend email' : 'Send email'}
-              onConfirm={() => handleAction(sendVolunteerAcceptanceEmail)}
-            >
-              {(triggerProps) => (
-                <button
-                  {...triggerProps}
-                  disabled={isPending}
-                  aria-label={`${volunteer.acceptanceEmailSentAt ? 'Resend' : 'Send'} the volunteer acceptance email to ${volunteer.name}`}
-                  title={volunteer.acceptanceEmailSentAt ? 'Resend acceptance email' : 'Send acceptance email'}
-                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-60 ${
-                    volunteer.acceptanceEmailSentAt
-                      ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
-                      : 'bg-google-green/15 text-google-green-light hover:bg-google-green-deep hover:text-white'
-                  }`}
-                >
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                    <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
-                  </svg>
-                </button>
-              )}
-            </ConfirmAction>
-          )}
-          {(volunteer.status === 'rejected' || volunteer.status === 'archived' || volunteer.status === 'accepted') && (
-            <button
-              onClick={() => handleAction(restoreVolunteer)}
-              disabled={isPending}
-              aria-label={`Restore volunteer signup to pending: ${volunteer.name}`}
-              title="Restore"
-              className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-            >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 4L2.5 7.5 6 11M2.5 7.5h6.5a4 4 0 010 8H7" />
-              </svg>
-            </button>
-          )}
-          <div className="relative" ref={moreMenuRef}>
-            <button
-              onClick={() => setMoreOpen((open) => !open)}
-              disabled={isPending}
-              aria-haspopup="menu"
-              aria-expanded={moreOpen}
-              aria-label={`More actions for: ${volunteer.name}`}
-              title="More actions"
-              className="relative inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                <circle cx="3" cy="8" r="1.25" />
-                <circle cx="8" cy="8" r="1.25" />
-                <circle cx="13" cy="8" r="1.25" />
-              </svg>
-              {volunteer.reviewerNotes.length > 0 && (
-                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-xs font-bold leading-none">
-                  {volunteer.reviewerNotes.length}
-                </span>
-              )}
-            </button>
-
-            {moreOpen && (
-              <div
-                role="menu"
-                className="absolute right-0 top-full mt-2 w-44 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
+      <div className={RAIL_CLASSES}>
+        <div className="flex justify-end gap-1.5">
+            <div className="relative" ref={moreMenuRef}>
+              <button
+                onClick={() => setMoreOpen((open) => !open)}
+                disabled={isPending}
+                aria-haspopup="menu"
+                aria-expanded={moreOpen}
+                aria-label={`More actions for: ${volunteer.name}`}
+                title="More actions"
+                className={RAIL_ICON_CLASSES}
               >
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    setNotesOpen((open) => !open);
-                    setMoreOpen(false);
-                  }}
-                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                <MoreIcon />
+                {volunteer.reviewerNotes.length > 0 && (
+                  <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-xs font-bold leading-none">
+                    {volunteer.reviewerNotes.length}
+                  </span>
+                )}
+              </button>
+
+              {moreOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full mt-2 w-44 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
                 >
-                  Notes{volunteer.reviewerNotes.length > 0 ? ` (${volunteer.reviewerNotes.length})` : ''}
-                </button>
-                {volunteer.status !== 'archived' && (
                   <button
                     role="menuitem"
                     onClick={() => {
-                      handleAction(archiveVolunteer);
+                      setNotesOpen((open) => !open);
                       setMoreOpen(false);
                     }}
                     className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
                   >
-                    Archive
+                    Notes{volunteer.reviewerNotes.length > 0 ? ` (${volunteer.reviewerNotes.length})` : ''}
                   </button>
-                )}
-              </div>
-            )}
-          </div>
+                  {volunteer.status !== 'archived' && (
+                    <button
+                      role="menuitem"
+                      onClick={() => {
+                        handleAction(archiveVolunteer);
+                        setMoreOpen(false);
+                      }}
+                      className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                    >
+                      Archive
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          <ExpandButton isOpen={isOpen} onToggle={() => setIsOpen((open) => !open)} subject={volunteer.name} />
         </div>
+        {volunteer.status === 'pending' && (
+          <DecisionButtons
+            subject={`${volunteer.name}'s volunteer signup`}
+            disabled={isPending}
+            accept={{
+              message: `Accept ${volunteer.name} onto the crew?`,
+              detail: 'They move to the crew roster. No email is sent yet: send the acceptance email when you\'re ready.',
+              onConfirm: () => handleAction(acceptVolunteer),
+            }}
+            reject={{
+              message: `Turn down ${volunteer.name}'s signup?`,
+              detail: 'No email is sent, and you can move it back to pending.',
+              onConfirm: () => handleAction(rejectVolunteer),
+            }}
+          />
+        )}
+        {/* The same send this volunteer's card offers on /admin/devfest/crew, so an organiser
+            working through the review queue doesn't have to change pages to tell someone. */}
+        {volunteer.status === 'accepted' && (
+          <ConfirmAction
+            tone="send"
+            message={`${volunteer.acceptanceEmailSentAt ? 'Resend' : 'Send'} the volunteer acceptance email to ${volunteer.name}?`}
+            detail={volunteer.acceptanceEmailSentAt
+              ? `Last sent ${formatDate(volunteer.acceptanceEmailSentAt)}. They get it again, with a new date to confirm by.`
+              : 'It tells them they\'re on the crew and asks them to confirm.'}
+            confirmLabel={volunteer.acceptanceEmailSentAt ? 'Resend email' : 'Send email'}
+            onConfirm={() => handleAction(sendVolunteerAcceptanceEmail)}
+            className="flex"
+          >
+            {(triggerProps) => (
+              <button
+                {...triggerProps}
+                disabled={isPending}
+                aria-label={`${volunteer.acceptanceEmailSentAt ? 'Resend' : 'Send'} the volunteer acceptance email to ${volunteer.name}`}
+                title={volunteer.acceptanceEmailSentAt ? 'Resend the acceptance email' : 'Send the acceptance email'}
+                className={RAIL_PILL_CLASSES}
+              >
+                {volunteer.acceptanceEmailSentAt ? 'Resend email' : 'Send email'}
+              </button>
+            )}
+          </ConfirmAction>
+        )}
+        {(volunteer.status === 'rejected' || volunteer.status === 'archived' || volunteer.status === 'accepted') && (
+          <ConfirmAction
+            tone="danger"
+            message={`Move ${volunteer.name} back to pending?`}
+            detail={volunteer.status === 'accepted'
+              ? 'They come off the crew and go back to the review queue. Nothing is emailed.'
+              : 'Their signup goes back to the review queue. Nothing is emailed.'}
+            confirmLabel="Move back"
+            onConfirm={() => handleAction(restoreVolunteer)}
+            className="flex"
+          >
+            {(triggerProps) => (
+              <button
+                {...triggerProps}
+                disabled={isPending}
+                aria-label={`Move ${volunteer.name}'s signup back to pending`}
+                className={RAIL_TEXT_BUTTON_CLASSES}
+              >
+                Back to pending
+              </button>
+            )}
+          </ConfirmAction>
+        )}
       </div>
+    </div>
 
       {notesOpen && (
         <ReviewerNotesPanel volunteerId={volunteer.id} notes={volunteer.reviewerNotes} onError={onError} />

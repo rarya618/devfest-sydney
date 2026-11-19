@@ -24,6 +24,7 @@ import ConfirmAction from './ConfirmAction';
 import SidePanel from './SidePanel';
 import { Chip, StatusLabel, type StatusTone } from './Chips';
 import DecisionButtons from './DecisionButtons';
+import { ExpandButton, MoreIcon, RAIL_CLASSES, RAIL_ICON_CLASSES, RAIL_PILL_CLASSES, RAIL_TEXT_BUTTON_CLASSES } from './RailButtons';
 import AdminSearch from './AdminSearch';
 
 // The speaker changed the proposal from the speaker portal after sending it.
@@ -106,7 +107,7 @@ function SendAcceptanceEmailButton({
   onSend: () => void;
   disabled: boolean;
   /** `pill`: the labelled next-step button in the proposals table. */
-  variant?: 'icon' | 'pill';
+  variant?: 'icon' | 'pill' | 'rail';
 }) {
   const alreadySent = Boolean(submission.acceptanceEmailSentAt);
   const detail = submission.speakerConfirmedAt
@@ -123,9 +124,9 @@ function SendAcceptanceEmailButton({
       confirmLabel={alreadySent ? 'Resend email' : 'Send email'}
       onConfirm={onSend}
     >
-      {(triggerProps) => variant === 'pill' ? (
-        <button {...triggerProps} type="button" disabled={disabled} aria-label={`Send acceptance email to ${submission.name} for: ${submission.talkTitle}`} className={NEXT_STEP_PILL_CLASSES}>
-          Send acceptance email
+      {(triggerProps) => variant !== 'icon' ? (
+        <button {...triggerProps} type="button" disabled={disabled} aria-label={`Send acceptance email to ${submission.name} for: ${submission.talkTitle}`} className={variant === 'rail' ? RAIL_PILL_CLASSES : NEXT_STEP_PILL_CLASSES}>
+          {variant === 'rail' ? (alreadySent ? 'Resend email' : 'Send email') : 'Send acceptance email'}
         </button>
       ) : (
         <button
@@ -162,7 +163,7 @@ function SendSpeakerTicketButton({
   onSend: () => void;
   disabled: boolean;
   /** `pill`: the labelled next-step button in the proposals table. */
-  variant?: 'icon' | 'pill';
+  variant?: 'icon' | 'pill' | 'rail';
 }) {
   const alreadySent = Boolean(submission.speakerTicketEmailSentAt);
 
@@ -176,9 +177,9 @@ function SendSpeakerTicketButton({
       confirmLabel={alreadySent ? 'Resend ticket' : 'Send ticket'}
       onConfirm={onSend}
     >
-      {(triggerProps) => variant === 'pill' ? (
-        <button {...triggerProps} type="button" disabled={disabled} aria-label={`Send the complimentary speaker ticket to ${submission.name}`} className={NEXT_STEP_PILL_CLASSES}>
-          Send ticket
+      {(triggerProps) => variant !== 'icon' ? (
+        <button {...triggerProps} type="button" disabled={disabled} aria-label={`Send the complimentary speaker ticket to ${submission.name}`} className={variant === 'rail' ? RAIL_PILL_CLASSES : NEXT_STEP_PILL_CLASSES}>
+          {variant === 'rail' ? (alreadySent ? 'Resend ticket' : 'Send ticket') : 'Send ticket'}
         </button>
       ) : (
         <button
@@ -218,7 +219,7 @@ function SendRejectionEmailButton({
   onSend: () => void;
   disabled: boolean;
   /** `pill`: the labelled next-step button in the proposals table. */
-  variant?: 'icon' | 'pill';
+  variant?: 'icon' | 'pill' | 'rail';
 }) {
   const alreadySent = Boolean(submission.rejectionEmailSentAt);
 
@@ -232,9 +233,9 @@ function SendRejectionEmailButton({
       confirmLabel={alreadySent ? 'Resend email' : 'Send email'}
       onConfirm={onSend}
     >
-      {(triggerProps) => variant === 'pill' ? (
-        <button {...triggerProps} type="button" disabled={disabled} aria-label={`Send rejection email to ${submission.name} for: ${submission.talkTitle}`} className={NEXT_STEP_PILL_CLASSES}>
-          Send rejection email
+      {(triggerProps) => variant !== 'icon' ? (
+        <button {...triggerProps} type="button" disabled={disabled} aria-label={`Send rejection email to ${submission.name} for: ${submission.talkTitle}`} className={variant === 'rail' ? RAIL_PILL_CLASSES : NEXT_STEP_PILL_CLASSES}>
+          {variant === 'rail' ? (alreadySent ? 'Resend email' : 'Send rejection email') : 'Send rejection email'}
         </button>
       ) : (
         <button
@@ -294,12 +295,9 @@ function UndoAcceptanceButton({
           {...triggerProps}
           disabled={disabled}
           aria-label={`Undo acceptance of proposal: ${submission.talkTitle}`}
-          title="Undo acceptance"
-          className="inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-full bg-white/[0.06] text-white/70 hover:bg-google-red/[0.12] hover:text-google-red-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className={RAIL_TEXT_BUTTON_CLASSES}
         >
-          <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 4L2.5 7.5 6 11M2.5 7.5h6.5a4 4 0 010 8H7" />
-          </svg>
+          Undo acceptance
         </button>
       )}
     </ConfirmAction>
@@ -776,24 +774,80 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
       </div>
       </div>
 
-      <div className="flex flex-col items-end gap-2 shrink-0 self-start">
-          <button
-            onClick={() => setIsOpen((open) => !open)}
-            aria-expanded={isOpen}
-            aria-label={`${isOpen ? 'Collapse' : 'Expand'} details for: ${submission.talkTitle}`}
-            className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-          >
-            <svg
-              className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.75}
-              aria-hidden="true"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6l4 4 4-4" />
-            </svg>
-          </button>
+      <div className={RAIL_CLASSES}>
+        <div className="flex justify-end gap-1.5">
+          <div className="relative" ref={moreMenuRef}>
+              <button
+                onClick={() => setMoreOpen((open) => !open)}
+                disabled={isPending || bulkActionsPending}
+                aria-haspopup="menu"
+                aria-expanded={moreOpen}
+                aria-label={`More actions for: ${submission.talkTitle}`}
+                title="More actions"
+                className={RAIL_ICON_CLASSES}
+              >
+                <MoreIcon />
+                {submission.reviewerNotes.length > 0 && (
+                  <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-xs font-bold leading-none">
+                    {submission.reviewerNotes.length}
+                  </span>
+                )}
+              </button>
+
+              {moreOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full mt-2 w-44 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
+                >
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      setNotesOpen((open) => !open);
+                      setMoreOpen(false);
+                    }}
+                    className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                  >
+                    Notes{submission.reviewerNotes.length > 0 ? ` (${submission.reviewerNotes.length})` : ''}
+                  </button>
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      setIsEditing(true);
+                      setMoreOpen(false);
+                    }}
+                    className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                  >
+                    Edit
+                  </button>
+                  {(submission.status === 'rejected' || submission.status === 'archived') && (
+                    <button
+                      role="menuitem"
+                      onClick={() => {
+                        handleAction(restoreSubmission);
+                        setMoreOpen(false);
+                      }}
+                      className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                    >
+                      Restore
+                    </button>
+                  )}
+                  {submission.status !== 'accepted' && submission.status !== 'archived' && (
+                    <button
+                      role="menuitem"
+                      onClick={() => {
+                        handleAction(archiveSubmission);
+                        setMoreOpen(false);
+                      }}
+                      className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                    >
+                      Archive
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          <ExpandButton isOpen={isOpen} onToggle={() => setIsOpen((open) => !open)} subject={submission.talkTitle} />
+        </div>
           {submission.status === 'pending' && (
             <DecisionButtons
               subject={`${submission.name}'s proposal: ${submission.talkTitle}`}
@@ -812,6 +866,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
           )}
           {submission.status === 'rejected' && !rejectionBlocker && (
             <SendRejectionEmailButton
+            variant="rail"
               submission={submission}
               onSend={() => handleAction(sendRejectionEmail)}
               disabled={isPending || bulkActionsPending}
@@ -819,6 +874,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
           )}
           {submission.status === 'accepted' && (
             <SendAcceptanceEmailButton
+            variant="rail"
               submission={submission}
               onSend={() => handleAction(sendAcceptanceEmail)}
               disabled={isPending || bulkActionsPending}
@@ -826,6 +882,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
           )}
           {submission.status === 'accepted' && submission.speakerConfirmedAt && (
             <SendSpeakerTicketButton
+            variant="rail"
               submission={submission}
               onSend={() => handleAction(sendSpeakerTicketEmail)}
               disabled={isPending || bulkActionsPending}
@@ -833,85 +890,12 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
           )}
           {submission.status === 'accepted' && (
             <UndoAcceptanceButton
+            wrapperClassName="flex"
               submission={submission}
               onUndo={() => handleAction(undoPromotion)}
               disabled={isPending || bulkActionsPending}
             />
           )}
-          <div className="relative" ref={moreMenuRef}>
-            <button
-              onClick={() => setMoreOpen((open) => !open)}
-              disabled={isPending || bulkActionsPending}
-              aria-haspopup="menu"
-              aria-expanded={moreOpen}
-              aria-label={`More actions for: ${submission.talkTitle}`}
-              title="More actions"
-              className="relative inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                <circle cx="3" cy="8" r="1.25" />
-                <circle cx="8" cy="8" r="1.25" />
-                <circle cx="13" cy="8" r="1.25" />
-              </svg>
-              {submission.reviewerNotes.length > 0 && (
-                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-xs font-bold leading-none">
-                  {submission.reviewerNotes.length}
-                </span>
-              )}
-            </button>
-
-            {moreOpen && (
-              <div
-                role="menu"
-                className="absolute right-0 top-full mt-2 w-44 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
-              >
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    setNotesOpen((open) => !open);
-                    setMoreOpen(false);
-                  }}
-                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                >
-                  Notes{submission.reviewerNotes.length > 0 ? ` (${submission.reviewerNotes.length})` : ''}
-                </button>
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    setIsEditing(true);
-                    setMoreOpen(false);
-                  }}
-                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                >
-                  Edit
-                </button>
-                {(submission.status === 'rejected' || submission.status === 'archived') && (
-                  <button
-                    role="menuitem"
-                    onClick={() => {
-                      handleAction(restoreSubmission);
-                      setMoreOpen(false);
-                    }}
-                    className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                  >
-                    Restore
-                  </button>
-                )}
-                {submission.status !== 'accepted' && submission.status !== 'archived' && (
-                  <button
-                    role="menuitem"
-                    onClick={() => {
-                      handleAction(archiveSubmission);
-                      setMoreOpen(false);
-                    }}
-                    className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                  >
-                    Archive
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
         </div>
       </div>
 

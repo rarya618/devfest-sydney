@@ -23,6 +23,7 @@ import type { ReviewerNote, ShowcaseStage, ShowcaseStatus, ShowcaseSubmission } 
 import { useMobileBarHidden } from './MobileBarContext';
 import ConfirmAction from './ConfirmAction';
 import DecisionButtons from './DecisionButtons';
+import { ExpandButton, MoreIcon, RAIL_CLASSES, RAIL_ICON_CLASSES, RAIL_PILL_CLASSES, RAIL_TEXT_BUTTON_CLASSES } from './RailButtons';
 import AdminSearch from './AdminSearch';
 import FilterChipRow from './FilterChipRow';
 
@@ -332,24 +333,68 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
       </div>
       </div>
 
-      <div className="flex flex-col items-end gap-2 shrink-0 self-start">
+      <div className={RAIL_CLASSES}>
+        <div className="flex justify-end gap-1.5">
+        <div className="relative" ref={moreMenuRef}>
           <button
-            onClick={() => setIsOpen((open) => !open)}
-            aria-expanded={isOpen}
-            aria-label={`${isOpen ? 'Collapse' : 'Expand'} details for: ${entry.projectName}`}
-            className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
+            onClick={() => setMoreOpen((open) => !open)}
+            disabled={isPending}
+            aria-haspopup="menu"
+            aria-expanded={moreOpen}
+            aria-label={`More actions for: ${entry.projectName}`}
+            title="More actions"
+            className={RAIL_ICON_CLASSES}
           >
-            <svg
-              className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.75}
-              aria-hidden="true"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6l4 4 4-4" />
-            </svg>
+            <MoreIcon />
+            {entry.reviewerNotes.length > 0 && (
+              <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-xs font-bold leading-none">
+                {entry.reviewerNotes.length}
+              </span>
+            )}
           </button>
+
+          {moreOpen && (
+            <div
+              role="menu"
+              className="absolute right-0 top-full mt-2 w-44 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
+            >
+              <button
+                role="menuitem"
+                onClick={() => {
+                  setNotesOpen((open) => !open);
+                  setMoreOpen(false);
+                }}
+                className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+              >
+                Notes{entry.reviewerNotes.length > 0 ? ` (${entry.reviewerNotes.length})` : ''}
+              </button>
+              <button
+                role="menuitem"
+                onClick={() => {
+                  setIsEditing(true);
+                  setMoreOpen(false);
+                }}
+                className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+              >
+                Edit
+              </button>
+              {entry.status !== 'archived' && (
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    handleAction(archiveShowcaseEntry);
+                    setMoreOpen(false);
+                  }}
+                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                >
+                  Archive
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+          <ExpandButton isOpen={isOpen} onToggle={() => setIsOpen((open) => !open)} subject={entry.projectName} />
+        </div>
           {entry.status === 'pending' && (
             <DecisionButtons
               subject={`the Builder Showcase entry ${entry.projectName}`}
@@ -368,6 +413,7 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
           )}
           {entry.status === 'accepted' && (
             <ConfirmAction
+                    className="flex"
               tone="send"
               message={`${entry.acceptanceEmailSentAt ? 'Resend' : 'Send'} the showcase acceptance email to ${entry.name}?`}
               detail={entry.acceptanceEmailSentAt
@@ -382,22 +428,17 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
                   disabled={isPending}
                   aria-label={`${entry.acceptanceEmailSentAt ? 'Resend' : 'Send'} the Builder Showcase acceptance email to ${entry.name} for ${entry.projectName}`}
                   title={entry.acceptanceEmailSentAt ? 'Resend acceptance email' : 'Send acceptance email'}
-                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-60 ${
-                    entry.acceptanceEmailSentAt
-                      ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
-                      : 'bg-google-green/15 text-google-green-light hover:bg-google-green-deep hover:text-white'
-                  }`}
+                
+                  className={RAIL_PILL_CLASSES}
                 >
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                    <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
-                  </svg>
+                  {entry.acceptanceEmailSentAt ? 'Resend email' : 'Send email'}
                 </button>
               )}
             </ConfirmAction>
           )}
           {canSendTicket && (
             <ConfirmAction
+                    className="flex"
               tone="send"
               message={`${entry.showcaseTicketEmailSentAt ? 'Resend' : 'Send'} the showcase ticket to ${entry.name}?`}
               detail={entry.showcaseTicketEmailSentAt ? 'They get the free ticket link again.' : 'It emails them the link to their free showcase ticket.'}
@@ -410,95 +451,30 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
                   disabled={isPending}
                   aria-label={`${entry.showcaseTicketEmailSentAt ? 'Resend' : 'Send'} the complimentary Builder Showcase ticket to ${entry.name} for ${entry.projectName}`}
                   title={entry.showcaseTicketEmailSentAt ? 'Resend showcase ticket' : 'Send showcase ticket'}
-                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-60 ${
-                    entry.showcaseTicketEmailSentAt
-                      ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
-                      : 'bg-google-yellow/15 text-google-yellow hover:bg-google-yellow hover:text-black-02'
-                  }`}
+                
+                  className={RAIL_PILL_CLASSES}
                 >
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 6.25V4.5a1 1 0 011-1h11a1 1 0 011 1v1.75a1.75 1.75 0 000 3.5V11.5a1 1 0 01-1 1h-11a1 1 0 01-1-1V9.75a1.75 1.75 0 000-3.5z" />
-                    <path strokeLinecap="round" strokeDasharray="1.5 1.5" d="M10 4v8" />
-                  </svg>
+                  {entry.showcaseTicketEmailSentAt ? 'Resend ticket' : 'Send ticket'}
                 </button>
               )}
             </ConfirmAction>
           )}
           {(entry.status === 'rejected' || entry.status === 'archived' || entry.status === 'accepted') && (
-            <button
-              onClick={() => handleAction(restoreShowcaseEntry)}
-              disabled={isPending}
-              aria-label={`Restore Builder Showcase entry to pending: ${entry.projectName}`}
-              title="Restore"
-              className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
+            <ConfirmAction
+              tone="danger"
+              message={`Move ${entry.projectName} back to pending?`}
+              detail={entry.status === 'accepted' ? 'It comes out of the showcase and goes back to the review queue. Nothing is emailed.' : 'It goes back to the review queue. Nothing is emailed.'}
+              confirmLabel="Move back"
+              onConfirm={() => handleAction(restoreShowcaseEntry)}
+              className="flex"
             >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 4L2.5 7.5 6 11M2.5 7.5h6.5a4 4 0 010 8H7" />
-              </svg>
-            </button>
-          )}
-          <div className="relative" ref={moreMenuRef}>
-            <button
-              onClick={() => setMoreOpen((open) => !open)}
-              disabled={isPending}
-              aria-haspopup="menu"
-              aria-expanded={moreOpen}
-              aria-label={`More actions for: ${entry.projectName}`}
-              title="More actions"
-              className="relative inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                <circle cx="3" cy="8" r="1.25" />
-                <circle cx="8" cy="8" r="1.25" />
-                <circle cx="13" cy="8" r="1.25" />
-              </svg>
-              {entry.reviewerNotes.length > 0 && (
-                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-xs font-bold leading-none">
-                  {entry.reviewerNotes.length}
-                </span>
+              {(triggerProps) => (
+                <button {...triggerProps} disabled={isPending} aria-label={`Move ${entry.projectName} back to pending`} className={RAIL_TEXT_BUTTON_CLASSES}>
+                  Back to pending
+                </button>
               )}
-            </button>
-
-            {moreOpen && (
-              <div
-                role="menu"
-                className="absolute right-0 top-full mt-2 w-44 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
-              >
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    setNotesOpen((open) => !open);
-                    setMoreOpen(false);
-                  }}
-                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                >
-                  Notes{entry.reviewerNotes.length > 0 ? ` (${entry.reviewerNotes.length})` : ''}
-                </button>
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    setIsEditing(true);
-                    setMoreOpen(false);
-                  }}
-                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                >
-                  Edit
-                </button>
-                {entry.status !== 'archived' && (
-                  <button
-                    role="menuitem"
-                    onClick={() => {
-                      handleAction(archiveShowcaseEntry);
-                      setMoreOpen(false);
-                    }}
-                    className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                  >
-                    Archive
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+            </ConfirmAction>
+          )}
         </div>
       </div>
 

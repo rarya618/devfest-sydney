@@ -314,16 +314,13 @@ function CrewCard({ member, onError, inPanel = false }: CrewCardProps) {
                 disabled={isPending}
                 aria-label={`${alreadyEmailed ? 'Resend' : 'Send'} the volunteer acceptance email to ${member.name}`}
                 title={alreadyEmailed ? 'Resend acceptance email' : 'Send acceptance email'}
-                className={`inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                  alreadyEmailed
-                    ? 'text-white/55 hover:text-white hover:bg-white/[0.08]'
-                    : 'bg-google-green/15 text-google-green-light hover:bg-google-green-deep hover:text-white'
-                }`}
+                className="relative inline-flex items-center justify-center w-9 h-9 rounded-full text-white/60 hover:text-white hover:bg-white/[0.08] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                   <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
                 </svg>
+                {!alreadyEmailed && <span aria-hidden="true" className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-google-yellow ring-2 ring-surface" />}
               </button>
             )}
           </ConfirmAction>
@@ -342,8 +339,8 @@ function CrewCard({ member, onError, inPanel = false }: CrewCardProps) {
               title={ticketSent ? 'Ticket sent: click to unmark' : 'Mark ticket as sent'}
               className={`inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                 ticketSent
-                  ? 'bg-google-blue/15 text-google-blue-light hover:bg-white/[0.08] hover:text-white'
-                  : 'text-white/55 hover:text-white hover:bg-white/[0.08]'
+                  ? 'bg-white/[0.12] text-off-white hover:bg-white/[0.16]'
+                  : 'text-white/60 hover:text-white hover:bg-white/[0.08]'
               }`}
             >
               <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
