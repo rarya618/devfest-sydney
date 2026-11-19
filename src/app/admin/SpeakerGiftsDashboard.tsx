@@ -57,7 +57,7 @@ function GiftRow({ gift, onError }: { gift: SpeakerGift; onError: (message: stri
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <p className="text-[11px] font-mono uppercase tracking-[0.12em] text-white/50 mb-1">Mug</p>
+          <p className="text-xs font-mono uppercase tracking-[0.12em] text-white/50 mb-1">Mug</p>
           {gift.wantsMug ? (
             <address className="not-italic text-sm text-white/85 leading-relaxed">
               {postalAddress(gift).map((line, index) => <span key={index} className="block">{line}</span>)}
@@ -68,7 +68,7 @@ function GiftRow({ gift, onError }: { gift: SpeakerGift; onError: (message: stri
           )}
         </div>
         <div>
-          <p className="text-[11px] font-mono uppercase tracking-[0.12em] text-white/50 mb-1">Asana trial</p>
+          <p className="text-xs font-mono uppercase tracking-[0.12em] text-white/50 mb-1">Asana trial</p>
           {gift.wantsAsanaTrial ? (
             <p className="text-sm text-white/85">
               {gift.workEmail}

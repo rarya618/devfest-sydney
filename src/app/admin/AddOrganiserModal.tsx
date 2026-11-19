@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useTransition, type FormEvent } from 'react';
-import { createPortal } from 'react-dom';
 import { addOrganiser, type NewOrganiserFields } from './crewActions';
 import { VOLUNTEER_AREA_LABELS, VOLUNTEER_SHIFT_LABELS } from '@/lib/volunteerLabels';
 import Select from '@/components/Select';
+import AdminModal from './AdminModal';
 
 interface Props {
   onClose: () => void;
@@ -24,7 +24,7 @@ const EMPTY_ORGANISER: NewOrganiserFields = {
 
 const inputClasses =
   'w-full rounded-lg border border-white/35 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40';
-const labelClasses = 'block text-xs font-semibold text-white/50 mb-1';
+const labelClasses = 'block text-xs font-bold text-white/50 mb-1';
 
 // Organisers never went through the volunteer form, so this is the only way one reaches
 // the crew. Deliberately short: a name, how to reach them, and what they do. The photo
@@ -49,14 +49,8 @@ export default function AddOrganiserModal({ onClose, onError }: Props) {
     });
   }
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[60] flex items-start sm:items-center justify-center bg-black/70 p-4 overflow-y-auto"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Add an organiser to the crew"
-    >
-      <div className="w-full max-w-xl bg-surface-raised rounded-2xl shadow-xl my-8">
+  return (
+    <AdminModal label="Add an organiser to the crew" onClose={onClose} isBusy={isPending} widthClass="max-w-xl">
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <h2 className="text-lg font-bold text-white">Add an organiser</h2>
@@ -193,14 +187,12 @@ export default function AddOrganiserModal({ onClose, onError }: Props) {
               type="submit"
               disabled={isPending}
               aria-label="Add this organiser to the crew"
-              className="text-xs px-4 py-1.5 rounded-full bg-google-blue-deep text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50"
+              className="text-xs px-4 py-1.5 rounded-full bg-google-blue-deep text-white font-bold hover:opacity-90 transition-colors disabled:opacity-50"
             >
               {isPending ? 'Adding…' : 'Add organiser'}
             </button>
           </div>
         </form>
-      </div>
-    </div>,
-    document.body
+    </AdminModal>
   );
 }

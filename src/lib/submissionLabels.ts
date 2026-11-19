@@ -44,15 +44,6 @@ export const TRACK_CHIP_COLORS: Record<Track, string> = {
   developer: 'text-google-blue-light',
 };
 
-export const TRACK_BORDER_COLORS: Record<Track, string> = {
-  keynote: 'border-l-white',
-  spotlight: 'border-l-google-red',
-  developer: 'border-l-google-blue',
-  builder: 'border-l-google-green',
-  workshop: 'border-l-google-yellow',
-  showcase: 'border-l-google-yellow',
-};
-
 export const TRACK_DOT_COLORS: Record<Track, string> = {
   keynote: 'bg-white',
   spotlight: 'bg-google-red',

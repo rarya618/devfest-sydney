@@ -4,12 +4,12 @@ import { useRef, useState, useTransition, type ChangeEvent, type FormEvent } fro
 import FormattingHelp from '@/components/FormattingHelp';
 import SpeakerCard, { type SpeakerCardProfile } from '@/components/SpeakerCard';
 import Image from 'next/image';
-import { createPortal } from 'react-dom';
 import { removeSpeakerPhoto, updateSpeaker, updateSpeakerProfile, uploadSpeakerPhoto, type SpeakerEditableFields } from './speakerActions';
 import { getInitials } from '@/lib/format';
 import { TRACK_LABELS, FORMAT_LABELS, EXPERIENCE_LABELS } from '@/lib/submissionLabels';
 import type { Speaker } from '@/lib/types';
 import Select from '@/components/Select';
+import AdminModal from './AdminModal';
 
 // What the modal edits: the person, and on /admin/devfest/speakers the talk too. /admin/people passes
 // a person with blank talk fields and profileOnly.
@@ -45,8 +45,8 @@ function toEditableFields(speaker: EditSpeakerTarget): SpeakerEditableFields {
 
 const inputClasses =
   'w-full rounded-lg border border-white/35 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40';
-const labelClasses = 'block text-xs font-semibold text-white/50 mb-1';
-const sectionHeadingClasses = 'text-[11px] font-bold uppercase tracking-wider text-white/50';
+const labelClasses = 'block text-xs font-bold text-white/50 mb-1';
+const sectionHeadingClasses = 'text-xs font-bold uppercase tracking-wider text-white/50';
 
 export default function EditSpeakerModal({ speaker, leadSpeakerName, profileOnly = false, onClose, onError }: Props) {
   const isCoSpeaker = Boolean(speaker.coSpeakerOf);
@@ -117,14 +117,8 @@ export default function EditSpeakerModal({ speaker, leadSpeakerName, profileOnly
     });
   }
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[60] flex items-start sm:items-center justify-center bg-black/70 p-4 overflow-y-auto"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Edit speaker: ${speaker.name}`}
-    >
-      <div className="w-full max-w-xl lg:max-w-4xl bg-surface-raised rounded-2xl shadow-xl my-8">
+  return (
+    <AdminModal label={`Edit speaker: ${speaker.name}`} onClose={onClose} isBusy={isPending} widthClass="max-w-xl lg:max-w-4xl">
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <h2 className="text-lg font-bold text-white">{profileOnly ? 'Edit profile' : isCoSpeaker ? 'Edit co-speaker' : 'Edit speaker'}</h2>
@@ -146,7 +140,7 @@ export default function EditSpeakerModal({ speaker, leadSpeakerName, profileOnly
           <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
             <details className="lg:hidden rounded-xl border border-white/10 px-4 py-3">
-              <summary className="cursor-pointer text-sm font-semibold text-white/80">Preview the public card</summary>
+              <summary className="cursor-pointer text-sm font-bold text-white/80">Preview the public card</summary>
               <div className="mt-3">{preview}</div>
             </details>
 
@@ -238,7 +232,7 @@ export default function EditSpeakerModal({ speaker, leadSpeakerName, profileOnly
                       onClick={() => photoInputRef.current?.click()}
                       disabled={isUploadingPhoto || isPending}
                       aria-label={fields.photoUrl ? 'Replace speaker photo' : 'Upload speaker photo'}
-                      className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-google-blue-deep text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-google-blue-deep text-white font-bold hover:opacity-90 transition-colors disabled:opacity-50"
                     >
                       <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8 10.5v-8M4.5 6L8 2.5 11.5 6" />
@@ -383,14 +377,12 @@ export default function EditSpeakerModal({ speaker, leadSpeakerName, profileOnly
               type="submit"
               disabled={isPending}
               aria-label="Save changes to speaker"
-              className="text-xs px-4 py-1.5 rounded-full bg-google-blue-deep text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50"
+              className="text-xs px-4 py-1.5 rounded-full bg-google-blue-deep text-white font-bold hover:opacity-90 transition-colors disabled:opacity-50"
             >
               {isPending ? 'Saving…' : 'Save changes'}
             </button>
           </div>
         </form>
-      </div>
-    </div>,
-    document.body
+    </AdminModal>
   );
 }

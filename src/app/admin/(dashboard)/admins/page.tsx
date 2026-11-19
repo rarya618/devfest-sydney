@@ -1,4 +1,3 @@
-import { SITE_OG_IMAGE } from '@/lib/metadata';
 import { adminDb } from '@/lib/firebase-admin';
 import { getVerifiedSession } from '@/lib/adminSession';
 import AdminsView from './AdminsView';
@@ -7,8 +6,6 @@ import type { Timestamp } from 'firebase-admin/firestore';
 
 export const metadata = {
   title: 'Admins',
-  openGraph: { title: 'Admins — GDG Sydney', images: [SITE_OG_IMAGE] },
-  twitter: { card: 'summary_large_image', title: 'Admins — GDG Sydney', images: [SITE_OG_IMAGE] },
 };
 
 async function fetchAdmins(): Promise<AdminUser[]> {

@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useTransition, type FormEvent } from 'react';
-import { createPortal } from 'react-dom';
 import FormattingHelp from '@/components/FormattingHelp';
 import { addCoSpeaker, type SpeakerProfileFields } from './speakerActions';
 import type { Speaker } from '@/lib/types';
+import AdminModal from './AdminModal';
 
 interface Props {
   lead: Speaker;
@@ -25,7 +25,7 @@ const EMPTY_PROFILE: SpeakerProfileFields = {
 
 const inputClasses =
   'w-full rounded-lg border border-white/35 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40';
-const labelClasses = 'block text-xs font-semibold text-white/50 mb-1';
+const labelClasses = 'block text-xs font-bold text-white/50 mb-1';
 
 // Someone presenting the lead's session with them. Only their profile is asked for: the
 // talk is the lead's. The photo is added afterwards with Edit, since an upload needs the
@@ -50,14 +50,8 @@ export default function AddCoSpeakerModal({ lead, onClose, onError }: Props) {
     });
   }
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[60] flex items-start sm:items-center justify-center bg-black/70 p-4 overflow-y-auto"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Add a co-speaker to ${lead.name}'s session`}
-    >
-      <div className="w-full max-w-xl bg-surface-raised rounded-2xl shadow-xl my-8">
+  return (
+    <AdminModal label={`Add a co-speaker to ${lead.name}'s session`} onClose={onClose} isBusy={isPending} widthClass="max-w-xl">
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <h2 className="text-lg font-bold text-white">Add co-speaker</h2>
@@ -178,14 +172,12 @@ export default function AddCoSpeakerModal({ lead, onClose, onError }: Props) {
               type="submit"
               disabled={isPending}
               aria-label={`Add co-speaker to ${lead.name}'s session`}
-              className="text-xs px-4 py-1.5 rounded-full bg-google-blue-deep text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50"
+              className="text-xs px-4 py-1.5 rounded-full bg-google-blue-deep text-white font-bold hover:opacity-90 transition-colors disabled:opacity-50"
             >
               {isPending ? 'Adding…' : 'Add co-speaker'}
             </button>
           </div>
         </form>
-      </div>
-    </div>,
-    document.body
+    </AdminModal>
   );
 }

@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { SITE_OG_IMAGE } from '@/lib/metadata';
 import { getVerifiedSession } from '@/lib/adminSession';
 import { loadGdgAnalytics, type EventAnalyticsRow, type GdgAnalytics } from '@/lib/gdgAnalytics';
 import StickyAdminHeader from '../../StickyAdminHeader';
@@ -13,8 +12,6 @@ export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Analytics',
-  openGraph: { title: 'Analytics — GDG Sydney', images: [SITE_OG_IMAGE] },
-  twitter: { card: 'summary_large_image', title: 'Analytics — GDG Sydney', images: [SITE_OG_IMAGE] },
 };
 
 function formatEventDate(iso: string): string {
@@ -37,7 +34,7 @@ function EventsTable({ events }: { events: EventAnalyticsRow[] }) {
       <table className="w-full min-w-[720px] text-sm text-white/80">
         <caption className="sr-only">Every GDG Sydney event, newest first, with its talks, speakers, proposals and volunteers</caption>
         <thead>
-          <tr className="text-left text-xs font-semibold text-white/55 border-b border-white/10">
+          <tr className="text-left text-xs font-bold text-white/55 border-b border-white/10">
             <th scope="col" className={cell}>Event</th>
             <th scope="col" className={cell}>Talks</th>
             <th scope="col" className={cell}>Speakers</th>
@@ -53,7 +50,7 @@ function EventsTable({ events }: { events: EventAnalyticsRow[] }) {
                 <span className="block font-bold text-white">{event.name}</span>
                 <span className="mt-1 flex flex-wrap items-center gap-2 text-xs text-white/55">
                   <span className="font-mono">{formatEventDate(event.startAt)}</span>
-                  <span className={`px-2 py-0.5 rounded-full font-bold ${event.type === 'devfest' ? 'bg-google-blue/15 text-google-blue-light' : 'bg-google-green/15 text-google-green'}`}>
+                  <span className={`px-2 py-0.5 rounded-full font-bold ${event.type === 'devfest' ? 'bg-google-blue/15 text-google-blue-light' : 'bg-google-green/15 text-google-green-light'}`}>
                     {event.type === 'devfest' ? 'DevFest' : 'Meetup'}
                   </span>
                   {event.isUpcoming && <span className="px-2 py-0.5 rounded-full font-bold bg-google-yellow/15 text-google-yellow">Upcoming</span>}

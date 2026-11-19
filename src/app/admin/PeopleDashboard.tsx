@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useCallback, useState } from 'react';
+import AdminModal from './AdminModal';
 import Image from 'next/image';
 import Alert from '@/components/Alert';
 import SpeakerCard from '@/components/SpeakerCard';
@@ -17,33 +17,12 @@ import { useMobileBarHidden } from './MobileBarContext';
 // The speaker's public card, exactly as the speaker portal shows it to them ("This is how you
 // appear next to your talks"), with the full bio. Escape or the backdrop closes it.
 function SpeakerPreviewDialog({ person, onClose }: { person: PersonWithTalks; onClose: () => void }) {
-  const closeButton = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    closeButton.current?.focus();
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
-
-  return createPortal(
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Preview of ${person.name}'s speaker card`}
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
-      className="fixed inset-0 z-[60] flex justify-center bg-black/70 p-4 overflow-y-auto"
-    >
-      {/* my-auto rather than items-center: centred when it fits, and scrollable from its top
-          when the card (a long bio) is taller than the screen, instead of cut off above. */}
-      <div className="w-full max-w-sm my-auto py-4">
+  return (
+    <AdminModal label={`Preview of ${person.name}'s speaker card`} onClose={onClose} widthClass="max-w-sm" variant="bare" closeOnBackdrop>
+      <div className="py-4">
         <div className="mb-3 flex items-center justify-between gap-3">
           <p className="text-sm text-white/70">How {person.name} appears next to their talks</p>
           <button
-            ref={closeButton}
             type="button"
             onClick={onClose}
             aria-label="Close the preview"
@@ -58,14 +37,13 @@ function SpeakerPreviewDialog({ person, onClose }: { person: PersonWithTalks; on
           <SpeakerCard profile={person} showFullBio viewer="organiser" />
         </div>
       </div>
-    </div>,
-    document.body
+    </AdminModal>
   );
 }
 
 function PersonCard({ person, onEdit, onPreview }: { person: PersonWithTalks; onEdit: () => void; onPreview: () => void }) {
   return (
-    <div className="bg-surface border-l-4 border-l-google-blue rounded-lg p-5 sm:p-6" aria-label={`Speaker: ${person.name}`}>
+    <div className="bg-surface rounded-2xl p-5 sm:p-6" aria-label={`Speaker: ${person.name}`}>
       <div className="flex items-start gap-4">
         {person.photoUrl ? (
           <Image
@@ -81,7 +59,7 @@ function PersonCard({ person, onEdit, onPreview }: { person: PersonWithTalks; on
           </span>
         )}
         <div className="min-w-0 flex-1">
-          <h3 className="font-bold text-white text-lg leading-snug">{person.name}</h3>
+          <h2 className="font-bold text-white text-lg leading-snug">{person.name}</h2>
           <p className="text-sm text-white/55 truncate">{person.email}</p>
           {person.tagline && <p className="mt-1 text-sm text-white/65">{person.tagline}</p>}
         </div>
@@ -91,7 +69,7 @@ function PersonCard({ person, onEdit, onPreview }: { person: PersonWithTalks; on
             type="button"
             onClick={onPreview}
             aria-label={`Preview ${person.name}'s public speaker card`}
-            className="text-xs font-semibold px-3 py-2 rounded-lg border border-white/40 text-white/70 hover:border-white/60 hover:text-white transition-colors"
+            className="text-xs font-bold px-3 py-2 rounded-lg border border-white/40 text-white/70 hover:border-white/60 hover:text-white transition-colors"
           >
             Preview
           </button>
@@ -99,7 +77,7 @@ function PersonCard({ person, onEdit, onPreview }: { person: PersonWithTalks; on
             type="button"
             onClick={onEdit}
             aria-label={`Edit ${person.name}'s profile`}
-            className="text-xs font-semibold px-3 py-2 rounded-lg border border-white/40 text-white/70 hover:border-white/60 hover:text-white transition-colors"
+            className="text-xs font-bold px-3 py-2 rounded-lg border border-white/40 text-white/70 hover:border-white/60 hover:text-white transition-colors"
           >
             Edit profile
           </button>

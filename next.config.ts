@@ -11,6 +11,9 @@ const ADMIN_DEVFEST_PAGES = ['volunteers', 'showcase', 'feedback', 'credits', 's
 const FIREBASE_HOSTING_ORIGIN = 'https://devfest-sydney-2026.firebaseapp.com';
 
 const nextConfig: NextConfig = {
+  // `npm run dev:emulated` builds into .next-emulated, so it can run beside `next dev` on
+  // port 3000 without the two sharing (and corrupting) one .next.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   experimental: {
     serverActions: {
       // Speaker photo uploads in /admin/devfest/speakers go through a Server Action; the default

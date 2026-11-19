@@ -10,6 +10,7 @@ import type { VolunteerPoolEvent, VolunteerPoolMember } from '@/lib/volunteerInv
 import type { VolunteerStatus } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
 import Select from '@/components/Select';
+import FilterChipRow from './FilterChipRow';
 
 // The volunteer pool (stage 4d-2, PM.md): the volunteers who said they'd like to hear about
 // future events, kept like a mailing list. Nobody is in it by default: an admin adds them from
@@ -151,7 +152,7 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
           <div className="flex flex-wrap items-center gap-2 min-w-0">
             {events.length > 0 && (
               <>
-                <label htmlFor="pool-event" className="text-sm font-semibold text-white/70">Invite to</label>
+                <label htmlFor="pool-event" className="text-sm font-bold text-white/70">Invite to</label>
                 <Select
                   id="pool-event"
                   value={eventId}
@@ -165,7 +166,7 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
                   }))}
                   disabled={isPending}
                   aria-label="Choose the event to invite volunteers to"
-                  className="h-10 rounded-full border border-white/35 bg-white/[0.06] px-4 text-sm font-semibold text-white focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
+                  className="h-10 rounded-full border border-white/35 bg-white/[0.06] px-4 text-sm font-bold text-white focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
                 />
               </>
             )}
@@ -174,15 +175,15 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
               onClick={handleSend}
               disabled={isPending || !chosenEvent || selectedForEvent.length === 0}
               aria-label={chosenEvent ? `Send ${selectedForEvent.length} invites to crew ${chosenEvent.name}` : 'Send invites'}
-              className="inline-flex items-center h-10 text-sm px-4 rounded-full bg-google-green-deep text-white font-bold transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="press inline-flex items-center h-10 text-sm px-4 rounded-full bg-google-green-deep text-white font-bold transition-opacity hover:opacity-85 disabled:bg-transparent disabled:border disabled:border-white/20 disabled:text-white/60 disabled:cursor-not-allowed"
             >
-              {progress ? `Sent ${progress.sent} of ${progress.total}` : `Send ${selectedForEvent.length} invite${selectedForEvent.length === 1 ? '' : 's'}`}
+              {progress ? `Sent ${progress.sent} of ${progress.total}` : selectedForEvent.length === 0 ? 'Choose who to invite' : `Send ${selectedForEvent.length} invite${selectedForEvent.length === 1 ? '' : 's'}`}
             </button>
           </div>
         </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <div role="group" aria-label="Filter the pool" className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <FilterChipRow label="Filter the pool" className="-mx-4 md:mx-0 md:px-0">
             {filterTabs.map((tab) => (
               <button
                 key={tab.value}
@@ -197,7 +198,7 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
                 {tab.label}
               </button>
             ))}
-          </div>
+          </FilterChipRow>
           <input
             type="search"
             value={search}
@@ -228,7 +229,7 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
         ) : (
           <div className="bg-surface rounded-2xl border border-white/10 overflow-hidden">
             {filter !== 'others' && chosenEvent && selectableVisible.length > 0 && (
-              <label className="flex items-center gap-3 px-4 py-3 border-b border-white/10 text-sm font-semibold text-white">
+              <label className="flex items-center gap-3 px-4 py-3 border-b border-white/10 text-sm font-bold text-white">
                 <input
                   type="checkbox"
                   className="h-4 w-4 accent-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue"
@@ -255,7 +256,7 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
                       />
                     )}
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-white">
+                      <p className="text-sm font-bold text-white">
                         {member.name}
                       </p>
                       <p className="text-xs text-white/55 truncate">{member.email}</p>

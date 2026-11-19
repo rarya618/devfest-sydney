@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { addAdmin } from './actions';
+import AdminModal from './AdminModal';
 
 interface Props {
   onDone: () => void;
@@ -26,8 +27,8 @@ export default function InviteAdminForm({ onDone, onError }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 px-4" role="dialog" aria-modal="true" aria-label="Invite admin">
-      <div className="w-full max-w-sm bg-surface-raised border border-white/10 rounded-2xl p-6">
+    <AdminModal label="Invite an admin" onClose={onDone} isBusy={submitting} widthClass="max-w-sm">
+      <div className="p-6">
         <h2 className="font-bold text-white text-lg tracking-tight mb-1">Invite an admin</h2>
         <p className="text-sm text-white/50 mb-5 leading-relaxed">
           They&apos;ll be able to sign in with Google immediately using this email.
@@ -74,13 +75,13 @@ export default function InviteAdminForm({ onDone, onError }: Props) {
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 text-sm font-semibold px-4 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="flex-1 text-sm font-bold px-4 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {submitting ? 'Adding…' : 'Add admin'}
             </button>
           </div>
         </form>
       </div>
-    </div>
+    </AdminModal>
   );
 }

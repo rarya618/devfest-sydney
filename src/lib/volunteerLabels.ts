@@ -55,7 +55,7 @@ export const VOLUNTEER_SHIFT_LABELS: Record<VolunteerShift, string> = {
 export const VOLUNTEER_CONFIRMATION_CHIPS: Record<VolunteerConfirmation, { label: string; className: string; title: string }> = {
   confirmed: {
     label: 'Confirmed',
-    className: 'bg-google-green/15 text-google-green',
+    className: 'bg-google-green/15 text-google-green-light',
     title: 'The volunteer has confirmed they are coming.',
   },
   awaiting: {

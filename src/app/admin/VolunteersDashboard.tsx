@@ -23,6 +23,10 @@ import { useMobileBarHidden } from './MobileBarContext';
 import { useRouter } from 'next/navigation';
 import Select from '@/components/Select';
 import ConfirmAction from './ConfirmAction';
+import DecisionButtons from './DecisionButtons';
+import { ExpandButton, MoreIcon, RAIL_CLASSES, RAIL_ICON_CLASSES, RAIL_PILL_CLASSES, RAIL_TEXT_BUTTON_CLASSES } from './RailButtons';
+import AdminSearch from './AdminSearch';
+import FilterChipRow from './FilterChipRow';
 
 interface ReviewerNotesPanelProps {
   volunteerId: string;
@@ -57,7 +61,7 @@ function ReviewerNotesPanel({ volunteerId, notes, onError }: ReviewerNotesPanelP
             <li key={index} className="text-xs bg-white/[0.04] border border-white/10 rounded-lg px-3 py-2">
               <p className="text-white/70 leading-relaxed whitespace-pre-wrap">{note.text}</p>
               <p className="mt-1 text-xs text-white/55">
-                <span className="font-medium text-white/50">{note.authorName}</span> &middot; {formatDate(note.createdAt)}
+                <span className="font-normal text-white/50">{note.authorName}</span> &middot; {formatDate(note.createdAt)}
               </p>
             </li>
           ))}
@@ -81,7 +85,7 @@ function ReviewerNotesPanel({ volunteerId, notes, onError }: ReviewerNotesPanelP
           type="submit"
           disabled={isPending || !draft.trim()}
           aria-label="Save reviewer note"
-          className="shrink-0 text-xs font-semibold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
+          className="shrink-0 text-xs font-bold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
         >
           {isPending ? 'Saving…' : 'Add'}
         </button>
@@ -143,7 +147,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
   return (
     <div
       onClick={handleCardClick}
-      className={`relative cursor-pointer bg-surface border-l-4 border-l-google-green rounded-lg pt-4 pb-4 pl-5 pr-4 sm:pt-5 sm:pb-6 sm:pl-6 sm:pr-5 transition-colors hover:bg-white/[0.07] ${
+      className={`relative cursor-pointer bg-surface rounded-2xl p-4 sm:px-5 sm:pt-5 sm:pb-6 transition-colors hover:bg-white/[0.07] ${
         isPending ? 'opacity-50 pointer-events-none' : ''
       } ${moreOpen ? 'z-40' : ''}`}
       aria-label={`Volunteer signup from ${volunteer.name}`}
@@ -151,13 +155,13 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
       <div className="flex items-stretch gap-4">
       <div className="flex-1 min-w-0 flex flex-col">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
-        <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{volunteer.name}</h3>
+        <h2 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{volunteer.name}</h2>
         {/* Only on accepted signups: "Not emailed" against a pending one would read as a
             task, when the thing to do first is decide. */}
         {volunteer.status === 'accepted' && (
           <span
             title={VOLUNTEER_CONFIRMATION_CHIPS[volunteer.confirmation].title}
-            className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${VOLUNTEER_CONFIRMATION_CHIPS[volunteer.confirmation].className}`}
+            className={`text-xs font-bold px-1.5 py-0.5 rounded ${VOLUNTEER_CONFIRMATION_CHIPS[volunteer.confirmation].className}`}
           >
             {VOLUNTEER_CONFIRMATION_CHIPS[volunteer.confirmation].label}
           </span>
@@ -185,19 +189,19 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
         {(volunteer.googleTechExperience || volunteer.isTorrensStudentOrStaff || volunteer.hasBeenGdgOnCampusExec) && (
           <div className="flex flex-wrap items-center gap-1.5 gap-y-2 mt-3">
             {volunteer.googleTechExperience && (
-              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25">
+              <span className="inline-flex items-center gap-1 text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25">
                 Possible facilitator
               </span>
             )}
             {volunteer.isTorrensStudentOrStaff && (
-              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25">
+              <span className="inline-flex items-center gap-1 text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25">
                 Torrens
               </span>
             )}
             {volunteer.hasBeenGdgOnCampusExec && (
               <span
                 title="Has been on the exec team of a GDG on Campus chapter"
-                className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-green/15 text-google-green border-google-green/25"
+                className="inline-flex items-center gap-1 text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-green/15 text-google-green-light border-google-green/25"
               >
                 GDG on Campus exec{volunteer.gdgOnCampusChapter ? ` · ${GDG_ON_CAMPUS_CHAPTER_LABELS[volunteer.gdgOnCampusChapter]}` : ''}
               </span>
@@ -208,7 +212,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
 
       <div className="flex flex-wrap items-center gap-1.5 gap-y-2 mb-4">
         {volunteer.areasOfInterest.map((area) => (
-          <span key={area} className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-medium">
+          <span key={area} className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-bold">
             {VOLUNTEER_AREA_LABELS[area]}
           </span>
         ))}
@@ -243,7 +247,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
           )}
           {hasTracking && (
             <p className="text-sm text-white/55">
-              <span className="font-medium text-white/70">Link tracking: </span>
+              <span className="font-bold text-white/70">Link tracking: </span>
               {[
                 volunteer.tracking.ref && `ref=${volunteer.tracking.ref}`,
                 volunteer.tracking.utmSource && `source=${volunteer.tracking.utmSource}`,
@@ -269,150 +273,125 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
       </div>
       </div>
 
-      <div className="flex flex-col items-center gap-2 shrink-0 self-start">
-          <button
-            onClick={() => setIsOpen((open) => !open)}
-            aria-expanded={isOpen}
-            aria-label={`${isOpen ? 'Collapse' : 'Expand'} details for: ${volunteer.name}`}
-            className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-          >
-            <svg
-              className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.75}
-              aria-hidden="true"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6l4 4 4-4" />
-            </svg>
-          </button>
-          {volunteer.status === 'pending' && (
-            <div className="inline-flex flex-col rounded-full border border-white/15 overflow-hidden">
+      <div className={RAIL_CLASSES}>
+        <div className="flex justify-end gap-1.5">
+            <div className="relative" ref={moreMenuRef}>
               <button
-                onClick={() => handleAction(rejectVolunteer)}
+                onClick={() => setMoreOpen((open) => !open)}
                 disabled={isPending}
-                aria-label={`Reject volunteer signup: ${volunteer.name}`}
-                title="Reject"
-                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-red-deep hover:text-white transition-colors disabled:opacity-60"
+                aria-haspopup="menu"
+                aria-expanded={moreOpen}
+                aria-label={`More actions for: ${volunteer.name}`}
+                title="More actions"
+                className={RAIL_ICON_CLASSES}
               >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <path strokeLinecap="round" d="M2.5 2.5l7 7m0-7l-7 7" />
-                </svg>
+                <MoreIcon />
+                {volunteer.reviewerNotes.length > 0 && (
+                  <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-xs font-bold leading-none">
+                    {volunteer.reviewerNotes.length}
+                  </span>
+                )}
               </button>
-              <span className="h-px bg-white/15" />
-              <button
-                onClick={() => handleAction(acceptVolunteer)}
-                disabled={isPending}
-                aria-label={`Accept volunteer signup: ${volunteer.name}`}
-                title="Accept"
-                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-green-deep hover:text-white transition-colors disabled:opacity-60"
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.375l2.625 2.625L9.75 3.75" />
-                </svg>
-              </button>
-            </div>
-          )}
-          {/* The same send this volunteer's card offers on /admin/devfest/crew, so an organiser
-              working through the review queue doesn't have to change pages to tell someone. */}
-          {volunteer.status === 'accepted' && (
-            <ConfirmAction
-              tone="send"
-              message={`${volunteer.acceptanceEmailSentAt ? 'Resend' : 'Send'} the volunteer acceptance email to ${volunteer.name}?`}
-              detail={volunteer.acceptanceEmailSentAt
-                ? `Last sent ${formatDate(volunteer.acceptanceEmailSentAt)}. They get it again, with a new date to confirm by.`
-                : 'It tells them they\'re on the crew and asks them to confirm.'}
-              confirmLabel={volunteer.acceptanceEmailSentAt ? 'Resend email' : 'Send email'}
-              onConfirm={() => handleAction(sendVolunteerAcceptanceEmail)}
-            >
-              {(triggerProps) => (
-                <button
-                  {...triggerProps}
-                  disabled={isPending}
-                  aria-label={`${volunteer.acceptanceEmailSentAt ? 'Resend' : 'Send'} the volunteer acceptance email to ${volunteer.name}`}
-                  title={volunteer.acceptanceEmailSentAt ? 'Resend acceptance email' : 'Send acceptance email'}
-                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-60 ${
-                    volunteer.acceptanceEmailSentAt
-                      ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
-                      : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
-                  }`}
-                >
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                    <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
-                  </svg>
-                </button>
-              )}
-            </ConfirmAction>
-          )}
-          {(volunteer.status === 'rejected' || volunteer.status === 'archived' || volunteer.status === 'accepted') && (
-            <button
-              onClick={() => handleAction(restoreVolunteer)}
-              disabled={isPending}
-              aria-label={`Restore volunteer signup to pending: ${volunteer.name}`}
-              title="Restore"
-              className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-            >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 4L2.5 7.5 6 11M2.5 7.5h6.5a4 4 0 010 8H7" />
-              </svg>
-            </button>
-          )}
-          <div className="relative" ref={moreMenuRef}>
-            <button
-              onClick={() => setMoreOpen((open) => !open)}
-              disabled={isPending}
-              aria-haspopup="menu"
-              aria-expanded={moreOpen}
-              aria-label={`More actions for: ${volunteer.name}`}
-              title="More actions"
-              className="relative inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                <circle cx="3" cy="8" r="1.25" />
-                <circle cx="8" cy="8" r="1.25" />
-                <circle cx="13" cy="8" r="1.25" />
-              </svg>
-              {volunteer.reviewerNotes.length > 0 && (
-                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-[10px] font-bold leading-none">
-                  {volunteer.reviewerNotes.length}
-                </span>
-              )}
-            </button>
 
-            {moreOpen && (
-              <div
-                role="menu"
-                className="absolute right-0 top-full mt-2 w-44 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
-              >
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    setNotesOpen((open) => !open);
-                    setMoreOpen(false);
-                  }}
-                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+              {moreOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full mt-2 w-44 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
                 >
-                  Notes{volunteer.reviewerNotes.length > 0 ? ` (${volunteer.reviewerNotes.length})` : ''}
-                </button>
-                {volunteer.status !== 'archived' && (
                   <button
                     role="menuitem"
                     onClick={() => {
-                      handleAction(archiveVolunteer);
+                      setNotesOpen((open) => !open);
                       setMoreOpen(false);
                     }}
                     className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
                   >
-                    Archive
+                    Notes{volunteer.reviewerNotes.length > 0 ? ` (${volunteer.reviewerNotes.length})` : ''}
                   </button>
-                )}
-              </div>
-            )}
-          </div>
+                  {volunteer.status !== 'archived' && (
+                    <button
+                      role="menuitem"
+                      onClick={() => {
+                        handleAction(archiveVolunteer);
+                        setMoreOpen(false);
+                      }}
+                      className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                    >
+                      Archive
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          <ExpandButton isOpen={isOpen} onToggle={() => setIsOpen((open) => !open)} subject={volunteer.name} />
         </div>
+        {volunteer.status === 'pending' && (
+          <DecisionButtons
+            subject={`${volunteer.name}'s volunteer signup`}
+            disabled={isPending}
+            accept={{
+              message: `Accept ${volunteer.name} onto the crew?`,
+              detail: 'They move to the crew roster. No email is sent yet: send the acceptance email when you\'re ready.',
+              onConfirm: () => handleAction(acceptVolunteer),
+            }}
+            reject={{
+              message: `Turn down ${volunteer.name}'s signup?`,
+              detail: 'No email is sent, and you can move it back to pending.',
+              onConfirm: () => handleAction(rejectVolunteer),
+            }}
+          />
+        )}
+        {/* The same send this volunteer's card offers on /admin/devfest/crew, so an organiser
+            working through the review queue doesn't have to change pages to tell someone. */}
+        {volunteer.status === 'accepted' && (
+          <ConfirmAction
+            tone="send"
+            message={`${volunteer.acceptanceEmailSentAt ? 'Resend' : 'Send'} the volunteer acceptance email to ${volunteer.name}?`}
+            detail={volunteer.acceptanceEmailSentAt
+              ? `Last sent ${formatDate(volunteer.acceptanceEmailSentAt)}. They get it again, with a new date to confirm by.`
+              : 'It tells them they\'re on the crew and asks them to confirm.'}
+            confirmLabel={volunteer.acceptanceEmailSentAt ? 'Resend email' : 'Send email'}
+            onConfirm={() => handleAction(sendVolunteerAcceptanceEmail)}
+            className="flex"
+          >
+            {(triggerProps) => (
+              <button
+                {...triggerProps}
+                disabled={isPending}
+                aria-label={`${volunteer.acceptanceEmailSentAt ? 'Resend' : 'Send'} the volunteer acceptance email to ${volunteer.name}`}
+                title={volunteer.acceptanceEmailSentAt ? 'Resend the acceptance email' : 'Send the acceptance email'}
+                className={RAIL_PILL_CLASSES}
+              >
+                {volunteer.acceptanceEmailSentAt ? 'Resend email' : 'Send email'}
+              </button>
+            )}
+          </ConfirmAction>
+        )}
+        {(volunteer.status === 'rejected' || volunteer.status === 'archived' || volunteer.status === 'accepted') && (
+          <ConfirmAction
+            tone="danger"
+            message={`Move ${volunteer.name} back to pending?`}
+            detail={volunteer.status === 'accepted'
+              ? 'They come off the crew and go back to the review queue. Nothing is emailed.'
+              : 'Their signup goes back to the review queue. Nothing is emailed.'}
+            confirmLabel="Move back"
+            onConfirm={() => handleAction(restoreVolunteer)}
+            className="flex"
+          >
+            {(triggerProps) => (
+              <button
+                {...triggerProps}
+                disabled={isPending}
+                aria-label={`Move ${volunteer.name}'s signup back to pending`}
+                className={RAIL_TEXT_BUTTON_CLASSES}
+              >
+                Back to pending
+              </button>
+            )}
+          </ConfirmAction>
+        )}
       </div>
+    </div>
 
       {notesOpen && (
         <ReviewerNotesPanel volunteerId={volunteer.id} notes={volunteer.reviewerNotes} onError={onError} />
@@ -437,27 +416,9 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
   const [filter, setFilter] = useState<FilterStatus>('all');
   const [areaFilter, setAreaFilter] = useState<FilterArea>('all');
   const [search, setSearch] = useState('');
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchWidthOpen, setSearchWidthOpen] = useState(false);
   const [statusMenuOpen, setStatusMenuOpen] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
   const statusMenuRef = useRef<HTMLDivElement>(null);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (searchOpen || search) {
-      const timeout = setTimeout(() => setSearchWidthOpen(true), 20);
-      return () => clearTimeout(timeout);
-    }
-    setSearchWidthOpen(false);
-  }, [searchOpen, search]);
-
-  useEffect(() => {
-    if (searchWidthOpen) {
-      searchInputRef.current?.focus();
-    }
-  }, [searchWidthOpen]);
 
   useEffect(() => {
     if (!statusMenuOpen) return;
@@ -478,30 +439,6 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [statusMenuOpen]);
-
-  useEffect(() => {
-    if (!searchOpen) return;
-
-    function handlePointerDown(event: MouseEvent) {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
-        setSearch('');
-        setSearchOpen(false);
-      }
-    }
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        setSearch('');
-        setSearchOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [searchOpen]);
 
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
 
@@ -566,75 +503,12 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
               onChange={(eventId) => router.push(`/admin/event-volunteers?event=${encodeURIComponent(eventId)}`)}
               options={generalEvents.events.map((event) => ({ value: event.id, label: event.name }))}
               aria-label="Choose which general event's volunteers to show"
-              className="h-10 rounded-full border border-white/35 bg-white/[0.06] px-4 text-sm font-semibold text-white focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
+              className="h-10 rounded-full border border-white/35 bg-white/[0.06] px-4 text-sm font-bold text-white focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
             />
           )}
 
           <div className="flex flex-wrap items-center gap-2 min-w-0">
-            <div
-              ref={searchContainerRef}
-              className={`relative shrink-0 h-10 rounded-full transition-all duration-300 ease-in-out ${
-                searchWidthOpen ? 'w-full sm:w-80 bg-white/[0.06]' : 'w-10 bg-white/[0.06] hover:bg-white/[0.1]'
-              }`}
-            >
-              <button
-                onClick={() => setSearchOpen(true)}
-                tabIndex={searchOpen || search ? -1 : undefined}
-                aria-label="Search by name or email"
-                title="Search"
-                className={`absolute left-0 top-0 inline-flex items-center justify-center w-10 h-10 rounded-full text-white/70 hover:text-white transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
-                }`}
-              >
-                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <circle cx="7" cy="7" r="5" />
-                  <path strokeLinecap="round" d="M11 11l3.5 3.5" />
-                </svg>
-              </button>
-
-              <input
-                ref={searchInputRef}
-                type="search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                tabIndex={searchOpen || search ? undefined : -1}
-                placeholder="Search by name or email…"
-                aria-label="Search by name or email"
-                className={`w-full h-10 rounded-full bg-transparent pl-9 pr-9 py-0 text-sm text-white placeholder:text-white/50 focus:outline-none transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
-              />
-              <svg
-                className={`absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/55 pointer-events-none transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-100' : 'opacity-0'
-                }`}
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              >
-                <circle cx="7" cy="7" r="5" />
-                <path strokeLinecap="round" d="M11 11l3.5 3.5" />
-              </svg>
-              <button
-                onClick={() => {
-                  setSearch('');
-                  setSearchOpen(false);
-                }}
-                tabIndex={searchOpen || search ? undefined : -1}
-                aria-label="Close search"
-                className={`absolute right-2 top-1/2 -translate-y-1/2 text-white/55 hover:text-white/70 transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <path strokeLinecap="round" d="M4 4l8 8M12 4l-8 8" />
-                </svg>
-              </button>
-            </div>
-
-            {(searchOpen || search) && <div className="basis-full h-0 sm:hidden" aria-hidden="true" />}
+            <AdminSearch value={search} onChange={setSearch} label="Search volunteers by name or email" placeholder="Search by name or email…" />
 
             <div className="relative shrink-0" ref={statusMenuRef}>
               <button
@@ -647,7 +521,7 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
                 }`}
               >
                 {filterTabs.find((tab) => tab.value === filter)?.label}
-                <span className="font-medium text-white/60">{counts[filter]}</span>
+                <span className="font-normal text-white/60">{counts[filter]}</span>
                 <svg className={`w-3 h-3 text-white/55 transition-transform ${statusMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
                 </svg>
@@ -668,7 +542,7 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
                       }}
                       aria-checked={filter === tab.value}
                       className={`w-full flex items-center justify-between gap-3 text-left text-sm px-4 py-2.5 transition-colors ${
-                        filter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
+                        filter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-bold hover:bg-white/[0.08] hover:text-white'
                       }`}
                     >
                       {tab.label}
@@ -684,11 +558,7 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
         {/* Areas of interest as a tab row. Status is a menu because a signup is in exactly
             one state; an area is a lens on the queue, and the row shows how thin each one
             is without opening anything. */}
-        <div
-          role="group"
-          aria-label="Filter volunteers by area of interest"
-          className="mt-3 -mx-4 md:-mx-5 px-4 md:px-5 flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
+        <FilterChipRow label="Filter volunteers by area of interest" className="mt-3 -mx-4 md:-mx-5">
           {areaTabs.map((tab) => (
             <button
               key={tab.value}
@@ -706,10 +576,10 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
               }`}
             >
               {tab.label}
-              <span className="font-medium text-white/60">{tab.count}</span>
+              <span className="font-normal text-white/60">{tab.count}</span>
             </button>
           ))}
-        </div>
+        </FilterChipRow>
       </div>
 
       <div className="px-4 md:px-5 pb-8 sm:pb-10">

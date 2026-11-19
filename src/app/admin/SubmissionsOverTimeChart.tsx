@@ -207,14 +207,14 @@ export default function SubmissionsOverTimeChart({ entries, noun, accent }: Prop
       </div>
 
       <details className="mt-4">
-        <summary className="text-xs font-medium text-white/50 cursor-pointer select-none">View as table</summary>
+        <summary className="text-xs font-normal text-white/50 cursor-pointer select-none">View as table</summary>
         <div className="mt-3 overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
               <tr className="text-left text-white/50 border-b border-white/10">
-                <th className="py-1.5 pr-4 font-medium">Date</th>
-                <th className="py-1.5 pr-4 font-medium capitalize">{noun}</th>
-                <th className="py-1.5 font-medium">Cumulative</th>
+                <th className="py-1.5 pr-4 font-normal">Date</th>
+                <th className="py-1.5 pr-4 font-normal capitalize">{noun}</th>
+                <th className="py-1.5 font-normal">Cumulative</th>
               </tr>
             </thead>
             <tbody>

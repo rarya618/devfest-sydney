@@ -1,4 +1,3 @@
-import { SITE_OG_IMAGE } from '@/lib/metadata';
 import { getVerifiedSession } from '@/lib/adminSession';
 import { areTicketsOnSale, isFlowOpen, loadCurrentDevfestId, loadEventPrivateLinks, loadEvents } from '@/lib/events';
 import { EVENT_FLOW_KEYS, EVENT_PRIVATE_LINK_KEYS } from '@/lib/eventLabels';
@@ -7,8 +6,6 @@ import EventsDashboard, { type AdminEventSummary } from '../../EventsDashboard';
 
 export const metadata = {
   title: 'Events',
-  openGraph: { title: 'Events — GDG Sydney', images: [SITE_OG_IMAGE] },
-  twitter: { card: 'summary_large_image', title: 'Events — GDG Sydney', images: [SITE_OG_IMAGE] },
 };
 
 export const dynamic = 'force-dynamic';

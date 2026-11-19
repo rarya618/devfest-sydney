@@ -6,8 +6,8 @@ import type { ReactNode } from 'react';
 // title template so pages don't each repeat the site suffix.
 export const metadata: Metadata = {
   title: {
-    template: '%s · Admin — GDG Sydney',
-    default: 'Admin — GDG Sydney',
+    template: '%s · Admin · GDG Sydney',
+    default: 'Admin · GDG Sydney',
   },
   robots: { index: false, follow: false },
 };

@@ -21,6 +21,10 @@ import HistoryDisclosure, { stampedOn, type HistoryRow } from './HistoryDisclosu
 import InvitePastVolunteersModal from './InvitePastVolunteersModal';
 import type { InvitablePastVolunteer } from '@/lib/volunteerInvite';
 import ConfirmAction from './ConfirmAction';
+import AdminSearch from './AdminSearch';
+import FilterChipRow from './FilterChipRow';
+import SidePanel from './SidePanel';
+import { Chip, StatusLabel, type StatusTone } from './Chips';
 
 // Neither 'unassigned' nor 'organisers' is a VolunteerArea. 'unassigned' is the absence
 // of one, and the filter reached for most while the roster is still being built;
@@ -28,13 +32,13 @@ import ConfirmAction from './ConfirmAction';
 type FilterArea = 'all' | 'unassigned' | 'organisers' | VolunteerArea;
 type FilterConfirmation = 'all' | VolunteerConfirmation;
 
-function CrewAvatar({ member }: { member: VolunteerSubmission }) {
+function CrewAvatar({ member, size = 'large' }: { member: VolunteerSubmission; size?: 'large' | 'small' }) {
   return (
-    <div className="w-14 h-14 rounded-full overflow-hidden bg-white/[0.06] shrink-0">
+    <div className={`${size === 'small' ? 'w-10 h-10' : 'w-14 h-14'} rounded-full overflow-hidden bg-white/[0.06] shrink-0`}>
       {member.photoUrl ? (
         <Image src={member.photoUrl} alt={member.name} width={56} height={56} className="w-full h-full object-cover" />
       ) : (
-        <div className="w-full h-full flex items-center justify-center text-white/55 text-base font-bold" aria-hidden="true">
+        <div className={`w-full h-full flex items-center justify-center text-white/60 font-bold ${size === 'small' ? 'text-xs' : 'text-base'}`} aria-hidden="true">
           {getInitials(member.name)}
         </div>
       )}
@@ -74,27 +78,19 @@ function formatGdgOnCampusExec(member: VolunteerSubmission): string {
 interface CrewCardProps {
   member: VolunteerSubmission;
   onError: (message: string) => void;
+  // Shown inside the table's side panel: opens expanded.
+  inPanel?: boolean;
 }
 
-function CrewCard({ member, onError }: CrewCardProps) {
+function CrewCard({ member, onError, inPanel = false }: CrewCardProps) {
   const [isPending, startTransition] = useTransition();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(inPanel);
   const [editing, setEditing] = useState(false);
-  const [confirmingRemove, setConfirmingRemove] = useState(false);
   const confirmation = VOLUNTEER_CONFIRMATION_CHIPS[member.confirmation];
   const isOrganiser = member.isOrganiser;
 
-  useEffect(() => {
-    if (!confirmingRemove) return;
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setConfirmingRemove(false);
-    }
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [confirmingRemove]);
 
   function handleRemove() {
-    setConfirmingRemove(false);
     startTransition(async () => {
       const result = await removeFromCrew(member.id);
       if (result.error) onError(result.error);
@@ -135,7 +131,7 @@ function CrewCard({ member, onError }: CrewCardProps) {
   return (
     <div
       onClick={handleCardClick}
-      className={`relative cursor-pointer bg-surface border-l-4 ${isOrganiser ? 'border-l-google-blue' : 'border-l-google-green'} rounded-lg p-4 sm:p-5 transition-colors hover:bg-white/[0.07] ${
+      className={`relative cursor-pointer bg-surface rounded-2xl p-4 sm:p-5 transition-colors hover:bg-white/[0.07] ${
         isPending ? 'opacity-50 pointer-events-none' : ''
       }`}
       aria-label={`${isOrganiser ? 'Organiser' : 'Crew member'} ${member.name}`}
@@ -145,16 +141,16 @@ function CrewCard({ member, onError }: CrewCardProps) {
 
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <h3 className="font-bold text-white text-xl leading-snug tracking-tight">{member.name}</h3>
+            <h2 className="font-bold text-white text-xl leading-snug tracking-tight">{member.name}</h2>
             {isOrganiser ? (
               <span
                 title="Added to the crew by an admin rather than through the volunteer signup form."
-                className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-blue/15 text-google-blue-light"
+                className="text-xs font-bold px-1.5 py-0.5 rounded bg-google-blue/15 text-google-blue-light"
               >
                 Organiser
               </span>
             ) : (
-              <span title={confirmation.title} className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${confirmation.className}`}>
+              <span title={confirmation.title} className={`text-xs font-bold px-1.5 py-0.5 rounded ${confirmation.className}`}>
                 {confirmation.label}
               </span>
             )}
@@ -178,36 +174,36 @@ function CrewCard({ member, onError }: CrewCardProps) {
 
           <div className="flex flex-wrap items-center gap-1.5 gap-y-2 mt-3">
             {isOrganiser && (
-              <span className="inline-flex items-center gap-1.5 text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] font-bold text-google-blue-light">
+              <span className="inline-flex items-center gap-1.5 text-xs leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] font-bold text-google-blue-light">
                 <span className="w-1.5 h-1.5 rounded-full bg-google-blue" aria-hidden="true" />
                 {member.organiserRole || 'No role set'}
               </span>
             )}
             {member.assignedArea ? (
-              <span className="inline-flex items-center gap-1.5 text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] font-bold text-google-green">
+              <span className="inline-flex items-center gap-1.5 text-xs leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] font-bold text-google-green">
                 <span className="w-1.5 h-1.5 rounded-full bg-google-green" aria-hidden="true" />
                 {VOLUNTEER_AREA_LABELS[member.assignedArea]}
               </span>
             ) : (
               <span
                 title={`This ${isOrganiser ? 'organiser' : 'volunteer'} has no area yet. Assign one from Edit so they know what they're doing on the day.`}
-                className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25"
+                className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25"
               >
                 No area assigned
               </span>
             )}
-            <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-medium">
+            <span className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-bold">
               {VOLUNTEER_SHIFT_LABELS[member.assignedShift]}
             </span>
             {member.isTorrensStudentOrStaff && (
-              <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-medium">
+              <span className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-bold">
                 Torrens
               </span>
             )}
             {member.hasBeenGdgOnCampusExec && (
               <span
                 title="Has been on the exec team of a GDG on Campus chapter"
-                className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-medium"
+                className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-bold"
               >
                 GDG on Campus exec{member.gdgOnCampusChapter ? ` · ${GDG_ON_CAMPUS_CHAPTER_LABELS[member.gdgOnCampusChapter]}` : ''}
               </span>
@@ -215,7 +211,7 @@ function CrewCard({ member, onError }: CrewCardProps) {
             {member.showOnCrewPage ? (
               <span
                 title={isOrganiser ? 'Listed on the public crew page and on the landing page.' : 'Listed on the public crew page, once they have confirmed.'}
-                className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25"
+                className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25"
               >
                 On the crew page
               </span>
@@ -223,7 +219,7 @@ function CrewCard({ member, onError }: CrewCardProps) {
               awaitingPublish && (
                 <span
                   title={isOrganiser ? "Not listed publicly. Tick 'Show on the crew and landing pages' in Edit to name them on the site." : "Confirmed, but not listed publicly. Tick 'Show on the public crew page' in Edit once they've said they're happy to be named."}
-                  className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-white/[0.06] text-white/60 border-white/10"
+                  className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-white/[0.06] text-white/60 border-white/10"
                 >
                   Not on the crew page
                 </span>
@@ -232,7 +228,7 @@ function CrewCard({ member, onError }: CrewCardProps) {
             {!isOrganiser && ticketSent && (
               <span
                 title="Marked as having their ticket. The ticket link is hidden from them on the confirmation page."
-                className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25"
+                className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25"
               >
                 Ticket sent
               </span>
@@ -240,7 +236,7 @@ function CrewCard({ member, onError }: CrewCardProps) {
             {member.dietaryRequirements && (
               <span
                 title={member.dietaryRequirements}
-                className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25"
+                className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25"
               >
                 Dietary needs
               </span>
@@ -318,16 +314,13 @@ function CrewCard({ member, onError }: CrewCardProps) {
                 disabled={isPending}
                 aria-label={`${alreadyEmailed ? 'Resend' : 'Send'} the volunteer acceptance email to ${member.name}`}
                 title={alreadyEmailed ? 'Resend acceptance email' : 'Send acceptance email'}
-                className={`inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                  alreadyEmailed
-                    ? 'text-white/55 hover:text-white hover:bg-white/[0.08]'
-                    : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
-                }`}
+                className="relative inline-flex items-center justify-center w-9 h-9 rounded-full text-white/60 hover:text-white hover:bg-white/[0.08] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                   <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
                 </svg>
+                {!alreadyEmailed && <span aria-hidden="true" className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-google-yellow ring-2 ring-surface" />}
               </button>
             )}
           </ConfirmAction>
@@ -346,8 +339,8 @@ function CrewCard({ member, onError }: CrewCardProps) {
               title={ticketSent ? 'Ticket sent: click to unmark' : 'Mark ticket as sent'}
               className={`inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                 ticketSent
-                  ? 'bg-google-blue/15 text-google-blue-light hover:bg-white/[0.08] hover:text-white'
-                  : 'text-white/55 hover:text-white hover:bg-white/[0.08]'
+                  ? 'bg-white/[0.12] text-off-white hover:bg-white/[0.16]'
+                  : 'text-white/60 hover:text-white hover:bg-white/[0.08]'
               }`}
             >
               <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
@@ -357,42 +350,49 @@ function CrewCard({ member, onError }: CrewCardProps) {
             </button>
           )}
 
-          {confirmingRemove ? (
-            <div role="group" aria-label={`Confirm removing ${member.name}`} className="flex flex-col items-end gap-1.5 bg-surface-raised border border-white/10 rounded-xl px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.45)] w-52">
-              <p className="text-xs text-white/70 leading-snug text-left w-full">
-                {isOrganiser
-                  ? 'Remove this organiser? Their record is deleted, not returned to the signup queue.'
-                  : 'Remove from the crew and put the signup back to pending?'}
-              </p>
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => setConfirmingRemove(false)}
-                  aria-label={`Keep ${isOrganiser ? 'this organiser' : 'this crew member'}`}
-                  className="text-xs px-2.5 py-1 rounded-lg border border-white/40 text-white/50 hover:border-white/60 hover:text-white transition-colors"
-                >
-                  Keep
-                </button>
-                <button
-                  onClick={handleRemove}
-                  aria-label={`Remove ${member.name} from the crew`}
-                  className="text-xs px-2.5 py-1 rounded-full bg-google-red-deep text-white font-medium hover:opacity-90 transition-colors"
-                >
-                  Remove
-                </button>
-              </div>
-            </div>
-          ) : (
-            <button
-              onClick={() => setConfirmingRemove(true)}
-              aria-label={`Remove ${member.name} from the crew`}
-              title="Remove from crew"
-              className="inline-flex items-center justify-center w-9 h-9 rounded-full text-white/55 hover:text-google-red-light hover:bg-google-red/[0.08] transition-colors"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9h6.6l.7-9" />
-              </svg>
-            </button>
-          )}
+          <ConfirmAction
+
+            tone="danger"
+
+            message={isOrganiser ? `Remove ${member.name} as an organiser?` : `Remove ${member.name} from the crew?`}
+
+            detail={isOrganiser
+
+              ? 'Their organiser record is deleted, not returned to the signup queue.'
+
+              : 'Their signup goes back to pending. Nothing is emailed.'}
+
+            confirmLabel="Remove"
+
+            onConfirm={handleRemove}
+
+          >
+
+            {(triggerProps) => (
+
+              <button
+
+                {...triggerProps}
+
+                aria-label={`Remove ${member.name} from the crew`}
+
+                title="Remove from crew"
+
+                className="inline-flex items-center justify-center w-9 h-9 rounded-full text-white/60 hover:text-google-red-light hover:bg-google-red/[0.08] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
+
+              >
+
+                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9h6.6l.7-9" />
+
+                </svg>
+
+              </button>
+
+            )}
+
+          </ConfirmAction>
         </div>
       </div>
 
@@ -407,6 +407,117 @@ function CrewCard({ member, onError }: CrewCardProps) {
         />
       )}
     </div>
+  );
+}
+
+// Where a crew member stands, in the portal's state colours.
+const CREW_STATUS: Record<VolunteerConfirmation, { tone: StatusTone; label: string }> = {
+  confirmed: { tone: 'good', label: 'Confirmed' },
+  awaiting: { tone: 'waiting', label: 'Awaiting confirmation' },
+  'not-emailed': { tone: 'waiting', label: 'Not emailed' },
+};
+
+const CREW_NEXT_STEP_PILL =
+  'press inline-flex items-center justify-center h-8 px-3.5 rounded-full border border-white/35 text-sm font-bold text-off-white whitespace-nowrap hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue';
+
+// A row of the crew roster: who, their area and shift, where they stand, and the one thing to
+// do next. The full card (contact, answers, photo, edit, remove, history) opens in the side panel.
+function CrewRow({ member, onError }: CrewCardProps) {
+  const [isPending, startTransition] = useTransition();
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const isOrganiser = member.isOrganiser;
+  const status = isOrganiser ? { tone: 'done' as StatusTone, label: 'Organiser' } : CREW_STATUS[member.confirmation];
+
+  function run(send: () => Promise<{ error?: string }>) {
+    startTransition(async () => {
+      const result = await send();
+      if (result.error) onError(result.error);
+    });
+  }
+
+  function handleRowClick(event: React.MouseEvent<HTMLLIElement>) {
+    const target = event.target as HTMLElement;
+    if (target.closest('button, a, input, textarea, select, [role="menu"], [role="dialog"], [role="alertdialog"]')) return;
+    if (window.getSelection()?.toString()) return;
+    setIsPanelOpen(true);
+  }
+
+  let nextStep: React.ReactNode = null;
+  if (!isOrganiser && member.confirmation === 'not-emailed') {
+    nextStep = (
+      <ConfirmAction
+        tone="send"
+        message={`Send the volunteer acceptance email to ${member.name}?`}
+        detail="It tells them they're on the crew and asks them to confirm."
+        confirmLabel="Send email"
+        onConfirm={() => run(() => sendVolunteerAcceptanceEmail(member.id))}
+      >
+        {(triggerProps) => (
+          <button {...triggerProps} type="button" disabled={isPending} aria-label={`Send the volunteer acceptance email to ${member.name}`} className={CREW_NEXT_STEP_PILL}>
+            Send acceptance email
+          </button>
+        )}
+      </ConfirmAction>
+    );
+  } else if (!isOrganiser && member.confirmation === 'confirmed' && !member.ticketSentAt) {
+    // A mark, not a send: the ticket goes out from Humanitix. It can be unmarked from the card.
+    nextStep = (
+      <button
+        type="button"
+        onClick={() => run(() => setTicketSent(member.id, true))}
+        disabled={isPending}
+        aria-label={`Mark ${member.name}'s ticket as sent (sends nothing)`}
+        title="Records that their ticket went out from Humanitix. Sends nothing."
+        className={CREW_NEXT_STEP_PILL}
+      >
+        Mark ticket sent
+      </button>
+    );
+  }
+
+  return (
+    <li
+      onClick={handleRowClick}
+      className={`grid grid-cols-[auto_minmax(0,1fr)_auto] md:grid-cols-[auto_minmax(0,1fr)_11rem_11.5rem_12rem_auto] items-center gap-x-4 gap-y-2 px-4 py-3 cursor-pointer transition-colors hover:bg-white/[0.04] ${
+        isPending ? 'opacity-50 pointer-events-none' : ''
+      }`}
+    >
+      <CrewAvatar member={member} size="small" />
+      <div className="min-w-0">
+        <h2 className="font-bold text-off-white text-[0.9375rem] leading-snug truncate">{member.name}</h2>
+        <p className="mt-0.5 text-sm text-white/60 truncate">
+          {isOrganiser ? member.organiserRole || 'Organiser' : member.email}
+        </p>
+      </div>
+      <span className="hidden md:flex flex-col items-start gap-1">
+        {member.assignedArea ? (
+          <Chip>{VOLUNTEER_AREA_LABELS[member.assignedArea]}</Chip>
+        ) : (
+          <Chip tone="attention">No area yet</Chip>
+        )}
+        {member.assignedShift && <span className="font-mono text-xs text-white/60">{VOLUNTEER_SHIFT_LABELS[member.assignedShift]}</span>}
+      </span>
+      <span className="hidden md:flex flex-col items-start gap-1">
+        <StatusLabel tone={status.tone}>{status.label}</StatusLabel>
+        {!isOrganiser && member.ticketSentAt && <span className="font-mono text-xs text-white/60">Ticket sent</span>}
+      </span>
+      <span className="col-span-full md:col-span-1 flex justify-start md:justify-end pl-14 md:pl-0 max-md:empty:hidden">{nextStep}</span>
+      <button
+        type="button"
+        onClick={() => setIsPanelOpen(true)}
+        aria-label={`Open ${member.name}`}
+        className="press row-start-1 col-start-3 md:row-auto md:col-auto inline-flex items-center justify-center w-8 h-8 rounded-full text-white/60 hover:text-white hover:bg-white/[0.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
+      >
+        <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 3.5L10.5 8 6 12.5" />
+        </svg>
+      </button>
+      {isPanelOpen && (
+        <SidePanel title={member.name} subtitle={isOrganiser ? member.organiserRole || 'Organiser' : 'Crew'} onClose={() => setIsPanelOpen(false)}>
+          <CrewCard member={member} onError={onError} inPanel />
+        </SidePanel>
+      )}
+    </li>
   );
 }
 
@@ -425,16 +536,8 @@ export default function CrewDashboard({ crew, invites }: Props) {
   const [areaFilter, setAreaFilter] = useState<FilterArea>('all');
   const [confirmationFilter, setConfirmationFilter] = useState<FilterConfirmation>('all');
   const [search, setSearch] = useState('');
-  const [searchOpen, setSearchOpen] = useState(false);
   const [confirmationMenuOpen, setConfirmationMenuOpen] = useState(false);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
   const confirmationMenuRef = useRef<HTMLDivElement>(null);
-  const searchWidthOpen = searchOpen || Boolean(search);
-
-  useEffect(() => {
-    if (searchOpen) searchInputRef.current?.focus();
-  }, [searchOpen]);
 
   useEffect(() => {
     if (!confirmationMenuOpen) return;
@@ -455,30 +558,6 @@ export default function CrewDashboard({ crew, invites }: Props) {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [confirmationMenuOpen]);
-
-  useEffect(() => {
-    if (!searchOpen) return;
-
-    function handlePointerDown(event: MouseEvent) {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
-        setSearch('');
-        setSearchOpen(false);
-      }
-    }
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        setSearch('');
-        setSearchOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [searchOpen]);
 
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
 
@@ -625,7 +704,7 @@ export default function CrewDashboard({ crew, invites }: Props) {
                 className="inline-flex items-center gap-1.5 h-10 text-sm px-4 rounded-full border border-white/40 text-white/85 font-bold transition-colors hover:border-white/60 hover:text-white shrink-0"
               >
                 Invite past volunteers
-                {uninvitedCount > 0 && <span className="font-medium text-white/60">{uninvitedCount}</span>}
+                {uninvitedCount > 0 && <span className="font-bold text-white/60">{uninvitedCount}</span>}
               </button>
             )}
 
@@ -641,70 +720,7 @@ export default function CrewDashboard({ crew, invites }: Props) {
               </svg>
             </button>
 
-            <div
-              ref={searchContainerRef}
-              className={`relative shrink-0 h-10 rounded-full transition-all duration-300 ease-in-out ${
-                searchWidthOpen ? 'w-full sm:w-80 bg-white/[0.06]' : 'w-10 bg-white/[0.06] hover:bg-white/[0.1]'
-              }`}
-            >
-              <button
-                onClick={() => setSearchOpen(true)}
-                tabIndex={searchOpen || search ? -1 : undefined}
-                aria-label="Search crew by name, email, or phone"
-                title="Search"
-                className={`absolute left-0 top-0 inline-flex items-center justify-center w-10 h-10 rounded-full text-white/70 hover:text-white transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
-                }`}
-              >
-                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <circle cx="7" cy="7" r="5" />
-                  <path strokeLinecap="round" d="M11 11l3.5 3.5" />
-                </svg>
-              </button>
-
-              <input
-                ref={searchInputRef}
-                type="search"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                tabIndex={searchOpen || search ? undefined : -1}
-                placeholder="Search by name, email, or phone…"
-                aria-label="Search crew by name, email, or phone"
-                className={`w-full h-10 rounded-full bg-transparent pl-9 pr-9 py-0 text-sm text-white placeholder:text-white/50 focus:outline-none transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
-              />
-              <svg
-                className={`absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/55 pointer-events-none transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-100' : 'opacity-0'
-                }`}
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              >
-                <circle cx="7" cy="7" r="5" />
-                <path strokeLinecap="round" d="M11 11l3.5 3.5" />
-              </svg>
-              <button
-                onClick={() => {
-                  setSearch('');
-                  setSearchOpen(false);
-                }}
-                tabIndex={searchOpen || search ? undefined : -1}
-                aria-label="Close search"
-                className={`absolute right-2 top-1/2 -translate-y-1/2 text-white/55 hover:text-white/70 transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <path strokeLinecap="round" d="M4 4l8 8M12 4l-8 8" />
-                </svg>
-              </button>
-            </div>
-
-            {(searchOpen || search) && <div className="basis-full h-0 sm:hidden" aria-hidden="true" />}
+            <AdminSearch value={search} onChange={setSearch} label="Search crew by name, email or phone" placeholder="Search by name, email or phone…" />
 
             <div className="relative shrink-0" ref={confirmationMenuRef}>
               <button
@@ -717,7 +733,7 @@ export default function CrewDashboard({ crew, invites }: Props) {
                 }`}
               >
                 {confirmationTabs.find((tab) => tab.value === confirmationFilter)?.label}
-                <span className="font-medium text-white/60">{confirmationCounts[confirmationFilter]}</span>
+                <span className="font-normal text-white/60">{confirmationCounts[confirmationFilter]}</span>
                 <svg className={`w-3 h-3 text-white/55 transition-transform ${confirmationMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
                 </svg>
@@ -738,7 +754,7 @@ export default function CrewDashboard({ crew, invites }: Props) {
                       }}
                       aria-checked={confirmationFilter === tab.value}
                       className={`w-full flex items-center justify-between gap-3 text-left text-sm px-4 py-2.5 transition-colors ${
-                        confirmationFilter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
+                        confirmationFilter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-bold hover:bg-white/[0.08] hover:text-white'
                       }`}
                     >
                       {tab.label}
@@ -755,11 +771,7 @@ export default function CrewDashboard({ crew, invites }: Props) {
         {/* Assigned area as a tab row, matching /admin/devfest/volunteers and /admin/devfest/showcase:
             confirmation is a menu because a crew member is in exactly one state, while the
             area row doubles as the roster at a glance. */}
-        <div
-          role="group"
-          aria-label="Filter crew by assigned area"
-          className="mt-3 -mx-4 md:-mx-5 px-4 md:px-5 flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
+        <FilterChipRow label="Filter crew by assigned area" className="mt-3 -mx-4 md:-mx-5">
           {areaTabs.map((tab) => (
             <button
               key={tab.value}
@@ -773,10 +785,10 @@ export default function CrewDashboard({ crew, invites }: Props) {
               }`}
             >
               {tab.label}
-              <span className="font-medium text-white/60">{areaCounts.get(tab.value) ?? 0}</span>
+              <span className="font-normal text-white/60">{areaCounts.get(tab.value) ?? 0}</span>
             </button>
           ))}
-        </div>
+        </FilterChipRow>
       </div>
 
       <div className="px-4 md:px-5 pb-8 sm:pb-10">
@@ -791,10 +803,20 @@ export default function CrewDashboard({ crew, invites }: Props) {
             <p className="text-sm text-white/50">No crew members match this filter.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 items-start">
-            {filtered.map((member) => (
-              <CrewCard key={member.id} member={member} onError={setAlertMessage} />
-            ))}
+          <div className="rounded-2xl bg-surface overflow-hidden">
+            <div aria-hidden="true" className="hidden md:grid grid-cols-[auto_minmax(0,1fr)_11rem_11.5rem_12rem_auto] gap-x-4 px-4 py-2.5 border-b border-white/10 text-xs font-bold text-white/60">
+              <span className="w-10" />
+              <span>Name</span>
+              <span>Area and shift</span>
+              <span>Status</span>
+              <span className="text-right">Next step</span>
+              <span className="w-8" />
+            </div>
+            <ul className="divide-y divide-white/[0.07]">
+              {filtered.map((member) => (
+                <CrewRow key={member.id} member={member} onError={setAlertMessage} />
+              ))}
+            </ul>
           </div>
         )}
       </div>

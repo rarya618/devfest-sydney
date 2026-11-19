@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useTransition, type FormEvent } from 'react';
-import { createPortal } from 'react-dom';
 import { updateShowcaseEntry, type ShowcaseEditableFields } from './showcaseActions';
 import { SHOWCASE_STAGE_LABELS } from '@/lib/showcaseLabels';
 import type { ShowcaseSubmission } from '@/lib/types';
 import Select from '@/components/Select';
+import AdminModal from './AdminModal';
 
 interface Props {
   entry: ShowcaseSubmission;
@@ -35,7 +35,7 @@ function toEditableFields(entry: ShowcaseSubmission): ShowcaseEditableFields {
 
 const inputClasses =
   'w-full rounded-lg border border-white/35 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40';
-const labelClasses = 'block text-xs font-semibold text-white/50 mb-1';
+const labelClasses = 'block text-xs font-bold text-white/50 mb-1';
 
 export default function EditShowcaseEntryModal({ entry, onClose, onError }: Props) {
   const [fields, setFields] = useState<ShowcaseEditableFields>(() => toEditableFields(entry));
@@ -80,14 +80,8 @@ export default function EditShowcaseEntryModal({ entry, onClose, onError }: Prop
     });
   }
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[60] flex items-start sm:items-center justify-center bg-black/70 p-4 overflow-y-auto"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Edit Builder Showcase entry: ${entry.projectName}`}
-    >
-      <div className="w-full max-w-xl bg-surface-raised rounded-2xl shadow-xl my-8">
+  return (
+    <AdminModal label={`Edit Builder Showcase entry: ${entry.projectName}`} onClose={onClose} isBusy={isPending} widthClass="max-w-xl">
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <h2 className="text-lg font-bold text-white">Edit entry</h2>
@@ -311,14 +305,12 @@ export default function EditShowcaseEntryModal({ entry, onClose, onError }: Prop
               type="submit"
               disabled={isPending}
               aria-label="Save changes to this Builder Showcase entry"
-              className="text-xs px-4 py-1.5 rounded-full bg-google-blue-deep text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50"
+              className="text-xs px-4 py-1.5 rounded-full bg-google-blue-deep text-white font-bold hover:opacity-90 transition-colors disabled:opacity-50"
             >
               {isPending ? 'Saving…' : 'Save changes'}
             </button>
           </div>
         </form>
-      </div>
-    </div>,
-    document.body
+    </AdminModal>
   );
 }

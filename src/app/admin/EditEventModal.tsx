@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useTransition, type FormEvent, type ReactNode } from 'react';
-import { createPortal } from 'react-dom';
 import { createEvent, updateEvent, type EventFormInput, type PrivateLinkChange } from './eventActions';
 import type { AdminEventSummary } from './EventsDashboard';
 import {
@@ -18,6 +17,7 @@ import {
 import { isoToWallTime } from '@/lib/zonedTime';
 import type { EventFlowKey, EventPrivateLinkKey, EventVenue, GdgEventType } from '@/lib/types';
 import Select from '@/components/Select';
+import AdminModal from './AdminModal';
 
 interface Props {
   // Null to create a new event.
@@ -28,7 +28,7 @@ interface Props {
 
 const inputClasses =
   'w-full rounded-lg border border-white/35 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40 disabled:opacity-60';
-const labelClasses = 'block text-xs font-semibold text-white/55 mb-1';
+const labelClasses = 'block text-xs font-bold text-white/55 mb-1';
 const hintClasses = 'mt-1 text-xs text-white/50';
 const checkboxClasses = 'h-4 w-4 accent-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue';
 
@@ -149,14 +149,8 @@ export default function EditEventModal({ summary, onClose, onError }: Props) {
   const title = isCreating ? 'New event' : `Edit ${summary.event.name}`;
   const hasAnyFlow = EVENT_FLOW_KEYS.some((flowKey) => fields.flows[flowKey].enabled);
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[60] flex items-start sm:items-center justify-center bg-black/70 p-4 overflow-y-auto"
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-    >
-      <div className="w-full max-w-2xl bg-surface-raised rounded-2xl shadow-xl my-8">
+  return (
+    <AdminModal label={title} onClose={onClose} isBusy={isPending} widthClass="max-w-2xl">
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <h2 className="text-lg font-bold text-white">{title}</h2>
@@ -356,7 +350,7 @@ export default function EditEventModal({ summary, onClose, onError }: Props) {
                 return (
                   <div key={flowKey} className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
                     <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-white">
+                      <label className="flex items-center gap-2 text-sm font-bold text-white">
                         <input
                           type="checkbox"
                           className={checkboxClasses}
@@ -405,7 +399,7 @@ export default function EditEventModal({ summary, onClose, onError }: Props) {
                   return (
                     <div key={linkKey}>
                       <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
-                        <span className="text-xs font-semibold text-white/55">
+                        <span className="text-xs font-bold text-white/55">
                           {EVENT_PRIVATE_LINK_LABELS[linkKey]}{' '}
                           <span className={isSet ? 'text-google-green' : 'text-white/50'}>
                             {change.action === 'clear' ? '(will be removed)' : isSet ? '(set)' : '(not set)'}
@@ -478,14 +472,12 @@ export default function EditEventModal({ summary, onClose, onError }: Props) {
               type="submit"
               disabled={isPending}
               aria-label={isCreating ? 'Create this event' : 'Save changes to this event'}
-              className="text-xs px-4 py-1.5 rounded-full bg-google-blue-deep text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50"
+              className="text-xs px-4 py-1.5 rounded-full bg-google-blue-deep text-white font-bold hover:opacity-90 transition-colors disabled:opacity-50"
             >
               {isPending ? 'Saving…' : isCreating ? 'Create event' : 'Save changes'}
             </button>
           </div>
         </form>
-      </div>
-    </div>,
-    document.body
+    </AdminModal>
   );
 }

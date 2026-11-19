@@ -72,6 +72,9 @@
   --color-google-red-deep: #d93025;
   --color-google-red-light: #f28b82;
   --color-google-blue-light: #8ab4f8;
+  /* Green 300: green text on a green tint. Core green on its own 15% tint measured 3.9:1 on a
+     #282828 card; this is 6.1:1 there and 5.5:1 on #303030. */
+  --color-google-green-light: #81c995;
 
   /* Halftone colours */
   --color-halftone-blue: #57caff;
@@ -112,7 +115,8 @@ html {
 body {
   font-family: 'Google Sans', sans-serif;
   background-color: var(--bg);
-  color: var(--color-black-02);
+  /* Off White, not Black 02: text that sets no colour of its own was invisible on the page. */
+  color: var(--color-off-white);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -317,6 +321,66 @@ body {
     opacity: 0;
     translate: 0 var(--select-list-shift, -4px);
   }
+}
+
+/* The admin's modal (src/app/admin/AdminModal.tsx) settles in as it opens, its backdrop
+   fading behind it. `backwards`, not `both`: a transform left on the dialog afterwards would
+   pin the fixed-position Alert inside it. */
+.modal-panel[open] {
+  animation: modal-in 0.32s var(--ease-settle) backwards;
+}
+
+.modal-panel[open]::backdrop {
+  animation: modal-backdrop-in 0.24s var(--ease-settle) backwards;
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+}
+
+@keyframes modal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The side panel (src/app/admin/SidePanel.tsx) slides in from the right edge. */
+.sheet-panel[open] {
+  animation: sheet-in 0.42s var(--ease-settle) backwards;
+}
+
+.sheet-panel[open]::backdrop {
+  animation: modal-backdrop-in 0.3s var(--ease-settle) backwards;
+}
+
+@keyframes sheet-in {
+  from {
+    opacity: 0.4;
+    transform: translateX(48px);
+  }
+}
+
+/* The confirmation panel (src/app/admin/ConfirmAction.tsx) drops 4px into place. */
+.confirm-panel {
+  animation: confirm-panel-in 0.2s var(--ease-settle) backwards;
+}
+
+@keyframes confirm-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+/* A visible focus ring for any control that doesn't style its own: many admin buttons relied on
+   the browser default. A control's own focus classes (ring, outline-none) are more specific
+   and still win. */
+:where(button, a, summary, [role='button'], [tabindex]):focus-visible {
+  outline: 2px solid var(--color-google-blue);
+  outline-offset: 2px;
 }
 
 /* A pressed button gives slightly under the finger. */

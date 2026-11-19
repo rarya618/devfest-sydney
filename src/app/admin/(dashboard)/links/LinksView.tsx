@@ -70,7 +70,7 @@ export default function LinksView() {
           <div className="grid sm:grid-cols-4 gap-3 mb-4">
             {FIELDS.map(({ key, label, placeholder }) => (
               <div key={key}>
-                <label htmlFor={`link-gen-${key}`} className="block text-xs font-medium text-white/50 mb-1.5">
+                <label htmlFor={`link-gen-${key}`} className="block text-xs font-normal text-white/50 mb-1.5">
                   {label}
                 </label>
                 <input
@@ -88,7 +88,7 @@ export default function LinksView() {
           <div className="space-y-3">
             {DESTINATIONS.map(({ path, label }) => (
               <div key={path}>
-                <p className="text-xs font-medium text-white/50 mb-1.5">{label}</p>
+                <p className="text-xs font-bold text-white/50 mb-1.5">{label}</p>
                 <div className="flex items-center gap-2">
                   <code className="flex-1 min-w-0 truncate text-xs text-white/70 bg-white/[0.04] border border-white/10 rounded-lg px-3 py-2">
                     {urlFor(path)}
@@ -96,7 +96,7 @@ export default function LinksView() {
                   <button
                     onClick={() => handleCopy(path)}
                     aria-label={`Copy ${label} tracking link`}
-                    className="shrink-0 text-xs font-semibold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors"
+                    className="shrink-0 text-xs font-bold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors"
                   >
                     {copiedPath === path ? 'Copied!' : 'Copy'}
                   </button>

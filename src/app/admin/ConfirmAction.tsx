@@ -12,6 +12,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
+import { ADMIN_ACTION_START_EVENT } from '@/components/Alert';
 
 export interface ConfirmTriggerProps {
   ref: RefObject<HTMLButtonElement | null>;
@@ -27,8 +28,9 @@ interface ConfirmActionProps {
   detail?: string;
   /** The confirm button's words: "Send email", "Undo acceptance". */
   confirmLabel: string;
-  /** `send` for an email (Blue 700), `danger` for something that deletes (Red 600). */
-  tone: 'send' | 'danger';
+  /** `send` for an email (Blue 700), `accept` for a decision in someone's favour (Green 700),
+   *  `danger` for something that deletes or turns someone down (Red 600). */
+  tone: 'send' | 'accept' | 'danger';
   onConfirm: () => void;
   /** Which side of the trigger the panel lines up with. */
   align?: 'left' | 'right';
@@ -82,9 +84,11 @@ export default function ConfirmAction({
     };
   }, [isOpen]);
 
-  const confirmClasses = tone === 'danger'
-    ? 'bg-google-red-deep focus-visible:ring-google-red-light'
-    : 'bg-google-blue-deep focus-visible:ring-google-blue';
+  const confirmClasses = {
+    send: 'bg-google-blue-deep focus-visible:ring-google-blue',
+    accept: 'bg-google-green-deep focus-visible:ring-google-blue',
+    danger: 'bg-google-red-deep focus-visible:ring-google-red-light',
+  }[tone];
 
   return (
     <div className={`relative ${className}`}>
@@ -103,7 +107,7 @@ export default function ConfirmAction({
           aria-describedby={detail ? detailId : undefined}
           // Keeps clicks inside the panel from reaching a clickable card behind it.
           onClick={(event) => event.stopPropagation()}
-          className={`absolute top-full mt-2 z-30 w-72 max-w-[calc(100vw-2rem)] ${align === 'right' ? 'right-0' : 'left-0'}
+          className={`confirm-panel absolute top-full mt-2 z-30 w-72 max-w-[calc(100vw-2rem)] ${align === 'right' ? 'right-0' : 'left-0'}
             bg-surface-raised border border-white/10 rounded-2xl p-4 shadow-[0_12px_32px_rgba(0,0,0,0.45)] text-left`}
         >
           <p id={messageId} className="text-sm font-bold text-off-white leading-snug">{message}</p>
@@ -121,6 +125,9 @@ export default function ConfirmAction({
               type="button"
               onClick={() => {
                 close({ returnFocus: true });
+                // Clears an error still on screen from an earlier attempt (src/components/Alert.tsx),
+                // so a retry that works doesn't leave "couldn't be sent" up and invite a duplicate.
+                window.dispatchEvent(new Event(ADMIN_ACTION_START_EVENT));
                 onConfirm();
               }}
               className={`press px-4 py-1.5 rounded-full text-sm font-bold text-white hover:opacity-85 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-raised ${confirmClasses}`}

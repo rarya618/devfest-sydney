@@ -56,7 +56,7 @@ function AverageRow({ label, ratings }: { label: string; ratings: number[] }) {
   return (
     <div title={`${label}: ${mean} out of 5 from ${ratings.length} ratings`}>
       <div className="flex items-center justify-between text-sm mb-1.5">
-        <span className="font-medium text-white/70">{label}</span>
+        <span className="font-normal text-white/70">{label}</span>
         <span className="text-white/55 text-xs shrink-0 font-mono">
           {ratings.length > 0 ? `${mean.toFixed(1)} / 5 · ${ratings.length}` : 'No ratings'}
         </span>

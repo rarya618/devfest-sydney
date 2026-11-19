@@ -11,7 +11,6 @@ import {
   STATUS_LABELS,
   TRACK_LABELS,
   TRACK_COLORS,
-  TRACK_BORDER_COLORS,
   TRACK_DOT_COLORS,
   FORMAT_LABELS,
   EXPERIENCE_LABELS,
@@ -22,6 +21,11 @@ import { csvFilename, downloadCsv, formatCsvBoolean } from '@/lib/csv';
 import { useMobileBarHidden } from './MobileBarContext';
 import Select from '@/components/Select';
 import ConfirmAction from './ConfirmAction';
+import SidePanel from './SidePanel';
+import { Chip, StatusLabel, type StatusTone } from './Chips';
+import DecisionButtons from './DecisionButtons';
+import { ExpandButton, MoreIcon, RAIL_CLASSES, RAIL_ICON_CLASSES, RAIL_PILL_CLASSES, RAIL_TEXT_BUTTON_CLASSES } from './RailButtons';
+import AdminSearch from './AdminSearch';
 
 // The speaker changed the proposal from the speaker portal after sending it.
 function EditedMark({ editedAt }: { editedAt: string }) {
@@ -60,7 +64,7 @@ function LinkChip({ label, value, icon, accent }: LinkChipProps) {
       <span className={`flex items-center justify-center w-5 h-5 rounded-full shrink-0 ${colors.iconBg} ${colors.iconText}`}>
         {icon}
       </span>
-      <span className="text-sm font-medium text-white/70 group-hover:text-white transition-colors">
+      <span className="text-sm font-normal text-white/70 group-hover:text-white transition-colors">
         {label}
         {!href && <span className="ml-1.5 font-normal text-white/55">{value.trim()}</span>}
       </span>
@@ -84,6 +88,11 @@ function LinkChip({ label, value, icon, accent }: LinkChipProps) {
   );
 }
 
+// The labelled next step in the proposals table: an outline pill, so a row's one action is
+// findable without competing with the page's primary button.
+const NEXT_STEP_PILL_CLASSES =
+  'press inline-flex items-center justify-center h-8 px-3.5 rounded-full border border-white/35 text-sm font-bold text-off-white whitespace-nowrap hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue';
+
 // Sending the acceptance email is the whole point of accepting a proposal, so it sits in
 // the action rail next to Undo rather than behind the overflow menu: an organiser
 // shouldn't have to go looking for the step that actually tells the speaker. It keeps the
@@ -92,10 +101,13 @@ function SendAcceptanceEmailButton({
   submission,
   onSend,
   disabled,
+  variant = 'icon',
 }: {
   submission: Submission;
   onSend: () => void;
   disabled: boolean;
+  /** `pill`: the labelled next-step button in the proposals table. */
+  variant?: 'icon' | 'pill' | 'rail';
 }) {
   const alreadySent = Boolean(submission.acceptanceEmailSentAt);
   const detail = submission.speakerConfirmedAt
@@ -112,7 +124,11 @@ function SendAcceptanceEmailButton({
       confirmLabel={alreadySent ? 'Resend email' : 'Send email'}
       onConfirm={onSend}
     >
-      {(triggerProps) => (
+      {(triggerProps) => variant !== 'icon' ? (
+        <button {...triggerProps} type="button" disabled={disabled} aria-label={`Send acceptance email to ${submission.name} for: ${submission.talkTitle}`} className={variant === 'rail' ? RAIL_PILL_CLASSES : NEXT_STEP_PILL_CLASSES}>
+          {variant === 'rail' ? (alreadySent ? 'Resend email' : 'Send email') : 'Send acceptance email'}
+        </button>
+      ) : (
         <button
           {...triggerProps}
           disabled={disabled}
@@ -121,7 +137,7 @@ function SendAcceptanceEmailButton({
           className={`inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
             alreadySent
               ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
-              : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
+              : 'bg-google-green/15 text-google-green-light hover:bg-google-green-deep hover:text-white'
           }`}
         >
           <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
@@ -141,10 +157,13 @@ function SendSpeakerTicketButton({
   submission,
   onSend,
   disabled,
+  variant = 'icon',
 }: {
   submission: Submission;
   onSend: () => void;
   disabled: boolean;
+  /** `pill`: the labelled next-step button in the proposals table. */
+  variant?: 'icon' | 'pill' | 'rail';
 }) {
   const alreadySent = Boolean(submission.speakerTicketEmailSentAt);
 
@@ -158,7 +177,11 @@ function SendSpeakerTicketButton({
       confirmLabel={alreadySent ? 'Resend ticket' : 'Send ticket'}
       onConfirm={onSend}
     >
-      {(triggerProps) => (
+      {(triggerProps) => variant !== 'icon' ? (
+        <button {...triggerProps} type="button" disabled={disabled} aria-label={`Send the complimentary speaker ticket to ${submission.name}`} className={variant === 'rail' ? RAIL_PILL_CLASSES : NEXT_STEP_PILL_CLASSES}>
+          {variant === 'rail' ? (alreadySent ? 'Resend ticket' : 'Send ticket') : 'Send ticket'}
+        </button>
+      ) : (
         <button
           {...triggerProps}
           disabled={disabled}
@@ -190,10 +213,13 @@ function SendRejectionEmailButton({
   submission,
   onSend,
   disabled,
+  variant = 'icon',
 }: {
   submission: Submission;
   onSend: () => void;
   disabled: boolean;
+  /** `pill`: the labelled next-step button in the proposals table. */
+  variant?: 'icon' | 'pill' | 'rail';
 }) {
   const alreadySent = Boolean(submission.rejectionEmailSentAt);
 
@@ -207,7 +233,11 @@ function SendRejectionEmailButton({
       confirmLabel={alreadySent ? 'Resend email' : 'Send email'}
       onConfirm={onSend}
     >
-      {(triggerProps) => (
+      {(triggerProps) => variant !== 'icon' ? (
+        <button {...triggerProps} type="button" disabled={disabled} aria-label={`Send rejection email to ${submission.name} for: ${submission.talkTitle}`} className={variant === 'rail' ? RAIL_PILL_CLASSES : NEXT_STEP_PILL_CLASSES}>
+          {variant === 'rail' ? (alreadySent ? 'Resend email' : 'Send rejection email') : 'Send rejection email'}
+        </button>
+      ) : (
         <button
           {...triggerProps}
           disabled={disabled}
@@ -265,12 +295,9 @@ function UndoAcceptanceButton({
           {...triggerProps}
           disabled={disabled}
           aria-label={`Undo acceptance of proposal: ${submission.talkTitle}`}
-          title="Undo acceptance"
-          className="inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-full bg-white/[0.06] text-white/70 hover:bg-google-red/[0.12] hover:text-google-red-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className={RAIL_TEXT_BUTTON_CLASSES}
         >
-          <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 4L2.5 7.5 6 11M2.5 7.5h6.5a4 4 0 010 8H7" />
-          </svg>
+          Undo acceptance
         </button>
       )}
     </ConfirmAction>
@@ -282,7 +309,7 @@ function RejectionEmailState({ submission, blocker }: { submission: Submission; 
     return (
       <span
         title={`Rejection email sent ${formatDate(submission.rejectionEmailSentAt)}${submission.rejectionEmailSentBy ? ` by ${submission.rejectionEmailSentBy}` : ''}`}
-        className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
+        className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
       >
         Emailed
       </span>
@@ -293,7 +320,7 @@ function RejectionEmailState({ submission, blocker }: { submission: Submission; 
     return (
       <span
         title="This person has another proposal accepted, so they don't get a rejection email. Mention this talk to them yourself if you want to."
-        className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-green/15 text-google-green"
+        className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-google-green/15 text-google-green-light"
       >
         Speaking
       </span>
@@ -304,7 +331,7 @@ function RejectionEmailState({ submission, blocker }: { submission: Submission; 
     return (
       <span
         title="This person has another proposal waiting for review. Decide it first so they only get one email."
-        className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
+        className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
       >
         Pending decision
       </span>
@@ -314,7 +341,7 @@ function RejectionEmailState({ submission, blocker }: { submission: Submission; 
   return (
     <span
       title="This speaker hasn't been told yet. Send the rejection email from the action rail."
-      className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-yellow/15 text-google-yellow"
+      className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-google-yellow/15 text-google-yellow"
     >
       Not emailed
     </span>
@@ -328,7 +355,7 @@ function AcceptanceState({ submission }: { submission: Submission }) {
     return (
       <span
         title={`Speaker confirmed ${formatDate(submission.speakerConfirmedAt)}`}
-        className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-green/15 text-google-green"
+        className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-google-green/15 text-google-green-light"
       >
         Confirmed
       </span>
@@ -339,7 +366,7 @@ function AcceptanceState({ submission }: { submission: Submission }) {
     return (
       <span
         title={`Acceptance email sent ${formatDate(submission.acceptanceEmailSentAt)}${submission.acceptanceEmailSentBy ? ` by ${submission.acceptanceEmailSentBy}` : ''}`}
-        className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
+        className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
       >
         Awaiting confirmation
       </span>
@@ -349,7 +376,7 @@ function AcceptanceState({ submission }: { submission: Submission }) {
   return (
     <span
       title="This speaker hasn't been told yet. Send the acceptance email from the actions menu."
-      className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-yellow/15 text-google-yellow"
+      className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-google-yellow/15 text-google-yellow"
     >
       Not emailed
     </span>
@@ -416,7 +443,7 @@ function ReviewerNotesPanel({ submissionId, notes, onError }: ReviewerNotesPanel
                       className="shrink-0 text-white/55 hover:text-google-red-light transition-colors disabled:opacity-40"
                     >
                       {isDeleting && deletingIndex === index ? (
-                        <span className="text-[10px]">Deleting…</span>
+                        <span className="text-xs">Deleting…</span>
                       ) : (
                         <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M3.5 4.5h9M6.5 4.5v-1a1 1 0 011-1h1a1 1 0 011 1v1m-5.5 0l.5 8a1 1 0 001 .95h5a1 1 0 001-.95l.5-8" />
@@ -427,7 +454,7 @@ function ReviewerNotesPanel({ submissionId, notes, onError }: ReviewerNotesPanel
                 </ConfirmAction>
               </div>
               <p className="mt-1 text-xs text-white/55">
-                <span className="font-medium text-white/50">{note.authorName}</span> &middot; {formatDate(note.createdAt)}
+                <span className="font-normal text-white/50">{note.authorName}</span> &middot; {formatDate(note.createdAt)}
               </p>
             </li>
           ))}
@@ -451,7 +478,7 @@ function ReviewerNotesPanel({ submissionId, notes, onError }: ReviewerNotesPanel
           type="submit"
           disabled={isPending || !draft.trim()}
           aria-label="Save reviewer note"
-          className="shrink-0 text-xs font-semibold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
+          className="shrink-0 text-xs font-bold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
         >
           {isPending ? 'Saving…' : 'Add'}
         </button>
@@ -468,13 +495,17 @@ interface SubmissionRowProps {
   bulkActionsPending: boolean;
   // Why this person's rejection email can't go yet, worked out across all their proposals.
   rejectionBlocker: RejectionEmailBlocker | null;
+  // Shown inside the table's side panel: opens expanded, and selection stays with the row.
+  inPanel?: boolean;
 }
 
-function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActionsPending, rejectionBlocker }: SubmissionRowProps) {
+function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActionsPending, rejectionBlocker, inPanel = false }: SubmissionRowProps) {
   const [isPending, startTransition] = useTransition();
   const [isEditing, setIsEditing] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(inPanel);
+  // Content lines up under the title, past the checkbox; in the panel there's no checkbox.
+  const indent = inPanel ? '' : 'pl-8';
   const [moreOpen, setMoreOpen] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement>(null);
 
@@ -515,26 +546,30 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
   return (
     <div
       onClick={handleCardClick}
-      className={`relative cursor-pointer bg-surface border-l-4 rounded-lg pt-4 pb-4 pl-4 pr-4 sm:pt-5 sm:pb-6 sm:pl-5 sm:pr-5 transition-colors hover:bg-white/[0.07] ${
+      className={`relative cursor-pointer bg-surface rounded-2xl pt-4 pb-4 pl-4 pr-4 sm:pt-5 sm:pb-6 sm:pl-5 sm:pr-5 transition-colors hover:bg-white/[0.07] ${
         isPending ? 'opacity-50 pointer-events-none' : selected ? 'ring-2 ring-google-blue/30' : ''
-      } ${TRACK_BORDER_COLORS[submission.track]} ${moreOpen ? 'z-40' : ''}`}
+      } ${moreOpen ? 'z-40' : ''}`}
       aria-label={`Submission from ${submission.name}: ${submission.talkTitle}`}
     >
       <div className="flex items-stretch gap-4">
       <div className="flex-1 min-w-0 flex flex-col">
-      <div className="flex items-start gap-4 mb-2">
-        <input
-          type="checkbox"
-          checked={selected}
-          onChange={onToggleSelect}
-          disabled={bulkActionsPending}
-          aria-label={`Select submission: ${submission.talkTitle}`}
-          className="mt-[0.28125rem] shrink-0 w-4 h-4 rounded-md border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue"
-        />
-        <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{submission.talkTitle}</h3>
-      </div>
+      {/* In the side panel, the panel's own heading carries the title and the row keeps the
+          selection. */}
+      {!inPanel && (
+        <div className="flex items-start gap-4 mb-2">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={onToggleSelect}
+            disabled={bulkActionsPending}
+            aria-label={`Select submission: ${submission.talkTitle}`}
+            className="mt-[0.28125rem] shrink-0 w-4 h-4 rounded-md border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue"
+          />
+          <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{submission.talkTitle}</h3>
+        </div>
+      )}
 
-      <div className="mb-3 pl-8">
+      <div className={`mb-3 ${indent}`}>
         <div className="min-w-0">
           <p className="text-base font-bold text-white/90 truncate">{submission.name}</p>
           <p className="mt-1 flex items-center gap-1.5 text-sm text-white/55 truncate">
@@ -555,22 +590,22 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
           submission.optOutOfRecording) && (
           <div className="flex flex-wrap items-center gap-1.5 gap-y-2 mt-3">
             {submission.isFirstTimeSpeaker && (
-              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-green/15 text-google-green border-google-green/25">
+              <span className="inline-flex items-center gap-1 text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-green/15 text-google-green-light border-google-green/25">
                 First-time speaker
               </span>
             )}
             {submission.wantsMentoring && (
-              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-green/15 text-google-green border-google-green/25">
+              <span className="inline-flex items-center gap-1 text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-green/15 text-google-green-light border-google-green/25">
                 Wants mentoring
               </span>
             )}
             {submission.isGoogleDeveloperExpert && (
-              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25">
+              <span className="inline-flex items-center gap-1 text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25">
                 GDE
               </span>
             )}
             {submission.requiresTravelSupport && (
-              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25">
+              <span className="inline-flex items-center gap-1 text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25">
                 <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 15.5V9.75a1.5 1.5 0 011.5-1.5h13.5a1.5 1.5 0 011.5 1.5v5.75M3.75 15.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5M3.75 15.5v.75A1.5 1.5 0 005.25 17.75h13.5a1.5 1.5 0 001.5-1.5v-.75M9 8.25V6.5A1.5 1.5 0 0110.5 5h3A1.5 1.5 0 0115 6.5v1.75" />
                 </svg>
@@ -578,7 +613,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
               </span>
             )}
             {submission.optOutOfRecording && (
-              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-red/15 text-google-red-light border-google-red/25">
+              <span className="inline-flex items-center gap-1 text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-red/15 text-google-red-light border-google-red/25">
                 Don&apos;t record
               </span>
             )}
@@ -590,9 +625,9 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
       >
         <div className="overflow-hidden">
-      <div className="flex flex-wrap items-center gap-2 mb-5 pl-8">
+      <div className={`flex flex-wrap items-center gap-2 mb-5 ${indent}`}>
         <span className={`inline-block w-[5px] h-[5px] rounded-full ${TRACK_DOT_COLORS[submission.track]}`} />
-        <span className={`text-xs font-medium ${TRACK_COLORS[submission.track]}`}>
+        <span className={`text-xs font-normal ${TRACK_COLORS[submission.track]}`}>
           {TRACK_LABELS[submission.track]}
         </span>
         <span className="text-white/50 text-xs">/</span>
@@ -601,7 +636,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         <span className="text-xs text-white/55 capitalize">{submission.experienceLevel}</span>
       </div>
 
-      <MarkdownText text={submission.abstract} className="text-sm text-white/65 leading-relaxed mb-5 pl-8" />
+      <MarkdownText text={submission.abstract} className={`text-sm text-white/65 leading-relaxed mb-5 ${indent}`} />
 
       {(submission.speakerBio ||
         submission.accessibilityNeeds ||
@@ -613,7 +648,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         submission.coSpeakerEmails ||
         submission.hasSpokenAtGdgSydneyBefore ||
         submission.isOpenToAudienceQuestions) && (
-        <div className="space-y-3 mb-5 pl-8">
+        <div className={`space-y-3 mb-5 ${indent}`}>
           {submission.speakerBio && (
             <div className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
               <p className="font-bold text-white/85 mb-1">Bio</p>
@@ -630,14 +665,14 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
 
           {submission.howDidYouHear && (
             <p className="text-sm text-white/55">
-              <span className="font-medium text-white/70">Found us via: </span>
+              <span className="font-normal text-white/70">Found us via: </span>
               {submission.howDidYouHear}
             </p>
           )}
 
           {(submission.tracking.utmSource || submission.tracking.utmMedium || submission.tracking.utmCampaign || submission.tracking.ref) && (
             <p className="text-sm text-white/55">
-              <span className="font-medium text-white/70">Link tracking: </span>
+              <span className="font-normal text-white/70">Link tracking: </span>
               {[
                 submission.tracking.ref && `ref=${submission.tracking.ref}`,
                 submission.tracking.utmSource && `source=${submission.tracking.utmSource}`,
@@ -651,7 +686,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
 
           {submission.coSpeakerEmails && (
             <p className="text-sm text-white/55">
-              <span className="font-medium text-white/70">Co-speaker(s): </span>
+              <span className="font-normal text-white/70">Co-speaker(s): </span>
               {submission.coSpeakerEmails}
             </p>
           )}
@@ -670,7 +705,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
       )}
 
       {(submission.linkedinUrl || submission.githubUrl || submission.websiteUrl || submission.previousTalkLink) && (
-        <div className="flex flex-wrap gap-2 mb-5 pl-8">
+        <div className={`flex flex-wrap gap-2 mb-5 ${indent}`}>
           {submission.linkedinUrl && (
             <LinkChip
               label="LinkedIn"
@@ -726,7 +761,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         </div>
       </div>
 
-      <div className="flex items-center gap-3 mt-auto pt-2 pl-8">
+      <div className={`flex items-center gap-3 mt-auto pt-2 ${indent}`}>
         <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${STATUS_DOT_STYLES[submission.status].text}`}>
           <span className={`w-[5px] h-[5px] rounded-full ${STATUS_DOT_STYLES[submission.status].dot}`} />
           {STATUS_LABELS[submission.status]}
@@ -739,53 +774,99 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
       </div>
       </div>
 
-      <div className="flex flex-col items-center gap-2 shrink-0 self-start">
-          <button
-            onClick={() => setIsOpen((open) => !open)}
-            aria-expanded={isOpen}
-            aria-label={`${isOpen ? 'Collapse' : 'Expand'} details for: ${submission.talkTitle}`}
-            className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-          >
-            <svg
-              className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.75}
-              aria-hidden="true"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6l4 4 4-4" />
-            </svg>
-          </button>
-          {submission.status === 'pending' && (
-            <div className="inline-flex flex-col rounded-full border border-white/15 overflow-hidden">
+      <div className={RAIL_CLASSES}>
+        <div className="flex justify-end gap-1.5">
+          <div className="relative" ref={moreMenuRef}>
               <button
-                onClick={() => handleAction(rejectSubmission)}
+                onClick={() => setMoreOpen((open) => !open)}
                 disabled={isPending || bulkActionsPending}
-                aria-label={`Reject proposal: ${submission.talkTitle}`}
-                title="Reject"
-                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-red-deep hover:text-white transition-colors disabled:opacity-60"
+                aria-haspopup="menu"
+                aria-expanded={moreOpen}
+                aria-label={`More actions for: ${submission.talkTitle}`}
+                title="More actions"
+                className={RAIL_ICON_CLASSES}
               >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <path strokeLinecap="round" d="M2.5 2.5l7 7m0-7l-7 7" />
-                </svg>
+                <MoreIcon />
+                {submission.reviewerNotes.length > 0 && (
+                  <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-xs font-bold leading-none">
+                    {submission.reviewerNotes.length}
+                  </span>
+                )}
               </button>
-              <span className="h-px bg-white/15" />
-              <button
-                onClick={() => handleAction(promoteSubmission)}
-                disabled={isPending || bulkActionsPending}
-                aria-label={`Accept and promote proposal: ${submission.talkTitle}`}
-                title="Accept"
-                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-green-deep hover:text-white transition-colors disabled:opacity-60"
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.375l2.625 2.625L9.75 3.75" />
-                </svg>
-              </button>
+
+              {moreOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full mt-2 w-44 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
+                >
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      setNotesOpen((open) => !open);
+                      setMoreOpen(false);
+                    }}
+                    className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                  >
+                    Notes{submission.reviewerNotes.length > 0 ? ` (${submission.reviewerNotes.length})` : ''}
+                  </button>
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      setIsEditing(true);
+                      setMoreOpen(false);
+                    }}
+                    className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                  >
+                    Edit
+                  </button>
+                  {(submission.status === 'rejected' || submission.status === 'archived') && (
+                    <button
+                      role="menuitem"
+                      onClick={() => {
+                        handleAction(restoreSubmission);
+                        setMoreOpen(false);
+                      }}
+                      className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                    >
+                      Restore
+                    </button>
+                  )}
+                  {submission.status !== 'accepted' && submission.status !== 'archived' && (
+                    <button
+                      role="menuitem"
+                      onClick={() => {
+                        handleAction(archiveSubmission);
+                        setMoreOpen(false);
+                      }}
+                      className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                    >
+                      Archive
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
+          <ExpandButton isOpen={isOpen} onToggle={() => setIsOpen((open) => !open)} subject={submission.talkTitle} />
+        </div>
+          {submission.status === 'pending' && (
+            <DecisionButtons
+              subject={`${submission.name}'s proposal: ${submission.talkTitle}`}
+              disabled={isPending || bulkActionsPending}
+              accept={{
+                message: `Accept ${submission.name}'s talk?`,
+                detail: 'It joins the lineup, and their speaker profile is created or reused. No email is sent yet: send the acceptance email when you\'re ready.',
+                onConfirm: () => handleAction(promoteSubmission),
+              }}
+              reject={{
+                message: `Mark ${submission.name}'s talk as not selected?`,
+                detail: 'No email is sent. You can send the rejection email afterwards, or move it back to pending.',
+                onConfirm: () => handleAction(rejectSubmission),
+              }}
+            />
           )}
           {submission.status === 'rejected' && !rejectionBlocker && (
             <SendRejectionEmailButton
+            variant="rail"
               submission={submission}
               onSend={() => handleAction(sendRejectionEmail)}
               disabled={isPending || bulkActionsPending}
@@ -793,6 +874,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
           )}
           {submission.status === 'accepted' && (
             <SendAcceptanceEmailButton
+            variant="rail"
               submission={submission}
               onSend={() => handleAction(sendAcceptanceEmail)}
               disabled={isPending || bulkActionsPending}
@@ -800,6 +882,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
           )}
           {submission.status === 'accepted' && submission.speakerConfirmedAt && (
             <SendSpeakerTicketButton
+            variant="rail"
               submission={submission}
               onSend={() => handleAction(sendSpeakerTicketEmail)}
               disabled={isPending || bulkActionsPending}
@@ -807,85 +890,12 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
           )}
           {submission.status === 'accepted' && (
             <UndoAcceptanceButton
+            wrapperClassName="flex"
               submission={submission}
               onUndo={() => handleAction(undoPromotion)}
               disabled={isPending || bulkActionsPending}
             />
           )}
-          <div className="relative" ref={moreMenuRef}>
-            <button
-              onClick={() => setMoreOpen((open) => !open)}
-              disabled={isPending || bulkActionsPending}
-              aria-haspopup="menu"
-              aria-expanded={moreOpen}
-              aria-label={`More actions for: ${submission.talkTitle}`}
-              title="More actions"
-              className="relative inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                <circle cx="3" cy="8" r="1.25" />
-                <circle cx="8" cy="8" r="1.25" />
-                <circle cx="13" cy="8" r="1.25" />
-              </svg>
-              {submission.reviewerNotes.length > 0 && (
-                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-[10px] font-bold leading-none">
-                  {submission.reviewerNotes.length}
-                </span>
-              )}
-            </button>
-
-            {moreOpen && (
-              <div
-                role="menu"
-                className="absolute right-0 top-full mt-2 w-44 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
-              >
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    setNotesOpen((open) => !open);
-                    setMoreOpen(false);
-                  }}
-                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                >
-                  Notes{submission.reviewerNotes.length > 0 ? ` (${submission.reviewerNotes.length})` : ''}
-                </button>
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    setIsEditing(true);
-                    setMoreOpen(false);
-                  }}
-                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                >
-                  Edit
-                </button>
-                {(submission.status === 'rejected' || submission.status === 'archived') && (
-                  <button
-                    role="menuitem"
-                    onClick={() => {
-                      handleAction(restoreSubmission);
-                      setMoreOpen(false);
-                    }}
-                    className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                  >
-                    Restore
-                  </button>
-                )}
-                {submission.status !== 'accepted' && submission.status !== 'archived' && (
-                  <button
-                    role="menuitem"
-                    onClick={() => {
-                      handleAction(archiveSubmission);
-                      setMoreOpen(false);
-                    }}
-                    className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                  >
-                    Archive
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
         </div>
       </div>
 
@@ -908,20 +918,25 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
   );
 }
 
+// Where a proposal stands, in the portal's state colours, once per row.
+function submissionStatus(submission: Submission): { tone: StatusTone; label: string } {
+  if (submission.status === 'pending') return { tone: 'waiting', label: 'Pending' };
+  if (submission.status === 'archived') return { tone: 'done', label: 'Archived' };
+  if (submission.status === 'rejected') return { tone: 'done', label: submission.rejectionEmailSentAt ? 'Not selected, told' : 'Not selected' };
+  if (submission.speakerTicketEmailSentAt) return { tone: 'good', label: 'Ticket sent' };
+  if (submission.speakerConfirmedAt) return { tone: 'good', label: 'Confirmed' };
+  if (submission.acceptanceEmailSentAt) return { tone: 'waiting', label: 'Awaiting confirmation' };
+  return { tone: 'good', label: 'Accepted' };
+}
+
+// A row of the proposals table: who and what, the track, where it stands, and the one thing to
+// do next as a labelled button. Everything else (abstract, links, notes, edit, history, undo)
+// is in the side panel the row opens, which holds the full card.
 function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulkActionsPending, rejectionBlocker }: SubmissionRowProps) {
   const [isPending, startTransition] = useTransition();
-  const [isEditing, setIsEditing] = useState(false);
-  const [notesOpen, setNotesOpen] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
-  const moreMenuRef = useRef<HTMLDivElement>(null);
-
-  const links = [
-    submission.linkedinUrl && { label: 'LinkedIn', value: submission.linkedinUrl },
-    submission.githubUrl && { label: 'GitHub', value: submission.githubUrl },
-    submission.websiteUrl && { label: 'Website', value: submission.websiteUrl },
-    submission.previousTalkLink && { label: 'Previous talk', value: submission.previousTalkLink },
-  ].filter((link): link is { label: string; value: string } => Boolean(link));
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const status = submissionStatus(submission);
+  const disabled = isPending || bulkActionsPending;
 
   function handleAction(action: (id: string) => Promise<{ error?: string }>) {
     startTransition(async () => {
@@ -930,295 +945,100 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
     });
   }
 
-  useEffect(() => {
-    if (!moreOpen) return;
-
-    function handlePointerDown(event: MouseEvent) {
-      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
-        setMoreOpen(false);
-      }
-    }
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setMoreOpen(false);
-    }
-
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [moreOpen]);
-
-  function handleRowClick(event: React.MouseEvent<HTMLDivElement>) {
+  function handleRowClick(event: React.MouseEvent<HTMLLIElement>) {
     const target = event.target as HTMLElement;
-    if (target.closest('button, a, input, textarea, select, [role="menu"], [role="dialog"]')) return;
+    if (target.closest('button, a, input, textarea, select, [role="menu"], [role="dialog"], [role="alertdialog"]')) return;
     if (window.getSelection()?.toString()) return;
-    setIsOpen((open) => !open);
+    setIsPanelOpen(true);
+  }
+
+  let nextStep: React.ReactNode = null;
+  if (submission.status === 'pending') {
+    nextStep = (
+      <DecisionButtons
+        layout="row"
+        subject={`${submission.name}'s proposal: ${submission.talkTitle}`}
+        disabled={disabled}
+        accept={{
+          message: `Accept ${submission.name}'s talk?`,
+          detail: 'It joins the lineup, and their speaker profile is created or reused. No email is sent yet: send the acceptance email when you\'re ready.',
+          onConfirm: () => handleAction(promoteSubmission),
+        }}
+        reject={{
+          message: `Mark ${submission.name}'s talk as not selected?`,
+          detail: 'No email is sent. You can send the rejection email afterwards, or move it back to pending.',
+          onConfirm: () => handleAction(rejectSubmission),
+        }}
+      />
+    );
+  } else if (submission.status === 'accepted' && !submission.acceptanceEmailSentAt) {
+    nextStep = <SendAcceptanceEmailButton variant="pill" submission={submission} onSend={() => handleAction(sendAcceptanceEmail)} disabled={disabled} />;
+  } else if (submission.status === 'accepted' && submission.speakerConfirmedAt && !submission.speakerTicketEmailSentAt) {
+    nextStep = <SendSpeakerTicketButton variant="pill" submission={submission} onSend={() => handleAction(sendSpeakerTicketEmail)} disabled={disabled} />;
+  } else if (submission.status === 'rejected' && !submission.rejectionEmailSentAt && !rejectionBlocker) {
+    nextStep = <SendRejectionEmailButton variant="pill" submission={submission} onSend={() => handleAction(sendRejectionEmail)} disabled={disabled} />;
   }
 
   return (
-    <div
+    <li
       onClick={handleRowClick}
-      className={`relative cursor-pointer bg-surface border-l-4 rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[0.07] ${
-        isPending ? 'opacity-50 pointer-events-none' : selected ? 'ring-2 ring-google-blue/30' : ''
-      } ${TRACK_BORDER_COLORS[submission.track]} ${moreOpen ? 'z-40' : ''}`}
-      aria-label={`Submission from ${submission.name}: ${submission.talkTitle}`}
+      className={`group relative grid grid-cols-[auto_minmax(0,1fr)_auto] md:grid-cols-[auto_minmax(0,1fr)_8.5rem_11.5rem_15.5rem_auto] items-center gap-x-4 gap-y-2 px-4 py-3 cursor-pointer transition-colors hover:bg-white/[0.04] ${
+        isPending ? 'opacity-50 pointer-events-none' : selected ? 'bg-google-blue/[0.08]' : ''
+      }`}
     >
-      <div className="flex items-center gap-3">
-        <input
-          type="checkbox"
-          checked={selected}
-          onChange={onToggleSelect}
-          disabled={bulkActionsPending}
-          aria-label={`Select submission: ${submission.talkTitle}`}
-          className="shrink-0 w-4 h-4 rounded-md border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue"
-        />
+      <input
+        type="checkbox"
+        checked={selected}
+        onChange={onToggleSelect}
+        disabled={bulkActionsPending}
+        aria-label={`Select submission: ${submission.talkTitle}`}
+        className="shrink-0 w-4 h-4 rounded-md border-white/35 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue"
+      />
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-baseline gap-2.5">
-            <h3 className="font-bold text-white text-sm truncate">{submission.talkTitle}</h3>
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-white/55 truncate">
-            <span className="font-bold text-white/70">{submission.name}</span>
-            <span>&middot;</span>
-            <span className="truncate">{FORMAT_LABELS[submission.format]} &middot; {EXPERIENCE_LABELS[submission.experienceLevel]}</span>
-            {submission.isGoogleDeveloperExpert && (
-              <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-blue/15 text-google-blue-light">GDE</span>
-            )}
-            {submission.isFirstTimeSpeaker && (
-              <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-green/15 text-google-green">First-timer</span>
-            )}
-          </div>
-        </div>
-
-        <span className="hidden sm:flex flex-col items-end shrink-0 text-[11px] text-white/55 leading-snug text-right">
-          <span className={`font-bold ${STATUS_DOT_STYLES[submission.status].text}`}>{STATUS_LABELS[submission.status]}</span>
-          {formatDate(submission.submittedAt)}
-          {submission.editedAt && <EditedMark editedAt={submission.editedAt} />}
-        </span>
-
-        {submission.status === 'accepted' && (
-          <span className="hidden sm:inline-flex shrink-0">
-            <AcceptanceState submission={submission} />
-          </span>
-        )}
-
-        {submission.status === 'rejected' && (
-          <span className="hidden sm:inline-flex shrink-0">
-            <RejectionEmailState submission={submission} blocker={rejectionBlocker} />
-          </span>
-        )}
-
-        {submission.status === 'pending' && (
-          <div className="hidden md:inline-flex shrink-0 rounded-full border border-white/15 overflow-hidden">
-            <button
-              onClick={() => handleAction(rejectSubmission)}
-              disabled={isPending || bulkActionsPending}
-              aria-label={`Reject proposal: ${submission.talkTitle}`}
-              title="Reject"
-              className="inline-flex items-center justify-center px-3 h-8 text-white/70 hover:bg-google-red-deep hover:text-white transition-colors disabled:opacity-60"
-            >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                <path strokeLinecap="round" d="M2.5 2.5l7 7m0-7l-7 7" />
-              </svg>
-            </button>
-            <span className="w-px bg-white/15" />
-            <button
-              onClick={() => handleAction(promoteSubmission)}
-              disabled={isPending || bulkActionsPending}
-              aria-label={`Accept and promote proposal: ${submission.talkTitle}`}
-              title="Accept"
-              className="inline-flex items-center justify-center px-3 h-8 text-white/70 hover:bg-google-green-deep hover:text-white transition-colors disabled:opacity-60"
-            >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.375l2.625 2.625L9.75 3.75" />
-              </svg>
-            </button>
-          </div>
-        )}
-        {submission.status === 'rejected' && !rejectionBlocker && (
-          <SendRejectionEmailButton
-            submission={submission}
-            onSend={() => handleAction(sendRejectionEmail)}
-            disabled={isPending || bulkActionsPending}
-          />
-        )}
-        {submission.status === 'accepted' && (
-          <SendAcceptanceEmailButton
-            submission={submission}
-            onSend={() => handleAction(sendAcceptanceEmail)}
-            disabled={isPending || bulkActionsPending}
-          />
-        )}
-        {submission.status === 'accepted' && submission.speakerConfirmedAt && (
-          <SendSpeakerTicketButton
-            submission={submission}
-            onSend={() => handleAction(sendSpeakerTicketEmail)}
-            disabled={isPending || bulkActionsPending}
-          />
-        )}
-        {submission.status === 'accepted' && (
-          <UndoAcceptanceButton
-            submission={submission}
-            onUndo={() => handleAction(undoPromotion)}
-            disabled={isPending || bulkActionsPending}
-            wrapperClassName="hidden md:inline-flex shrink-0"
-          />
-        )}
-
-        <div className="relative shrink-0" ref={moreMenuRef}>
-          <button
-            onClick={() => setMoreOpen((open) => !open)}
-            disabled={isPending || bulkActionsPending}
-            aria-haspopup="menu"
-            aria-expanded={moreOpen}
-            aria-label={`More actions for: ${submission.talkTitle}`}
-            title="More actions"
-            className="relative inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-              <circle cx="3" cy="8" r="1.25" />
-              <circle cx="8" cy="8" r="1.25" />
-              <circle cx="13" cy="8" r="1.25" />
-            </svg>
-            {submission.reviewerNotes.length > 0 && (
-              <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-[10px] font-bold leading-none">
-                {submission.reviewerNotes.length}
-              </span>
-            )}
-          </button>
-
-          {moreOpen && (
-            <div
-              role="menu"
-              className="absolute right-0 top-full mt-2 w-44 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
-            >
-              <button
-                role="menuitem"
-                onClick={() => {
-                  setNotesOpen((open) => !open);
-                  setMoreOpen(false);
-                }}
-                className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-              >
-                Notes{submission.reviewerNotes.length > 0 ? ` (${submission.reviewerNotes.length})` : ''}
-              </button>
-              <button
-                role="menuitem"
-                onClick={() => {
-                  setIsEditing(true);
-                  setMoreOpen(false);
-                }}
-                className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-              >
-                Edit
-              </button>
-              {(submission.status === 'rejected' || submission.status === 'archived') && (
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    handleAction(restoreSubmission);
-                    setMoreOpen(false);
-                  }}
-                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                >
-                  Restore
-                </button>
-              )}
-              {submission.status !== 'accepted' && submission.status !== 'archived' && (
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    handleAction(archiveSubmission);
-                    setMoreOpen(false);
-                  }}
-                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                >
-                  Archive
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-
-        <button
-          onClick={() => setIsOpen((open) => !open)}
-          aria-expanded={isOpen}
-          aria-label={`${isOpen ? 'Collapse' : 'Expand'} details for: ${submission.talkTitle}`}
-          className="inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-        >
-          <svg
-            className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-            viewBox="0 0 16 16"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.75}
-            aria-hidden="true"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6l4 4 4-4" />
-          </svg>
-        </button>
+      <div className="min-w-0">
+        <h3 className="font-bold text-off-white text-[0.9375rem] leading-snug truncate">{submission.talkTitle}</h3>
+        <p className="mt-0.5 flex items-center gap-1.5 text-sm text-white/60 truncate">
+          <span className="text-white/80">{submission.name}</span>
+          <span aria-hidden="true">&middot;</span>
+          <span className="truncate">{FORMAT_LABELS[submission.format]}, {EXPERIENCE_LABELS[submission.experienceLevel].toLowerCase()}</span>
+          {submission.isGoogleDeveloperExpert && <span className="shrink-0"><Chip>GDE</Chip></span>}
+        </p>
       </div>
 
-      <div
-        className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+      <span className="hidden md:block"><Chip dotClass={TRACK_DOT_COLORS[submission.track]}>{TRACK_LABELS[submission.track]}</Chip></span>
+
+      <span className="hidden md:flex flex-col gap-1">
+        <StatusLabel tone={status.tone}>{status.label}</StatusLabel>
+        <span className="font-mono text-xs text-white/60">{formatDate(submission.submittedAt)}</span>
+      </span>
+
+      <span className="col-span-full md:col-span-1 flex justify-start md:justify-end pl-8 md:pl-0 max-md:empty:hidden">{nextStep}</span>
+
+      <button
+        type="button"
+        onClick={() => setIsPanelOpen(true)}
+        aria-label={`Open ${submission.name}'s proposal: ${submission.talkTitle}`}
+        className="press row-start-1 col-start-3 md:row-auto md:col-auto inline-flex items-center justify-center w-8 h-8 rounded-full text-white/60 hover:text-white hover:bg-white/[0.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
       >
-        <div className="overflow-hidden">
-          <div className="mt-2.5 pl-7 pr-1 pb-0.5 space-y-3">
-            <div className="flex flex-wrap items-center gap-2 text-xs text-white/55 sm:hidden">
-              <span className={`font-bold ${STATUS_DOT_STYLES[submission.status].text}`}>{STATUS_LABELS[submission.status]}</span>
-              <span>&middot;</span>
-              <span>{formatDate(submission.submittedAt)}</span>
-              {submission.editedAt && <EditedMark editedAt={submission.editedAt} />}
-            </div>
-            <MarkdownText text={submission.abstract} className="text-sm text-white/65 leading-relaxed" />
-            {submission.speakerBio && (
-              <div className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
-                <p className="font-bold text-white/85 mb-1">Bio</p>
-                <MarkdownText text={submission.speakerBio} />
-              </div>
-            )}
-            {links.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {links.map((link) => (
-                  <LinkChip
-                    key={link.label}
-                    label={link.label}
-                    value={link.value}
-                    accent={link.label === 'Previous talk' ? 'red' : 'blue'}
-                    icon={
-                      <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                        <circle cx="8" cy="8" r="6.5" />
-                        <path strokeLinecap="round" d="M2 8h12M8 1.5c1.5 1.7 2.3 3.9 2.3 6.5s-.8 4.8-2.3 6.5c-1.5-1.7-2.3-3.9-2.3-6.5S6.5 3.2 8 1.5z" />
-                      </svg>
-                    }
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+        <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 3.5L10.5 8 6 12.5" />
+        </svg>
+      </button>
 
-      {notesOpen && (
-        <div className="mt-2 pl-7">
-          <ReviewerNotesPanel
-            submissionId={submission.id}
-            notes={submission.reviewerNotes}
+      {isPanelOpen && (
+        <SidePanel title={submission.talkTitle} subtitle={`${submission.name}, ${TRACK_LABELS[submission.track]}`} onClose={() => setIsPanelOpen(false)}>
+          <SubmissionRow
+            submission={submission}
             onError={onError}
+            selected={selected}
+            onToggleSelect={onToggleSelect}
+            bulkActionsPending={bulkActionsPending}
+            rejectionBlocker={rejectionBlocker}
+            inPanel
           />
-        </div>
+        </SidePanel>
       )}
-
-      {isEditing && (
-        <EditSubmissionModal
-          submission={submission}
-          onClose={() => setIsEditing(false)}
-          onError={onError}
-        />
-      )}
-    </div>
+    </li>
   );
 }
 
@@ -1278,33 +1098,15 @@ function groupBySubmitter(list: Submission[]): SubmitterGroup[] {
 
 export default function SubmissionsDashboard({ submissions }: Props) {
   const mobileBarHidden = useMobileBarHidden();
-  const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
+  // Table by default (issue #9): one row per proposal, opening a side panel; cards on request.
+  const [viewMode, setViewMode] = useState<'cards' | 'list'>('list');
   const [filter, setFilter] = useState<FilterStatus>('all');
   const [trackFilter, setTrackFilter] = useState<TrackFilter>('all');
   const [sort, setSort] = useState<SortOption>('newest');
   const [search, setSearch] = useState('');
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchWidthOpen, setSearchWidthOpen] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (searchOpen || search) {
-      const timeout = setTimeout(() => setSearchWidthOpen(true), 20);
-      return () => clearTimeout(timeout);
-    }
-    setSearchWidthOpen(false);
-  }, [searchOpen, search]);
-
-  useEffect(() => {
-    if (searchWidthOpen) {
-      searchInputRef.current?.focus();
-    }
-  }, [searchWidthOpen]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [isBulkPending, startBulkTransition] = useTransition();
-  const [isConfirmingRejectionEmails, setIsConfirmingRejectionEmails] = useState(false);
   const [rejectionEmailProgress, setRejectionEmailProgress] = useState<{ sent: number; total: number } | null>(null);
 
   // Worked out over every submission, not just the filtered view: a person's accepted talk
@@ -1330,7 +1132,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
   const statusMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!filtersMenuOpen && !moreMenuOpen && !searchOpen && !trackStatsOpen && !statusMenuOpen) return;
+    if (!filtersMenuOpen && !moreMenuOpen && !trackStatsOpen && !statusMenuOpen) return;
 
     function handlePointerDown(event: MouseEvent) {
       if (filtersMenuOpen && filtersMenuRef.current && !filtersMenuRef.current.contains(event.target as Node)) {
@@ -1345,11 +1147,6 @@ export default function SubmissionsDashboard({ submissions }: Props) {
       if (statusMenuOpen && statusMenuRef.current && !statusMenuRef.current.contains(event.target as Node)) {
         setStatusMenuOpen(false);
       }
-      // Only collapse an empty search box on an outside click. With a query typed, clicking a
-      // submission is part of working through the results, so the search view has to survive it.
-      if (searchOpen && !search && searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
-        setSearchOpen(false);
-      }
     }
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
@@ -1357,10 +1154,6 @@ export default function SubmissionsDashboard({ submissions }: Props) {
         setMoreMenuOpen(false);
         setTrackStatsOpen(false);
         setStatusMenuOpen(false);
-        if (searchOpen) {
-          setSearch('');
-          setSearchOpen(false);
-        }
       }
     }
 
@@ -1370,7 +1163,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
       document.removeEventListener('mousedown', handlePointerDown);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [filtersMenuOpen, moreMenuOpen, searchOpen, search, trackStatsOpen, statusMenuOpen]);
+  }, [filtersMenuOpen, moreMenuOpen, trackStatsOpen, statusMenuOpen]);
 
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
 
@@ -1464,7 +1257,6 @@ export default function SubmissionsDashboard({ submissions }: Props) {
 
   function clearSelection() {
     setSelectedIds(new Set());
-    setIsConfirmingRejectionEmails(false);
   }
 
   function runBulkAction(
@@ -1523,7 +1315,6 @@ export default function SubmissionsDashboard({ submissions }: Props) {
 
   function handleBulkSendRejectionEmails() {
     const targets = unsentRejectionTargets;
-    setIsConfirmingRejectionEmails(false);
     if (targets.length === 0) return;
 
     startBulkTransition(async () => {
@@ -1649,58 +1440,73 @@ export default function SubmissionsDashboard({ submissions }: Props) {
             {selectedCount > 0 ? (
               <div key="bulk-actions" className="flex items-center gap-2 flex-wrap animate-fade-in-fast">
                 <span className="shrink-0 text-sm text-white/55 mr-2">{selectedCount} selected</span>
-                <button
-                  onClick={handleBulkReject}
-                  disabled={isBulkPending}
-                  aria-label={`Reject ${selectedCount} selected submissions`}
-                  className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-red-deep text-white hover:opacity-90 transition-colors disabled:opacity-60"
+                <ConfirmAction
+                  tone="danger"
+                  align="left"
+                  message={`Mark ${selectedCount} selected ${selectedCount === 1 ? 'proposal' : 'proposals'} as not selected?`}
+                  detail="Only pending ones change. No email is sent: send rejection emails afterwards."
+                  confirmLabel="Not this time"
+                  onConfirm={handleBulkReject}
+                  className="inline-flex shrink-0"
                 >
-                  Reject
-                </button>
-                <button
-                  onClick={handleBulkAccept}
-                  disabled={isBulkPending}
-                  aria-label={`Accept ${selectedCount} selected submissions`}
-                  className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-green-deep text-white hover:opacity-90 transition-colors disabled:opacity-60"
+                  {(triggerProps) => (
+                    <button
+                      {...triggerProps}
+                      disabled={isBulkPending}
+                      aria-label={`Not this time: ${selectedCount} selected submissions`}
+                      className="press shrink-0 h-10 text-sm font-bold px-4 rounded-full border border-white/35 text-off-white hover:border-white transition-colors disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
+                    >
+                      Not this time
+                    </button>
+                  )}
+                </ConfirmAction>
+                <ConfirmAction
+                  tone="accept"
+                  align="left"
+                  message={`Accept ${selectedCount} selected ${selectedCount === 1 ? 'proposal' : 'proposals'}?`}
+                  detail="Only pending ones change. Each talk joins the lineup with its speaker profile. No email is sent yet."
+                  confirmLabel="Accept"
+                  onConfirm={handleBulkAccept}
+                  className="inline-flex shrink-0"
                 >
-                  Accept
-                </button>
+                  {(triggerProps) => (
+                    <button
+                      {...triggerProps}
+                      disabled={isBulkPending}
+                      aria-label={`Accept ${selectedCount} selected submissions`}
+                      className="press shrink-0 h-10 text-sm font-bold px-4 rounded-full bg-google-green-deep text-white hover:opacity-85 transition-opacity disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue focus-visible:ring-offset-2 focus-visible:ring-offset-black-02"
+                    >
+                      Accept
+                    </button>
+                  )}
+                </ConfirmAction>
                 {rejectionEmailProgress ? (
                   <span role="status" className="shrink-0 h-10 inline-flex items-center text-sm text-white/70 px-2">
                     Sending {rejectionEmailProgress.sent} of {rejectionEmailProgress.total} rejection emails
                   </span>
-                ) : isConfirmingRejectionEmails ? (
-                  <span className="shrink-0 inline-flex items-center gap-2">
-                    <span className="text-sm text-white/70">
-                      Email {unsentRejectionTargets.length} {unsentRejectionTargets.length === 1 ? 'speaker' : 'speakers'}? This can&apos;t be undone.
-                    </span>
-                    <button
-                      onClick={() => setIsConfirmingRejectionEmails(false)}
-                      aria-label="Cancel sending rejection emails"
-                      className="shrink-0 h-10 text-sm px-4 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleBulkSendRejectionEmails}
-                      disabled={isBulkPending || unsentRejectionTargets.length === 0}
-                      aria-label={`Send rejection emails to ${unsentRejectionTargets.length} selected speakers`}
-                      className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-60"
-                    >
-                      Send
-                    </button>
-                  </span>
                 ) : (
                   unsentRejectionTargets.length > 0 && (
-                    <button
-                      onClick={() => setIsConfirmingRejectionEmails(true)}
-                      disabled={isBulkPending}
-                      aria-label={`Email ${unsentRejectionTargets.length} selected rejected ${unsentRejectionTargets.length === 1 ? 'person' : 'people'} who haven't been told yet`}
-                      title="One email per person. Skips anyone already emailed, speaking, or with a proposal still pending."
-                      className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white transition-colors disabled:opacity-60"
+                    <ConfirmAction
+                      tone="send"
+                      align="left"
+                      message={`Email ${unsentRejectionTargets.length} ${unsentRejectionTargets.length === 1 ? 'person' : 'people'} that their talk wasn't selected?`}
+                      detail="One email per person, inviting them to propose to a meetup. Anyone already emailed, speaking, or with a proposal still pending is skipped. Emails can't be unsent."
+                      confirmLabel={`Send ${unsentRejectionTargets.length}`}
+                      onConfirm={handleBulkSendRejectionEmails}
+                      className="inline-flex shrink-0"
                     >
-                      Email {unsentRejectionTargets.length} {unsentRejectionTargets.length === 1 ? 'person' : 'people'}
-                    </button>
+                      {(triggerProps) => (
+                        <button
+                          {...triggerProps}
+                          disabled={isBulkPending}
+                          aria-label={`Email ${unsentRejectionTargets.length} selected rejected ${unsentRejectionTargets.length === 1 ? 'person' : 'people'} who haven't been told yet`}
+                          title="One email per person. Skips anyone already emailed, speaking, or with a proposal still pending."
+                          className="shrink-0 h-10 text-sm font-bold px-4 rounded-full bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white transition-colors disabled:opacity-60"
+                        >
+                          Email {unsentRejectionTargets.length} {unsentRejectionTargets.length === 1 ? 'person' : 'people'}
+                        </button>
+                      )}
+                    </ConfirmAction>
                   )
                 )}
                 <button
@@ -1730,70 +1536,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 min-w-0">
-            <div
-              ref={searchContainerRef}
-              className={`relative shrink-0 h-10 rounded-full transition-all duration-300 ease-in-out ${
-                searchWidthOpen ? 'w-full sm:w-80 bg-white/[0.06]' : 'w-10 bg-white/[0.06] hover:bg-white/[0.1]'
-              }`}
-            >
-              <button
-                onClick={() => setSearchOpen(true)}
-                tabIndex={searchOpen || search ? -1 : undefined}
-                aria-label="Search name, email, talk title, or abstract"
-                title="Search"
-                className={`absolute left-0 top-0 inline-flex items-center justify-center w-10 h-10 rounded-full text-white/70 hover:text-white transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
-                }`}
-              >
-                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <circle cx="7" cy="7" r="5" />
-                  <path strokeLinecap="round" d="M11 11l3.5 3.5" />
-                </svg>
-              </button>
-
-              <input
-                ref={searchInputRef}
-                type="search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                tabIndex={searchOpen || search ? undefined : -1}
-                placeholder="Search name, email, talk title, or abstract…"
-                aria-label="Search name, email, talk title, or abstract"
-                className={`w-full h-10 rounded-full bg-transparent pl-9 pr-9 py-0 text-sm text-white placeholder:text-white/50 focus:outline-none transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
-              />
-              <svg
-                className={`absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/55 pointer-events-none transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-100' : 'opacity-0'
-                }`}
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              >
-                <circle cx="7" cy="7" r="5" />
-                <path strokeLinecap="round" d="M11 11l3.5 3.5" />
-              </svg>
-              <button
-                onClick={() => {
-                  setSearch('');
-                  setSearchOpen(false);
-                }}
-                tabIndex={searchOpen || search ? undefined : -1}
-                aria-label="Close search"
-                className={`absolute right-2 top-1/2 -translate-y-1/2 text-white/55 hover:text-white/70 transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <path strokeLinecap="round" d="M4 4l8 8M12 4l-8 8" />
-                </svg>
-              </button>
-            </div>
-
-            {(searchOpen || search) && <div className="basis-full h-0 sm:hidden" aria-hidden="true" />}
+            <AdminSearch value={search} onChange={setSearch} label="Search name, email, talk title or abstract" placeholder="Search name, email, talk title or abstract…" />
 
             <div className="relative shrink-0" ref={statusMenuRef}>
               <button
@@ -1806,7 +1549,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 }`}
               >
                 {filterTabs.find((tab) => tab.value === filter)?.label}
-                <span className="font-medium text-white/60">{counts[filter]}</span>
+                <span className="font-normal text-white/60">{counts[filter]}</span>
                 <svg className={`w-3 h-3 text-white/55 transition-transform ${statusMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
                 </svg>
@@ -1827,7 +1570,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                       }}
                       aria-checked={filter === tab.value}
                       className={`w-full flex items-center justify-between gap-3 text-left text-sm px-4 py-2.5 transition-colors ${
-                        filter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
+                        filter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-bold hover:bg-white/[0.08] hover:text-white'
                       }`}
                     >
                       {tab.label}
@@ -1844,7 +1587,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 aria-haspopup="menu"
                 aria-expanded={trackStatsOpen}
                 aria-label="View submission counts by track"
-                className={`inline-flex items-center gap-2 h-10 text-sm px-4 rounded-full transition-colors font-medium ${
+                className={`inline-flex items-center gap-2 h-10 text-sm px-4 rounded-full transition-colors font-bold ${
                   trackStatsOpen
                     ? 'bg-white/[0.12] text-white'
                     : 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
@@ -1864,11 +1607,11 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 >
                   {(Object.keys(TRACK_LABELS) as Track[]).map((track) => (
                     <div key={track} className="flex items-center justify-between gap-3 px-4 py-2 text-sm">
-                      <span className="inline-flex items-center gap-2 text-white/70 font-medium">
+                      <span className="inline-flex items-center gap-2 text-white/70 font-bold">
                         <span className={`w-[5px] h-[5px] rounded-full ${TRACK_DOT_COLORS[track]}`} />
                         {TRACK_LABELS[track]}
                       </span>
-                      <span className="text-white font-semibold">{trackCounts[track]}</span>
+                      <span className="text-white font-bold">{trackCounts[track]}</span>
                     </div>
                   ))}
                 </div>
@@ -1898,7 +1641,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                   className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-56 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden px-4 py-5 space-y-4 z-30"
                 >
                   <div>
-                    <label htmlFor="track-filter-select" className="block text-sm font-semibold text-white/55 capitalize mb-1">
+                    <label htmlFor="track-filter-select" className="block text-sm font-bold text-white/55 capitalize mb-1">
                       Track
                     </label>
                     <Select<TrackFilter>
@@ -1910,12 +1653,12 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                         ...(Object.entries(TRACK_LABELS) as [Track, string][]).map(([value, label]) => ({ value, label })),
                       ]}
                       aria-label="Filter by track"
-                      className="w-full rounded-lg border border-white/35 bg-white/[0.06] px-2.5 py-1.5 text-sm font-medium text-white/70 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
+                      className="w-full rounded-lg border border-white/35 bg-white/[0.06] px-2.5 py-1.5 text-sm font-bold text-white/70 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="sort-select" className="block text-sm font-semibold text-white/55 capitalize mb-1">
+                    <label htmlFor="sort-select" className="block text-sm font-bold text-white/55 capitalize mb-1">
                       Sort
                     </label>
                     <Select<SortOption>
@@ -1924,7 +1667,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                       onChange={setSort}
                       options={(Object.entries(SORT_LABELS) as [SortOption, string][]).map(([value, label]) => ({ value, label }))}
                       aria-label="Sort submissions"
-                      className="w-full rounded-lg border border-white/35 bg-white/[0.06] px-2.5 py-1.5 text-sm font-medium text-white/70 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
+                      className="w-full rounded-lg border border-white/35 bg-white/[0.06] px-2.5 py-1.5 text-sm font-bold text-white/70 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
                     />
                   </div>
                 </div>
@@ -1949,8 +1692,8 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               <button
                 onClick={() => setViewMode('list')}
                 aria-pressed={viewMode === 'list'}
-                aria-label="List view"
-                title="List view"
+                aria-label="Table view"
+                title="Table view"
                 className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors ${
                   viewMode === 'list' ? 'bg-white/[0.14] text-white' : 'text-white/50 hover:text-white'
                 }`}
@@ -2045,7 +1788,9 @@ export default function SubmissionsDashboard({ submissions }: Props) {
       </div>
 
       <div className="px-4 md:px-5">
-        {/* Submissions list */}
+        {/* Submissions list. Grouped by submitter, each group has a visible h2 (the person);
+            otherwise this hidden one sits between the page's h1 and the rows' h3s. */}
+        {sort !== 'submitter' && <h2 className="sr-only">Proposals</h2>}
         {sorted.length === 0 ? (
           <div className="text-center py-16 text-white/55 text-sm">
             No submissions match these filters.
@@ -2058,24 +1803,38 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                   <h2 className="text-base font-bold text-white">{group.name}</h2>
                   <span className="text-sm text-white/55">{group.email}</span>
                   {group.submissions.length > 1 && (
-                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-google-blue/15 text-google-blue-light border border-google-blue/25">
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-google-blue/15 text-google-blue-light border border-google-blue/25">
                       {group.submissions.length} submissions
                     </span>
                   )}
                 </div>
-                <div className={`grid grid-cols-1 items-start ${viewMode === 'list' ? 'gap-2' : 'gap-5'}`}>
-                  {group.submissions.map((submission) =>
-                    viewMode === 'list' ? (
-                      <SubmissionListRow
-                        key={submission.id}
-                        submission={submission}
-                        onError={setAlertMessage}
-                        selected={selectedIds.has(submission.id)}
-                        onToggleSelect={() => toggleSelect(submission.id)}
-                        bulkActionsPending={isBulkPending}
-                        rejectionBlocker={rejectionBlockerByApplicant.get(applicantKey(submission.email)) ?? null}
-                      />
-                    ) : (
+                {viewMode === 'list' ? (
+                  <div className="rounded-2xl bg-surface overflow-hidden">
+                    <div aria-hidden="true" className="hidden md:grid grid-cols-[auto_minmax(0,1fr)_8.5rem_11.5rem_15.5rem_auto] gap-x-4 px-4 py-2.5 border-b border-white/10 text-xs font-bold text-white/60">
+                      <span className="w-4" />
+                      <span>Talk and speaker</span>
+                      <span>Track</span>
+                      <span>Status</span>
+                      <span className="text-right">Next step</span>
+                      <span className="w-8" />
+                    </div>
+                    <ul className="divide-y divide-white/[0.07]">
+                      {group.submissions.map((submission) => (
+                        <SubmissionListRow
+                          key={submission.id}
+                          submission={submission}
+                          onError={setAlertMessage}
+                          selected={selectedIds.has(submission.id)}
+                          onToggleSelect={() => toggleSelect(submission.id)}
+                          bulkActionsPending={isBulkPending}
+                          rejectionBlocker={rejectionBlockerByApplicant.get(applicantKey(submission.email)) ?? null}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 items-start gap-5">
+                    {group.submissions.map((submission) => (
                       <SubmissionRow
                         key={submission.id}
                         submission={submission}
@@ -2085,26 +1844,39 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                         bulkActionsPending={isBulkPending}
                         rejectionBlocker={rejectionBlockerByApplicant.get(applicantKey(submission.email)) ?? null}
                       />
-                    )
-                  )}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
-        ) : (
-          <div className={`grid grid-cols-1 items-start ${viewMode === 'list' ? 'gap-2' : 'gap-5'}`}>
-            {sorted.map((submission) =>
-              viewMode === 'list' ? (
-                <SubmissionListRow
-                  key={submission.id}
-                  submission={submission}
-                  onError={setAlertMessage}
-                  selected={selectedIds.has(submission.id)}
-                  onToggleSelect={() => toggleSelect(submission.id)}
-                  bulkActionsPending={isBulkPending}
-                  rejectionBlocker={rejectionBlockerByApplicant.get(applicantKey(submission.email)) ?? null}
-                />
-              ) : (
+        ) : viewMode === 'list' ? (
+            <div className="rounded-2xl bg-surface overflow-hidden">
+              <div aria-hidden="true" className="hidden md:grid grid-cols-[auto_minmax(0,1fr)_8.5rem_11.5rem_15.5rem_auto] gap-x-4 px-4 py-2.5 border-b border-white/10 text-xs font-bold text-white/60">
+                <span className="w-4" />
+                <span>Talk and speaker</span>
+                <span>Track</span>
+                <span>Status</span>
+                <span className="text-right">Next step</span>
+                <span className="w-8" />
+              </div>
+              <ul className="divide-y divide-white/[0.07]">
+                {sorted.map((submission) => (
+                  <SubmissionListRow
+                    key={submission.id}
+                    submission={submission}
+                    onError={setAlertMessage}
+                    selected={selectedIds.has(submission.id)}
+                    onToggleSelect={() => toggleSelect(submission.id)}
+                    bulkActionsPending={isBulkPending}
+                    rejectionBlocker={rejectionBlockerByApplicant.get(applicantKey(submission.email)) ?? null}
+                  />
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 items-start gap-5">
+              {sorted.map((submission) => (
                 <SubmissionRow
                   key={submission.id}
                   submission={submission}
@@ -2114,10 +1886,9 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                   bulkActionsPending={isBulkPending}
                   rejectionBlocker={rejectionBlockerByApplicant.get(applicantKey(submission.email)) ?? null}
                 />
-              )
-            )}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
       </div>
 
       {isAddingSubmission && (

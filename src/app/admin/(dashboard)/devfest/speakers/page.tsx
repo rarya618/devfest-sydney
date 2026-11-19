@@ -1,4 +1,3 @@
-import { SITE_OG_IMAGE } from '@/lib/metadata';
 import { getVerifiedSession } from '@/lib/adminSession';
 import { fetchSpeakers } from '@/lib/speakers';
 import { fetchSessionTimesByTalkId } from '@/lib/schedule';
@@ -7,8 +6,6 @@ import { getAdminDevfestId } from '@/lib/adminEvent';
 
 export const metadata = {
   title: 'Speakers',
-  openGraph: { title: 'Speakers — GDG Sydney', images: [SITE_OG_IMAGE] },
-  twitter: { card: 'summary_large_image', title: 'Speakers — GDG Sydney', images: [SITE_OG_IMAGE] },
 };
 
 export default async function SpeakersPage() {

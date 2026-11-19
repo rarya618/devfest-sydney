@@ -22,6 +22,10 @@ import {
 import type { ReviewerNote, ShowcaseStage, ShowcaseStatus, ShowcaseSubmission } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
 import ConfirmAction from './ConfirmAction';
+import DecisionButtons from './DecisionButtons';
+import { ExpandButton, MoreIcon, RAIL_CLASSES, RAIL_ICON_CLASSES, RAIL_PILL_CLASSES, RAIL_TEXT_BUTTON_CLASSES } from './RailButtons';
+import AdminSearch from './AdminSearch';
+import FilterChipRow from './FilterChipRow';
 
 interface ReviewerNotesPanelProps {
   entryId: string;
@@ -81,7 +85,7 @@ function ReviewerNotesPanel({ entryId, notes, onError }: ReviewerNotesPanelProps
           type="submit"
           disabled={isPending || !draft.trim()}
           aria-label="Save reviewer note"
-          className="shrink-0 text-xs font-semibold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
+          className="shrink-0 text-xs font-bold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
         >
           {isPending ? 'Saving…' : 'Add'}
         </button>
@@ -152,7 +156,7 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
   return (
     <div
       onClick={handleCardClick}
-      className={`relative cursor-pointer bg-surface border-l-4 border-l-google-yellow rounded-lg pt-4 pb-4 pl-5 pr-4 sm:pt-5 sm:pb-6 sm:pl-6 sm:pr-5 transition-colors hover:bg-white/[0.07] ${
+      className={`relative cursor-pointer bg-surface rounded-2xl p-4 sm:px-5 sm:pt-5 sm:pb-6 transition-colors hover:bg-white/[0.07] ${
         isPending ? 'opacity-50 pointer-events-none' : ''
       } ${moreOpen ? 'z-40' : ''}`}
       aria-label={`Builder Showcase entry: ${entry.projectName} by ${entry.name}`}
@@ -160,13 +164,13 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
       <div className="flex items-stretch gap-4">
       <div className="flex-1 min-w-0 flex flex-col">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-1.5">
-        <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{entry.projectName}</h3>
+        <h2 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{entry.projectName}</h2>
         {/* Only on accepted entries: "Not emailed" against a pending one would read as a
             task, when the thing to do first is decide. */}
         {entry.status === 'accepted' && (
           <span
             title={SHOWCASE_CONFIRMATION_CHIPS[entry.confirmation].title}
-            className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${SHOWCASE_CONFIRMATION_CHIPS[entry.confirmation].className}`}
+            className={`text-xs font-bold px-1.5 py-0.5 rounded ${SHOWCASE_CONFIRMATION_CHIPS[entry.confirmation].className}`}
           >
             {SHOWCASE_CONFIRMATION_CHIPS[entry.confirmation].label}
           </span>
@@ -174,7 +178,7 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
         {canSendTicket && !entry.showcaseTicketEmailSentAt && (
           <span
             title="This entrant has confirmed but hasn't been emailed their complimentary ticket. Send it with the ticket button."
-            className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-yellow/15 text-google-yellow"
+            className="text-xs font-bold px-1.5 py-0.5 rounded bg-google-yellow/15 text-google-yellow"
           >
             No ticket sent
           </span>
@@ -202,21 +206,21 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
       </div>
 
       <div className="flex flex-wrap items-center gap-1.5 gap-y-2 mb-4">
-        <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25">
+        <span className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25">
           {SHOWCASE_STAGE_LABELS[entry.stage]}
         </span>
         {entry.isFirstTimePresenter && (
-          <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25">
+          <span className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25">
             First-time presenter
           </span>
         )}
         {entry.coPresenters.length > 0 && (
-          <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-medium">
+          <span className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-bold">
             {entry.coPresenters.length === 1 ? 'Presenting as a pair' : `Presenting as a team of ${entry.coPresenters.length + 1}`}
           </span>
         )}
         {entry.demoRequirements && (
-          <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-red/15 text-google-red-light border-google-red/25">
+          <span className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full font-mono bg-white/[0.06] text-google-yellow" title="They need something set up for their demo: see the description below">
             Has demo requirements
           </span>
         )}
@@ -283,7 +287,7 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
           )}
           {hasTracking && (
             <p className="text-sm text-white/55">
-              <span className="font-medium text-white/70">Link tracking: </span>
+              <span className="font-bold text-white/70">Link tracking: </span>
               {[
                 entry.tracking.ref && `ref=${entry.tracking.ref}`,
                 entry.tracking.utmSource && `source=${entry.tracking.utmSource}`,
@@ -306,7 +310,7 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`Open ${link.label.toLowerCase()} link for ${entry.projectName} in a new tab`}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.06] text-white/70 hover:text-white hover:bg-white/[0.1] transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.06] text-white/70 hover:text-white hover:bg-white/[0.1] transition-colors"
             >
               {link.label}
               <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
@@ -329,53 +333,87 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
       </div>
       </div>
 
-      <div className="flex flex-col items-center gap-2 shrink-0 self-start">
+      <div className={RAIL_CLASSES}>
+        <div className="flex justify-end gap-1.5">
+        <div className="relative" ref={moreMenuRef}>
           <button
-            onClick={() => setIsOpen((open) => !open)}
-            aria-expanded={isOpen}
-            aria-label={`${isOpen ? 'Collapse' : 'Expand'} details for: ${entry.projectName}`}
-            className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
+            onClick={() => setMoreOpen((open) => !open)}
+            disabled={isPending}
+            aria-haspopup="menu"
+            aria-expanded={moreOpen}
+            aria-label={`More actions for: ${entry.projectName}`}
+            title="More actions"
+            className={RAIL_ICON_CLASSES}
           >
-            <svg
-              className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.75}
-              aria-hidden="true"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6l4 4 4-4" />
-            </svg>
+            <MoreIcon />
+            {entry.reviewerNotes.length > 0 && (
+              <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-xs font-bold leading-none">
+                {entry.reviewerNotes.length}
+              </span>
+            )}
           </button>
-          {entry.status === 'pending' && (
-            <div className="inline-flex flex-col rounded-full border border-white/15 overflow-hidden">
+
+          {moreOpen && (
+            <div
+              role="menu"
+              className="absolute right-0 top-full mt-2 w-44 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
+            >
               <button
-                onClick={() => handleAction(rejectShowcaseEntry)}
-                disabled={isPending}
-                aria-label={`Reject Builder Showcase entry: ${entry.projectName}`}
-                title="Reject"
-                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-red-deep hover:text-white transition-colors disabled:opacity-60"
+                role="menuitem"
+                onClick={() => {
+                  setNotesOpen((open) => !open);
+                  setMoreOpen(false);
+                }}
+                className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
               >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <path strokeLinecap="round" d="M2.5 2.5l7 7m0-7l-7 7" />
-                </svg>
+                Notes{entry.reviewerNotes.length > 0 ? ` (${entry.reviewerNotes.length})` : ''}
               </button>
-              <span className="h-px bg-white/15" />
               <button
-                onClick={() => handleAction(acceptShowcaseEntry)}
-                disabled={isPending}
-                aria-label={`Accept Builder Showcase entry: ${entry.projectName}`}
-                title="Accept"
-                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-green-deep hover:text-white transition-colors disabled:opacity-60"
+                role="menuitem"
+                onClick={() => {
+                  setIsEditing(true);
+                  setMoreOpen(false);
+                }}
+                className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
               >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.375l2.625 2.625L9.75 3.75" />
-                </svg>
+                Edit
               </button>
+              {entry.status !== 'archived' && (
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    handleAction(archiveShowcaseEntry);
+                    setMoreOpen(false);
+                  }}
+                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                >
+                  Archive
+                </button>
+              )}
             </div>
+          )}
+        </div>
+          <ExpandButton isOpen={isOpen} onToggle={() => setIsOpen((open) => !open)} subject={entry.projectName} />
+        </div>
+          {entry.status === 'pending' && (
+            <DecisionButtons
+              subject={`the Builder Showcase entry ${entry.projectName}`}
+              disabled={isPending}
+              accept={{
+                message: `Accept ${entry.projectName} into the showcase?`,
+                detail: `No email is sent yet: send ${entry.name} the acceptance email when you're ready.`,
+                onConfirm: () => handleAction(acceptShowcaseEntry),
+              }}
+              reject={{
+                message: `Turn down ${entry.projectName}?`,
+                detail: 'No email is sent, and you can move it back to pending.',
+                onConfirm: () => handleAction(rejectShowcaseEntry),
+              }}
+            />
           )}
           {entry.status === 'accepted' && (
             <ConfirmAction
+                    className="flex"
               tone="send"
               message={`${entry.acceptanceEmailSentAt ? 'Resend' : 'Send'} the showcase acceptance email to ${entry.name}?`}
               detail={entry.acceptanceEmailSentAt
@@ -390,22 +428,17 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
                   disabled={isPending}
                   aria-label={`${entry.acceptanceEmailSentAt ? 'Resend' : 'Send'} the Builder Showcase acceptance email to ${entry.name} for ${entry.projectName}`}
                   title={entry.acceptanceEmailSentAt ? 'Resend acceptance email' : 'Send acceptance email'}
-                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-60 ${
-                    entry.acceptanceEmailSentAt
-                      ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
-                      : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
-                  }`}
+                
+                  className={RAIL_PILL_CLASSES}
                 >
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                    <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
-                  </svg>
+                  {entry.acceptanceEmailSentAt ? 'Resend email' : 'Send email'}
                 </button>
               )}
             </ConfirmAction>
           )}
           {canSendTicket && (
             <ConfirmAction
+                    className="flex"
               tone="send"
               message={`${entry.showcaseTicketEmailSentAt ? 'Resend' : 'Send'} the showcase ticket to ${entry.name}?`}
               detail={entry.showcaseTicketEmailSentAt ? 'They get the free ticket link again.' : 'It emails them the link to their free showcase ticket.'}
@@ -418,95 +451,30 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
                   disabled={isPending}
                   aria-label={`${entry.showcaseTicketEmailSentAt ? 'Resend' : 'Send'} the complimentary Builder Showcase ticket to ${entry.name} for ${entry.projectName}`}
                   title={entry.showcaseTicketEmailSentAt ? 'Resend showcase ticket' : 'Send showcase ticket'}
-                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-60 ${
-                    entry.showcaseTicketEmailSentAt
-                      ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
-                      : 'bg-google-yellow/15 text-google-yellow hover:bg-google-yellow hover:text-black-02'
-                  }`}
+                
+                  className={RAIL_PILL_CLASSES}
                 >
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 6.25V4.5a1 1 0 011-1h11a1 1 0 011 1v1.75a1.75 1.75 0 000 3.5V11.5a1 1 0 01-1 1h-11a1 1 0 01-1-1V9.75a1.75 1.75 0 000-3.5z" />
-                    <path strokeLinecap="round" strokeDasharray="1.5 1.5" d="M10 4v8" />
-                  </svg>
+                  {entry.showcaseTicketEmailSentAt ? 'Resend ticket' : 'Send ticket'}
                 </button>
               )}
             </ConfirmAction>
           )}
           {(entry.status === 'rejected' || entry.status === 'archived' || entry.status === 'accepted') && (
-            <button
-              onClick={() => handleAction(restoreShowcaseEntry)}
-              disabled={isPending}
-              aria-label={`Restore Builder Showcase entry to pending: ${entry.projectName}`}
-              title="Restore"
-              className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
+            <ConfirmAction
+              tone="danger"
+              message={`Move ${entry.projectName} back to pending?`}
+              detail={entry.status === 'accepted' ? 'It comes out of the showcase and goes back to the review queue. Nothing is emailed.' : 'It goes back to the review queue. Nothing is emailed.'}
+              confirmLabel="Move back"
+              onConfirm={() => handleAction(restoreShowcaseEntry)}
+              className="flex"
             >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 4L2.5 7.5 6 11M2.5 7.5h6.5a4 4 0 010 8H7" />
-              </svg>
-            </button>
-          )}
-          <div className="relative" ref={moreMenuRef}>
-            <button
-              onClick={() => setMoreOpen((open) => !open)}
-              disabled={isPending}
-              aria-haspopup="menu"
-              aria-expanded={moreOpen}
-              aria-label={`More actions for: ${entry.projectName}`}
-              title="More actions"
-              className="relative inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                <circle cx="3" cy="8" r="1.25" />
-                <circle cx="8" cy="8" r="1.25" />
-                <circle cx="13" cy="8" r="1.25" />
-              </svg>
-              {entry.reviewerNotes.length > 0 && (
-                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-[10px] font-bold leading-none">
-                  {entry.reviewerNotes.length}
-                </span>
+              {(triggerProps) => (
+                <button {...triggerProps} disabled={isPending} aria-label={`Move ${entry.projectName} back to pending`} className={RAIL_TEXT_BUTTON_CLASSES}>
+                  Back to pending
+                </button>
               )}
-            </button>
-
-            {moreOpen && (
-              <div
-                role="menu"
-                className="absolute right-0 top-full mt-2 w-44 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
-              >
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    setNotesOpen((open) => !open);
-                    setMoreOpen(false);
-                  }}
-                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                >
-                  Notes{entry.reviewerNotes.length > 0 ? ` (${entry.reviewerNotes.length})` : ''}
-                </button>
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    setIsEditing(true);
-                    setMoreOpen(false);
-                  }}
-                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                >
-                  Edit
-                </button>
-                {entry.status !== 'archived' && (
-                  <button
-                    role="menuitem"
-                    onClick={() => {
-                      handleAction(archiveShowcaseEntry);
-                      setMoreOpen(false);
-                    }}
-                    className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                  >
-                    Archive
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+            </ConfirmAction>
+          )}
         </div>
       </div>
 
@@ -537,27 +505,9 @@ export default function ShowcaseDashboard({ entries }: Props) {
   const [filter, setFilter] = useState<FilterStatus>('all');
   const [stageFilter, setStageFilter] = useState<FilterStage>('all');
   const [search, setSearch] = useState('');
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchWidthOpen, setSearchWidthOpen] = useState(false);
   const [statusMenuOpen, setStatusMenuOpen] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
   const statusMenuRef = useRef<HTMLDivElement>(null);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (searchOpen || search) {
-      const timeout = setTimeout(() => setSearchWidthOpen(true), 20);
-      return () => clearTimeout(timeout);
-    }
-    setSearchWidthOpen(false);
-  }, [searchOpen, search]);
-
-  useEffect(() => {
-    if (searchWidthOpen) {
-      searchInputRef.current?.focus();
-    }
-  }, [searchWidthOpen]);
 
   useEffect(() => {
     if (!statusMenuOpen) return;
@@ -578,30 +528,6 @@ export default function ShowcaseDashboard({ entries }: Props) {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [statusMenuOpen]);
-
-  useEffect(() => {
-    if (!searchOpen) return;
-
-    function handlePointerDown(event: MouseEvent) {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
-        setSearch('');
-        setSearchOpen(false);
-      }
-    }
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        setSearch('');
-        setSearchOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [searchOpen]);
 
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
 
@@ -667,70 +593,7 @@ export default function ShowcaseDashboard({ entries }: Props) {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 min-w-0">
-            <div
-              ref={searchContainerRef}
-              className={`relative shrink-0 h-10 rounded-full transition-all duration-300 ease-in-out ${
-                searchWidthOpen ? 'w-full sm:w-80 bg-white/[0.06]' : 'w-10 bg-white/[0.06] hover:bg-white/[0.1]'
-              }`}
-            >
-              <button
-                onClick={() => setSearchOpen(true)}
-                tabIndex={searchOpen || search ? -1 : undefined}
-                aria-label="Search by project, name, or email"
-                title="Search"
-                className={`absolute left-0 top-0 inline-flex items-center justify-center w-10 h-10 rounded-full text-white/70 hover:text-white transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
-                }`}
-              >
-                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <circle cx="7" cy="7" r="5" />
-                  <path strokeLinecap="round" d="M11 11l3.5 3.5" />
-                </svg>
-              </button>
-
-              <input
-                ref={searchInputRef}
-                type="search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                tabIndex={searchOpen || search ? undefined : -1}
-                placeholder="Search by project, name, or email…"
-                aria-label="Search by project, name, or email"
-                className={`w-full h-10 rounded-full bg-transparent pl-9 pr-9 py-0 text-sm text-white placeholder:text-white/50 focus:outline-none transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
-              />
-              <svg
-                className={`absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/55 pointer-events-none transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-100' : 'opacity-0'
-                }`}
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              >
-                <circle cx="7" cy="7" r="5" />
-                <path strokeLinecap="round" d="M11 11l3.5 3.5" />
-              </svg>
-              <button
-                onClick={() => {
-                  setSearch('');
-                  setSearchOpen(false);
-                }}
-                tabIndex={searchOpen || search ? undefined : -1}
-                aria-label="Close search"
-                className={`absolute right-2 top-1/2 -translate-y-1/2 text-white/55 hover:text-white/70 transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <path strokeLinecap="round" d="M4 4l8 8M12 4l-8 8" />
-                </svg>
-              </button>
-            </div>
-
-            {(searchOpen || search) && <div className="basis-full h-0 sm:hidden" aria-hidden="true" />}
+            <AdminSearch value={search} onChange={setSearch} label="Search entries by project, name or email" placeholder="Search by project, name or email…" />
 
             <div className="relative shrink-0" ref={statusMenuRef}>
               <button
@@ -743,7 +606,7 @@ export default function ShowcaseDashboard({ entries }: Props) {
                 }`}
               >
                 {filterTabs.find((tab) => tab.value === filter)?.label}
-                <span className="font-medium text-white/60">{counts[filter]}</span>
+                <span className="font-normal text-white/60">{counts[filter]}</span>
                 <svg className={`w-3 h-3 text-white/55 transition-transform ${statusMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
                 </svg>
@@ -764,7 +627,7 @@ export default function ShowcaseDashboard({ entries }: Props) {
                       }}
                       aria-checked={filter === tab.value}
                       className={`w-full flex items-center justify-between gap-3 text-left text-sm px-4 py-2.5 transition-colors ${
-                        filter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
+                        filter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-bold hover:bg-white/[0.08] hover:text-white'
                       }`}
                     >
                       {tab.label}
@@ -780,11 +643,7 @@ export default function ShowcaseDashboard({ entries }: Props) {
         {/* Stage as a tab row, matching /admin/devfest/volunteers: status is a menu because an entry
             is in exactly one state, while stage is a lens on the queue and the row shows how
             much of it is still an idea without opening anything. */}
-        <div
-          role="group"
-          aria-label="Filter entries by project stage"
-          className="mt-3 -mx-4 md:-mx-5 px-4 md:px-5 flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
+        <FilterChipRow label="Filter entries by project stage" className="mt-3 -mx-4 md:-mx-5">
           {stageTabs.map((tab) => (
             <button
               key={tab.value}
@@ -802,10 +661,10 @@ export default function ShowcaseDashboard({ entries }: Props) {
               }`}
             >
               {tab.label}
-              <span className="font-medium text-white/60">{tab.count}</span>
+              <span className="font-normal text-white/60">{tab.count}</span>
             </button>
           ))}
-        </div>
+        </FilterChipRow>
       </div>
 
       <div className="px-4 md:px-5 pb-8 sm:pb-10">

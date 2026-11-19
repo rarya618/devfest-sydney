@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { createPortal } from 'react-dom';
 import { sendVolunteerInvite } from './volunteerInviteActions';
 import { formatDate } from '@/lib/format';
 import type { InvitablePastVolunteer } from '@/lib/volunteerInvite';
+import AdminModal from './AdminModal';
 
 interface Props {
   eventId: string;
@@ -66,14 +66,8 @@ export default function InvitePastVolunteersModal({ eventId, eventName, people, 
 
   const allSelected = people.length > 0 && selected.size === people.length;
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[60] flex items-start sm:items-center justify-center bg-black/70 p-4 overflow-y-auto"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Invite past volunteers to ${eventName}`}
-    >
-      <div className="w-full max-w-xl bg-surface-raised rounded-2xl shadow-xl my-8">
+  return (
+    <AdminModal label={`Invite past volunteers to ${eventName}`} onClose={onClose} isBusy={isPending} widthClass="max-w-xl">
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
           <h2 className="text-lg font-bold text-white">Invite past volunteers</h2>
           <button
@@ -94,7 +88,7 @@ export default function InvitePastVolunteersModal({ eventId, eventName, people, 
             Each person gets an email asking them to crew {eventName}, with a link that shows the details we hold and
             asks only where they&rsquo;d like to help. Their answer lands in Volunteers as a pending signup.
           </p>
-          <label className="flex items-center gap-2 text-sm font-semibold text-white">
+          <label className="flex items-center gap-2 text-sm font-bold text-white">
             <input
               type="checkbox"
               className="h-4 w-4 accent-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue"
@@ -115,7 +109,7 @@ export default function InvitePastVolunteersModal({ eventId, eventName, people, 
                     aria-label={`Invite ${person.name}`}
                   />
                   <span className="min-w-0">
-                    <span className="block text-sm font-semibold text-white">{person.name}</span>
+                    <span className="block text-sm font-bold text-white">{person.name}</span>
                     <span className="block text-xs text-white/55 truncate">{person.email}</span>
                     <span className="block text-xs text-white/55">
                       Crewed {person.pastEventNames.join(', ')}
@@ -147,13 +141,11 @@ export default function InvitePastVolunteersModal({ eventId, eventName, people, 
             onClick={handleSend}
             disabled={isPending || selected.size === 0}
             aria-label={`Send ${selected.size} invite${selected.size === 1 ? '' : 's'} to crew ${eventName}`}
-            className="text-xs px-4 py-1.5 rounded-full bg-google-green-deep text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50"
+            className="text-xs px-4 py-1.5 rounded-full bg-google-green-deep text-white font-bold hover:opacity-90 transition-colors disabled:opacity-50"
           >
             {isPending ? 'Sending…' : `Send ${selected.size} invite${selected.size === 1 ? '' : 's'}`}
           </button>
         </div>
-      </div>
-    </div>,
-    document.body
+    </AdminModal>
   );
 }

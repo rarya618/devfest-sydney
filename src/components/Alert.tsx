@@ -3,6 +3,10 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
+// Fired when an admin confirms a new action (ConfirmAction): any error from an earlier attempt
+// is dismissed at once, so it can't sit next to a retry that worked.
+export const ADMIN_ACTION_START_EVENT = 'admin-action-start';
+
 interface AlertProps {
   message: string;
   onDismiss: () => void;
@@ -12,10 +16,13 @@ export default function Alert({ message, onDismiss }: AlertProps) {
   const [visible, setVisible] = useState(false);
   // The portal target only exists in the browser, and an alert can be in the server render
   // (SpeakersDashboard starts with one), so it appears after hydration.
-  const [isMounted, setIsMounted] = useState(false);
+  const [container, setContainer] = useState<HTMLElement | null>(null);
 
+  // Rendered inside an open modal <dialog> when there is one: a modal makes everything outside
+  // it inert and sits in the top layer above it, so an alert in <body> would be hidden behind
+  // the backdrop and couldn't be dismissed.
   useEffect(() => {
-    setIsMounted(true);
+    setContainer(document.querySelector<HTMLDialogElement>('dialog[open]') ?? document.body);
   }, []);
 
   // Stays until dismissed: an error that disappears on a timer can go before someone has read
@@ -24,6 +31,11 @@ export default function Alert({ message, onDismiss }: AlertProps) {
     const enterTimer = setTimeout(() => setVisible(true), 10);
     return () => clearTimeout(enterTimer);
   }, []);
+
+  useEffect(() => {
+    window.addEventListener(ADMIN_ACTION_START_EVENT, onDismiss);
+    return () => window.removeEventListener(ADMIN_ACTION_START_EVENT, onDismiss);
+  }, [onDismiss]);
 
   function handleDismiss() {
     setVisible(false);
@@ -35,7 +47,7 @@ export default function Alert({ message, onDismiss }: AlertProps) {
   // Rendered into <body>: `fixed` is relative to the nearest transformed ancestor, and
   // animate-page-in leaves a transform on the page shells and the portal's panels, which would
   // otherwise pin the alert inside them instead of to the bottom-left of the screen.
-  if (!isMounted) return null;
+  if (!container) return null;
   return createPortal(
     <div
       role="alert"
@@ -61,6 +73,6 @@ export default function Alert({ message, onDismiss }: AlertProps) {
         </svg>
       </button>
     </div>,
-    document.body
+    container
   );
 }

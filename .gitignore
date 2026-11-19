@@ -35,3 +35,10 @@ next-env.d.ts
 
 # Impeccable's local preview server: its state file holds a session token.
 .impeccable/live/
+
+# Emulated local dev (npm run dev:emulated): its own build output and the caught emails.
+.next-emulated/
+.emulator-mail/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log

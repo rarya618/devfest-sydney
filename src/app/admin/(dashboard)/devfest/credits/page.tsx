@@ -1,12 +1,9 @@
-import { SITE_OG_IMAGE } from '@/lib/metadata';
 import { getVerifiedSession } from '@/lib/adminSession';
 import { fetchCreditRequests } from '@/lib/creditRequests';
 import CreditRequestsDashboard from '../../../CreditRequestsDashboard';
 
 export const metadata = {
   title: 'Credits',
-  openGraph: { title: 'Credits — GDG Sydney', images: [SITE_OG_IMAGE] },
-  twitter: { card: 'summary_large_image', title: 'Credits — GDG Sydney', images: [SITE_OG_IMAGE] },
 };
 
 export default async function CreditRequestsAdminPage() {

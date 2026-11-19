@@ -23,6 +23,9 @@ import {
 import type { MeetupFormat, MeetupProposal, MeetupProposalStatus, ReviewerNote } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
 import ConfirmAction from './ConfirmAction';
+import DecisionButtons from './DecisionButtons';
+import { ExpandButton, MoreIcon, RAIL_CLASSES, RAIL_ICON_CLASSES, RAIL_PILL_CLASSES, RAIL_TEXT_BUTTON_CLASSES } from './RailButtons';
+import FilterChipRow from './FilterChipRow';
 
 // Closes a popover on an outside click or Escape.
 function useDismissable(isOpen: boolean, containerRef: React.RefObject<HTMLDivElement | null>, onDismiss: () => void) {
@@ -100,7 +103,7 @@ function ReviewerNotesPanel({ proposalId, notes, onError }: ReviewerNotesPanelPr
           type="submit"
           disabled={isPending || !draft.trim()}
           aria-label="Save reviewer note"
-          className="shrink-0 text-xs font-semibold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
+          className="shrink-0 text-xs font-bold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
         >
           {isPending ? 'Saving…' : 'Add'}
         </button>
@@ -139,7 +142,7 @@ const CONFIRMATION_CHIPS: Record<MeetupProposal['confirmation'], { label: string
   },
   confirmed: {
     label: 'Confirmed',
-    className: 'bg-google-green/15 text-google-green border-google-green/25',
+    className: 'bg-google-green/15 text-google-green-light border-google-green/25',
     title: 'The speaker has confirmed. They now appear in the event\'s public lineup.',
   },
   unknown: { label: 'Unknown', className: 'bg-white/[0.06] text-white/70 border-white/10', title: '' },
@@ -197,14 +200,14 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
     <>
     <div
       onClick={handleCardClick}
-      className={`relative cursor-pointer bg-surface border-l-4 border-l-google-blue rounded-lg pt-4 pb-4 pl-5 pr-4 sm:pt-5 sm:pb-6 sm:pl-6 sm:pr-5 transition-colors hover:bg-white/[0.07] ${
+      className={`relative cursor-pointer bg-surface rounded-2xl p-4 sm:px-5 sm:pt-5 sm:pb-6 transition-colors hover:bg-white/[0.07] ${
         isPending ? 'opacity-50 pointer-events-none' : ''
       } ${moreOpen ? 'z-40' : ''}`}
       aria-label={`Meetup talk proposal: ${proposal.talkTitle} by ${proposal.name}`}
     >
       <div className="flex items-stretch gap-4">
         <div className="flex-1 min-w-0 flex flex-col">
-          <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight mb-3">{proposal.talkTitle}</h3>
+          <h2 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight mb-3">{proposal.talkTitle}</h2>
 
           <div className="mb-3 min-w-0">
             <p className="flex items-center gap-1.5 text-sm text-white/55 truncate">
@@ -232,19 +235,19 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
           <div className="flex flex-wrap items-center gap-1.5 gap-y-2 mb-4">
             <span
               title={MEETUP_FORMAT_LABELS[proposal.format]}
-              className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25"
+              className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25"
             >
               {MEETUP_FORMAT_SHORT_LABELS[proposal.format]}
             </span>
             {isAccepted && (
-              <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-green/15 text-google-green border-google-green/25">
+              <span className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-green/15 text-google-green-light border-google-green/25">
                 {eventNames[proposal.eventId] ?? 'Event removed'}
               </span>
             )}
             {isAccepted && (
               <span
                 title={CONFIRMATION_CHIPS[proposal.confirmation].title}
-                className={`inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold ${CONFIRMATION_CHIPS[proposal.confirmation].className}`}
+                className={`inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border font-bold ${CONFIRMATION_CHIPS[proposal.confirmation].className}`}
               >
                 {CONFIRMATION_CHIPS[proposal.confirmation].label}
               </span>
@@ -252,7 +255,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
             {proposal.source === 'api' && (
               <span
                 title="Sent through the proposal API rather than the gdgsydney.com/speak form, usually by an AI agent on the speaker's behalf. Check it reads like them before accepting."
-                className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25"
+                className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25"
               >
                 Sent by an agent
               </span>
@@ -260,7 +263,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
             {!proposal.speakingExperience && (
               <span
                 title="They left speaking experience blank, which may mean this would be their first talk."
-                className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-medium"
+                className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-bold"
               >
                 No speaking experience given
               </span>
@@ -283,7 +286,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={`Open ${proposal.name}'s profile in a new tab`}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.06] text-white/70 hover:text-white hover:bg-white/[0.1] transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.06] text-white/70 hover:text-white hover:bg-white/[0.1] transition-colors"
                   >
                     Profile
                     <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
@@ -310,47 +313,96 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
           </div>
         </div>
 
-        <div className="flex flex-col items-center gap-2 shrink-0 self-start">
-          <button
-            onClick={() => setIsOpen((open) => !open)}
-            aria-expanded={isOpen}
-            aria-label={`${isOpen ? 'Collapse' : 'Expand'} details for: ${proposal.talkTitle}`}
-            className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-          >
-            <svg className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6l4 4 4-4" />
-            </svg>
-          </button>
-          {proposal.status === 'pending' && (
-            <div className="inline-flex flex-col rounded-full border border-white/15 overflow-hidden">
+        <div className={RAIL_CLASSES}>
+          <div className="flex justify-end gap-1.5">
+            <div className="relative" ref={moreMenuRef}>
               <button
-                onClick={() => handleAction(rejectMeetupProposal)}
+                onClick={() => setMoreOpen((open) => !open)}
                 disabled={isPending}
-                aria-label={`Reject meetup talk proposal: ${proposal.talkTitle}`}
-                title="Reject"
-                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-red-deep hover:text-white transition-colors disabled:opacity-60"
+                aria-haspopup="menu"
+                aria-expanded={moreOpen}
+                aria-label={`More actions for: ${proposal.talkTitle}`}
+                title="More actions"
+                className={RAIL_ICON_CLASSES}
               >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <path strokeLinecap="round" d="M2.5 2.5l7 7m0-7l-7 7" />
-                </svg>
+                <MoreIcon />
+                {proposal.reviewerNotes.length > 0 && (
+                  <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-xs font-bold leading-none">
+                    {proposal.reviewerNotes.length}
+                  </span>
+                )}
               </button>
-              <span className="h-px bg-white/15" />
-              <button
-                onClick={() => (events.length > 0 ? setChoosingEvent((open) => !open) : onError('There\'s no upcoming general event to accept this into. Create one in Events first.'))}
-                disabled={isPending}
-                aria-expanded={choosingEvent}
-                aria-label={`Accept meetup talk proposal: ${proposal.talkTitle}, choosing which event`}
-                title="Accept"
-                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-green-deep hover:text-white transition-colors disabled:opacity-60"
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.375l2.625 2.625L9.75 3.75" />
-                </svg>
-              </button>
+
+              {moreOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full mt-2 w-44 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
+                >
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      setIsEditing(true);
+                      setMoreOpen(false);
+                    }}
+                    aria-label={`Edit ${isAccepted ? 'the talk' : 'the proposal'}: ${proposal.talkTitle}`}
+                    className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      setNotesOpen((open) => !open);
+                      setMoreOpen(false);
+                    }}
+                    className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                  >
+                    Notes{proposal.reviewerNotes.length > 0 ? ` (${proposal.reviewerNotes.length})` : ''}
+                  </button>
+                  {proposal.status !== 'archived' && (
+                    <button
+                      role="menuitem"
+                      onClick={() => {
+                        if (isAccepted) setConfirmingTakeBack('archived');
+                        else handleAction(archiveMeetupProposal);
+                        setMoreOpen(false);
+                      }}
+                      className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
+                    >
+                      Archive
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
+            <ExpandButton isOpen={isOpen} onToggle={() => setIsOpen((open) => !open)} subject={proposal.talkTitle} />
+          </div>
+          {proposal.status === 'pending' && (
+            <DecisionButtons
+              subject={`${proposal.name}'s meetup proposal: ${proposal.talkTitle}`}
+              disabled={isPending}
+              acceptTrigger={(buttonClassName) => (
+                <button
+                  type="button"
+                  onClick={() => (events.length > 0 ? setChoosingEvent((open) => !open) : onError('There\'s no upcoming general event to accept this into. Create one in Events first.'))}
+                  disabled={isPending}
+                  aria-expanded={choosingEvent}
+                  aria-label={`Accept ${proposal.name}'s meetup proposal: ${proposal.talkTitle}, choosing which event`}
+                  className={buttonClassName}
+                >
+                  Accept
+                </button>
+              )}
+              reject={{
+                message: `Turn down ${proposal.name}'s talk?`,
+                detail: 'No email is sent, and you can move it back to pending.',
+                onConfirm: () => handleAction(rejectMeetupProposal),
+              }}
+            />
           )}
           {isAccepted && (
             <ConfirmAction
+                      className="flex"
               tone="send"
               message={`${proposal.acceptanceEmailSentAt ? 'Resend' : 'Send'} the acceptance email to ${proposal.name}?`}
               detail={proposal.acceptanceEmailSentAt
@@ -365,18 +417,10 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
                   disabled={isPending}
                   aria-label={`${proposal.acceptanceEmailSentAt ? 'Resend' : 'Send'} the acceptance email for ${proposal.talkTitle}`}
                   title={proposal.acceptanceEmailSentAt ? 'Resend acceptance email' : 'Send acceptance email'}
-                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-60 ${
-                    // Highlighted only while the speaker still needs telling: not once sent, nor for a
-                    // talk agreed outside the form and confirmed without an email.
-                    proposal.acceptanceEmailSentAt || proposal.confirmation === 'confirmed'
-                      ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
-                      : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
-                  }`}
+                
+                  className={RAIL_PILL_CLASSES}
                 >
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                    <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
-                  </svg>
+                  {proposal.acceptanceEmailSentAt ? 'Resend email' : 'Send email'}
                 </button>
               )}
             </ConfirmAction>
@@ -386,84 +430,17 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
               onClick={() => (isAccepted ? setConfirmingTakeBack('pending') : handleAction(restoreMeetupProposal))}
               disabled={isPending}
               aria-label={`Move meetup talk proposal back to pending: ${proposal.talkTitle}`}
-              title="Back to pending"
-              className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
+              className={RAIL_TEXT_BUTTON_CLASSES}
             >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 4L2.5 7.5 6 11M2.5 7.5h6.5a4 4 0 010 8H7" />
-              </svg>
+              Back to pending
             </button>
           )}
-          <div className="relative" ref={moreMenuRef}>
-            <button
-              onClick={() => setMoreOpen((open) => !open)}
-              disabled={isPending}
-              aria-haspopup="menu"
-              aria-expanded={moreOpen}
-              aria-label={`More actions for: ${proposal.talkTitle}`}
-              title="More actions"
-              className="relative inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                <circle cx="3" cy="8" r="1.25" />
-                <circle cx="8" cy="8" r="1.25" />
-                <circle cx="13" cy="8" r="1.25" />
-              </svg>
-              {proposal.reviewerNotes.length > 0 && (
-                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-[10px] font-bold leading-none">
-                  {proposal.reviewerNotes.length}
-                </span>
-              )}
-            </button>
-
-            {moreOpen && (
-              <div
-                role="menu"
-                className="absolute right-0 top-full mt-2 w-44 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
-              >
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    setIsEditing(true);
-                    setMoreOpen(false);
-                  }}
-                  aria-label={`Edit ${isAccepted ? 'the talk' : 'the proposal'}: ${proposal.talkTitle}`}
-                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                >
-                  Edit
-                </button>
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    setNotesOpen((open) => !open);
-                    setMoreOpen(false);
-                  }}
-                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                >
-                  Notes{proposal.reviewerNotes.length > 0 ? ` (${proposal.reviewerNotes.length})` : ''}
-                </button>
-                {proposal.status !== 'archived' && (
-                  <button
-                    role="menuitem"
-                    onClick={() => {
-                      if (isAccepted) setConfirmingTakeBack('archived');
-                      else handleAction(archiveMeetupProposal);
-                      setMoreOpen(false);
-                    }}
-                    className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                  >
-                    Archive
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
         </div>
       </div>
 
       {choosingEvent && (
         <div className="mt-3 pt-3 border-t border-white/10">
-          <p className="text-xs font-semibold text-white/65 mb-2">Accept into which event?</p>
+          <p className="text-xs font-bold text-white/65 mb-2">Accept into which event?</p>
           <div className="flex flex-wrap gap-2">
             {events.map((event) => (
               <button
@@ -472,7 +449,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
                 onClick={() => handleAccept(event.id)}
                 disabled={isPending}
                 aria-label={`Accept ${proposal.talkTitle} into ${event.name}`}
-                className="text-xs font-semibold px-3 py-1.5 rounded-full border border-white/40 text-white/85 hover:border-google-green hover:text-white transition-colors"
+                className="text-xs font-bold px-3 py-1.5 rounded-full border border-white/40 text-white/85 hover:border-google-green hover:text-white transition-colors"
               >
                 {event.name}
               </button>
@@ -508,7 +485,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
             type="button"
             onClick={() => handleTakeBack(confirmingTakeBack)}
             aria-label="Take this talk off its event"
-            className="text-xs px-3 py-1.5 rounded-full bg-google-red-deep text-white font-semibold hover:opacity-90 transition-opacity"
+            className="text-xs px-3 py-1.5 rounded-full bg-google-red-deep text-white font-bold hover:opacity-90 transition-opacity"
           >
             Take it off
           </button>
@@ -621,7 +598,7 @@ export default function MeetupProposalsDashboard({ proposals, events, eventNames
                 }`}
               >
                 {STATUS_TABS.find((tab) => tab.value === statusFilter)?.label}
-                <span className="font-medium text-white/60">{counts[statusFilter]}</span>
+                <span className="font-normal text-white/60">{counts[statusFilter]}</span>
                 <svg className={`w-3 h-3 text-white/55 transition-transform ${statusMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
                 </svg>
@@ -642,7 +619,7 @@ export default function MeetupProposalsDashboard({ proposals, events, eventNames
                         setStatusMenuOpen(false);
                       }}
                       className={`w-full flex items-center justify-between gap-3 text-left text-sm px-4 py-2.5 transition-colors ${
-                        statusFilter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
+                        statusFilter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-bold hover:bg-white/[0.08] hover:text-white'
                       }`}
                     >
                       {tab.label}
@@ -655,7 +632,7 @@ export default function MeetupProposalsDashboard({ proposals, events, eventNames
           </div>
         </div>
 
-        <div role="group" aria-label="Filter proposals by format" className="mt-3 -mx-4 md:-mx-5 px-4 md:px-5 flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <FilterChipRow label="Filter proposals by format" className="mt-3 -mx-4 md:-mx-5">
           {formatTabs.map((tab) => (
             <button
               key={tab.value}
@@ -667,10 +644,10 @@ export default function MeetupProposalsDashboard({ proposals, events, eventNames
               }`}
             >
               {tab.label}
-              <span className="font-medium text-white/60">{tab.count}</span>
+              <span className="font-normal text-white/60">{tab.count}</span>
             </button>
           ))}
-        </div>
+        </FilterChipRow>
       </div>
 
       <div className="px-4 md:px-5 pb-8 sm:pb-10">

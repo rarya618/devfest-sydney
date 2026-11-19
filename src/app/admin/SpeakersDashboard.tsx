@@ -14,7 +14,6 @@ import { formatDate, getInitials } from '@/lib/format';
 import {
   TRACK_LABELS,
   TRACK_CHIP_COLORS,
-  TRACK_BORDER_COLORS,
   TRACK_DOT_COLORS,
   FORMAT_LABELS,
   EXPERIENCE_LABELS,
@@ -25,6 +24,9 @@ import type { CalendarInviteStatus, Speaker, SpeakerConfirmation, SpeakerSession
 import { useMobileBarHidden } from './MobileBarContext';
 import HistoryDisclosure, { stampedOn, type HistoryRow } from './HistoryDisclosure';
 import ConfirmAction from './ConfirmAction';
+import AdminSearch from './AdminSearch';
+import SidePanel from './SidePanel';
+import { Chip, StatusLabel, type StatusTone } from './Chips';
 
 // The speaker card's history rows. Same shape as the crew card's, so the two dashboards
 // read the same way; the dates themselves differ because a speaker is promoted from a
@@ -104,7 +106,7 @@ type FilterConfirmation = 'all' | SpeakerConfirmation;
 const CONFIRMATION_CHIP: Record<SpeakerConfirmation, { label: string; className: string; title: string }> = {
   confirmed: {
     label: 'Confirmed',
-    className: 'bg-google-green/15 text-google-green',
+    className: 'bg-google-green/15 text-google-green-light',
     title: 'The speaker has confirmed their participation.',
   },
   awaiting: {
@@ -158,7 +160,7 @@ function ProfileLink({ href, label }: ProfileLinkProps) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`Open ${label} profile in a new tab`}
-      className="inline-flex items-center gap-1 text-xs font-medium text-google-blue hover:underline"
+      className="inline-flex items-center gap-1 text-xs font-bold text-google-blue hover:underline"
     >
       {label}
       <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
@@ -168,7 +170,7 @@ function ProfileLink({ href, label }: ProfileLinkProps) {
   );
 }
 
-interface SpeakerCardProps {
+interface LineupCardProps {
   speaker: Speaker;
   // On a co-speaker, the speaker whose session they present. Undefined otherwise.
   leadSpeaker?: Speaker;
@@ -177,29 +179,23 @@ interface SpeakerCardProps {
   session: SpeakerSessionTime | null;
   inviteStatus: CalendarInviteStatus | null;
   onError: (message: string) => void;
+  // Shown inside the table's side panel: opens expanded.
+  inPanel?: boolean;
 }
 
-function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, onError }: SpeakerCardProps) {
+// One (talk, speaker) pair in full: named LineupCard so it can't be mistaken for the shared
+// SpeakerCard (the portal's badge face) imported elsewhere.
+function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, onError, inPanel = false }: LineupCardProps) {
   const [isPending, startTransition] = useTransition();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(inPanel);
   const [editing, setEditing] = useState(false);
   const [addingCoSpeaker, setAddingCoSpeaker] = useState(false);
   const isCoSpeaker = Boolean(speaker.coSpeakerOf);
-  const [confirmingRemove, setConfirmingRemove] = useState(false);
   const confirmation = CONFIRMATION_CHIP[speaker.confirmation];
   const missing = missingProfileParts(speaker);
 
-  useEffect(() => {
-    if (!confirmingRemove) return;
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setConfirmingRemove(false);
-    }
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [confirmingRemove]);
 
   function handleRemove() {
-    setConfirmingRemove(false);
     startTransition(async () => {
       const result = await removeSpeaker(speaker.talkId, speaker.id);
       if (result.error) onError(result.error);
@@ -259,8 +255,8 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
   }
 
   const quietIcon = 'text-white/60 hover:text-white hover:bg-white/[0.08]';
-  const neutralChip = 'inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full bg-white/[0.06] text-white/70 font-medium';
-  const warningChip = 'inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full font-bold bg-google-yellow/15 text-google-yellow';
+  const neutralChip = 'inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full bg-white/[0.06] text-white/70 font-bold';
+  const warningChip = 'inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full font-bold bg-google-yellow/15 text-google-yellow';
 
   // Compact by default (redesigned 2026-11-14: the card had seven stacked action buttons and six
   // lines before the talk title). Collapsed: who, what, and one row of chips with every gap
@@ -269,18 +265,20 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
   return (
     <div
       onClick={handleCardClick}
-      className={`relative cursor-pointer bg-surface border-l-4 ${TRACK_BORDER_COLORS[speaker.track]} rounded-xl px-4 py-4 sm:px-5 transition-colors hover:bg-white/[0.07] ${
+      className={`relative cursor-pointer bg-surface rounded-2xl px-4 py-4 sm:px-5 transition-colors hover:bg-white/[0.07] ${
         isPending ? 'opacity-50 pointer-events-none' : ''
       }`}
       aria-label={`Speaker ${speaker.name}`}
     >
-      <div className="flex items-start gap-4">
+      {/* In the side panel the actions take their own row along the top, so the text keeps the
+          panel's full width instead of wrapping beside seven buttons. */}
+      <div className={`flex items-start gap-4 ${inPanel ? 'flex-wrap' : ''}`}>
         <SpeakerAvatar speaker={speaker} />
 
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-            <h3 className="font-bold text-white text-base leading-snug">{speaker.name}</h3>
-            <span title={confirmation.title} className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${confirmation.className}`}>
+            <h2 className="font-bold text-white text-base leading-snug">{speaker.name}</h2>
+            <span title={confirmation.title} className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${confirmation.className}`}>
               {confirmation.label}
             </span>
             {isCoSpeaker && (
@@ -370,7 +368,7 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
         </div>
 
         {/* One row of actions rather than a column: the column set the card's height. */}
-        <div className="relative flex flex-wrap items-center justify-end gap-1 shrink-0 max-w-[8.75rem] sm:max-w-none">
+        <div className={`relative flex flex-wrap items-center gap-1 ${inPanel ? 'order-first w-full justify-start -ml-1.5 pb-3 mb-1 border-b border-white/10' : 'justify-end shrink-0 max-w-[8.75rem] sm:max-w-none'}`}>
           <button onClick={() => setEditing(true)} aria-label={`Edit ${speaker.name}`} title="Edit speaker" className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${quietIcon}`}>
             <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" />
@@ -409,12 +407,13 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
                   disabled={isPending}
                   aria-label={`${alreadyEmailed ? 'Resend' : 'Send'} acceptance email to ${speaker.name} for: ${speaker.talkTitle}`}
                   title={alreadyEmailed ? 'Resend acceptance email' : 'Send acceptance email'}
-                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${alreadyEmailed ? quietIcon : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'}`}
+                  className={`relative inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${quietIcon}`}
                 >
                   <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                     <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
                   </svg>
+                  {!alreadyEmailed && <span aria-hidden="true" className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-google-yellow ring-2 ring-surface" />}
                 </button>
               )}
             </ConfirmAction>
@@ -434,12 +433,13 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
                   disabled={isPending}
                   aria-label={`${ticketSent ? 'Resend' : 'Send'} the complimentary speaker ticket to ${speaker.name}`}
                   title={ticketSent ? 'Resend speaker ticket' : 'Send speaker ticket'}
-                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${ticketSent ? quietIcon : 'bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white'}`}
+                  className={`relative inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${quietIcon}`}
                 >
                   <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 6.25V4.5a1 1 0 011-1h11a1 1 0 011 1v1.75a1.75 1.75 0 000 3.5V11.5a1 1 0 01-1 1h-11a1 1 0 01-1-1V9.75a1.75 1.75 0 000-3.5z" />
                     <path strokeLinecap="round" strokeDasharray="1.5 1.5" d="M10 4v8" />
                   </svg>
+                  {!ticketSent && <span aria-hidden="true" className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-google-yellow ring-2 ring-surface" />}
                 </button>
               )}
             </ConfirmAction>
@@ -459,12 +459,13 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
                   disabled={isPending}
                   aria-label={`${INVITE_BUTTON_TITLE[inviteAction]} to ${speaker.name}`}
                   title={INVITE_BUTTON_TITLE[inviteAction]}
-                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${inviteNeedsSending ? 'bg-google-yellow/15 text-google-yellow hover:bg-google-yellow hover:text-black-02' : quietIcon}`}
+                  className={`relative inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${quietIcon}`}
                 >
                   <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                     <rect x="2" y="3" width="12" height="11" rx="1.5" />
                     <path strokeLinecap="round" d="M2 6.5h12M5.5 1.75v2.5M10.5 1.75v2.5" />
                   </svg>
+                  {inviteNeedsSending && <span aria-hidden="true" className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-google-yellow ring-2 ring-surface" />}
                 </button>
               )}
             </ConfirmAction>
@@ -484,59 +485,64 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
                   disabled={isPending}
                   aria-label={`${thanksSent ? 'Resend' : 'Send'} the thank-you email with photos, mug and Asana trial to ${speaker.name}`}
                   title={thanksSent ? 'Resend thank-you' : 'Send thank-you'}
-                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${thanksSent ? quietIcon : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'}`}
+                  className={`relative inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${quietIcon}`}
                 >
                   <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                     <path strokeLinejoin="round" d="M8 13.5S1.75 9.75 1.75 5.75A3 3 0 018 4a3 3 0 016.25 1.75C14.25 9.75 8 13.5 8 13.5z" />
                   </svg>
+                  {!thanksSent && <span aria-hidden="true" className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-google-yellow ring-2 ring-surface" />}
                 </button>
               )}
             </ConfirmAction>
           )}
 
-          <button
-            onClick={() => setConfirmingRemove((open) => !open)}
-            aria-label={`Remove ${speaker.name} from the lineup`}
-            aria-expanded={confirmingRemove}
-            title="Remove from lineup"
-            className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-white/60 hover:text-google-red-light hover:bg-google-red/[0.08]`}
-          >
-            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9h6.6l.7-9" />
-            </svg>
-          </button>
+          <ConfirmAction
 
-          {confirmingRemove && (
-            <div
-              role="group"
-              aria-label={`Confirm removing ${speaker.name}`}
-              className="absolute right-0 top-full mt-1.5 z-20 flex flex-col items-end gap-2 bg-surface-raised border border-white/10 rounded-2xl px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.45)] w-56"
-            >
-              <p className="text-xs text-white/70 leading-snug w-full">
-                {isCoSpeaker
-                  ? 'Remove this co-speaker from the lineup?'
-                  : coSpeakers.length > 0
-                    ? `Remove from the lineup with ${coSpeakers.map((coSpeaker) => coSpeaker.name.split(' ')[0]).join(' and ')}, and return the proposal to pending?`
-                    : 'Remove from the lineup and return the proposal to pending?'}
-              </p>
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => setConfirmingRemove(false)}
-                  aria-label="Keep this speaker"
-                  className="text-xs px-2.5 py-1 rounded-full border border-white/35 text-white/70 hover:border-white/60 hover:text-white transition-colors"
-                >
-                  Keep
-                </button>
-                <button
-                  onClick={handleRemove}
-                  aria-label={`Remove ${speaker.name} from the lineup`}
-                  className="text-xs px-2.5 py-1 rounded-full bg-google-red-deep text-white font-medium hover:opacity-90 transition-colors"
-                >
-                  Remove
-                </button>
-              </div>
-            </div>
-          )}
+            tone="danger"
+
+            message={`Remove ${speaker.name} from the lineup?`}
+
+            detail={isCoSpeaker
+
+              ? 'They come off this session. Nothing is emailed.'
+
+              : coSpeakers.length > 0
+
+                ? `The talk comes off the lineup with ${coSpeakers.map((coSpeaker) => coSpeaker.name.split(' ')[0]).join(' and ')}, and the proposal goes back to pending. Nothing is emailed.`
+
+                : 'The talk comes off the lineup and the proposal goes back to pending. Nothing is emailed.'}
+
+            confirmLabel="Remove"
+
+            onConfirm={handleRemove}
+
+          >
+
+            {(triggerProps) => (
+
+              <button
+
+                {...triggerProps}
+
+                aria-label={`Remove ${speaker.name} from the lineup`}
+
+                title="Remove from lineup"
+
+                className="inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-white/60 hover:text-google-red-light hover:bg-google-red/[0.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
+
+              >
+
+                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9h6.6l.7-9" />
+
+                </svg>
+
+              </button>
+
+            )}
+
+          </ConfirmAction>
         </div>
       </div>
 
@@ -566,6 +572,136 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
   );
 }
 
+// Where a speaker stands, in the portal's state colours.
+const CONFIRMATION_STATUS: Record<SpeakerConfirmation, { tone: StatusTone; label: string }> = {
+  confirmed: { tone: 'good', label: 'Confirmed' },
+  awaiting: { tone: 'waiting', label: 'Awaiting confirmation' },
+  'not-emailed': { tone: 'waiting', label: 'Not emailed' },
+  unknown: { tone: 'done', label: 'Unknown' },
+};
+
+const NEXT_STEP_PILL =
+  'press inline-flex items-center justify-center h-8 px-3.5 rounded-full border border-white/35 text-sm font-bold text-off-white whitespace-nowrap hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue';
+
+// A row of the lineup table: the person and their talk, the track, where they stand, what's
+// missing from their profile, and the one email to send next. The full card (bio, links,
+// session, every send, co-speakers, edit, remove, history) opens in the side panel.
+function LineupRow(props: LineupCardProps) {
+  const { speaker, leadSpeaker, inviteStatus, onError } = props;
+  const [isPending, startTransition] = useTransition();
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const isCoSpeaker = Boolean(speaker.coSpeakerOf);
+  const status = CONFIRMATION_STATUS[speaker.confirmation];
+  const missing = missingProfileParts(speaker);
+  const canEmail = !isCoSpeaker && speaker.confirmation !== 'unknown';
+  const canSendTicket = speaker.confirmation === 'confirmed';
+  const inviteAction = canSendTicket && inviteStatus && inviteStatus !== 'unscheduled' ? inviteStatus : null;
+
+  function run(send: () => Promise<{ error?: string }>) {
+    startTransition(async () => {
+      const result = await send();
+      if (result.error) onError(result.error);
+    });
+  }
+
+  function handleRowClick(event: React.MouseEvent<HTMLLIElement>) {
+    const target = event.target as HTMLElement;
+    if (target.closest('button, a, input, textarea, select, [role="menu"], [role="dialog"], [role="alertdialog"]')) return;
+    if (window.getSelection()?.toString()) return;
+    setIsPanelOpen(true);
+  }
+
+  let nextStep: React.ReactNode = null;
+  if (canEmail && speaker.confirmation === 'not-emailed') {
+    nextStep = (
+      <ConfirmAction
+        tone="send"
+        message={`Send the acceptance email to ${speaker.name}?`}
+        detail="It tells them their talk is in and asks them to confirm their spot."
+        confirmLabel="Send email"
+        onConfirm={() => run(() => sendAcceptanceEmail(speaker.submissionId))}
+      >
+        {(triggerProps) => (
+          <button {...triggerProps} type="button" disabled={isPending} aria-label={`Send acceptance email to ${speaker.name}`} className={NEXT_STEP_PILL}>
+            Send acceptance email
+          </button>
+        )}
+      </ConfirmAction>
+    );
+  } else if (canSendTicket && !speaker.speakerTicketEmailSentAt && !isCoSpeaker) {
+    nextStep = (
+      <ConfirmAction
+        tone="send"
+        message={`Send the speaker ticket to ${speaker.name}?`}
+        detail="It emails them the link to their free speaker ticket."
+        confirmLabel="Send ticket"
+        onConfirm={() => run(() => sendSpeakerTicketEmail(speaker.submissionId))}
+      >
+        {(triggerProps) => (
+          <button {...triggerProps} type="button" disabled={isPending} aria-label={`Send the speaker ticket to ${speaker.name}`} className={NEXT_STEP_PILL}>
+            Send ticket
+          </button>
+        )}
+      </ConfirmAction>
+    );
+  } else if (inviteAction && INVITE_NEEDS_SENDING.includes(inviteAction)) {
+    nextStep = (
+      <ConfirmAction
+        tone="send"
+        message={`${INVITE_BUTTON_TITLE[inviteAction]} to ${speaker.name}?`}
+        detail={INVITE_CONFIRM_DETAIL[inviteAction]}
+        confirmLabel={INVITE_BUTTON_TITLE[inviteAction].replace(/ calendar /, ' ').replace(/^./, (letter) => letter.toUpperCase())}
+        onConfirm={() => run(() => sendCalendarInvite(speaker.talkId, speaker.id))}
+      >
+        {(triggerProps) => (
+          <button {...triggerProps} type="button" disabled={isPending} aria-label={`${INVITE_BUTTON_TITLE[inviteAction]} to ${speaker.name}`} className={NEXT_STEP_PILL}>
+            {INVITE_BUTTON_TITLE[inviteAction].replace(/^Send calendar /, 'Send ')}
+          </button>
+        )}
+      </ConfirmAction>
+    );
+  }
+
+  return (
+    <li
+      onClick={handleRowClick}
+      className={`grid grid-cols-[auto_minmax(0,1fr)_auto] md:grid-cols-[auto_minmax(0,1fr)_8.5rem_11.5rem_12rem_auto] items-center gap-x-4 gap-y-2 px-4 py-3 cursor-pointer transition-colors hover:bg-white/[0.04] ${
+        isPending ? 'opacity-50 pointer-events-none' : ''
+      }`}
+    >
+      <SpeakerAvatar speaker={speaker} />
+      <div className="min-w-0">
+        <h2 className="font-bold text-off-white text-[0.9375rem] leading-snug truncate">
+          {speaker.name}
+          {isCoSpeaker && leadSpeaker && <span className="font-normal text-white/60"> with {leadSpeaker.name}</span>}
+        </h2>
+        <p className="mt-0.5 text-sm text-white/60 truncate">{speaker.talkTitle}</p>
+        {missing.length > 0 && (
+          <p className="mt-1.5"><Chip tone="attention" title="Missing from the public profile">Missing {missing.join(', ').toLowerCase()}</Chip></p>
+        )}
+      </div>
+      <span className="hidden md:block"><Chip dotClass={TRACK_DOT_COLORS[speaker.track]}>{TRACK_LABELS[speaker.track]}</Chip></span>
+      <span className="hidden md:block"><StatusLabel tone={status.tone} title={CONFIRMATION_CHIP[speaker.confirmation].title}>{status.label}</StatusLabel></span>
+      <span className="col-span-full md:col-span-1 flex justify-start md:justify-end pl-14 md:pl-0 max-md:empty:hidden">{nextStep}</span>
+      <button
+        type="button"
+        onClick={() => setIsPanelOpen(true)}
+        aria-label={`Open ${speaker.name}: ${speaker.talkTitle}`}
+        className="press row-start-1 col-start-3 md:row-auto md:col-auto inline-flex items-center justify-center w-8 h-8 rounded-full text-white/60 hover:text-white hover:bg-white/[0.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
+      >
+        <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 3.5L10.5 8 6 12.5" />
+        </svg>
+      </button>
+      {isPanelOpen && (
+        <SidePanel title={speaker.name} subtitle={speaker.talkTitle} onClose={() => setIsPanelOpen(false)}>
+          <LineupCard {...props} inPanel />
+        </SidePanel>
+      )}
+    </li>
+  );
+}
+
 interface Props {
   speakers: Speaker[];
   // Speaker id to their slot. Null when the schedule couldn't be read.
@@ -590,7 +726,7 @@ const BULK_COPY: Record<BulkKind, { singular: string; plural: string; buttonClas
   thanks: {
     singular: 'thank-you',
     plural: 'thank-yous',
-    buttonClass: 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white',
+    buttonClass: 'bg-google-green/15 text-google-green-light hover:bg-google-green-deep hover:text-white',
     confirmClass: 'bg-google-green-deep text-white',
     title: 'Sends the thank-you with the photos and the mug and Asana link to every confirmed speaker and co-speaker who hasn\'t had it.',
   },
@@ -601,24 +737,15 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
   const [alertMessage, setAlertMessage] = useState<string | null>(
     sessionTimes ? null : 'The schedule couldn\'t be loaded, so calendar invites are hidden for now. Refresh the page to try again.'
   );
-  const [confirmingBulk, setConfirmingBulk] = useState<BulkKind | null>(null);
   const [bulkProgress, setBulkProgress] = useState<{ kind: BulkKind; sent: number; total: number } | null>(null);
   const [isBulkPending, startBulkTransition] = useTransition();
   const [filter, setFilter] = useState<FilterTrack>('all');
   const [confirmationFilter, setConfirmationFilter] = useState<FilterConfirmation>('all');
   const [search, setSearch] = useState('');
-  const [searchOpen, setSearchOpen] = useState(false);
   const [trackMenuOpen, setTrackMenuOpen] = useState(false);
   const [confirmationMenuOpen, setConfirmationMenuOpen] = useState(false);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
   const trackMenuRef = useRef<HTMLDivElement>(null);
   const confirmationMenuRef = useRef<HTMLDivElement>(null);
-  const searchWidthOpen = searchOpen || Boolean(search);
-
-  useEffect(() => {
-    if (searchOpen) searchInputRef.current?.focus();
-  }, [searchOpen]);
 
   useEffect(() => {
     if (!trackMenuOpen) return;
@@ -659,30 +786,6 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [confirmationMenuOpen]);
-
-  useEffect(() => {
-    if (!searchOpen) return;
-
-    function handlePointerDown(event: MouseEvent) {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
-        setSearch('');
-        setSearchOpen(false);
-      }
-    }
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        setSearch('');
-        setSearchOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [searchOpen]);
 
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
 
@@ -728,7 +831,6 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
   function handleBulkSend(kind: BulkKind) {
     const targets = bulkTargets[kind];
     const { singular, plural } = BULK_COPY[kind];
-    setConfirmingBulk(null);
     if (targets.length === 0) return;
 
     startBulkTransition(async () => {
@@ -822,117 +924,46 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
               <p role="status" className="shrink-0 h-10 inline-flex items-center px-4 rounded-full bg-white/[0.06] text-sm font-bold text-white/70">
                 Sending {BULK_COPY[bulkProgress.kind].plural} {bulkProgress.sent} of {bulkProgress.total}
               </p>
-            ) : confirmingBulk ? (
-              <div role="group" aria-label={`Confirm sending ${BULK_COPY[confirmingBulk].plural}`} className="shrink-0 flex items-center gap-2 h-10 pl-4 pr-1.5 rounded-full bg-surface-raised border border-white/10">
-                <span className="text-sm text-white/70">
-                  Email {bulkTargets[confirmingBulk].length} {bulkTargets[confirmingBulk].length === 1 ? 'speaker' : 'speakers'}?
-                </span>
-                <button
-                  onClick={() => setConfirmingBulk(null)}
-                  aria-label={`Cancel sending ${BULK_COPY[confirmingBulk].plural}`}
-                  className="text-xs px-2.5 py-1 rounded-full border border-white/40 text-white/60 hover:border-white/60 hover:text-white transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => handleBulkSend(confirmingBulk)}
-                  aria-label={`Send ${BULK_COPY[confirmingBulk].plural} to ${bulkTargets[confirmingBulk].length} speakers`}
-                  className={`text-xs px-2.5 py-1 rounded-full font-bold hover:opacity-90 transition-opacity ${BULK_COPY[confirmingBulk].confirmClass}`}
-                >
-                  Send
-                </button>
-              </div>
             ) : (
               (['thanks', 'invites'] as const)
                 .filter((kind) => bulkTargets[kind].length > 0)
                 .map((kind) => (
-                  <button
+                  <ConfirmAction
                     key={kind}
-                    onClick={() => setConfirmingBulk(kind)}
-                    disabled={isBulkPending}
-                    aria-label={`Send ${BULK_COPY[kind].plural} to the ${bulkTargets[kind].length} confirmed speakers who need one`}
-                    title={BULK_COPY[kind].title}
-                    className={`shrink-0 inline-flex items-center gap-2 h-10 text-sm px-4 rounded-full font-bold transition-colors disabled:opacity-50 ${BULK_COPY[kind].buttonClass}`}
+                    tone="send"
+                    align="left"
+                    message={`Email ${bulkTargets[kind].length} ${bulkTargets[kind].length === 1 ? 'speaker' : 'speakers'} their ${bulkTargets[kind].length === 1 ? BULK_COPY[kind].singular : BULK_COPY[kind].plural}?`}
+                    detail={`${BULK_COPY[kind].title} They go one at a time, about a second apart.`}
+                    confirmLabel={`Send ${bulkTargets[kind].length}`}
+                    onConfirm={() => handleBulkSend(kind)}
+                    className="inline-flex shrink-0"
                   >
-                    {kind === 'invites' ? (
-                      <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                        <rect x="2" y="3" width="12" height="11" rx="1.5" />
-                        <path strokeLinecap="round" d="M2 6.5h12M5.5 1.75v2.5M10.5 1.75v2.5" />
-                      </svg>
-                    ) : (
-                      <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                        <path strokeLinejoin="round" d="M8 13.5S1.75 9.75 1.75 5.75A3 3 0 018 4a3 3 0 016.25 1.75C14.25 9.75 8 13.5 8 13.5z" />
-                      </svg>
+                    {(triggerProps) => (
+                      <button
+                        {...triggerProps}
+                        disabled={isBulkPending}
+                        aria-label={`Send ${BULK_COPY[kind].plural} to the ${bulkTargets[kind].length} confirmed speakers who need one`}
+                        title={BULK_COPY[kind].title}
+                        className={`shrink-0 inline-flex items-center gap-2 h-10 text-sm px-4 rounded-full font-bold transition-colors disabled:opacity-50 ${BULK_COPY[kind].buttonClass}`}
+                      >
+                        {kind === 'invites' ? (
+                          <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                            <rect x="2" y="3" width="12" height="11" rx="1.5" />
+                            <path strokeLinecap="round" d="M2 6.5h12M5.5 1.75v2.5M10.5 1.75v2.5" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                            <path strokeLinejoin="round" d="M8 13.5S1.75 9.75 1.75 5.75A3 3 0 018 4a3 3 0 016.25 1.75C14.25 9.75 8 13.5 8 13.5z" />
+                          </svg>
+                        )}
+                        Send {bulkTargets[kind].length} {bulkTargets[kind].length === 1 ? BULK_COPY[kind].singular : BULK_COPY[kind].plural}
+                      </button>
                     )}
-                    Send {bulkTargets[kind].length} {bulkTargets[kind].length === 1 ? BULK_COPY[kind].singular : BULK_COPY[kind].plural}
-                  </button>
+                  </ConfirmAction>
                 ))
             )}
 
-            <div
-              ref={searchContainerRef}
-              className={`relative shrink-0 h-10 rounded-full transition-all duration-300 ease-in-out ${
-                searchWidthOpen ? 'w-full sm:w-80 bg-white/[0.06]' : 'w-10 bg-white/[0.06] hover:bg-white/[0.1]'
-              }`}
-            >
-              <button
-                onClick={() => setSearchOpen(true)}
-                tabIndex={searchOpen || search ? -1 : undefined}
-                aria-label="Search speakers by name, email, or talk title"
-                title="Search"
-                className={`absolute left-0 top-0 inline-flex items-center justify-center w-10 h-10 rounded-full text-white/70 hover:text-white transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
-                }`}
-              >
-                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <circle cx="7" cy="7" r="5" />
-                  <path strokeLinecap="round" d="M11 11l3.5 3.5" />
-                </svg>
-              </button>
-
-              <input
-                ref={searchInputRef}
-                type="search"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                tabIndex={searchOpen || search ? undefined : -1}
-                placeholder="Search by name, email, or talk…"
-                aria-label="Search speakers by name, email, or talk title"
-                className={`w-full h-10 rounded-full bg-transparent pl-9 pr-9 py-0 text-sm text-white placeholder:text-white/50 focus:outline-none transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
-              />
-              <svg
-                className={`absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/55 pointer-events-none transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-100' : 'opacity-0'
-                }`}
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              >
-                <circle cx="7" cy="7" r="5" />
-                <path strokeLinecap="round" d="M11 11l3.5 3.5" />
-              </svg>
-              <button
-                onClick={() => {
-                  setSearch('');
-                  setSearchOpen(false);
-                }}
-                tabIndex={searchOpen || search ? undefined : -1}
-                aria-label="Close search"
-                className={`absolute right-2 top-1/2 -translate-y-1/2 text-white/55 hover:text-white/70 transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <path strokeLinecap="round" d="M4 4l8 8M12 4l-8 8" />
-                </svg>
-              </button>
-            </div>
-
-            {(searchOpen || search) && <div className="basis-full h-0 sm:hidden" aria-hidden="true" />}
+            <AdminSearch value={search} onChange={setSearch} label="Search speakers by name, email or talk title" placeholder="Search by name, email or talk…" />
 
             <div className="relative shrink-0" ref={confirmationMenuRef}>
               <button
@@ -945,7 +976,7 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
                 }`}
               >
                 {confirmationTabs.find((tab) => tab.value === confirmationFilter)?.label}
-                <span className="font-medium text-white/60">{confirmationCounts[confirmationFilter]}</span>
+                <span className="font-normal text-white/60">{confirmationCounts[confirmationFilter]}</span>
                 <svg className={`w-3 h-3 text-white/55 transition-transform ${confirmationMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
                 </svg>
@@ -966,7 +997,7 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
                       }}
                       aria-checked={confirmationFilter === tab.value}
                       className={`w-full flex items-center justify-between gap-3 text-left text-sm px-4 py-2.5 transition-colors ${
-                        confirmationFilter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
+                        confirmationFilter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-bold hover:bg-white/[0.08] hover:text-white'
                       }`}
                     >
                       {tab.label}
@@ -988,7 +1019,7 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
                 }`}
               >
                 {filterTabs.find((tab) => tab.value === filter)?.label}
-                <span className="font-medium text-white/60">{counts[filter]}</span>
+                <span className="font-normal text-white/60">{counts[filter]}</span>
                 <svg className={`w-3 h-3 text-white/55 transition-transform ${trackMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
                 </svg>
@@ -1009,7 +1040,7 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
                       }}
                       aria-checked={filter === tab.value}
                       className={`w-full flex items-center justify-between gap-3 text-left text-sm px-4 py-2.5 transition-colors ${
-                        filter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
+                        filter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-bold hover:bg-white/[0.08] hover:text-white'
                       }`}
                     >
                       {tab.label}
@@ -1033,18 +1064,28 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
             <p className="text-sm text-white/50">No speakers match this filter.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-3 items-start">
-            {filtered.map((speaker) => (
-              <SpeakerCard
-                key={speaker.rowId}
-                speaker={speaker}
-                leadSpeaker={speaker.coSpeakerOf ? leadByTalk.get(speaker.talkId) : undefined}
-                coSpeakers={speaker.coSpeakerOf ? [] : coSpeakersByTalk.get(speaker.talkId) ?? []}
-                session={sessionTimes?.[speaker.talkId] ?? null}
-                inviteStatus={inviteStatuses.get(speaker.rowId) ?? null}
-                onError={setAlertMessage}
-              />
-            ))}
+          <div className="rounded-2xl bg-surface overflow-hidden">
+            <div aria-hidden="true" className="hidden md:grid grid-cols-[auto_minmax(0,1fr)_8.5rem_11.5rem_12rem_auto] gap-x-4 px-4 py-2.5 border-b border-white/10 text-xs font-bold text-white/60">
+              <span className="w-10 sm:w-11" />
+              <span>Speaker and talk</span>
+              <span>Track</span>
+              <span>Status</span>
+              <span className="text-right">Next step</span>
+              <span className="w-8" />
+            </div>
+            <ul className="divide-y divide-white/[0.07]">
+              {filtered.map((speaker) => (
+                <LineupRow
+                  key={speaker.rowId}
+                  speaker={speaker}
+                  leadSpeaker={speaker.coSpeakerOf ? leadByTalk.get(speaker.talkId) : undefined}
+                  coSpeakers={speaker.coSpeakerOf ? [] : coSpeakersByTalk.get(speaker.talkId) ?? []}
+                  session={sessionTimes?.[speaker.talkId] ?? null}
+                  inviteStatus={inviteStatuses.get(speaker.rowId) ?? null}
+                  onError={setAlertMessage}
+                />
+              ))}
+            </ul>
           </div>
         )}
       </div>

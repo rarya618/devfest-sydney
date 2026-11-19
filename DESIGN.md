@@ -11,6 +11,7 @@ colors:
   google-red: "#EA4335"
   google-red-deep: "#d93025"
   google-red-light: "#f28b82"
+  google-green-light: "#81c995"
   black-02: "#1e1e1e"
   surface: "#282828"
   surface-raised: "#303030"
@@ -236,6 +237,7 @@ The Google core colours on a dark grey ground, with BRANDING.md's deeper and lig
 ### Secondary
 - **Google Green** (`google-green`): status that is good or waiting on the speaker: ruler markers and pill dates for talks in or coming up, the agenda card's status line and current step, done steps and the rules between them, the card's hairline (45%) when a spot waits to be confirmed, "Confirm by" dates, save confirmations, the "Needs you" strip's border (30%) and tint (10%).
 - **Green 700** (`google-green-deep`): the Confirm button fill, the one solid green.
+- **Green 300** (`google-green-light`): green text on a green tint (6.1:1 on a card). Core green fails AA there (3.9:1), though it passes as plain text on a card (4.8:1).
 
 ### Tertiary
 - **Google Yellow** (`google-yellow`): proposals under review (their ruler marker, pill dot and date, status line and current step), "Unsaved changes", "Add a photo to finish it" nudges. Text and small status dots only in the portal, never a fill.
@@ -302,6 +304,8 @@ Flat by default. Cards and panels, the agenda card included, are opaque grey fil
 - **Punched slot** (`box-shadow: inset 0 1px 2px rgba(0,0,0,0.6)`): the slot cut into the top of a badge.
 - **Floating alert** (Tailwind `shadow-xl`): the bottom-left error alert.
 - **Floating menu** (`box-shadow: 0 12px 32px rgba(0,0,0,0.45)`): the admin's More menus and the dropdown's open list, which float over the content they belong to.
+- **Modal** (`box-shadow: 0 24px 64px rgba(0,0,0,0.55)`): the admin's modal (`AdminModal.tsx`).
+- **Side panel** (`box-shadow: 0 0 64px rgba(0,0,0,0.6)`): the sheet a table row opens (`SidePanel.tsx`).
 
 ### Named Rules
 **The Only Thing That Hangs Rule.** Only the badge casts a shadow. Panels, cards, strips and rows stay flat and separate by tone. Things that float above the page for a moment (the alert, menus, the dropdown's list) are the exception.
@@ -372,6 +376,18 @@ The talk that matters now, opening on a spot to confirm, then the soonest talk a
 ### Saved Talk Row
 - The surviving row grid: the label column holds a 12px label at white 60% ("Idea", "Proposed") over a 14px mono count at white 60% ("Not sent", "Once"); the content column holds the Bold title, a two-line abstract at white 60%, where it has been proposed, and actions aligned right from 640px.
 
+### Admin tables (issue #9, 2026-11-19)
+The organiser admin is a working tool: dense, scannable, one signal per fact.
+- **Tables:** Talk proposals, Speakers and Crew are one `#282828` panel at 24px radius with a header row (Bold 12px at white 60%) and rows split by 7% white rules. A row is the person or talk (Bold 15px title, a 14px line at white 60%), a track or area chip, a status label, a labelled next step, and an open arrow. Columns are fixed widths so they line up; on phones the row stacks and the next step moves under the title. Proposals keep a card view on request.
+- **Status label:** a 6px dot and a Bold 12px word in the state colour, on no tint (`StatusLabel` in `Chips.tsx`): green for in or confirmed, yellow for waiting on someone or pending, white 60% for over. Once per row; never a tinted chip.
+- **Chip:** the portal chip (`Chip` in `Chips.tsx`) for facts: track (with its dot), format, GDE. Yellow text marks a fact to act on ("Missing photo", "No area yet"). 12px is the floor across the admin.
+- **Next step:** the one thing to do next, as an outline pill (35% border, Bold 14px off-white, 32px tall): "Send acceptance email", "Send ticket", "Send invite", "Mark ticket sent". Rows with nothing to do show nothing. Undo, Remove and the rest live in the side panel, never beside a send.
+- **Side panel:** a row opens its full card in a sheet against the right edge (full screen on phones), Black 02 with a 10% left edge and a 24px left radius, sliding 48px in over 420ms on the settle curve. Native `<dialog>`: focus is trapped, Escape or a click on the dimmed page closes it, focus returns to the row.
+- **Modal:** every admin modal is `AdminModal.tsx` on native `<dialog>`: `#303030`, 24px radius, 10% edge, the modal shadow, settling 8px up over 320ms. Errors raised inside it show in it (the Alert renders into an open dialog).
+- **Confirmation:** every send, every bulk action and everything destructive asks first in a panel under its button (`ConfirmAction.tsx`): `#303030`, 16px radius, the floating menu shadow, a Bold question naming the person, a line saying what happens, Cancel (focused first) and a confirm named for the action: Blue 700 for an email, Green 700 for an acceptance, Red 600 for a deletion or a turn-down. Confirming clears any earlier error on screen.
+- **Decision:** a pending record's choice is "Accept" (Green 700) and "Not this time" (outline), both confirmed (`DecisionButtons.tsx`).
+- **No side stripes.** Admin cards are plain `#282828` at 16px radius; track, role and type are said once, in a chip.
+
 ### Alert
 - The app's only error surface, anchored bottom-left (16px inset, 24px from 640px, full width less the gutters on phones, max 24rem). `#303030` with a 40% red border, 12px radius, 12px by 16px, a small red-tinted circle icon, 14px text at white 80%, and a dismiss button. It rises 12px and fades in over 300ms and stays until dismissed.
 
@@ -388,6 +404,7 @@ One curve, `--ease-settle: cubic-bezier(0.16, 1, 0.3, 1)`, for every portal tran
 - **Rows:** saved-talk rows and the "Needs you" strip rise 10px and fade in over 450ms, staggered 45ms per row after 120ms, capped at the sixth row.
 - **Section panels:** the new saved-talk editor's height animates from 0fr to 1fr over 420ms with opacity over 260ms; closing is quicker, 300ms and 180ms, and the panel stays mounted until it finishes.
 - **Press:** 0.97 scale over 160ms.
+- **Admin:** the modal settles 8px up with a slight scale over 320ms, the side panel slides 48px in over 420ms, the confirmation panel drops 4px over 200ms, backdrops fade over 240 to 300ms. All `backwards` fill, so no transform is left behind to trap a fixed-position Alert.
 - **Reduced motion:** no swing, tilt, travel, stagger, ruler draw, marker pop, stage morph or press scale; every remaining transition and animation is cut to 0.01ms, so panels, the card and colours change state at once. Scrolling to a panel is instant.
 
 ## Do's and Don'ts
@@ -408,6 +425,8 @@ One curve, `--ease-settle: cubic-bezier(0.16, 1, 0.3, 1)`, for every portal tran
 - **Don't** add ALL-CAPS mono eyebrows or kickers above headings.
 - **Don't** use the four core colours together anywhere but the lanyard strap.
 - **Don't** give panels, cards or rows a shadow; only the badge hangs.
+- **Don't** put a coloured stripe on the side of a card or row, or status in a tinted chip: one status label per row.
+- **Don't** let a send or a destructive action act on one click: route it through `ConfirmAction`.
 - **Don't** tilt or animate a badge that holds a form.
 - **Don't** drop text below white 50% on Black 02, or below white 60% for text under 14px on `#303030`.
 - **Don't** use spinners or blank sections while data loads.
