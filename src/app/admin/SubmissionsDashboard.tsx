@@ -22,6 +22,8 @@ import { csvFilename, downloadCsv, formatCsvBoolean } from '@/lib/csv';
 import { useMobileBarHidden } from './MobileBarContext';
 import Select from '@/components/Select';
 import ConfirmAction from './ConfirmAction';
+import SidePanel from './SidePanel';
+import { Chip, StatusLabel, type StatusTone } from './Chips';
 import DecisionButtons from './DecisionButtons';
 import AdminSearch from './AdminSearch';
 
@@ -86,6 +88,11 @@ function LinkChip({ label, value, icon, accent }: LinkChipProps) {
   );
 }
 
+// The labelled next step in the proposals table: an outline pill, so a row's one action is
+// findable without competing with the page's primary button.
+const NEXT_STEP_PILL_CLASSES =
+  'press inline-flex items-center justify-center h-8 px-3.5 rounded-full border border-white/35 text-sm font-bold text-off-white whitespace-nowrap hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue';
+
 // Sending the acceptance email is the whole point of accepting a proposal, so it sits in
 // the action rail next to Undo rather than behind the overflow menu: an organiser
 // shouldn't have to go looking for the step that actually tells the speaker. It keeps the
@@ -94,10 +101,13 @@ function SendAcceptanceEmailButton({
   submission,
   onSend,
   disabled,
+  variant = 'icon',
 }: {
   submission: Submission;
   onSend: () => void;
   disabled: boolean;
+  /** `pill`: the labelled next-step button in the proposals table. */
+  variant?: 'icon' | 'pill';
 }) {
   const alreadySent = Boolean(submission.acceptanceEmailSentAt);
   const detail = submission.speakerConfirmedAt
@@ -114,7 +124,11 @@ function SendAcceptanceEmailButton({
       confirmLabel={alreadySent ? 'Resend email' : 'Send email'}
       onConfirm={onSend}
     >
-      {(triggerProps) => (
+      {(triggerProps) => variant === 'pill' ? (
+        <button {...triggerProps} type="button" disabled={disabled} aria-label={`Send acceptance email to ${submission.name} for: ${submission.talkTitle}`} className={NEXT_STEP_PILL_CLASSES}>
+          Send acceptance email
+        </button>
+      ) : (
         <button
           {...triggerProps}
           disabled={disabled}
@@ -143,10 +157,13 @@ function SendSpeakerTicketButton({
   submission,
   onSend,
   disabled,
+  variant = 'icon',
 }: {
   submission: Submission;
   onSend: () => void;
   disabled: boolean;
+  /** `pill`: the labelled next-step button in the proposals table. */
+  variant?: 'icon' | 'pill';
 }) {
   const alreadySent = Boolean(submission.speakerTicketEmailSentAt);
 
@@ -160,7 +177,11 @@ function SendSpeakerTicketButton({
       confirmLabel={alreadySent ? 'Resend ticket' : 'Send ticket'}
       onConfirm={onSend}
     >
-      {(triggerProps) => (
+      {(triggerProps) => variant === 'pill' ? (
+        <button {...triggerProps} type="button" disabled={disabled} aria-label={`Send the complimentary speaker ticket to ${submission.name}`} className={NEXT_STEP_PILL_CLASSES}>
+          Send ticket
+        </button>
+      ) : (
         <button
           {...triggerProps}
           disabled={disabled}
@@ -192,10 +213,13 @@ function SendRejectionEmailButton({
   submission,
   onSend,
   disabled,
+  variant = 'icon',
 }: {
   submission: Submission;
   onSend: () => void;
   disabled: boolean;
+  /** `pill`: the labelled next-step button in the proposals table. */
+  variant?: 'icon' | 'pill';
 }) {
   const alreadySent = Boolean(submission.rejectionEmailSentAt);
 
@@ -209,7 +233,11 @@ function SendRejectionEmailButton({
       confirmLabel={alreadySent ? 'Resend email' : 'Send email'}
       onConfirm={onSend}
     >
-      {(triggerProps) => (
+      {(triggerProps) => variant === 'pill' ? (
+        <button {...triggerProps} type="button" disabled={disabled} aria-label={`Send rejection email to ${submission.name} for: ${submission.talkTitle}`} className={NEXT_STEP_PILL_CLASSES}>
+          Send rejection email
+        </button>
+      ) : (
         <button
           {...triggerProps}
           disabled={disabled}
@@ -470,13 +498,15 @@ interface SubmissionRowProps {
   bulkActionsPending: boolean;
   // Why this person's rejection email can't go yet, worked out across all their proposals.
   rejectionBlocker: RejectionEmailBlocker | null;
+  // Shown inside the table's side panel: opens expanded, and selection stays with the row.
+  inPanel?: boolean;
 }
 
-function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActionsPending, rejectionBlocker }: SubmissionRowProps) {
+function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActionsPending, rejectionBlocker, inPanel = false }: SubmissionRowProps) {
   const [isPending, startTransition] = useTransition();
   const [isEditing, setIsEditing] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(inPanel);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement>(null);
 
@@ -524,19 +554,23 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
     >
       <div className="flex items-stretch gap-4">
       <div className="flex-1 min-w-0 flex flex-col">
-      <div className="flex items-start gap-4 mb-2">
-        <input
-          type="checkbox"
-          checked={selected}
-          onChange={onToggleSelect}
-          disabled={bulkActionsPending}
-          aria-label={`Select submission: ${submission.talkTitle}`}
-          className="mt-[0.28125rem] shrink-0 w-4 h-4 rounded-md border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue"
-        />
-        <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{submission.talkTitle}</h3>
-      </div>
+      {/* In the side panel, the panel's own heading carries the title and the row keeps the
+          selection. */}
+      {!inPanel && (
+        <div className="flex items-start gap-4 mb-2">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={onToggleSelect}
+            disabled={bulkActionsPending}
+            aria-label={`Select submission: ${submission.talkTitle}`}
+            className="mt-[0.28125rem] shrink-0 w-4 h-4 rounded-md border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue"
+          />
+          <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{submission.talkTitle}</h3>
+        </div>
+      )}
 
-      <div className="mb-3 pl-8">
+      <div className={`mb-3 ${inPanel ? '' : 'pl-8'}`}>
         <div className="min-w-0">
           <p className="text-base font-bold text-white/90 truncate">{submission.name}</p>
           <p className="mt-1 flex items-center gap-1.5 text-sm text-white/55 truncate">
@@ -899,20 +933,25 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
   );
 }
 
+// Where a proposal stands, in the portal's state colours, once per row.
+function submissionStatus(submission: Submission): { tone: StatusTone; label: string } {
+  if (submission.status === 'pending') return { tone: 'waiting', label: 'Pending' };
+  if (submission.status === 'archived') return { tone: 'done', label: 'Archived' };
+  if (submission.status === 'rejected') return { tone: 'done', label: submission.rejectionEmailSentAt ? 'Not selected, told' : 'Not selected' };
+  if (submission.speakerTicketEmailSentAt) return { tone: 'good', label: 'Ticket sent' };
+  if (submission.speakerConfirmedAt) return { tone: 'good', label: 'Confirmed' };
+  if (submission.acceptanceEmailSentAt) return { tone: 'waiting', label: 'Awaiting confirmation' };
+  return { tone: 'good', label: 'Accepted' };
+}
+
+// A row of the proposals table: who and what, the track, where it stands, and the one thing to
+// do next as a labelled button. Everything else (abstract, links, notes, edit, history, undo)
+// is in the side panel the row opens, which holds the full card.
 function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulkActionsPending, rejectionBlocker }: SubmissionRowProps) {
   const [isPending, startTransition] = useTransition();
-  const [isEditing, setIsEditing] = useState(false);
-  const [notesOpen, setNotesOpen] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
-  const moreMenuRef = useRef<HTMLDivElement>(null);
-
-  const links = [
-    submission.linkedinUrl && { label: 'LinkedIn', value: submission.linkedinUrl },
-    submission.githubUrl && { label: 'GitHub', value: submission.githubUrl },
-    submission.websiteUrl && { label: 'Website', value: submission.websiteUrl },
-    submission.previousTalkLink && { label: 'Previous talk', value: submission.previousTalkLink },
-  ].filter((link): link is { label: string; value: string } => Boolean(link));
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const status = submissionStatus(submission);
+  const disabled = isPending || bulkActionsPending;
 
   function handleAction(action: (id: string) => Promise<{ error?: string }>) {
     startTransition(async () => {
@@ -921,286 +960,100 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
     });
   }
 
-  useEffect(() => {
-    if (!moreOpen) return;
-
-    function handlePointerDown(event: MouseEvent) {
-      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
-        setMoreOpen(false);
-      }
-    }
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setMoreOpen(false);
-    }
-
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [moreOpen]);
-
-  function handleRowClick(event: React.MouseEvent<HTMLDivElement>) {
+  function handleRowClick(event: React.MouseEvent<HTMLLIElement>) {
     const target = event.target as HTMLElement;
-    if (target.closest('button, a, input, textarea, select, [role="menu"], [role="dialog"]')) return;
+    if (target.closest('button, a, input, textarea, select, [role="menu"], [role="dialog"], [role="alertdialog"]')) return;
     if (window.getSelection()?.toString()) return;
-    setIsOpen((open) => !open);
+    setIsPanelOpen(true);
+  }
+
+  let nextStep: React.ReactNode = null;
+  if (submission.status === 'pending') {
+    nextStep = (
+      <DecisionButtons
+        layout="row"
+        subject={`${submission.name}'s proposal: ${submission.talkTitle}`}
+        disabled={disabled}
+        accept={{
+          message: `Accept ${submission.name}'s talk?`,
+          detail: 'It joins the lineup, and their speaker profile is created or reused. No email is sent yet: send the acceptance email when you\'re ready.',
+          onConfirm: () => handleAction(promoteSubmission),
+        }}
+        reject={{
+          message: `Mark ${submission.name}'s talk as not selected?`,
+          detail: 'No email is sent. You can send the rejection email afterwards, or move it back to pending.',
+          onConfirm: () => handleAction(rejectSubmission),
+        }}
+      />
+    );
+  } else if (submission.status === 'accepted' && !submission.acceptanceEmailSentAt) {
+    nextStep = <SendAcceptanceEmailButton variant="pill" submission={submission} onSend={() => handleAction(sendAcceptanceEmail)} disabled={disabled} />;
+  } else if (submission.status === 'accepted' && submission.speakerConfirmedAt && !submission.speakerTicketEmailSentAt) {
+    nextStep = <SendSpeakerTicketButton variant="pill" submission={submission} onSend={() => handleAction(sendSpeakerTicketEmail)} disabled={disabled} />;
+  } else if (submission.status === 'rejected' && !submission.rejectionEmailSentAt && !rejectionBlocker) {
+    nextStep = <SendRejectionEmailButton variant="pill" submission={submission} onSend={() => handleAction(sendRejectionEmail)} disabled={disabled} />;
   }
 
   return (
-    <div
+    <li
       onClick={handleRowClick}
-      className={`relative cursor-pointer bg-surface border-l-4 rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[0.07] ${
-        isPending ? 'opacity-50 pointer-events-none' : selected ? 'ring-2 ring-google-blue/30' : ''
-      } ${TRACK_BORDER_COLORS[submission.track]} ${moreOpen ? 'z-40' : ''}`}
-      aria-label={`Submission from ${submission.name}: ${submission.talkTitle}`}
+      className={`group relative grid grid-cols-[auto_minmax(0,1fr)_auto] md:grid-cols-[auto_minmax(0,1fr)_8.5rem_11.5rem_15.5rem_auto] items-center gap-x-4 gap-y-2 px-4 py-3 cursor-pointer transition-colors hover:bg-white/[0.04] ${
+        isPending ? 'opacity-50 pointer-events-none' : selected ? 'bg-google-blue/[0.08]' : ''
+      }`}
     >
-      <div className="flex items-center gap-3">
-        <input
-          type="checkbox"
-          checked={selected}
-          onChange={onToggleSelect}
-          disabled={bulkActionsPending}
-          aria-label={`Select submission: ${submission.talkTitle}`}
-          className="shrink-0 w-4 h-4 rounded-md border-white/15 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue"
-        />
+      <input
+        type="checkbox"
+        checked={selected}
+        onChange={onToggleSelect}
+        disabled={bulkActionsPending}
+        aria-label={`Select submission: ${submission.talkTitle}`}
+        className="shrink-0 w-4 h-4 rounded-md border-white/35 text-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue"
+      />
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-baseline gap-2.5">
-            <h3 className="font-bold text-white text-sm truncate">{submission.talkTitle}</h3>
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-white/55 truncate">
-            <span className="font-bold text-white/70">{submission.name}</span>
-            <span>&middot;</span>
-            <span className="truncate">{FORMAT_LABELS[submission.format]} &middot; {EXPERIENCE_LABELS[submission.experienceLevel]}</span>
-            {submission.isGoogleDeveloperExpert && (
-              <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-blue/15 text-google-blue-light">GDE</span>
-            )}
-            {submission.isFirstTimeSpeaker && (
-              <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-green/15 text-google-green">First-timer</span>
-            )}
-          </div>
-        </div>
-
-        <span className="hidden sm:flex flex-col items-end shrink-0 text-[11px] text-white/55 leading-snug text-right">
-          <span className={`font-bold ${STATUS_DOT_STYLES[submission.status].text}`}>{STATUS_LABELS[submission.status]}</span>
-          {formatDate(submission.submittedAt)}
-          {submission.editedAt && <EditedMark editedAt={submission.editedAt} />}
-        </span>
-
-        {submission.status === 'accepted' && (
-          <span className="hidden sm:inline-flex shrink-0">
-            <AcceptanceState submission={submission} />
-          </span>
-        )}
-
-        {submission.status === 'rejected' && (
-          <span className="hidden sm:inline-flex shrink-0">
-            <RejectionEmailState submission={submission} blocker={rejectionBlocker} />
-          </span>
-        )}
-
-        {submission.status === 'pending' && (
-          <DecisionButtons
-            layout="row"
-            className="hidden md:flex shrink-0"
-            subject={`${submission.name}'s proposal: ${submission.talkTitle}`}
-            disabled={isPending || bulkActionsPending}
-            accept={{
-              message: `Accept ${submission.name}'s talk?`,
-              detail: 'It joins the lineup, and their speaker profile is created or reused. No email is sent yet: send the acceptance email when you\'re ready.',
-              onConfirm: () => handleAction(promoteSubmission),
-            }}
-            reject={{
-              message: `Mark ${submission.name}'s talk as not selected?`,
-              detail: 'No email is sent. You can send the rejection email afterwards, or move it back to pending.',
-              onConfirm: () => handleAction(rejectSubmission),
-            }}
-          />
-        )}
-        {submission.status === 'rejected' && !rejectionBlocker && (
-          <SendRejectionEmailButton
-            submission={submission}
-            onSend={() => handleAction(sendRejectionEmail)}
-            disabled={isPending || bulkActionsPending}
-          />
-        )}
-        {submission.status === 'accepted' && (
-          <SendAcceptanceEmailButton
-            submission={submission}
-            onSend={() => handleAction(sendAcceptanceEmail)}
-            disabled={isPending || bulkActionsPending}
-          />
-        )}
-        {submission.status === 'accepted' && submission.speakerConfirmedAt && (
-          <SendSpeakerTicketButton
-            submission={submission}
-            onSend={() => handleAction(sendSpeakerTicketEmail)}
-            disabled={isPending || bulkActionsPending}
-          />
-        )}
-        {submission.status === 'accepted' && (
-          <UndoAcceptanceButton
-            submission={submission}
-            onUndo={() => handleAction(undoPromotion)}
-            disabled={isPending || bulkActionsPending}
-            wrapperClassName="hidden md:inline-flex shrink-0"
-          />
-        )}
-
-        <div className="relative shrink-0" ref={moreMenuRef}>
-          <button
-            onClick={() => setMoreOpen((open) => !open)}
-            disabled={isPending || bulkActionsPending}
-            aria-haspopup="menu"
-            aria-expanded={moreOpen}
-            aria-label={`More actions for: ${submission.talkTitle}`}
-            title="More actions"
-            className="relative inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-              <circle cx="3" cy="8" r="1.25" />
-              <circle cx="8" cy="8" r="1.25" />
-              <circle cx="13" cy="8" r="1.25" />
-            </svg>
-            {submission.reviewerNotes.length > 0 && (
-              <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-[10px] font-bold leading-none">
-                {submission.reviewerNotes.length}
-              </span>
-            )}
-          </button>
-
-          {moreOpen && (
-            <div
-              role="menu"
-              className="absolute right-0 top-full mt-2 w-44 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 z-30"
-            >
-              <button
-                role="menuitem"
-                onClick={() => {
-                  setNotesOpen((open) => !open);
-                  setMoreOpen(false);
-                }}
-                className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-              >
-                Notes{submission.reviewerNotes.length > 0 ? ` (${submission.reviewerNotes.length})` : ''}
-              </button>
-              <button
-                role="menuitem"
-                onClick={() => {
-                  setIsEditing(true);
-                  setMoreOpen(false);
-                }}
-                className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-              >
-                Edit
-              </button>
-              {(submission.status === 'rejected' || submission.status === 'archived') && (
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    handleAction(restoreSubmission);
-                    setMoreOpen(false);
-                  }}
-                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                >
-                  Restore
-                </button>
-              )}
-              {submission.status !== 'accepted' && submission.status !== 'archived' && (
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    handleAction(archiveSubmission);
-                    setMoreOpen(false);
-                  }}
-                  className="w-full text-left text-sm px-4 py-2.5 text-white hover:bg-white/[0.08] transition-colors"
-                >
-                  Archive
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-
-        <button
-          onClick={() => setIsOpen((open) => !open)}
-          aria-expanded={isOpen}
-          aria-label={`${isOpen ? 'Collapse' : 'Expand'} details for: ${submission.talkTitle}`}
-          className="inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-        >
-          <svg
-            className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-            viewBox="0 0 16 16"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.75}
-            aria-hidden="true"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6l4 4 4-4" />
-          </svg>
-        </button>
+      <div className="min-w-0">
+        <h3 className="font-bold text-off-white text-[0.9375rem] leading-snug truncate">{submission.talkTitle}</h3>
+        <p className="mt-0.5 flex items-center gap-1.5 text-sm text-white/60 truncate">
+          <span className="text-white/80">{submission.name}</span>
+          <span aria-hidden="true">&middot;</span>
+          <span className="truncate">{FORMAT_LABELS[submission.format]}, {EXPERIENCE_LABELS[submission.experienceLevel].toLowerCase()}</span>
+          {submission.isGoogleDeveloperExpert && <span className="shrink-0"><Chip>GDE</Chip></span>}
+        </p>
       </div>
 
-      <div
-        className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+      <span className="hidden md:block"><Chip dotClass={TRACK_DOT_COLORS[submission.track]}>{TRACK_LABELS[submission.track]}</Chip></span>
+
+      <span className="hidden md:flex flex-col gap-1">
+        <StatusLabel tone={status.tone}>{status.label}</StatusLabel>
+        <span className="font-mono text-xs text-white/60">{formatDate(submission.submittedAt)}</span>
+      </span>
+
+      <span className="col-span-full md:col-span-1 flex justify-start md:justify-end pl-8 md:pl-0 empty:hidden">{nextStep}</span>
+
+      <button
+        type="button"
+        onClick={() => setIsPanelOpen(true)}
+        aria-label={`Open ${submission.name}'s proposal: ${submission.talkTitle}`}
+        className="press row-start-1 col-start-3 md:row-auto md:col-auto inline-flex items-center justify-center w-8 h-8 rounded-full text-white/60 hover:text-white hover:bg-white/[0.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
       >
-        <div className="overflow-hidden">
-          <div className="mt-2.5 pl-7 pr-1 pb-0.5 space-y-3">
-            <div className="flex flex-wrap items-center gap-2 text-xs text-white/55 sm:hidden">
-              <span className={`font-bold ${STATUS_DOT_STYLES[submission.status].text}`}>{STATUS_LABELS[submission.status]}</span>
-              <span>&middot;</span>
-              <span>{formatDate(submission.submittedAt)}</span>
-              {submission.editedAt && <EditedMark editedAt={submission.editedAt} />}
-            </div>
-            <MarkdownText text={submission.abstract} className="text-sm text-white/65 leading-relaxed" />
-            {submission.speakerBio && (
-              <div className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
-                <p className="font-bold text-white/85 mb-1">Bio</p>
-                <MarkdownText text={submission.speakerBio} />
-              </div>
-            )}
-            {links.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {links.map((link) => (
-                  <LinkChip
-                    key={link.label}
-                    label={link.label}
-                    value={link.value}
-                    accent={link.label === 'Previous talk' ? 'red' : 'blue'}
-                    icon={
-                      <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                        <circle cx="8" cy="8" r="6.5" />
-                        <path strokeLinecap="round" d="M2 8h12M8 1.5c1.5 1.7 2.3 3.9 2.3 6.5s-.8 4.8-2.3 6.5c-1.5-1.7-2.3-3.9-2.3-6.5S6.5 3.2 8 1.5z" />
-                      </svg>
-                    }
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+        <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 3.5L10.5 8 6 12.5" />
+        </svg>
+      </button>
 
-      {notesOpen && (
-        <div className="mt-2 pl-7">
-          <ReviewerNotesPanel
-            submissionId={submission.id}
-            notes={submission.reviewerNotes}
+      {isPanelOpen && (
+        <SidePanel title={submission.talkTitle} subtitle={`${submission.name}, ${TRACK_LABELS[submission.track]}`} onClose={() => setIsPanelOpen(false)}>
+          <SubmissionRow
+            submission={submission}
             onError={onError}
+            selected={selected}
+            onToggleSelect={onToggleSelect}
+            bulkActionsPending={bulkActionsPending}
+            rejectionBlocker={rejectionBlocker}
+            inPanel
           />
-        </div>
+        </SidePanel>
       )}
-
-      {isEditing && (
-        <EditSubmissionModal
-          submission={submission}
-          onClose={() => setIsEditing(false)}
-          onError={onError}
-        />
-      )}
-    </div>
+    </li>
   );
 }
 
@@ -1260,7 +1113,8 @@ function groupBySubmitter(list: Submission[]): SubmitterGroup[] {
 
 export default function SubmissionsDashboard({ submissions }: Props) {
   const mobileBarHidden = useMobileBarHidden();
-  const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
+  // Table by default (issue #9): one row per proposal, opening a side panel; cards on request.
+  const [viewMode, setViewMode] = useState<'cards' | 'list'>('list');
   const [filter, setFilter] = useState<FilterStatus>('all');
   const [trackFilter, setTrackFilter] = useState<TrackFilter>('all');
   const [sort, setSort] = useState<SortOption>('newest');
@@ -1853,8 +1707,8 @@ export default function SubmissionsDashboard({ submissions }: Props) {
               <button
                 onClick={() => setViewMode('list')}
                 aria-pressed={viewMode === 'list'}
-                aria-label="List view"
-                title="List view"
+                aria-label="Table view"
+                title="Table view"
                 className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors ${
                   viewMode === 'list' ? 'bg-white/[0.14] text-white' : 'text-white/50 hover:text-white'
                 }`}
@@ -1967,19 +1821,33 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                     </span>
                   )}
                 </div>
-                <div className={`grid grid-cols-1 items-start ${viewMode === 'list' ? 'gap-2' : 'gap-5'}`}>
-                  {group.submissions.map((submission) =>
-                    viewMode === 'list' ? (
-                      <SubmissionListRow
-                        key={submission.id}
-                        submission={submission}
-                        onError={setAlertMessage}
-                        selected={selectedIds.has(submission.id)}
-                        onToggleSelect={() => toggleSelect(submission.id)}
-                        bulkActionsPending={isBulkPending}
-                        rejectionBlocker={rejectionBlockerByApplicant.get(applicantKey(submission.email)) ?? null}
-                      />
-                    ) : (
+                {viewMode === 'list' ? (
+                  <div className="rounded-2xl bg-surface overflow-hidden">
+                    <div aria-hidden="true" className="hidden md:grid grid-cols-[auto_minmax(0,1fr)_8.5rem_11.5rem_15.5rem_auto] gap-x-4 px-4 py-2.5 border-b border-white/10 text-xs font-bold text-white/60">
+                      <span className="w-4" />
+                      <span>Talk and speaker</span>
+                      <span>Track</span>
+                      <span>Status</span>
+                      <span className="text-right">Next step</span>
+                      <span className="w-8" />
+                    </div>
+                    <ul className="divide-y divide-white/[0.07]">
+                      {group.submissions.map((submission) => (
+                        <SubmissionListRow
+                          key={submission.id}
+                          submission={submission}
+                          onError={setAlertMessage}
+                          selected={selectedIds.has(submission.id)}
+                          onToggleSelect={() => toggleSelect(submission.id)}
+                          bulkActionsPending={isBulkPending}
+                          rejectionBlocker={rejectionBlockerByApplicant.get(applicantKey(submission.email)) ?? null}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 items-start gap-5">
+                    {group.submissions.map((submission) => (
                       <SubmissionRow
                         key={submission.id}
                         submission={submission}
@@ -1989,26 +1857,39 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                         bulkActionsPending={isBulkPending}
                         rejectionBlocker={rejectionBlockerByApplicant.get(applicantKey(submission.email)) ?? null}
                       />
-                    )
-                  )}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
-        ) : (
-          <div className={`grid grid-cols-1 items-start ${viewMode === 'list' ? 'gap-2' : 'gap-5'}`}>
-            {sorted.map((submission) =>
-              viewMode === 'list' ? (
-                <SubmissionListRow
-                  key={submission.id}
-                  submission={submission}
-                  onError={setAlertMessage}
-                  selected={selectedIds.has(submission.id)}
-                  onToggleSelect={() => toggleSelect(submission.id)}
-                  bulkActionsPending={isBulkPending}
-                  rejectionBlocker={rejectionBlockerByApplicant.get(applicantKey(submission.email)) ?? null}
-                />
-              ) : (
+        ) : viewMode === 'list' ? (
+            <div className="rounded-2xl bg-surface overflow-hidden">
+              <div aria-hidden="true" className="hidden md:grid grid-cols-[auto_minmax(0,1fr)_8.5rem_11.5rem_15.5rem_auto] gap-x-4 px-4 py-2.5 border-b border-white/10 text-xs font-bold text-white/60">
+                <span className="w-4" />
+                <span>Talk and speaker</span>
+                <span>Track</span>
+                <span>Status</span>
+                <span className="text-right">Next step</span>
+                <span className="w-8" />
+              </div>
+              <ul className="divide-y divide-white/[0.07]">
+                {sorted.map((submission) => (
+                  <SubmissionListRow
+                    key={submission.id}
+                    submission={submission}
+                    onError={setAlertMessage}
+                    selected={selectedIds.has(submission.id)}
+                    onToggleSelect={() => toggleSelect(submission.id)}
+                    bulkActionsPending={isBulkPending}
+                    rejectionBlocker={rejectionBlockerByApplicant.get(applicantKey(submission.email)) ?? null}
+                  />
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 items-start gap-5">
+              {sorted.map((submission) => (
                 <SubmissionRow
                   key={submission.id}
                   submission={submission}
@@ -2018,10 +1899,9 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                   bulkActionsPending={isBulkPending}
                   rejectionBlocker={rejectionBlockerByApplicant.get(applicantKey(submission.email)) ?? null}
                 />
-              )
-            )}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
       </div>
 
       {isAddingSubmission && (
