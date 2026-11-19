@@ -506,6 +506,8 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
   const [isEditing, setIsEditing] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(inPanel);
+  // Content lines up under the title, past the checkbox; in the panel there's no checkbox.
+  const indent = inPanel ? '' : 'pl-8';
   const [moreOpen, setMoreOpen] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement>(null);
 
@@ -569,7 +571,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         </div>
       )}
 
-      <div className={`mb-3 ${inPanel ? '' : 'pl-8'}`}>
+      <div className={`mb-3 ${indent}`}>
         <div className="min-w-0">
           <p className="text-base font-bold text-white/90 truncate">{submission.name}</p>
           <p className="mt-1 flex items-center gap-1.5 text-sm text-white/55 truncate">
@@ -625,7 +627,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
       >
         <div className="overflow-hidden">
-      <div className="flex flex-wrap items-center gap-2 mb-5 pl-8">
+      <div className={`flex flex-wrap items-center gap-2 mb-5 ${indent}`}>
         <span className={`inline-block w-[5px] h-[5px] rounded-full ${TRACK_DOT_COLORS[submission.track]}`} />
         <span className={`text-xs font-normal ${TRACK_COLORS[submission.track]}`}>
           {TRACK_LABELS[submission.track]}
@@ -636,7 +638,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         <span className="text-xs text-white/55 capitalize">{submission.experienceLevel}</span>
       </div>
 
-      <MarkdownText text={submission.abstract} className="text-sm text-white/65 leading-relaxed mb-5 pl-8" />
+      <MarkdownText text={submission.abstract} className={`text-sm text-white/65 leading-relaxed mb-5 ${indent}`} />
 
       {(submission.speakerBio ||
         submission.accessibilityNeeds ||
@@ -648,7 +650,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         submission.coSpeakerEmails ||
         submission.hasSpokenAtGdgSydneyBefore ||
         submission.isOpenToAudienceQuestions) && (
-        <div className="space-y-3 mb-5 pl-8">
+        <div className={`space-y-3 mb-5 ${indent}`}>
           {submission.speakerBio && (
             <div className="text-sm text-white/65 bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 leading-relaxed">
               <p className="font-bold text-white/85 mb-1">Bio</p>
@@ -705,7 +707,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
       )}
 
       {(submission.linkedinUrl || submission.githubUrl || submission.websiteUrl || submission.previousTalkLink) && (
-        <div className="flex flex-wrap gap-2 mb-5 pl-8">
+        <div className={`flex flex-wrap gap-2 mb-5 ${indent}`}>
           {submission.linkedinUrl && (
             <LinkChip
               label="LinkedIn"
@@ -761,7 +763,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         </div>
       </div>
 
-      <div className="flex items-center gap-3 mt-auto pt-2 pl-8">
+      <div className={`flex items-center gap-3 mt-auto pt-2 ${indent}`}>
         <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${STATUS_DOT_STYLES[submission.status].text}`}>
           <span className={`w-[5px] h-[5px] rounded-full ${STATUS_DOT_STYLES[submission.status].dot}`} />
           {STATUS_LABELS[submission.status]}

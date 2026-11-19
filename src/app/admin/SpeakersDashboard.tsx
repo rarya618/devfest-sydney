@@ -270,7 +270,9 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
       }`}
       aria-label={`Speaker ${speaker.name}`}
     >
-      <div className="flex items-start gap-4">
+      {/* In the side panel the actions take their own row along the top, so the text keeps the
+          panel's full width instead of wrapping beside seven buttons. */}
+      <div className={`flex items-start gap-4 ${inPanel ? 'flex-wrap' : ''}`}>
         <SpeakerAvatar speaker={speaker} />
 
         <div className="flex-1 min-w-0">
@@ -366,7 +368,7 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
         </div>
 
         {/* One row of actions rather than a column: the column set the card's height. */}
-        <div className="relative flex flex-wrap items-center justify-end gap-1 shrink-0 max-w-[8.75rem] sm:max-w-none">
+        <div className={`relative flex flex-wrap items-center gap-1 ${inPanel ? 'order-first w-full justify-start -ml-1.5 pb-3 mb-1 border-b border-white/10' : 'justify-end shrink-0 max-w-[8.75rem] sm:max-w-none'}`}>
           <button onClick={() => setEditing(true)} aria-label={`Edit ${speaker.name}`} title="Edit speaker" className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${quietIcon}`}>
             <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" />
