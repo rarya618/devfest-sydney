@@ -64,7 +64,7 @@ export default function VolunteerAnalytics({ volunteers }: Props) {
         <>
           <SubmissionsOverTimeChart entries={volunteers} noun="signups" accent="green" />
 
-          <div className="grid items-start sm:grid-cols-2 gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <BreakdownCard title="Areas of interest">
               {areasWithSignups.map((area) => (
                 <BarRow key={area} label={VOLUNTEER_AREA_LABELS[area]} count={areaCounts[area] ?? 0} total={total} barClass={BAR_CLASS} />

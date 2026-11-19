@@ -54,7 +54,7 @@ export default function SpeakerAnalytics({ submissions }: Props) {
         <>
           <SubmissionsOverTimeChart entries={submissions} noun="proposals" accent="blue" />
 
-          <div className="grid items-start sm:grid-cols-2 gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <BreakdownCard title="By track">
               {TRACK_ORDER.filter((track) => trackCounts[track]).map((track) => (
                 <BarRow

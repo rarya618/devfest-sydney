@@ -59,7 +59,7 @@ export default function ShowcaseAnalytics({ entries }: Props) {
         <>
           <SubmissionsOverTimeChart entries={entries} noun="entries" accent="yellow" />
 
-          <div className="grid items-start sm:grid-cols-2 gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <BreakdownCard title="By stage">
               {STAGE_ORDER.filter((stage) => stageCounts[stage]).map((stage) => (
                 <BarRow key={stage} label={SHOWCASE_STAGE_LABELS[stage]} count={stageCounts[stage] ?? 0} total={total} barClass={BAR_CLASS} />
