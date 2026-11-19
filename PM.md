@@ -151,7 +151,7 @@ Event settings (open/closed, deadlines, ticket links) are not env vars: they liv
 
 - **Adding a secret to `apphosting.yaml` does not create it.** The rollout fails with "Misconfigured secret ... versions/latest" (it happened three times). Create it with `firebase apphosting:secrets:set NAME --project devfest-sydney-2026 --data-file - --force`, grant it with `firebase apphosting:secrets:grantaccess NAME --backend devfest-sydney`, then redeploy the same commit: `firebase apphosting:rollouts:create devfest-sydney --git-branch main --project devfest-sydney-2026`.
 - **App Hosting rejects empty env values:** to unset one, omit it.
-- **Admin Google sign-in runs through our own host** (issue #11): production's `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` is `app.gdgsydney.com`, and `next.config.ts` proxies `/__/auth/*` and `/__/firebase/*` to `devfest-sydney-2026.firebaseapp.com`, so Google's account chooser names the app rather than the DevFest project. It needs `https://app.gdgsydney.com/__/auth/handler` in the OAuth client's authorised redirect URIs and `app.gdgsydney.com` in Firebase Auth's authorised domains; drop either and organisers can't sign in. `/__/` is never redirected off the old host. Local dev keeps the firebaseapp.com domain.
+- **Admin Google sign-in runs through our own host** (issue #11): production's `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` is `app.gdgsydney.com`, and `next.config.ts` proxies `/__/auth/*` and `/__/firebase/*` to `devfest-sydney-2026.firebaseapp.com`, so Google's account chooser names the app rather than the DevFest project. It needs `https://app.gdgsydney.com/__/auth/handler` in the OAuth client's authorised redirect URIs and `app.gdgsydney.com` in Firebase Auth's authorised domains; drop either and organisers can't sign in. `/__/` is never redirected off the old host. Local dev keeps the firebaseapp.com domain. The OAuth branding (Google Auth Platform) names the app GDG Sydney, with the privacy policy at `app.gdgsydney.com/privacy`, no logo and no terms of service. Checked in production 2026-11-19: the chooser names `app.gdgsydney.com` and sign-in works.
 - **The calendar invite UID domain is a literal** (`devfest.gdgsydney.com` for 2026 invites, in `calendarInviteEmail.ts`), not the site URL. Changing it orphans every invite already sent.
 - **Admin sessions** are checked without the revocation round trip (`src/lib/adminSession.ts`, cached per request); the `admins` lookup is what locks a removed admin out. Session cookies are per host.
 - **Migrations** are scripts in `scripts/` with `--dry-run`, read before running against production. Additive first; removing old fields is a separate later pass.
@@ -213,7 +213,7 @@ At `/speaker`, its own area outside `/admin`. Decided 2026-11-14:
 - **Who can create events:** any admin, or only some. There are no roles today.
 - **Who maintains it:** two frameworks to keep up. Write it down if other organisers join, and explain the project ID in the README.
 
-## Next tasks (as of 2026-11-14)
+## Next tasks (as of 2026-11-19)
 
 0. **Speaker portal: done and linked.** Checked in production 2026-11-14 with an organiser address: the sign-in link, the `portal_session` cookie surviving a fresh load behind the CDN, a profile edit reaching Firestore, and a meetup proposal filed with `source = speaker-portal` (then deleted). Optionally add TTL policies on `expiresAt` for the three portal collections (`gcloud firestore fields ttls update expiresAt --collection-group=portalSessions --enable-ttl --project devfest-sydney-2026`, and the same for `portalSignInLinks`, `portalSignInRequests` and `meetupProposalRequests`). It is linked from the speaker emails and gdgsydney.com/speak.
 
@@ -224,4 +224,5 @@ At `/speaker`, its own area outside `/admin`. Decided 2026-11-14:
    - Then reword the matching `/privacy` sections (Job Board still says "We take the job board down ... after the event") to say the data has been deleted.
 2. **Security leftovers:** rotate the reCAPTCHA key's secret (it once sat in `.env.local` under the site key's name), and decide whether to switch App Check on in production.
 3. **Verify before relying on them** (never exercised with a real send, since every recipient was real): a volunteer invite and `/volunteer/join` submission, and the meetup acceptance flow. Use the Android event (or a test general event), and send one of each to an organiser inbox.
-4. If not yet done: run the two cleanup scripts and deploy the rules (see Remaining stage 4 work). Then 4g.
+4. **Dropdowns** (`src/components/Select.tsx`, 2026-11-19, replacing every native `<select>`): checked by mouse and keyboard in the admin, the portal and `/feedback`, but not yet with VoiceOver, nor the DevFest picker (shows only with two DevFests) or Proposing as (needs an address with two profiles).
+5. If not yet done: run the two cleanup scripts and deploy the rules (see Remaining stage 4 work). Then 4g.
