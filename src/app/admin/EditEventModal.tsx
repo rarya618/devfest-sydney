@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useTransition, type FormEvent, type ReactNode } from 'react';
-import { createPortal } from 'react-dom';
 import { createEvent, updateEvent, type EventFormInput, type PrivateLinkChange } from './eventActions';
 import type { AdminEventSummary } from './EventsDashboard';
 import {
@@ -18,6 +17,7 @@ import {
 import { isoToWallTime } from '@/lib/zonedTime';
 import type { EventFlowKey, EventPrivateLinkKey, EventVenue, GdgEventType } from '@/lib/types';
 import Select from '@/components/Select';
+import AdminModal from './AdminModal';
 
 interface Props {
   // Null to create a new event.
@@ -149,14 +149,8 @@ export default function EditEventModal({ summary, onClose, onError }: Props) {
   const title = isCreating ? 'New event' : `Edit ${summary.event.name}`;
   const hasAnyFlow = EVENT_FLOW_KEYS.some((flowKey) => fields.flows[flowKey].enabled);
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[60] flex items-start sm:items-center justify-center bg-black/70 p-4 overflow-y-auto"
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-    >
-      <div className="w-full max-w-2xl bg-surface-raised rounded-2xl shadow-xl my-8">
+  return (
+    <AdminModal label={title} onClose={onClose} isBusy={isPending} widthClass="max-w-2xl">
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <h2 className="text-lg font-bold text-white">{title}</h2>
@@ -484,8 +478,6 @@ export default function EditEventModal({ summary, onClose, onError }: Props) {
             </button>
           </div>
         </form>
-      </div>
-    </div>,
-    document.body
+    </AdminModal>
   );
 }

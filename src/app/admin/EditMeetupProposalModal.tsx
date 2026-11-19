@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useTransition, type FormEvent } from 'react';
-import { createPortal } from 'react-dom';
 import { updateMeetupProposal } from './meetupProposalActions';
 import { MEETUP_FORMATS, MEETUP_FORMAT_LABELS, MEETUP_PROPOSAL_LIMITS } from '@/lib/meetupProposalLabels';
 import type { MeetupFormat, MeetupProposal } from '@/lib/types';
 import FormattingHelp from '@/components/FormattingHelp';
 import Select from '@/components/Select';
+import AdminModal from './AdminModal';
 
 // Edits a meetup proposal from /admin/meetups. The same fields a speaker can change from the
 // portal; once accepted, saving updates its talk too (editMeetupProposal). Name and email stay
@@ -112,14 +112,8 @@ export default function EditMeetupProposalModal({ proposal, onClose, onError }: 
     );
   }
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[60] flex items-start sm:items-center justify-center bg-black/70 p-4 overflow-y-auto"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Edit meetup talk: ${proposal.talkTitle}`}
-    >
-      <div className="w-full max-w-xl bg-surface-raised rounded-2xl shadow-xl my-8">
+  return (
+    <AdminModal label={`Edit meetup talk: ${proposal.talkTitle}`} onClose={onClose} isBusy={isPending} widthClass="max-w-xl">
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <h2 className="text-lg font-bold text-white">{isAccepted ? 'Edit talk' : 'Edit proposal'}</h2>
@@ -183,8 +177,6 @@ export default function EditMeetupProposalModal({ proposal, onClose, onError }: 
             </button>
           </div>
         </form>
-      </div>
-    </div>,
-    document.body
+    </AdminModal>
   );
 }

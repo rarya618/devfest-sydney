@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { createPortal } from 'react-dom';
 import { sendVolunteerInvite } from './volunteerInviteActions';
 import { formatDate } from '@/lib/format';
 import type { InvitablePastVolunteer } from '@/lib/volunteerInvite';
+import AdminModal from './AdminModal';
 
 interface Props {
   eventId: string;
@@ -66,14 +66,8 @@ export default function InvitePastVolunteersModal({ eventId, eventName, people, 
 
   const allSelected = people.length > 0 && selected.size === people.length;
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[60] flex items-start sm:items-center justify-center bg-black/70 p-4 overflow-y-auto"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Invite past volunteers to ${eventName}`}
-    >
-      <div className="w-full max-w-xl bg-surface-raised rounded-2xl shadow-xl my-8">
+  return (
+    <AdminModal label={`Invite past volunteers to ${eventName}`} onClose={onClose} isBusy={isPending} widthClass="max-w-xl">
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
           <h2 className="text-lg font-bold text-white">Invite past volunteers</h2>
           <button
@@ -152,8 +146,6 @@ export default function InvitePastVolunteersModal({ eventId, eventName, people, 
             {isPending ? 'Sending…' : `Send ${selected.size} invite${selected.size === 1 ? '' : 's'}`}
           </button>
         </div>
-      </div>
-    </div>,
-    document.body
+    </AdminModal>
   );
 }

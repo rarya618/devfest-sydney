@@ -2,12 +2,12 @@
 
 import { useRef, useState, useTransition, type ChangeEvent, type FormEvent } from 'react';
 import Image from 'next/image';
-import { createPortal } from 'react-dom';
 import { removeCrewPhoto, updateCrewMember, uploadCrewPhoto, type CrewEditableFields } from './crewActions';
 import { getInitials } from '@/lib/format';
 import { VOLUNTEER_AREA_LABELS, VOLUNTEER_SHIFT_LABELS } from '@/lib/volunteerLabels';
 import type { VolunteerSubmission } from '@/lib/types';
 import Select from '@/components/Select';
+import AdminModal from './AdminModal';
 
 interface Props {
   member: VolunteerSubmission;
@@ -84,14 +84,8 @@ export default function EditCrewMemberModal({ member, onClose, onError }: Props)
     });
   }
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[60] flex items-start sm:items-center justify-center bg-black/70 p-4 overflow-y-auto"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Edit ${member.isOrganiser ? 'organiser' : 'crew member'}: ${member.name}`}
-    >
-      <div className="w-full max-w-xl bg-surface-raised rounded-2xl shadow-xl my-8">
+  return (
+    <AdminModal label={`Edit ${member.isOrganiser ? 'organiser' : 'crew member'}: ${member.name}`} onClose={onClose} isBusy={isPending} widthClass="max-w-xl">
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <h2 className="text-lg font-bold text-white">{member.isOrganiser ? 'Edit organiser' : 'Edit crew member'}</h2>
@@ -274,8 +268,6 @@ export default function EditCrewMemberModal({ member, onClose, onError }: Props)
             </button>
           </div>
         </form>
-      </div>
-    </div>,
-    document.body
+    </AdminModal>
   );
 }

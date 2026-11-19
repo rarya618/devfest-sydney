@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useTransition, type FormEvent } from 'react';
-import { createPortal } from 'react-dom';
 import { addOrganiser, type NewOrganiserFields } from './crewActions';
 import { VOLUNTEER_AREA_LABELS, VOLUNTEER_SHIFT_LABELS } from '@/lib/volunteerLabels';
 import Select from '@/components/Select';
+import AdminModal from './AdminModal';
 
 interface Props {
   onClose: () => void;
@@ -49,14 +49,8 @@ export default function AddOrganiserModal({ onClose, onError }: Props) {
     });
   }
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[60] flex items-start sm:items-center justify-center bg-black/70 p-4 overflow-y-auto"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Add an organiser to the crew"
-    >
-      <div className="w-full max-w-xl bg-surface-raised rounded-2xl shadow-xl my-8">
+  return (
+    <AdminModal label="Add an organiser to the crew" onClose={onClose} isBusy={isPending} widthClass="max-w-xl">
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <h2 className="text-lg font-bold text-white">Add an organiser</h2>
@@ -199,8 +193,6 @@ export default function AddOrganiserModal({ onClose, onError }: Props) {
             </button>
           </div>
         </form>
-      </div>
-    </div>,
-    document.body
+    </AdminModal>
   );
 }

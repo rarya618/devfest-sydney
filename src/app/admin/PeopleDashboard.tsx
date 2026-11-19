@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useCallback, useState } from 'react';
+import AdminModal from './AdminModal';
 import Image from 'next/image';
 import Alert from '@/components/Alert';
 import SpeakerCard from '@/components/SpeakerCard';
@@ -17,33 +17,12 @@ import { useMobileBarHidden } from './MobileBarContext';
 // The speaker's public card, exactly as the speaker portal shows it to them ("This is how you
 // appear next to your talks"), with the full bio. Escape or the backdrop closes it.
 function SpeakerPreviewDialog({ person, onClose }: { person: PersonWithTalks; onClose: () => void }) {
-  const closeButton = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    closeButton.current?.focus();
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
-
-  return createPortal(
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Preview of ${person.name}'s speaker card`}
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
-      className="fixed inset-0 z-[60] flex justify-center bg-black/70 p-4 overflow-y-auto"
-    >
-      {/* my-auto rather than items-center: centred when it fits, and scrollable from its top
-          when the card (a long bio) is taller than the screen, instead of cut off above. */}
-      <div className="w-full max-w-sm my-auto py-4">
+  return (
+    <AdminModal label={`Preview of ${person.name}'s speaker card`} onClose={onClose} widthClass="max-w-sm" variant="bare" closeOnBackdrop>
+      <div className="py-4">
         <div className="mb-3 flex items-center justify-between gap-3">
           <p className="text-sm text-white/70">How {person.name} appears next to their talks</p>
           <button
-            ref={closeButton}
             type="button"
             onClick={onClose}
             aria-label="Close the preview"
@@ -58,8 +37,7 @@ function SpeakerPreviewDialog({ person, onClose }: { person: PersonWithTalks; on
           <SpeakerCard profile={person} showFullBio viewer="organiser" />
         </div>
       </div>
-    </div>,
-    document.body
+    </AdminModal>
   );
 }
 

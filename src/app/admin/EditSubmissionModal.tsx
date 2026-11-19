@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useTransition, type FormEvent } from 'react';
-import { createPortal } from 'react-dom';
 import { createSubmission, updateSubmission, type SubmissionEditableFields } from './actions';
 import { TRACK_LABELS, FORMAT_LABELS, EXPERIENCE_LABELS } from '@/lib/submissionLabels';
 import type { Submission } from '@/lib/types';
 import FormattingHelp from '@/components/FormattingHelp';
 import Select from '@/components/Select';
+import AdminModal from './AdminModal';
 
 interface Props {
   // Absent means create mode: a proposal that arrived outside the form is entered here
@@ -115,14 +115,8 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
     });
   }
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[60] flex items-start sm:items-center justify-center bg-black/70 p-4 overflow-y-auto"
-      role="dialog"
-      aria-modal="true"
-      aria-label={isCreating ? 'Add a submission' : `Edit submission: ${submission.talkTitle}`}
-    >
-      <div className="w-full max-w-xl bg-surface-raised rounded-2xl shadow-xl my-8">
+  return (
+    <AdminModal label={isCreating ? 'Add a submission' : `Edit submission: ${submission.talkTitle}`} onClose={onClose} isBusy={isPending} widthClass="max-w-xl">
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <h2 className="text-lg font-bold text-white">
@@ -477,8 +471,6 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
             </button>
           </div>
         </form>
-      </div>
-    </div>,
-    document.body
+    </AdminModal>
   );
 }

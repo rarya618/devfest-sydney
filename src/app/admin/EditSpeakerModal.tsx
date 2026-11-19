@@ -4,12 +4,12 @@ import { useRef, useState, useTransition, type ChangeEvent, type FormEvent } fro
 import FormattingHelp from '@/components/FormattingHelp';
 import SpeakerCard, { type SpeakerCardProfile } from '@/components/SpeakerCard';
 import Image from 'next/image';
-import { createPortal } from 'react-dom';
 import { removeSpeakerPhoto, updateSpeaker, updateSpeakerProfile, uploadSpeakerPhoto, type SpeakerEditableFields } from './speakerActions';
 import { getInitials } from '@/lib/format';
 import { TRACK_LABELS, FORMAT_LABELS, EXPERIENCE_LABELS } from '@/lib/submissionLabels';
 import type { Speaker } from '@/lib/types';
 import Select from '@/components/Select';
+import AdminModal from './AdminModal';
 
 // What the modal edits: the person, and on /admin/devfest/speakers the talk too. /admin/people passes
 // a person with blank talk fields and profileOnly.
@@ -117,14 +117,8 @@ export default function EditSpeakerModal({ speaker, leadSpeakerName, profileOnly
     });
   }
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[60] flex items-start sm:items-center justify-center bg-black/70 p-4 overflow-y-auto"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Edit speaker: ${speaker.name}`}
-    >
-      <div className="w-full max-w-xl lg:max-w-4xl bg-surface-raised rounded-2xl shadow-xl my-8">
+  return (
+    <AdminModal label={`Edit speaker: ${speaker.name}`} onClose={onClose} isBusy={isPending} widthClass="max-w-xl lg:max-w-4xl">
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <h2 className="text-lg font-bold text-white">{profileOnly ? 'Edit profile' : isCoSpeaker ? 'Edit co-speaker' : 'Edit speaker'}</h2>
@@ -389,8 +383,6 @@ export default function EditSpeakerModal({ speaker, leadSpeakerName, profileOnly
             </button>
           </div>
         </form>
-      </div>
-    </div>,
-    document.body
+    </AdminModal>
   );
 }
