@@ -9,6 +9,7 @@ import { VOLUNTEER_STATUS_LABELS } from '@/lib/volunteerLabels';
 import type { VolunteerPoolEvent, VolunteerPoolMember } from '@/lib/volunteerInvite';
 import type { VolunteerStatus } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
+import Select from '@/components/Select';
 
 // The volunteer pool (stage 4d-2, PM.md): the volunteers who said they'd like to hear about
 // future events, kept like a mailing list. Nobody is in it by default: an admin adds them from
@@ -151,23 +152,21 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
             {events.length > 0 && (
               <>
                 <label htmlFor="pool-event" className="text-sm font-semibold text-white/70">Invite to</label>
-                <select
+                <Select
                   id="pool-event"
                   value={eventId}
-                  onChange={(changeEvent) => {
-                    setEventId(changeEvent.target.value);
+                  onChange={(chosenEventId) => {
+                    setEventId(chosenEventId);
                     setSelected(new Set());
                   }}
+                  options={events.map((event) => ({
+                    value: event.id,
+                    label: `${event.name} (${EVENT_TYPE_LABELS[event.type]})`,
+                  }))}
                   disabled={isPending}
                   aria-label="Choose the event to invite volunteers to"
                   className="h-10 rounded-full border border-white/35 bg-white/[0.06] px-4 text-sm font-semibold text-white focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
-                >
-                  {events.map((event) => (
-                    <option key={event.id} value={event.id} className="bg-surface-raised">
-                      {event.name} ({EVENT_TYPE_LABELS[event.type]})
-                    </option>
-                  ))}
-                </select>
+                />
               </>
             )}
             <button

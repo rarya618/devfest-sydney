@@ -6,6 +6,7 @@ import { createSubmission, updateSubmission, type SubmissionEditableFields } fro
 import { TRACK_LABELS, FORMAT_LABELS, EXPERIENCE_LABELS } from '@/lib/submissionLabels';
 import type { Submission } from '@/lib/types';
 import FormattingHelp from '@/components/FormattingHelp';
+import Select from '@/components/Select';
 
 interface Props {
   // Absent means create mode: a proposal that arrived outside the form is entered here
@@ -211,42 +212,33 @@ export default function EditSubmissionModal({ submission, onClose, onError }: Pr
             <div className="grid grid-cols-3 gap-3">
               <div>
                 <label className={labelClasses} htmlFor="edit-track">Track</label>
-                <select
+                <Select
                   id="edit-track"
                   className={inputClasses}
                   value={fields.track}
-                  onChange={(e) => update('track', e.target.value as SubmissionEditableFields['track'])}
-                >
-                  {Object.entries(TRACK_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
-                </select>
+                  onChange={(value) => update('track', value as SubmissionEditableFields['track'])}
+                  options={Object.entries(TRACK_LABELS).map(([value, label]) => ({ value, label }))}
+                />
               </div>
               <div>
                 <label className={labelClasses} htmlFor="edit-format">Format</label>
-                <select
+                <Select
                   id="edit-format"
                   className={inputClasses}
                   value={fields.format}
-                  onChange={(e) => update('format', e.target.value as SubmissionEditableFields['format'])}
-                >
-                  {Object.entries(FORMAT_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
-                </select>
+                  onChange={(value) => update('format', value as SubmissionEditableFields['format'])}
+                  options={Object.entries(FORMAT_LABELS).map(([value, label]) => ({ value, label }))}
+                />
               </div>
               <div>
                 <label className={labelClasses} htmlFor="edit-experience">Experience</label>
-                <select
+                <Select
                   id="edit-experience"
                   className={inputClasses}
                   value={fields.experienceLevel}
-                  onChange={(e) => update('experienceLevel', e.target.value as SubmissionEditableFields['experienceLevel'])}
-                >
-                  {Object.entries(EXPERIENCE_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
-                </select>
+                  onChange={(value) => update('experienceLevel', value as SubmissionEditableFields['experienceLevel'])}
+                  options={Object.entries(EXPERIENCE_LABELS).map(([value, label]) => ({ value, label }))}
+                />
               </div>
             </div>
 

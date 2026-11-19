@@ -9,6 +9,7 @@ import { removeSpeakerPhoto, updateSpeaker, updateSpeakerProfile, uploadSpeakerP
 import { getInitials } from '@/lib/format';
 import { TRACK_LABELS, FORMAT_LABELS, EXPERIENCE_LABELS } from '@/lib/submissionLabels';
 import type { Speaker } from '@/lib/types';
+import Select from '@/components/Select';
 
 // What the modal edits: the person, and on /admin/devfest/speakers the talk too. /admin/people passes
 // a person with blank talk fields and profileOnly.
@@ -330,42 +331,33 @@ export default function EditSpeakerModal({ speaker, leadSpeakerName, profileOnly
                 <div className="grid grid-cols-3 gap-3">
                   <div>
                     <label className={labelClasses} htmlFor="speaker-track">Track</label>
-                    <select
+                    <Select
                       id="speaker-track"
                       className={inputClasses}
                       value={fields.track}
-                      onChange={(event) => update('track', event.target.value as SpeakerEditableFields['track'])}
-                    >
-                      {Object.entries(TRACK_LABELS).map(([value, label]) => (
-                        <option key={value} value={value}>{label}</option>
-                      ))}
-                    </select>
+                      onChange={(value) => update('track', value as SpeakerEditableFields['track'])}
+                      options={Object.entries(TRACK_LABELS).map(([value, label]) => ({ value, label }))}
+                    />
                   </div>
                   <div>
                     <label className={labelClasses} htmlFor="speaker-format">Format</label>
-                    <select
+                    <Select
                       id="speaker-format"
                       className={inputClasses}
                       value={fields.format}
-                      onChange={(event) => update('format', event.target.value as SpeakerEditableFields['format'])}
-                    >
-                      {Object.entries(FORMAT_LABELS).map(([value, label]) => (
-                        <option key={value} value={value}>{label}</option>
-                      ))}
-                    </select>
+                      onChange={(value) => update('format', value as SpeakerEditableFields['format'])}
+                      options={Object.entries(FORMAT_LABELS).map(([value, label]) => ({ value, label }))}
+                    />
                   </div>
                   <div>
                     <label className={labelClasses} htmlFor="speaker-experience">Level</label>
-                    <select
+                    <Select
                       id="speaker-experience"
                       className={inputClasses}
                       value={fields.experienceLevel}
-                      onChange={(event) => update('experienceLevel', event.target.value as SpeakerEditableFields['experienceLevel'])}
-                    >
-                      {Object.entries(EXPERIENCE_LABELS).map(([value, label]) => (
-                        <option key={value} value={value}>{label}</option>
-                      ))}
-                    </select>
+                      onChange={(value) => update('experienceLevel', value as SpeakerEditableFields['experienceLevel'])}
+                      options={Object.entries(EXPERIENCE_LABELS).map(([value, label]) => ({ value, label }))}
+                    />
                   </div>
                 </div>
               </div>

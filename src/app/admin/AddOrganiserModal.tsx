@@ -4,6 +4,7 @@ import { useState, useTransition, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { addOrganiser, type NewOrganiserFields } from './crewActions';
 import { VOLUNTEER_AREA_LABELS, VOLUNTEER_SHIFT_LABELS } from '@/lib/volunteerLabels';
+import Select from '@/components/Select';
 
 interface Props {
   onClose: () => void;
@@ -141,30 +142,23 @@ export default function AddOrganiserModal({ onClose, onError }: Props) {
               </div>
               <div>
                 <label className={labelClasses} htmlFor="organiser-area">Assigned area</label>
-                <select
+                <Select
                   id="organiser-area"
                   className={inputClasses}
                   value={fields.assignedArea}
-                  onChange={(event) => update('assignedArea', event.target.value as NewOrganiserFields['assignedArea'])}
-                >
-                  <option value="">Not assigned yet</option>
-                  {Object.entries(VOLUNTEER_AREA_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
-                </select>
+                  onChange={(value) => update('assignedArea', value as NewOrganiserFields['assignedArea'])}
+                  options={[{ value: '', label: 'Not assigned yet' }, ...Object.entries(VOLUNTEER_AREA_LABELS).map(([value, label]) => ({ value, label }))]}
+                />
               </div>
               <div>
                 <label className={labelClasses} htmlFor="organiser-shift">Shift</label>
-                <select
+                <Select
                   id="organiser-shift"
                   className={inputClasses}
                   value={fields.assignedShift}
-                  onChange={(event) => update('assignedShift', event.target.value as NewOrganiserFields['assignedShift'])}
-                >
-                  {Object.entries(VOLUNTEER_SHIFT_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
-                </select>
+                  onChange={(value) => update('assignedShift', value as NewOrganiserFields['assignedShift'])}
+                  options={Object.entries(VOLUNTEER_SHIFT_LABELS).map(([value, label]) => ({ value, label }))}
+                />
               </div>
             </div>
 

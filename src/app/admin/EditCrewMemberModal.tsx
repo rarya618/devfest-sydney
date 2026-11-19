@@ -7,6 +7,7 @@ import { removeCrewPhoto, updateCrewMember, uploadCrewPhoto, type CrewEditableFi
 import { getInitials } from '@/lib/format';
 import { VOLUNTEER_AREA_LABELS, VOLUNTEER_SHIFT_LABELS } from '@/lib/volunteerLabels';
 import type { VolunteerSubmission } from '@/lib/types';
+import Select from '@/components/Select';
 
 interface Props {
   member: VolunteerSubmission;
@@ -135,30 +136,23 @@ export default function EditCrewMemberModal({ member, onClose, onError }: Props)
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={labelClasses} htmlFor="crew-area">Assigned area</label>
-                  <select
+                  <Select
                     id="crew-area"
                     className={inputClasses}
                     value={fields.assignedArea}
-                    onChange={(event) => update('assignedArea', event.target.value as CrewEditableFields['assignedArea'])}
-                  >
-                    <option value="">Not assigned yet</option>
-                    {Object.entries(VOLUNTEER_AREA_LABELS).map(([value, label]) => (
-                      <option key={value} value={value}>{label}</option>
-                    ))}
-                  </select>
+                    onChange={(value) => update('assignedArea', value as CrewEditableFields['assignedArea'])}
+                    options={[{ value: '', label: 'Not assigned yet' }, ...Object.entries(VOLUNTEER_AREA_LABELS).map(([value, label]) => ({ value, label }))]}
+                  />
                 </div>
                 <div>
                   <label className={labelClasses} htmlFor="crew-shift">Shift</label>
-                  <select
+                  <Select
                     id="crew-shift"
                     className={inputClasses}
                     value={fields.assignedShift}
-                    onChange={(event) => update('assignedShift', event.target.value as CrewEditableFields['assignedShift'])}
-                  >
-                    {Object.entries(VOLUNTEER_SHIFT_LABELS).map(([value, label]) => (
-                      <option key={value} value={value}>{label}</option>
-                    ))}
-                  </select>
+                    onChange={(value) => update('assignedShift', value as CrewEditableFields['assignedShift'])}
+                    options={Object.entries(VOLUNTEER_SHIFT_LABELS).map(([value, label]) => ({ value, label }))}
+                  />
                 </div>
               </div>
 

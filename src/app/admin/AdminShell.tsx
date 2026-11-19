@@ -8,6 +8,7 @@ import { getInitials } from '@/lib/format';
 import Alert from '@/components/Alert';
 import { MobileBarContext } from './MobileBarContext';
 import { selectAdminDevfest } from './eventActions';
+import Select from '@/components/Select';
 
 interface NavLinkItem {
   href: string;
@@ -163,21 +164,18 @@ function DevfestPicker({ devfests, selectedDevfestId, onError, idSuffix }: Devfe
   }
 
   return (
-    <select
+    <Select
       id={`admin-devfest-picker-${idSuffix}`}
       value={selectedDevfestId ?? ''}
-      onChange={(changeEvent) => handleChange(changeEvent.target.value)}
+      onChange={handleChange}
+      options={devfests.map((devfest) => ({
+        value: devfest.id,
+        label: `${devfest.name}${devfest.isCurrent ? ' (current)' : ''}`,
+      }))}
       disabled={isPending}
       aria-label="Choose which DevFest the DevFest sections show"
       className="ml-2 rounded-full border border-white/35 bg-white/[0.06] px-2.5 py-0.5 text-xs font-bold text-off-white focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40 disabled:opacity-60"
-    >
-      {devfests.map((devfest) => (
-        <option key={devfest.id} value={devfest.id} className="bg-surface-raised">
-          {devfest.name}
-          {devfest.isCurrent ? ' (current)' : ''}
-        </option>
-      ))}
-    </select>
+    />
   );
 }
 

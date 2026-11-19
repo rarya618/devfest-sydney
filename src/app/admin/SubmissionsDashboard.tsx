@@ -20,6 +20,7 @@ import type { ReviewerNote, Submission, SubmissionStatus, Track } from '@/lib/ty
 import { applicantKey, rejectionEmailBlocker, type RejectionEmailBlocker } from '@/lib/rejectionEligibility';
 import { csvFilename, downloadCsv, formatCsvBoolean } from '@/lib/csv';
 import { useMobileBarHidden } from './MobileBarContext';
+import Select from '@/components/Select';
 
 // The speaker changed the proposal from the speaker portal after sending it.
 function EditedMark({ editedAt }: { editedAt: string }) {
@@ -1816,35 +1817,31 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                     <label htmlFor="track-filter-select" className="block text-sm font-semibold text-white/55 capitalize mb-1">
                       Track
                     </label>
-                    <select
+                    <Select<TrackFilter>
                       id="track-filter-select"
                       value={trackFilter}
-                      onChange={(e) => setTrackFilter(e.target.value as TrackFilter)}
+                      onChange={setTrackFilter}
+                      options={[
+                        { value: 'all', label: 'All tracks' },
+                        ...(Object.entries(TRACK_LABELS) as [Track, string][]).map(([value, label]) => ({ value, label })),
+                      ]}
                       aria-label="Filter by track"
                       className="w-full rounded-lg border border-white/35 bg-white/[0.06] px-2.5 py-1.5 text-sm font-medium text-white/70 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
-                    >
-                      <option value="all">All tracks</option>
-                      {(Object.entries(TRACK_LABELS) as [Track, string][]).map(([value, label]) => (
-                        <option key={value} value={value}>{label}</option>
-                      ))}
-                    </select>
+                    />
                   </div>
 
                   <div>
                     <label htmlFor="sort-select" className="block text-sm font-semibold text-white/55 capitalize mb-1">
                       Sort
                     </label>
-                    <select
+                    <Select<SortOption>
                       id="sort-select"
                       value={sort}
-                      onChange={(e) => setSort(e.target.value as SortOption)}
+                      onChange={setSort}
+                      options={(Object.entries(SORT_LABELS) as [SortOption, string][]).map(([value, label]) => ({ value, label }))}
                       aria-label="Sort submissions"
                       className="w-full rounded-lg border border-white/35 bg-white/[0.06] px-2.5 py-1.5 text-sm font-medium text-white/70 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
-                    >
-                      {(Object.entries(SORT_LABELS) as [SortOption, string][]).map(([value, label]) => (
-                        <option key={value} value={value}>{label}</option>
-                      ))}
-                    </select>
+                    />
                   </div>
                 </div>
               )}
