@@ -150,7 +150,7 @@ export function EmptyState({ message }: { message: string }) {
 }
 
 export function getChannel(tracking: SubmissionTracking): string {
-  // Internal CTAs (banner, navbar, footer, etc.) all share the same utm_source — bucket
+  // Internal CTAs (banner, navbar, footer, etc.) all share the same utm_source, so bucket
   // those by their more specific ref instead, so "banner" and "footer" show up separately.
   if (tracking.utmSource && tracking.utmSource !== INTERNAL_UTM_SOURCE) return tracking.utmSource;
   if (tracking.ref) return tracking.ref;

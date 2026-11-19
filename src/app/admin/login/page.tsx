@@ -7,9 +7,9 @@ import PublicShell from '@/components/PublicShell';
 import LoginForm from './LoginForm';
 
 export const metadata = {
-  title: { absolute: 'Organiser sign-in — GDG Sydney' },
-  openGraph: { title: 'Organiser sign-in — GDG Sydney', images: [SITE_OG_IMAGE] },
-  twitter: { card: 'summary_large_image', title: 'Organiser sign-in — GDG Sydney', images: [SITE_OG_IMAGE] },
+  title: { absolute: 'Organiser sign-in · GDG Sydney' },
+  openGraph: { title: 'Organiser sign-in · GDG Sydney', images: [SITE_OG_IMAGE] },
+  twitter: { card: 'summary_large_image', title: 'Organiser sign-in · GDG Sydney', images: [SITE_OG_IMAGE] },
 };
 
 export default async function AdminLoginPage() {
@@ -21,7 +21,7 @@ export default async function AdminLoginPage() {
       await adminAuth.verifySessionCookie(sessionCookie);
       redirect('/admin');
     } catch {
-      // Cookie is invalid or expired — fall through to the login form
+      // Cookie is invalid or expired: fall through to the login form
     }
   }
 

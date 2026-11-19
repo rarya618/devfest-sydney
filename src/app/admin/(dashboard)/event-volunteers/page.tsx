@@ -1,4 +1,3 @@
-import { SITE_OG_IMAGE } from '@/lib/metadata';
 import { getVerifiedSession } from '@/lib/adminSession';
 import { loadEvents } from '@/lib/events';
 import { fetchVolunteerSignups } from '@/lib/volunteers';
@@ -6,8 +5,6 @@ import VolunteersDashboard from '../../VolunteersDashboard';
 
 export const metadata = {
   title: 'Event volunteers',
-  openGraph: { title: 'Event volunteers — GDG Sydney', images: [SITE_OG_IMAGE] },
-  twitter: { card: 'summary_large_image', title: 'Event volunteers — GDG Sydney', images: [SITE_OG_IMAGE] },
 };
 
 export const dynamic = 'force-dynamic';

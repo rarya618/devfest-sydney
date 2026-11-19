@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { SITE_OG_IMAGE } from '@/lib/metadata';
 import { getVerifiedSession } from '@/lib/adminSession';
 import { loadGdgAnalytics, type EventAnalyticsRow, type GdgAnalytics } from '@/lib/gdgAnalytics';
 import StickyAdminHeader from '../../StickyAdminHeader';
@@ -13,8 +12,6 @@ export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Analytics',
-  openGraph: { title: 'Analytics — GDG Sydney', images: [SITE_OG_IMAGE] },
-  twitter: { card: 'summary_large_image', title: 'Analytics — GDG Sydney', images: [SITE_OG_IMAGE] },
 };
 
 function formatEventDate(iso: string): string {

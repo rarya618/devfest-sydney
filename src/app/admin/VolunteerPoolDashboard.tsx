@@ -175,9 +175,9 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
               onClick={handleSend}
               disabled={isPending || !chosenEvent || selectedForEvent.length === 0}
               aria-label={chosenEvent ? `Send ${selectedForEvent.length} invites to crew ${chosenEvent.name}` : 'Send invites'}
-              className="inline-flex items-center h-10 text-sm px-4 rounded-full bg-google-green-deep text-white font-bold transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="press inline-flex items-center h-10 text-sm px-4 rounded-full bg-google-green-deep text-white font-bold transition-opacity hover:opacity-85 disabled:bg-transparent disabled:border disabled:border-white/20 disabled:text-white/60 disabled:cursor-not-allowed"
             >
-              {progress ? `Sent ${progress.sent} of ${progress.total}` : `Send ${selectedForEvent.length} invite${selectedForEvent.length === 1 ? '' : 's'}`}
+              {progress ? `Sent ${progress.sent} of ${progress.total}` : selectedForEvent.length === 0 ? 'Choose who to invite' : `Send ${selectedForEvent.length} invite${selectedForEvent.length === 1 ? '' : 's'}`}
             </button>
           </div>
         </div>

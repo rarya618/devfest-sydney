@@ -219,7 +219,7 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
           </span>
         )}
         {entry.demoRequirements && (
-          <span className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-red/15 text-google-red-light border-google-red/25">
+          <span className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full font-mono bg-white/[0.06] text-google-yellow" title="They need something set up for their demo: see the description below">
             Has demo requirements
           </span>
         )}

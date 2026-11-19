@@ -1,4 +1,3 @@
-import { SITE_OG_IMAGE } from '@/lib/metadata';
 import { getVerifiedSession } from '@/lib/adminSession';
 import { fetchCrew } from '@/lib/volunteers';
 import CrewDashboard from '../../../CrewDashboard';
@@ -7,8 +6,6 @@ import { fetchInvitablePastVolunteers, inviteClosedReason } from '@/lib/voluntee
 
 export const metadata = {
   title: 'Crew',
-  openGraph: { title: 'Crew — GDG Sydney', images: [SITE_OG_IMAGE] },
-  twitter: { card: 'summary_large_image', title: 'Crew — GDG Sydney', images: [SITE_OG_IMAGE] },
 };
 
 export default async function CrewPage() {

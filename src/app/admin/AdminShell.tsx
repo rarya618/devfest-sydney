@@ -93,14 +93,14 @@ const NAV_GROUPS: NavGroup[] = [
       },
       { href: '/admin/devfest/speakers', label: 'Speakers' },
       { href: '/admin/devfest/crew', label: 'Crew' },
-      { href: '/admin/devfest/analytics', label: 'Analytics' },
+      { href: '/admin/devfest/analytics', label: 'Form analytics' },
     ],
   },
   {
     label: 'General events',
     items: [
       { href: '/admin/meetups', label: 'Meetup talks' },
-      { href: '/admin/event-volunteers', label: 'Volunteers' },
+      { href: '/admin/event-volunteers', label: 'Event volunteers' },
     ],
   },
   {
@@ -170,11 +170,13 @@ function DevfestPicker({ devfests, selectedDevfestId, onError, idSuffix }: Devfe
       onChange={handleChange}
       options={devfests.map((devfest) => ({
         value: devfest.id,
-        label: `${devfest.name}${devfest.isCurrent ? ' (current)' : ''}`,
+        // Beside the DevFest heading, so "DevFest Sydney 2027" reads as just its edition, which
+        // keeps the picker inside the sidebar instead of cut off at its edge.
+        label: `${devfest.name.replace(/^DevFest\s+(Sydney\s+)?/i, '') || devfest.name}${devfest.isCurrent ? ' (current)' : ''}`,
       }))}
       disabled={isPending}
       aria-label="Choose which DevFest the DevFest sections show"
-      className="ml-2 rounded-full border border-white/35 bg-white/[0.06] px-2.5 py-0.5 text-xs font-bold text-off-white focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40 disabled:opacity-60"
+      className="ml-2 min-w-0 max-w-full rounded-full border border-white/35 bg-white/[0.06] px-2.5 py-0.5 text-xs font-bold text-off-white focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40 disabled:opacity-60"
     />
   );
 }
