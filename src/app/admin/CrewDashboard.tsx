@@ -24,7 +24,9 @@ import ConfirmAction from './ConfirmAction';
 import AdminSearch from './AdminSearch';
 import FilterChipRow from './FilterChipRow';
 import SidePanel from './SidePanel';
-import { Chip, StatusLabel, type StatusTone } from './Chips';
+import { Chip, StatusLabel } from './Chips';
+import { PANEL_PILL_CLASSES, PANEL_TEXT_BUTTON_CLASSES } from './RailButtons';
+import { acceptedStatus, type RecordStatus } from './recordStatus';
 
 // Neither 'unassigned' nor 'organisers' is a VolunteerArea. 'unassigned' is the absence
 // of one, and the filter reached for most while the roster is still being built;
@@ -86,7 +88,6 @@ function CrewCard({ member, onError, inPanel = false }: CrewCardProps) {
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(inPanel);
   const [editing, setEditing] = useState(false);
-  const confirmation = VOLUNTEER_CONFIRMATION_CHIPS[member.confirmation];
   const isOrganiser = member.isOrganiser;
 
 
@@ -136,7 +137,7 @@ function CrewCard({ member, onError, inPanel = false }: CrewCardProps) {
       }`}
       aria-label={`${isOrganiser ? 'Organiser' : 'Crew member'} ${member.name}`}
     >
-      <div className="flex items-start gap-4">
+      <div className="flex flex-wrap items-start gap-4">
         <CrewAvatar member={member} />
 
         <div className="flex-1 min-w-0">
@@ -150,9 +151,9 @@ function CrewCard({ member, onError, inPanel = false }: CrewCardProps) {
                 Organiser
               </span>
             ) : (
-              <span title={confirmation.title} className={`text-xs font-bold px-1.5 py-0.5 rounded ${confirmation.className}`}>
-                {confirmation.label}
-              </span>
+              <StatusLabel tone={acceptedStatus(member.confirmation).tone} title={acceptedStatus(member.confirmation).title}>
+                {acceptedStatus(member.confirmation).label}
+              </StatusLabel>
             )}
           </div>
 
@@ -288,16 +289,14 @@ function CrewCard({ member, onError, inPanel = false }: CrewCardProps) {
           </div>
         </div>
 
-        <div className="flex flex-col items-end gap-1.5 shrink-0">
+        {/* The panel's actions, labelled, along the top: Remove as quiet text at the end. */}
+        <div className="order-first w-full flex flex-wrap items-center gap-2 pb-4 mb-1 border-b border-white/10">
           <button
             onClick={() => setEditing(true)}
             aria-label={`Edit ${member.name}`}
-            title="Edit crew member"
-            className="inline-flex items-center justify-center w-9 h-9 rounded-full text-white/70 hover:text-white hover:bg-white/[0.08] transition-colors"
+            className={PANEL_PILL_CLASSES}
           >
-            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" />
-            </svg>
+            Edit
           </button>
 
           {!isOrganiser && (
@@ -313,14 +312,9 @@ function CrewCard({ member, onError, inPanel = false }: CrewCardProps) {
                 {...triggerProps}
                 disabled={isPending}
                 aria-label={`${alreadyEmailed ? 'Resend' : 'Send'} the volunteer acceptance email to ${member.name}`}
-                title={alreadyEmailed ? 'Resend acceptance email' : 'Send acceptance email'}
-                className="relative inline-flex items-center justify-center w-9 h-9 rounded-full text-white/60 hover:text-white hover:bg-white/[0.08] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className={PANEL_PILL_CLASSES}
               >
-                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                  <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
-                </svg>
-                {!alreadyEmailed && <span aria-hidden="true" className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-google-yellow ring-2 ring-surface" />}
+                {alreadyEmailed ? 'Resend acceptance email' : 'Send acceptance email'}
               </button>
             )}
           </ConfirmAction>
@@ -336,17 +330,9 @@ function CrewCard({ member, onError, inPanel = false }: CrewCardProps) {
                   ? `${member.name} is marked as having their ticket. Unmark it to show them the ticket link again.`
                   : `Mark ${member.name}'s ticket as sent, which hides the ticket link on their confirmation page`
               }
-              title={ticketSent ? 'Ticket sent: click to unmark' : 'Mark ticket as sent'}
-              className={`inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                ticketSent
-                  ? 'bg-white/[0.12] text-off-white hover:bg-white/[0.16]'
-                  : 'text-white/60 hover:text-white hover:bg-white/[0.08]'
-              }`}
+              className={PANEL_PILL_CLASSES}
             >
-              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 6.25V4.5a1 1 0 011-1h11a1 1 0 011 1v1.75a1.75 1.75 0 000 3.5V11.5a1 1 0 01-1 1h-11a1 1 0 01-1-1V9.75a1.75 1.75 0 000-3.5z" />
-                <path strokeLinecap="round" strokeDasharray="1.5 1.5" d="M10 4v8" />
-              </svg>
+              {ticketSent ? 'Unmark ticket sent' : 'Mark ticket sent'}
             </button>
           )}
 
@@ -375,19 +361,9 @@ function CrewCard({ member, onError, inPanel = false }: CrewCardProps) {
                 {...triggerProps}
 
                 aria-label={`Remove ${member.name} from the crew`}
-
-                title="Remove from crew"
-
-                className="inline-flex items-center justify-center w-9 h-9 rounded-full text-white/60 hover:text-google-red-light hover:bg-google-red/[0.08] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
-
+                className={PANEL_TEXT_BUTTON_CLASSES}
               >
-
-                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9h6.6l.7-9" />
-
-                </svg>
-
+                Remove from crew
               </button>
 
             )}
@@ -410,13 +386,6 @@ function CrewCard({ member, onError, inPanel = false }: CrewCardProps) {
   );
 }
 
-// Where a crew member stands, in the portal's state colours.
-const CREW_STATUS: Record<VolunteerConfirmation, { tone: StatusTone; label: string }> = {
-  confirmed: { tone: 'good', label: 'Confirmed' },
-  awaiting: { tone: 'waiting', label: 'Awaiting confirmation' },
-  'not-emailed': { tone: 'waiting', label: 'Not emailed' },
-};
-
 const CREW_NEXT_STEP_PILL =
   'press inline-flex items-center justify-center h-8 px-3.5 rounded-full border border-white/35 text-sm font-bold text-off-white whitespace-nowrap hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue';
 
@@ -426,7 +395,7 @@ function CrewRow({ member, onError }: CrewCardProps) {
   const [isPending, startTransition] = useTransition();
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const isOrganiser = member.isOrganiser;
-  const status = isOrganiser ? { tone: 'done' as StatusTone, label: 'Organiser' } : CREW_STATUS[member.confirmation];
+  const status: RecordStatus = isOrganiser ? { tone: 'done', label: 'Organiser' } : acceptedStatus(member.confirmation);
 
   function run(send: () => Promise<{ error?: string }>) {
     startTransition(async () => {

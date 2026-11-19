@@ -40,3 +40,9 @@ export function MoreIcon() {
     </svg>
   );
 }
+
+/** The same pill sized to its label, for a wrapping row of actions in a side panel. */
+export const PANEL_PILL_CLASSES = RAIL_PILL_CLASSES.replace('w-full ', '');
+
+/** A destructive or backwards step in a side panel's action row: quiet text. */
+export const PANEL_TEXT_BUTTON_CLASSES = RAIL_TEXT_BUTTON_CLASSES.replace('w-full ', '');

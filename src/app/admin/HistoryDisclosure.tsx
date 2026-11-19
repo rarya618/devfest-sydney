@@ -40,7 +40,7 @@ export default function HistoryDisclosure({ subjectName, rows }: Props) {
       <dl className="mt-2 space-y-1">
         {rows.map((row) => (
           <div key={row.label} className="flex flex-wrap gap-x-3 text-xs">
-            <dt className="font-mono uppercase tracking-wide text-white/50 w-36 shrink-0">{row.label}</dt>
+            <dt className="text-white/60 w-36 shrink-0">{row.label}</dt>
             <dd className="text-white/65 min-w-0 break-words">{row.value}</dd>
           </div>
         ))}

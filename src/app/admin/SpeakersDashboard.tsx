@@ -26,7 +26,9 @@ import HistoryDisclosure, { stampedOn, type HistoryRow } from './HistoryDisclosu
 import ConfirmAction from './ConfirmAction';
 import AdminSearch from './AdminSearch';
 import SidePanel from './SidePanel';
-import { Chip, StatusLabel, type StatusTone } from './Chips';
+import { Chip, StatusLabel } from './Chips';
+import { PANEL_PILL_CLASSES, PANEL_TEXT_BUTTON_CLASSES } from './RailButtons';
+import { acceptedStatus } from './recordStatus';
 
 // The speaker card's history rows. Same shape as the crew card's, so the two dashboards
 // read the same way; the dates themselves differ because a speaker is promoted from a
@@ -191,7 +193,6 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
   const [editing, setEditing] = useState(false);
   const [addingCoSpeaker, setAddingCoSpeaker] = useState(false);
   const isCoSpeaker = Boolean(speaker.coSpeakerOf);
-  const confirmation = CONFIRMATION_CHIP[speaker.confirmation];
   const missing = missingProfileParts(speaker);
 
 
@@ -244,7 +245,6 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
   // Confirmed only, as the action enforces: an invite announces a slot the speaker has
   // agreed to turn up for.
   const inviteAction = canSendTicket && inviteStatus && inviteStatus !== 'unscheduled' ? inviteStatus : null;
-  const inviteNeedsSending = inviteAction ? INVITE_NEEDS_SENDING.includes(inviteAction) : false;
   const inviteChip = inviteAction ? INVITE_CHIP[inviteAction] : undefined;
 
   function handleCardClick(event: React.MouseEvent<HTMLDivElement>) {
@@ -254,7 +254,6 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
     setIsOpen((open) => !open);
   }
 
-  const quietIcon = 'text-white/60 hover:text-white hover:bg-white/[0.08]';
   const neutralChip = 'inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full bg-white/[0.06] text-white/70 font-bold';
   const warningChip = 'inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full font-bold bg-google-yellow/15 text-google-yellow';
 
@@ -278,9 +277,9 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
             <h2 className="font-bold text-white text-base leading-snug">{speaker.name}</h2>
-            <span title={confirmation.title} className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${confirmation.className}`}>
-              {confirmation.label}
-            </span>
+            <StatusLabel tone={acceptedStatus(speaker.confirmation).tone} title={acceptedStatus(speaker.confirmation).title}>
+              {acceptedStatus(speaker.confirmation).label}
+            </StatusLabel>
             {isCoSpeaker && (
               <span className="text-xs font-bold text-google-blue-light">
                 with {leadSpeaker?.name ?? 'a speaker no longer in the lineup'}
@@ -367,25 +366,19 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
           </div>
         </div>
 
-        {/* One row of actions rather than a column: the column set the card's height. */}
-        <div className={`relative flex flex-wrap items-center gap-1 ${inPanel ? 'order-first w-full justify-start -ml-1.5 pb-3 mb-1 border-b border-white/10' : 'justify-end shrink-0 max-w-[8.75rem] sm:max-w-none'}`}>
-          <button onClick={() => setEditing(true)} aria-label={`Edit ${speaker.name}`} title="Edit speaker" className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${quietIcon}`}>
-            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" />
-            </svg>
+        {/* The panel's actions, labelled: sends as pills, Remove as quiet text at the end. */}
+        <div className="relative order-first w-full flex flex-wrap items-center gap-2 pb-4 mb-1 border-b border-white/10">
+          <button onClick={() => setEditing(true)} aria-label={`Edit ${speaker.name}`} className={PANEL_PILL_CLASSES}>
+            Edit
           </button>
 
           {!isCoSpeaker && (
             <button
               onClick={() => setAddingCoSpeaker(true)}
               aria-label={`Add a co-speaker to ${speaker.name}'s session`}
-              title="Add co-speaker"
-              className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${quietIcon}`}
+              className={PANEL_PILL_CLASSES}
             >
-              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                <circle cx="6.5" cy="5" r="2.5" />
-                <path strokeLinecap="round" d="M1.5 13.5c.4-2.6 2.4-4 5-4s4.6 1.4 5 4M12.5 4.5v4M10.5 6.5h4" />
-              </svg>
+              Add co-speaker
             </button>
           )}
 
@@ -406,14 +399,9 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
                   {...triggerProps}
                   disabled={isPending}
                   aria-label={`${alreadyEmailed ? 'Resend' : 'Send'} acceptance email to ${speaker.name} for: ${speaker.talkTitle}`}
-                  title={alreadyEmailed ? 'Resend acceptance email' : 'Send acceptance email'}
-                  className={`relative inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${quietIcon}`}
+                  className={PANEL_PILL_CLASSES}
                 >
-                  <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                    <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
-                  </svg>
-                  {!alreadyEmailed && <span aria-hidden="true" className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-google-yellow ring-2 ring-surface" />}
+                  {alreadyEmailed ? 'Resend acceptance email' : 'Send acceptance email'}
                 </button>
               )}
             </ConfirmAction>
@@ -432,14 +420,9 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
                   {...triggerProps}
                   disabled={isPending}
                   aria-label={`${ticketSent ? 'Resend' : 'Send'} the complimentary speaker ticket to ${speaker.name}`}
-                  title={ticketSent ? 'Resend speaker ticket' : 'Send speaker ticket'}
-                  className={`relative inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${quietIcon}`}
+                  className={PANEL_PILL_CLASSES}
                 >
-                  <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 6.25V4.5a1 1 0 011-1h11a1 1 0 011 1v1.75a1.75 1.75 0 000 3.5V11.5a1 1 0 01-1 1h-11a1 1 0 01-1-1V9.75a1.75 1.75 0 000-3.5z" />
-                    <path strokeLinecap="round" strokeDasharray="1.5 1.5" d="M10 4v8" />
-                  </svg>
-                  {!ticketSent && <span aria-hidden="true" className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-google-yellow ring-2 ring-surface" />}
+                  {ticketSent ? 'Resend ticket' : 'Send ticket'}
                 </button>
               )}
             </ConfirmAction>
@@ -458,14 +441,9 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
                   {...triggerProps}
                   disabled={isPending}
                   aria-label={`${INVITE_BUTTON_TITLE[inviteAction]} to ${speaker.name}`}
-                  title={INVITE_BUTTON_TITLE[inviteAction]}
-                  className={`relative inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${quietIcon}`}
+                  className={PANEL_PILL_CLASSES}
                 >
-                  <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                    <rect x="2" y="3" width="12" height="11" rx="1.5" />
-                    <path strokeLinecap="round" d="M2 6.5h12M5.5 1.75v2.5M10.5 1.75v2.5" />
-                  </svg>
-                  {inviteNeedsSending && <span aria-hidden="true" className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-google-yellow ring-2 ring-surface" />}
+                  {INVITE_BUTTON_TITLE[inviteAction]}
                 </button>
               )}
             </ConfirmAction>
@@ -484,13 +462,9 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
                   {...triggerProps}
                   disabled={isPending}
                   aria-label={`${thanksSent ? 'Resend' : 'Send'} the thank-you email with photos, mug and Asana trial to ${speaker.name}`}
-                  title={thanksSent ? 'Resend thank-you' : 'Send thank-you'}
-                  className={`relative inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${quietIcon}`}
+                  className={PANEL_PILL_CLASSES}
                 >
-                  <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                    <path strokeLinejoin="round" d="M8 13.5S1.75 9.75 1.75 5.75A3 3 0 018 4a3 3 0 016.25 1.75C14.25 9.75 8 13.5 8 13.5z" />
-                  </svg>
-                  {!thanksSent && <span aria-hidden="true" className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-google-yellow ring-2 ring-surface" />}
+                  {thanksSent ? 'Resend thank-you' : 'Send thank-you'}
                 </button>
               )}
             </ConfirmAction>
@@ -525,19 +499,9 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
                 {...triggerProps}
 
                 aria-label={`Remove ${speaker.name} from the lineup`}
-
-                title="Remove from lineup"
-
-                className="inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-white/60 hover:text-google-red-light hover:bg-google-red/[0.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
-
+                className={PANEL_TEXT_BUTTON_CLASSES}
               >
-
-                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9h6.6l.7-9" />
-
-                </svg>
-
+                Remove from lineup
               </button>
 
             )}
@@ -572,14 +536,6 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
   );
 }
 
-// Where a speaker stands, in the portal's state colours.
-const CONFIRMATION_STATUS: Record<SpeakerConfirmation, { tone: StatusTone; label: string }> = {
-  confirmed: { tone: 'good', label: 'Confirmed' },
-  awaiting: { tone: 'waiting', label: 'Awaiting confirmation' },
-  'not-emailed': { tone: 'waiting', label: 'Not emailed' },
-  unknown: { tone: 'done', label: 'Unknown' },
-};
-
 const NEXT_STEP_PILL =
   'press inline-flex items-center justify-center h-8 px-3.5 rounded-full border border-white/35 text-sm font-bold text-off-white whitespace-nowrap hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue';
 
@@ -591,7 +547,7 @@ function LineupRow(props: LineupCardProps) {
   const [isPending, startTransition] = useTransition();
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const isCoSpeaker = Boolean(speaker.coSpeakerOf);
-  const status = CONFIRMATION_STATUS[speaker.confirmation];
+  const status = acceptedStatus(speaker.confirmation);
   const missing = missingProfileParts(speaker);
   const canEmail = !isCoSpeaker && speaker.confirmation !== 'unknown';
   const canSendTicket = speaker.confirmation === 'confirmed';
@@ -628,14 +584,15 @@ function LineupRow(props: LineupCardProps) {
         )}
       </ConfirmAction>
     );
-  } else if (canSendTicket && !speaker.speakerTicketEmailSentAt && !isCoSpeaker) {
+  } else if (canSendTicket && !speaker.speakerTicketEmailSentAt) {
+    // Co-speakers get their own ticket, sent against their place on the talk.
     nextStep = (
       <ConfirmAction
         tone="send"
         message={`Send the speaker ticket to ${speaker.name}?`}
         detail="It emails them the link to their free speaker ticket."
         confirmLabel="Send ticket"
-        onConfirm={() => run(() => sendSpeakerTicketEmail(speaker.submissionId))}
+        onConfirm={() => run(() => (isCoSpeaker ? sendCoSpeakerTicketEmail(speaker.talkId, speaker.id) : sendSpeakerTicketEmail(speaker.submissionId)))}
       >
         {(triggerProps) => (
           <button {...triggerProps} type="button" disabled={isPending} aria-label={`Send the speaker ticket to ${speaker.name}`} className={NEXT_STEP_PILL}>
@@ -681,7 +638,7 @@ function LineupRow(props: LineupCardProps) {
         )}
       </div>
       <span className="hidden md:block"><Chip dotClass={TRACK_DOT_COLORS[speaker.track]}>{TRACK_LABELS[speaker.track]}</Chip></span>
-      <span className="hidden md:block"><StatusLabel tone={status.tone} title={CONFIRMATION_CHIP[speaker.confirmation].title}>{status.label}</StatusLabel></span>
+      <span className="hidden md:block"><StatusLabel tone={status.tone} title={status.title}>{status.label}</StatusLabel></span>
       <span className="col-span-full md:col-span-1 flex justify-start md:justify-end pl-14 md:pl-0 max-md:empty:hidden">{nextStep}</span>
       <button
         type="button"

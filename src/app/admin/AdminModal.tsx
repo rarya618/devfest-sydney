@@ -30,6 +30,29 @@ interface AdminModalProps {
 export default function AdminModal({ label, onClose, isBusy = false, widthClass = 'max-w-xl', variant = 'panel', closeOnBackdrop = false, children }: AdminModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
+  // One Escape closes one layer. Chrome closes stacked dialogs (a modal opened from a side panel)
+  // together on Escape, so the browser's own handling is stopped and only the topmost dialog
+  // closes. A confirmation open inside it (ConfirmAction) closes itself first.
+  const onCloseRef = useRef(onClose);
+  const isBusyRef = useRef(isBusy);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+    isBusyRef.current = isBusy;
+  });
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return;
+      const openDialogs = document.querySelectorAll('dialog[open]');
+      const dialog = dialogRef.current;
+      if (!dialog || openDialogs[openDialogs.length - 1] !== dialog) return;
+      event.preventDefault();
+      if (dialog.querySelector('[role="alertdialog"]')) return;
+      if (!isBusyRef.current) onCloseRef.current();
+    }
+    document.addEventListener('keydown', handleKeyDown, true);
+    return () => document.removeEventListener('keydown', handleKeyDown, true);
+  }, []);
+
   useEffect(() => {
     const dialog = dialogRef.current;
     // React removes the dialog before the browser can hand focus back, so do it here.
@@ -46,10 +69,8 @@ export default function AdminModal({ label, onClose, isBusy = false, widthClass 
       ref={dialogRef}
       aria-label={label}
       // Escape: the browser would close the dialog itself; the parent owns that, so it decides.
-      onCancel={(event) => {
-        event.preventDefault();
-        if (!isBusy) onClose();
-      }}
+      // Escape is handled in the effect below; this only stops the browser closing it on its own.
+      onCancel={(event) => event.preventDefault()}
       // The backdrop belongs to the <dialog> itself, so a click on it targets the dialog.
       onClick={(event) => {
         if (closeOnBackdrop && !isBusy && event.target === event.currentTarget) onClose();

@@ -10,7 +10,7 @@ export const SHOWCASE_STATUS_DOT_STYLES: Record<ShowcaseStatus, { text: string; 
 export const SHOWCASE_STATUS_LABELS: Record<ShowcaseStatus, string> = {
   pending: 'Pending',
   accepted: 'Accepted',
-  rejected: 'Rejected',
+  rejected: 'Not selected',
   archived: 'Archived',
 };
 

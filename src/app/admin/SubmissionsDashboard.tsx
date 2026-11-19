@@ -7,10 +7,9 @@ import MarkdownText from '@/components/MarkdownText';
 import Alert from '@/components/Alert';
 import { formatDate } from '@/lib/format';
 import {
-  STATUS_DOT_STYLES,
   STATUS_LABELS,
   TRACK_LABELS,
-  TRACK_COLORS,
+  TRACK_CHIP_COLORS,
   TRACK_DOT_COLORS,
   FORMAT_LABELS,
   EXPERIENCE_LABELS,
@@ -22,10 +21,11 @@ import { useMobileBarHidden } from './MobileBarContext';
 import Select from '@/components/Select';
 import ConfirmAction from './ConfirmAction';
 import SidePanel from './SidePanel';
-import { Chip, StatusLabel, type StatusTone } from './Chips';
+import { Chip, StatusLabel } from './Chips';
 import DecisionButtons from './DecisionButtons';
 import { ExpandButton, MoreIcon, RAIL_CLASSES, RAIL_ICON_CLASSES, RAIL_PILL_CLASSES, RAIL_TEXT_BUTTON_CLASSES } from './RailButtons';
 import AdminSearch from './AdminSearch';
+import { proposalStatus } from './recordStatus';
 
 // The speaker changed the proposal from the speaker portal after sending it.
 function EditedMark({ editedAt }: { editedAt: string }) {
@@ -304,85 +304,6 @@ function UndoAcceptanceButton({
   );
 }
 
-function RejectionEmailState({ submission, blocker }: { submission: Submission; blocker: RejectionEmailBlocker | null }) {
-  if (submission.rejectionEmailSentAt) {
-    return (
-      <span
-        title={`Rejection email sent ${formatDate(submission.rejectionEmailSentAt)}${submission.rejectionEmailSentBy ? ` by ${submission.rejectionEmailSentBy}` : ''}`}
-        className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
-      >
-        Emailed
-      </span>
-    );
-  }
-
-  if (blocker === 'accepted-proposal') {
-    return (
-      <span
-        title="This person has another proposal accepted, so they don't get a rejection email. Mention this talk to them yourself if you want to."
-        className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-google-green/15 text-google-green-light"
-      >
-        Speaking
-      </span>
-    );
-  }
-
-  if (blocker === 'pending-proposal') {
-    return (
-      <span
-        title="This person has another proposal waiting for review. Decide it first so they only get one email."
-        className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
-      >
-        Pending decision
-      </span>
-    );
-  }
-
-  return (
-    <span
-      title="This speaker hasn't been told yet. Send the rejection email from the action rail."
-      className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-google-yellow/15 text-google-yellow"
-    >
-      Not emailed
-    </span>
-  );
-}
-
-// Accepting a proposal and telling the speaker are separate steps, so an accepted card
-// has to show which of the two has actually happened.
-function AcceptanceState({ submission }: { submission: Submission }) {
-  if (submission.speakerConfirmedAt) {
-    return (
-      <span
-        title={`Speaker confirmed ${formatDate(submission.speakerConfirmedAt)}`}
-        className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-google-green/15 text-google-green-light"
-      >
-        Confirmed
-      </span>
-    );
-  }
-
-  if (submission.acceptanceEmailSentAt) {
-    return (
-      <span
-        title={`Acceptance email sent ${formatDate(submission.acceptanceEmailSentAt)}${submission.acceptanceEmailSentBy ? ` by ${submission.acceptanceEmailSentBy}` : ''}`}
-        className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
-      >
-        Awaiting confirmation
-      </span>
-    );
-  }
-
-  return (
-    <span
-      title="This speaker hasn't been told yet. Send the acceptance email from the actions menu."
-      className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-google-yellow/15 text-google-yellow"
-    >
-      Not emailed
-    </span>
-  );
-}
-
 interface ReviewerNotesPanelProps {
   submissionId: string;
   notes: ReviewerNote[];
@@ -504,6 +425,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
   const [isEditing, setIsEditing] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(inPanel);
+  const cardStatus = proposalStatus(submission, rejectionBlocker);
   // Content lines up under the title, past the checkbox; in the panel there's no checkbox.
   const indent = inPanel ? '' : 'pl-8';
   const [moreOpen, setMoreOpen] = useState(false);
@@ -627,7 +549,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         <div className="overflow-hidden">
       <div className={`flex flex-wrap items-center gap-2 mb-5 ${indent}`}>
         <span className={`inline-block w-[5px] h-[5px] rounded-full ${TRACK_DOT_COLORS[submission.track]}`} />
-        <span className={`text-xs font-normal ${TRACK_COLORS[submission.track]}`}>
+        <span className={`text-xs font-normal ${TRACK_CHIP_COLORS[submission.track]}`}>
           {TRACK_LABELS[submission.track]}
         </span>
         <span className="text-white/50 text-xs">/</span>
@@ -762,15 +684,10 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
       </div>
 
       <div className={`flex items-center gap-3 mt-auto pt-2 ${indent}`}>
-        <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${STATUS_DOT_STYLES[submission.status].text}`}>
-          <span className={`w-[5px] h-[5px] rounded-full ${STATUS_DOT_STYLES[submission.status].dot}`} />
-          {STATUS_LABELS[submission.status]}
-        </span>
-        <span className="text-white/50 text-xs font-bold">&middot;</span>
-        <span className="text-xs font-bold text-white/55">{formatDate(submission.submittedAt)}</span>
+        <StatusLabel tone={cardStatus.tone} title={cardStatus.title}>{cardStatus.label}</StatusLabel>
+        <span className="text-white/50 text-xs" aria-hidden="true">&middot;</span>
+        <span className="font-mono text-xs text-white/60">Submitted {formatDate(submission.submittedAt)}</span>
         {submission.editedAt && <EditedMark editedAt={submission.editedAt} />}
-        {submission.status === 'accepted' && <AcceptanceState submission={submission} />}
-        {submission.status === 'rejected' && <RejectionEmailState submission={submission} blocker={rejectionBlocker} />}
       </div>
       </div>
 
@@ -918,24 +835,13 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
   );
 }
 
-// Where a proposal stands, in the portal's state colours, once per row.
-function submissionStatus(submission: Submission): { tone: StatusTone; label: string } {
-  if (submission.status === 'pending') return { tone: 'waiting', label: 'Pending' };
-  if (submission.status === 'archived') return { tone: 'done', label: 'Archived' };
-  if (submission.status === 'rejected') return { tone: 'done', label: submission.rejectionEmailSentAt ? 'Not selected, told' : 'Not selected' };
-  if (submission.speakerTicketEmailSentAt) return { tone: 'good', label: 'Ticket sent' };
-  if (submission.speakerConfirmedAt) return { tone: 'good', label: 'Confirmed' };
-  if (submission.acceptanceEmailSentAt) return { tone: 'waiting', label: 'Awaiting confirmation' };
-  return { tone: 'good', label: 'Accepted' };
-}
-
 // A row of the proposals table: who and what, the track, where it stands, and the one thing to
 // do next as a labelled button. Everything else (abstract, links, notes, edit, history, undo)
 // is in the side panel the row opens, which holds the full card.
 function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulkActionsPending, rejectionBlocker }: SubmissionRowProps) {
   const [isPending, startTransition] = useTransition();
   const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const status = submissionStatus(submission);
+  const status = proposalStatus(submission, rejectionBlocker);
   const disabled = isPending || bulkActionsPending;
 
   function handleAction(action: (id: string) => Promise<{ error?: string }>) {
@@ -1008,8 +914,8 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
       <span className="hidden md:block"><Chip dotClass={TRACK_DOT_COLORS[submission.track]}>{TRACK_LABELS[submission.track]}</Chip></span>
 
       <span className="hidden md:flex flex-col gap-1">
-        <StatusLabel tone={status.tone}>{status.label}</StatusLabel>
-        <span className="font-mono text-xs text-white/60">{formatDate(submission.submittedAt)}</span>
+        <StatusLabel tone={status.tone} title={status.title}>{status.label}</StatusLabel>
+        <span className="font-mono text-xs text-white/60" title="Submitted">{formatDate(submission.submittedAt)}</span>
       </span>
 
       <span className="col-span-full md:col-span-1 flex justify-start md:justify-end pl-8 md:pl-0 max-md:empty:hidden">{nextStep}</span>
@@ -1431,20 +1337,32 @@ export default function SubmissionsDashboard({ submissions }: Props) {
   }
 
   const selectedCount = visibleSelectedIds.length;
+  // Accept and Not this time only change pending proposals, so they count and offer only those.
+  const selectedPendingCount = sorted.filter((s) => selectedIds.has(s.id) && s.status === 'pending').length;
+  const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
+  const noPendingSelected = selectedPendingCount === 0 ? 'None of the selected proposals are pending.' : undefined;
 
   return (
     <>
       <div className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-black-02/95 backdrop-blur-sm`}>
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-          <div className="min-w-0 min-h-[3.25rem] flex items-center">
+          <div className="min-w-0 h-[3.25rem] flex items-center md:flex-1 md:basis-0">
             {selectedCount > 0 ? (
-              <div key="bulk-actions" className="flex items-center gap-2 flex-wrap animate-fade-in-fast">
-                <span className="shrink-0 text-sm text-white/55 mr-2">{selectedCount} selected</span>
+              <div key="bulk-actions" className="flex items-center gap-2 flex-nowrap overflow-x-auto [scrollbar-width:none] max-w-full animate-fade-in-fast">
+                <span className="shrink-0 text-sm text-white/60">{selectedCount} selected</span>
+                <button
+                  onClick={clearSelection}
+                  disabled={isBulkPending}
+                  aria-label="Clear the selection"
+                  className="shrink-0 h-10 text-sm px-3 -ml-1 rounded-full text-white/60 underline underline-offset-4 decoration-white/30 hover:text-white hover:decoration-white transition-colors"
+                >
+                  Clear
+                </button>
                 <ConfirmAction
                   tone="danger"
                   align="left"
-                  message={`Mark ${selectedCount} selected ${selectedCount === 1 ? 'proposal' : 'proposals'} as not selected?`}
-                  detail="Only pending ones change. No email is sent: send rejection emails afterwards."
+                  message={`Mark ${plural(selectedPendingCount, 'pending proposal', 'pending proposals')} as not selected?`}
+                  detail={`${selectedCount > selectedPendingCount ? `The other ${plural(selectedCount - selectedPendingCount, 'selected proposal is', 'selected proposals are')} already decided and stay as they are. ` : ''}No email is sent: send rejection emails afterwards.`}
                   confirmLabel="Not this time"
                   onConfirm={handleBulkReject}
                   className="inline-flex shrink-0"
@@ -1452,8 +1370,9 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                   {(triggerProps) => (
                     <button
                       {...triggerProps}
-                      disabled={isBulkPending}
-                      aria-label={`Not this time: ${selectedCount} selected submissions`}
+                      disabled={isBulkPending || selectedPendingCount === 0}
+                      aria-label={`Not this time: ${plural(selectedPendingCount, 'pending proposal', 'pending proposals')}`}
+                      title={noPendingSelected}
                       className="press shrink-0 h-10 text-sm font-bold px-4 rounded-full border border-white/35 text-off-white hover:border-white transition-colors disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
                     >
                       Not this time
@@ -1463,8 +1382,8 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 <ConfirmAction
                   tone="accept"
                   align="left"
-                  message={`Accept ${selectedCount} selected ${selectedCount === 1 ? 'proposal' : 'proposals'}?`}
-                  detail="Only pending ones change. Each talk joins the lineup with its speaker profile. No email is sent yet."
+                  message={`Accept ${plural(selectedPendingCount, 'pending proposal', 'pending proposals')}?`}
+                  detail={`${selectedCount > selectedPendingCount ? `The other ${plural(selectedCount - selectedPendingCount, 'selected proposal is', 'selected proposals are')} already decided and stay as they are. ` : ''}Each talk joins the lineup with its speaker profile. No email is sent yet.`}
                   confirmLabel="Accept"
                   onConfirm={handleBulkAccept}
                   className="inline-flex shrink-0"
@@ -1472,8 +1391,9 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                   {(triggerProps) => (
                     <button
                       {...triggerProps}
-                      disabled={isBulkPending}
-                      aria-label={`Accept ${selectedCount} selected submissions`}
+                      disabled={isBulkPending || selectedPendingCount === 0}
+                      aria-label={`Accept ${plural(selectedPendingCount, 'pending proposal', 'pending proposals')}`}
+                      title={noPendingSelected}
                       className="press shrink-0 h-10 text-sm font-bold px-4 rounded-full bg-google-green-deep text-white hover:opacity-85 transition-opacity disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue focus-visible:ring-offset-2 focus-visible:ring-offset-black-02"
                     >
                       Accept
@@ -1499,7 +1419,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                         <button
                           {...triggerProps}
                           disabled={isBulkPending}
-                          aria-label={`Email ${unsentRejectionTargets.length} selected rejected ${unsentRejectionTargets.length === 1 ? 'person' : 'people'} who haven't been told yet`}
+                          aria-label={`Email ${plural(unsentRejectionTargets.length, 'person', 'people')} whose talk wasn't selected and who haven't been told yet`}
                           title="One email per person. Skips anyone already emailed, speaking, or with a proposal still pending."
                           className="shrink-0 h-10 text-sm font-bold px-4 rounded-full bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white transition-colors disabled:opacity-60"
                         >
@@ -1512,17 +1432,10 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 <button
                   onClick={handleBulkArchive}
                   disabled={isBulkPending}
-                  aria-label={`Archive ${selectedCount} selected submissions`}
+                  aria-label={`Archive ${plural(selectedCount, 'selected proposal', 'selected proposals')}`}
                   className="shrink-0 h-10 text-sm px-4 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
                 >
                   Archive
-                </button>
-                <button
-                  onClick={clearSelection}
-                  disabled={isBulkPending}
-                  className="shrink-0 h-10 text-sm px-4 rounded-full text-white/55 hover:text-white/70 transition-colors"
-                >
-                  Clear
                 </button>
               </div>
             ) : (
@@ -1535,7 +1448,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 min-w-0 md:shrink-0 md:flex-nowrap">
             <AdminSearch value={search} onChange={setSearch} label="Search name, email, talk title or abstract" placeholder="Search name, email, talk title or abstract…" />
 
             <div className="relative shrink-0" ref={statusMenuRef}>

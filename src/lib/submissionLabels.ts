@@ -10,7 +10,7 @@ export const STATUS_DOT_STYLES: Record<SubmissionStatus, { text: string; dot: st
 export const STATUS_LABELS: Record<SubmissionStatus, string> = {
   pending: 'Pending',
   accepted: 'Accepted',
-  rejected: 'Rejected',
+  rejected: 'Not selected',
   archived: 'Archived',
 };
 

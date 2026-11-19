@@ -14,10 +14,7 @@ import EditShowcaseEntryModal from './EditShowcaseEntryModal';
 import Alert from '@/components/Alert';
 import { formatDate, formatDeadlineDate } from '@/lib/format';
 import {
-  SHOWCASE_STATUS_DOT_STYLES,
-  SHOWCASE_STATUS_LABELS,
   SHOWCASE_STAGE_LABELS,
-  SHOWCASE_CONFIRMATION_CHIPS,
 } from '@/lib/showcaseLabels';
 import type { ReviewerNote, ShowcaseStage, ShowcaseStatus, ShowcaseSubmission } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
@@ -26,6 +23,8 @@ import DecisionButtons from './DecisionButtons';
 import { ExpandButton, MoreIcon, RAIL_CLASSES, RAIL_ICON_CLASSES, RAIL_PILL_CLASSES, RAIL_TEXT_BUTTON_CLASSES } from './RailButtons';
 import AdminSearch from './AdminSearch';
 import FilterChipRow from './FilterChipRow';
+import { StatusLabel } from './Chips';
+import { decisionStatus } from './recordStatus';
 
 interface ReviewerNotesPanelProps {
   entryId: string;
@@ -104,6 +103,7 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
   const [notesOpen, setNotesOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const status = decisionStatus(entry.status, entry.confirmation);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement>(null);
   // The ticket link unlocks a free ticket, so it is only offered once the entrant has
@@ -165,16 +165,6 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
       <div className="flex-1 min-w-0 flex flex-col">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-1.5">
         <h2 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{entry.projectName}</h2>
-        {/* Only on accepted entries: "Not emailed" against a pending one would read as a
-            task, when the thing to do first is decide. */}
-        {entry.status === 'accepted' && (
-          <span
-            title={SHOWCASE_CONFIRMATION_CHIPS[entry.confirmation].title}
-            className={`text-xs font-bold px-1.5 py-0.5 rounded ${SHOWCASE_CONFIRMATION_CHIPS[entry.confirmation].className}`}
-          >
-            {SHOWCASE_CONFIRMATION_CHIPS[entry.confirmation].label}
-          </span>
-        )}
         {canSendTicket && !entry.showcaseTicketEmailSentAt && (
           <span
             title="This entrant has confirmed but hasn't been emailed their complimentary ticket. Send it with the ticket button."
@@ -324,10 +314,7 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
       </div>
 
       <div className="flex items-center gap-3 mt-auto pt-2">
-        <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${SHOWCASE_STATUS_DOT_STYLES[entry.status].text}`}>
-          <span className={`w-[5px] h-[5px] rounded-full ${SHOWCASE_STATUS_DOT_STYLES[entry.status].dot}`} />
-          {SHOWCASE_STATUS_LABELS[entry.status]}
-        </span>
+        <StatusLabel tone={status.tone} title={status.title}>{status.label}</StatusLabel>
         <span className="text-white/50 text-xs font-bold">&middot;</span>
         <span className="text-xs font-bold text-white/55">{formatDate(entry.submittedAt)}</span>
       </div>

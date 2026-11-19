@@ -33,7 +33,7 @@ export const MEETUP_FORMAT_SHORT_LABELS: Record<MeetupFormat, string> = {
 export const MEETUP_STATUS_LABELS: Record<MeetupProposalStatus, string> = {
   pending: 'Pending',
   accepted: 'Accepted',
-  rejected: 'Rejected',
+  rejected: 'Not selected',
   archived: 'Archived',
 };
 
