@@ -67,7 +67,9 @@ export default function ConfirmAction({
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key !== 'Escape') return;
-      // Only this panel closes, not a modal or menu it sits in.
+      // Only this panel closes, not a modal, side panel or menu it sits in: preventDefault stops
+      // the browser closing the <dialog> around it, stopPropagation stops page-level listeners.
+      event.preventDefault();
       event.stopPropagation();
       close({ returnFocus: true });
     }
