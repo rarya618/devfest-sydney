@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PointerEvent } from 'react';
-import { ACCENT_CHART_CLASSES, type AnalyticsAccent } from './analyticsShared';
+import { ACCENT_CHART_CLASSES, Disclosure, type AnalyticsAccent } from './analyticsShared';
 
 interface DatedEntry {
   submittedAt: string; // ISO date string
@@ -64,6 +64,13 @@ function buildDayPoints(entries: DatedEntry[]): DayPoint[] {
   return points;
 }
 
+function niceStep(rawStep: number): number {
+  if (rawStep <= 1) return 1;
+  const magnitude = 10 ** Math.floor(Math.log10(rawStep));
+  const multiplier = [1, 2, 5, 10].find((candidate) => candidate * magnitude >= rawStep) ?? 10;
+  return multiplier * magnitude;
+}
+
 export default function SubmissionsOverTimeChart({ entries, noun, accent }: Props) {
   const points = useMemo(() => buildDayPoints(entries), [entries]);
   const chartClasses = ACCENT_CHART_CLASSES[accent];
@@ -96,8 +103,14 @@ export default function SubmissionsOverTimeChart({ entries, noun, accent }: Prop
   const labelFontSize = Math.min(Math.max(Math.ceil(12 / scale), 9), 24);
   const paddingLeft = isMobile ? 40 : PADDING_LEFT;
   const maxCumulative = points.length > 0 ? points[points.length - 1].cumulative : 0;
+  // A round step (1, 2 or 5 times a power of ten) giving at most four gaps, with the axis
+  // topped at a step, so the gridlines are even (6 reads 0, 2, 4, 6, not 0, 2, 3, 5, 6).
+  const gridStep = niceStep(maxCumulative / 4);
+  const axisMax = Math.max(gridStep, Math.ceil(maxCumulative / gridStep) * gridStep);
   const plotWidth = CHART_WIDTH - paddingLeft - PADDING_RIGHT;
-  const plotHeight = chartHeight - PADDING_TOP - PADDING_BOTTOM;
+  // The date row grows with the label size, so the axis's 0 never sits on the first date.
+  const paddingBottom = Math.max(PADDING_BOTTOM, labelFontSize + 14);
+  const plotHeight = chartHeight - PADDING_TOP - paddingBottom;
 
   const xForIndex = useCallback(
     (index: number) => (points.length <= 1 ? paddingLeft + plotWidth / 2 : paddingLeft + (index / (points.length - 1)) * plotWidth),
@@ -105,8 +118,8 @@ export default function SubmissionsOverTimeChart({ entries, noun, accent }: Prop
   );
 
   const yForValue = useCallback(
-    (value: number) => (maxCumulative === 0 ? PADDING_TOP + plotHeight : PADDING_TOP + plotHeight - (value / maxCumulative) * plotHeight),
-    [maxCumulative, plotHeight]
+    (value: number) => PADDING_TOP + plotHeight - (value / axisMax) * plotHeight,
+    [axisMax, plotHeight]
   );
 
   const linePath = points
@@ -133,9 +146,7 @@ export default function SubmissionsOverTimeChart({ entries, noun, accent }: Prop
 
   const handlePointerLeave = useCallback(() => setHoverIndex(null), []);
 
-  const gridSteps = 4;
-  // De-duplicated: with fewer entries than grid steps, rounding makes neighbouring steps collide.
-  const gridValues = Array.from(new Set(Array.from({ length: gridSteps + 1 }, (_, step) => Math.round((maxCumulative / gridSteps) * step))));
+  const gridValues = Array.from({ length: axisMax / gridStep + 1 }, (_, step) => step * gridStep);
 
   const tickIndices =
     points.length <= 1 ? points.map((_, index) => index) : Array.from(new Set([0, Math.floor((points.length - 1) / 2), points.length - 1]));
@@ -148,7 +159,7 @@ export default function SubmissionsOverTimeChart({ entries, noun, accent }: Prop
   const tooltipOnRight = tooltipX < CHART_WIDTH / 2;
 
   return (
-    <div className="bg-surface border border-white/10 rounded-2xl px-5 py-5 mb-6">
+    <div className="mb-3 rounded-2xl bg-surface px-5 py-5">
       <h2 className="text-sm font-bold text-white/70 mb-4">Cumulative {noun} over time</h2>
       <div className="relative">
         <svg
@@ -219,8 +230,7 @@ export default function SubmissionsOverTimeChart({ entries, noun, accent }: Prop
         )}
       </div>
 
-      <details className="mt-2">
-        <summary className="inline-flex min-h-11 items-center text-xs font-normal text-white/60 cursor-pointer select-none">View as table</summary>
+      <Disclosure summary="View as table" size="xs" className="mt-2 not-open:-mb-3">
         <div className="mt-3 overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
@@ -241,7 +251,7 @@ export default function SubmissionsOverTimeChart({ entries, noun, accent }: Prop
             </tbody>
           </table>
         </div>
-      </details>
+      </Disclosure>
     </div>
   );
 }
