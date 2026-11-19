@@ -17,7 +17,7 @@ export const ACCENT_CHART_CLASSES: Record<AnalyticsAccent, { fill: string; strok
 // chips). Replaces the icon-and-tint pills, which repeated the cards below them.
 export function StatStrip({ children, className = 'mb-6' }: { children: ReactNode; className?: string }) {
   return (
-    <dl className={`grid grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] gap-x-8 gap-y-5 rounded-2xl bg-surface px-5 py-5 ${className}`}>
+    <dl className={`grid grid-cols-[repeat(auto-fit,minmax(6.5rem,1fr))] gap-x-4 gap-y-4 sm:grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] sm:gap-x-8 sm:gap-y-5 rounded-2xl bg-surface px-4 py-4 sm:px-5 sm:py-5 ${className}`}>
       {children}
     </dl>
   );

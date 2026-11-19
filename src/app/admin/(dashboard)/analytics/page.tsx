@@ -23,20 +23,30 @@ function formatEventDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Australia/Sydney' });
 }
 
-// One takeaway sentence, then what the figures mean. The takeaway is what the section says at
-// a glance; the rest defines the words so nobody has to guess.
-function SectionHeading({ id, children, takeaway, definition }: { id: string; children: React.ReactNode; takeaway?: string; definition?: string }) {
-  const hasText = Boolean(takeaway || definition);
+// One takeaway sentence says what the section shows at a glance. What the words mean lives in
+// one note at the foot of the page (FigureDefinitions), so no section repeats a paragraph.
+function SectionHeading({ id, children, takeaway }: { id: string; children: React.ReactNode; takeaway?: string }) {
   return (
     <>
-      <h2 id={id} className={`text-lg font-bold text-off-white ${hasText ? '' : 'mb-4'}`}>{children}</h2>
-      {hasText && (
-        <p className="mt-1 mb-4 max-w-prose text-sm text-white/60">
-          {takeaway && <span className="text-white/90">{takeaway} </span>}
-          {definition}
-        </p>
-      )}
+      <h2 id={id} className={`text-lg font-bold text-off-white ${takeaway ? '' : 'mb-4'}`}>{children}</h2>
+      {takeaway && <p className="mt-1 mb-4 max-w-prose text-sm text-white/80">{takeaway}</p>}
     </>
+  );
+}
+
+function FigureDefinitions() {
+  return (
+    <details className="text-sm text-white/60">
+      <summary className="inline-flex min-h-11 cursor-pointer select-none items-center font-bold text-white/70">What these figures mean</summary>
+      <ul className="mt-1 max-w-prose list-disc space-y-1.5 pl-5">
+        <li>First-time means their first talk with GDG Sydney; returning means they spoke at an earlier event. In the bars, green is returning and grey is first-time.</li>
+        <li>A meetup counts only the proposals accepted into it.</li>
+        <li>People on file have a speaker profile. A talk counts once it is on an event&rsquo;s programme, upcoming events included.</li>
+        <li>Volunteer profiles are everyone who has signed up. The pool is the opt-in list we invite to new events.</li>
+        <li>Repeat speakers have talks at more than one event; repeat volunteers signed up for more than one.</li>
+        <li>Each organiser is counted once, whichever events they organised.</li>
+      </ul>
+    </details>
   );
 }
 
@@ -103,7 +113,7 @@ function WaitingForDecision({ waiting }: { waiting: WaitingItem[] }) {
             <Link
               href={waitingHref(item)}
               aria-label={`Review ${item.count} ${noun}${item.eventName ? ` for ${item.eventName}` : ''}; ${describeAge(item.oldestDays)}`}
-              className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/[0.04] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-google-blue"
+              className="group flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-white/[0.04] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-google-blue"
             >
               <span className="w-10 shrink-0 text-2xl font-bold tabular-nums text-off-white">{item.count}</span>
               <span className="min-w-0 flex-1">
@@ -128,21 +138,21 @@ function WaitingForDecision({ waiting }: { waiting: WaitingItem[] }) {
 
 // The same facts feed the table (from sm) and the stacked cards (below it), so a phone never
 // has to scroll sideways to reach Proposals or Volunteers.
-function SpeakersFact({ event }: { event: EventAnalyticsRow }) {
+function SpeakersFact({ event, compact = false }: { event: EventAnalyticsRow; compact?: boolean }) {
   return (
     <>
       {event.speakers}
       {event.speakers > 0 && (
         <>
           <RetentionBar returning={event.returningSpeakers} firstTime={event.firstTimeSpeakers} />
-          <Muted>{event.firstTimeSpeakers} first-time, {event.returningSpeakers} returning</Muted>
+          <Muted>{compact ? `${event.returningSpeakers} returning` : `${event.firstTimeSpeakers} first-time, ${event.returningSpeakers} returning`}</Muted>
         </>
       )}
     </>
   );
 }
 
-function ProposalsFact({ event }: { event: EventAnalyticsRow }) {
+function ProposalsFact({ event, compact = false }: { event: EventAnalyticsRow; compact?: boolean }) {
   if (event.type === 'devfest') {
     return (
       <>
@@ -154,12 +164,12 @@ function ProposalsFact({ event }: { event: EventAnalyticsRow }) {
   return (
     <>
       {event.acceptedProposals}
-      <Muted>accepted from meetup proposals</Muted>
+      <Muted>{compact ? 'accepted' : 'accepted from meetup proposals'}</Muted>
     </>
   );
 }
 
-function VolunteersFact({ event }: { event: EventAnalyticsRow }) {
+function VolunteersFact({ event, compact = false }: { event: EventAnalyticsRow; compact?: boolean }) {
   return (
     <>
       {event.volunteerSignups}
@@ -167,7 +177,7 @@ function VolunteersFact({ event }: { event: EventAnalyticsRow }) {
         <>
           <RetentionBar returning={event.returningVolunteers} firstTime={event.volunteerSignups - event.returningVolunteers} />
           <Muted>
-            {event.acceptedVolunteers} accepted, {event.returningVolunteers} returning
+            {compact ? `${event.returningVolunteers} returning` : `${event.acceptedVolunteers} accepted, ${event.returningVolunteers} returning`}
           </Muted>
         </>
       )}
@@ -188,70 +198,96 @@ function EventHeading({ event }: { event: EventAnalyticsRow }) {
   );
 }
 
-function EventsTable({ events }: { events: EventAnalyticsRow[] }) {
-  if (events.length === 0) return <EmptyState message="No events yet." />;
+function EventCards({ events }: { events: EventAnalyticsRow[] }) {
+  return (
+    <ul className="space-y-3">
+      {events.map((event) => (
+        <li key={event.eventId} className="rounded-2xl bg-surface px-4 py-4">
+          <EventHeading event={event} />
+          <dl className="mt-3 grid grid-cols-3 gap-x-4 gap-y-3 text-sm text-white/80">
+            <div>
+              <dt className="text-xs font-bold text-white/60">Talks</dt>
+              <dd className="mt-0.5">{event.talks}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-bold text-white/60">Speakers</dt>
+              <dd className="mt-0.5"><SpeakersFact event={event} compact /></dd>
+            </div>
+            <div>
+              <dt className="text-xs font-bold text-white/60">Volunteers</dt>
+              <dd className="mt-0.5"><VolunteersFact event={event} compact /></dd>
+            </div>
+            <div>
+              <dt className="text-xs font-bold text-white/60">Proposals</dt>
+              <dd className="mt-0.5"><ProposalsFact event={event} compact /></dd>
+            </div>
+            <div>
+              <dt className="text-xs font-bold text-white/60">Organisers</dt>
+              <dd className="mt-0.5">{event.organisers}</dd>
+            </div>
+          </dl>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function EventRows({ events }: { events: EventAnalyticsRow[] }) {
   const cell = 'px-4 py-3 align-top';
   return (
-    <>
-      <ul className="space-y-3 sm:hidden">
-        {events.map((event) => (
-          <li key={event.eventId} className="rounded-2xl bg-surface px-5 py-4">
-            <EventHeading event={event} />
-            <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-4 text-sm text-white/80">
-              <div>
-                <dt className="text-xs font-bold text-white/60">Talks</dt>
-                <dd className="mt-0.5">{event.talks}</dd>
-              </div>
-              <div>
-                <dt className="text-xs font-bold text-white/60">Organisers</dt>
-                <dd className="mt-0.5">{event.organisers}</dd>
-              </div>
-              <div>
-                <dt className="text-xs font-bold text-white/60">Speakers</dt>
-                <dd className="mt-0.5"><SpeakersFact event={event} /></dd>
-              </div>
-              <div>
-                <dt className="text-xs font-bold text-white/60">Proposals</dt>
-                <dd className="mt-0.5"><ProposalsFact event={event} /></dd>
-              </div>
-              <div>
-                <dt className="text-xs font-bold text-white/60">Volunteers</dt>
-                <dd className="mt-0.5"><VolunteersFact event={event} /></dd>
-              </div>
-            </dl>
-          </li>
-        ))}
-      </ul>
-
-      <div className="hidden sm:block bg-surface border border-white/10 rounded-2xl overflow-x-auto">
-        <table className="w-full min-w-[640px] text-sm text-white/80">
-          <caption className="sr-only">Every GDG Sydney event, newest first, with its talks, speakers, proposals and volunteers</caption>
-          <thead>
-            <tr className="text-left text-xs font-bold text-white/60 border-b border-white/10">
-              <th scope="col" className={cell}>Event</th>
-              <th scope="col" className={cell}>Talks</th>
-              <th scope="col" className={cell}>Speakers</th>
-              <th scope="col" className={cell}>Proposals</th>
-              <th scope="col" className={cell}>Volunteers</th>
-              <th scope="col" className={cell}>Organisers</th>
+    <div className="bg-surface border border-white/10 rounded-2xl overflow-x-auto">
+      <table className="w-full min-w-[640px] text-sm text-white/80">
+        <caption className="sr-only">GDG Sydney events, newest first, with their talks, speakers, proposals and volunteers</caption>
+        <thead>
+          <tr className="text-left text-xs font-bold text-white/60 border-b border-white/10">
+            <th scope="col" className={cell}>Event</th>
+            <th scope="col" className={cell}>Talks</th>
+            <th scope="col" className={cell}>Speakers</th>
+            <th scope="col" className={cell}>Proposals</th>
+            <th scope="col" className={cell}>Volunteers</th>
+            <th scope="col" className={cell}>Organisers</th>
+          </tr>
+        </thead>
+        <tbody>
+          {events.map((event) => (
+            <tr key={event.eventId} className="border-b border-white/[0.06] last:border-b-0">
+              <th scope="row" className={`${cell} text-left font-normal`}>
+                <EventHeading event={event} />
+              </th>
+              <td className={cell}>{event.talks}</td>
+              <td className={cell}><SpeakersFact event={event} /></td>
+              <td className={cell}><ProposalsFact event={event} /></td>
+              <td className={cell}><VolunteersFact event={event} /></td>
+              <td className={cell}>{event.organisers}</td>
             </tr>
-          </thead>
-          <tbody>
-            {events.map((event) => (
-              <tr key={event.eventId} className="border-b border-white/[0.06] last:border-b-0">
-                <th scope="row" className={`${cell} text-left font-normal`}>
-                  <EventHeading event={event} />
-                </th>
-                <td className={cell}>{event.talks}</td>
-                <td className={cell}><SpeakersFact event={event} /></td>
-                <td className={cell}><ProposalsFact event={event} /></td>
-                <td className={cell}><VolunteersFact event={event} /></td>
-                <td className={cell}>{event.organisers}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// The four newest events show; the rest sit behind "Earlier events", since the list grows by a
+// meetup a month. The same facts feed the table (from sm) and the stacked cards below it.
+const RECENT_EVENT_COUNT = 4;
+
+function EventsList({ events }: { events: EventAnalyticsRow[] }) {
+  if (events.length === 0) return <EmptyState message="No events yet." />;
+  const recent = events.slice(0, RECENT_EVENT_COUNT);
+  const earlier = events.slice(RECENT_EVENT_COUNT);
+  return (
+    <>
+      <div className="sm:hidden"><EventCards events={recent} /></div>
+      <div className="hidden sm:block"><EventRows events={recent} /></div>
+      {earlier.length > 0 && (
+        <details className="mt-3">
+          <summary className="inline-flex min-h-11 cursor-pointer select-none items-center text-sm font-bold text-white/70">
+            Earlier events ({earlier.length})
+          </summary>
+          <div className="mt-2 sm:hidden"><EventCards events={earlier} /></div>
+          <div className="mt-2 hidden sm:block"><EventRows events={earlier} /></div>
+        </details>
+      )}
     </>
   );
 }
@@ -262,7 +298,7 @@ function AnalyticsBody({ analytics }: { analytics: GdgAnalytics }) {
   const returningPlaces = analytics.events.reduce((total, event) => total + event.returningSpeakers, 0);
 
   return (
-    <div className="space-y-12 pb-10">
+    <div className="space-y-10 pb-10">
       <section aria-labelledby="waiting-heading">
         <SectionHeading id="waiting-heading">Waiting for a decision</SectionHeading>
         <WaitingForDecision waiting={analytics.waiting} />
@@ -276,27 +312,26 @@ function AnalyticsBody({ analytics }: { analytics: GdgAnalytics }) {
               ? `${returningPlaces} of ${speakerPlaces} speaker places across ${analytics.events.length} events went to someone who had spoken before.`
               : undefined
           }
-          definition="First-time means their first talk with GDG Sydney. In the bars, green is returning and grey is first-time. A meetup counts only the proposals accepted into it."
         >
           Events
         </SectionHeading>
-        <EventsTable events={analytics.events} />
+        <EventsList events={analytics.events} />
       </section>
 
+      <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
       <section aria-labelledby="speakers-heading">
         <SectionHeading
           id="speakers-heading"
           takeaway={
             speakers.withTalks > 0 ? `${speakers.repeat} of ${speakers.withTalks} people with a talk have spoken at more than one event.` : undefined
           }
-          definition="People on file have a speaker profile. A talk counts once it is on an event's programme, upcoming events included."
         >
           Speakers across events
         </SectionHeading>
         <StatStrip className="">
           <StatTile label="People on file" count={speakers.people} />
           <StatTile label="Speakers with a talk" count={speakers.withTalks} />
-          <StatTile label="Spoke at more than one event" count={speakers.repeat} />
+          <StatTile label="Repeat speakers" count={speakers.repeat} />
           <StatTile label="Talks across events" count={speakers.talks} />
         </StatStrip>
       </section>
@@ -309,7 +344,6 @@ function AnalyticsBody({ analytics }: { analytics: GdgAnalytics }) {
               ? `${volunteers.repeat} of ${volunteers.withSignups} people who have signed up did so for more than one event.`
               : undefined
           }
-          definition="Profiles are everyone who has signed up. The pool is the opt-in list we invite to new events. Each organiser is counted once, whichever events they organised."
         >
           Volunteers across events
         </SectionHeading>
@@ -317,10 +351,12 @@ function AnalyticsBody({ analytics }: { analytics: GdgAnalytics }) {
           <StatTile label="Volunteer profiles" count={volunteers.profiles} />
           <StatTile label="In the volunteer pool" count={volunteers.inPool} />
           <StatTile label="Signups" count={volunteers.signups} />
-          <StatTile label="Volunteered at more than one event" count={volunteers.repeat} />
+          <StatTile label="Repeat volunteers" count={volunteers.repeat} />
           <StatTile label="Organisers" count={volunteers.organisers} />
         </StatStrip>
       </section>
+
+      </div>
 
       <section aria-labelledby="meetup-proposals-heading">
         <SectionHeading
@@ -347,14 +383,21 @@ function AnalyticsBody({ analytics }: { analytics: GdgAnalytics }) {
         {meetupProposals.total === 0 ? (
           <EmptyState message="No meetup proposals yet." />
         ) : (
-          <>
-            <SubmissionsOverTimeChart entries={meetupProposals.submittedAt.map((submittedAt) => ({ submittedAt }))} noun="proposals" accent="green" />
-            <div className="grid items-start sm:grid-cols-2 gap-3">
-              <ChannelsCard title="How proposals arrived" channels={meetupProposals.bySource} total={meetupProposals.total} noun="proposals" barClass="bg-google-green" />
+          <details className="mt-1">
+            <summary className="inline-flex min-h-11 cursor-pointer select-none items-center text-sm font-bold text-white/70">
+              Proposals over time and how they arrived
+            </summary>
+            <div className="mt-2">
+              <SubmissionsOverTimeChart entries={meetupProposals.submittedAt.map((submittedAt) => ({ submittedAt }))} noun="proposals" accent="green" />
+              <div className="grid items-start sm:grid-cols-2 gap-3">
+                <ChannelsCard title="How proposals arrived" channels={meetupProposals.bySource} total={meetupProposals.total} noun="proposals" barClass="bg-google-green" />
+              </div>
             </div>
-          </>
+          </details>
         )}
       </section>
+
+      <FigureDefinitions />
     </div>
   );
 }
