@@ -9,7 +9,7 @@ import { formatDate } from '@/lib/format';
 import {
   STATUS_LABELS,
   TRACK_LABELS,
-  TRACK_COLORS,
+  TRACK_CHIP_COLORS,
   TRACK_DOT_COLORS,
   FORMAT_LABELS,
   EXPERIENCE_LABELS,
@@ -549,7 +549,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         <div className="overflow-hidden">
       <div className={`flex flex-wrap items-center gap-2 mb-5 ${indent}`}>
         <span className={`inline-block w-[5px] h-[5px] rounded-full ${TRACK_DOT_COLORS[submission.track]}`} />
-        <span className={`text-xs font-normal ${TRACK_COLORS[submission.track]}`}>
+        <span className={`text-xs font-normal ${TRACK_CHIP_COLORS[submission.track]}`}>
           {TRACK_LABELS[submission.track]}
         </span>
         <span className="text-white/50 text-xs">/</span>

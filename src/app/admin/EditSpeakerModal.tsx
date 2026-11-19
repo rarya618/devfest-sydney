@@ -46,7 +46,7 @@ function toEditableFields(speaker: EditSpeakerTarget): SpeakerEditableFields {
 const inputClasses =
   'w-full rounded-lg border border-white/35 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40';
 const labelClasses = 'block text-xs font-bold text-white/50 mb-1';
-const sectionHeadingClasses = 'text-xs font-bold uppercase tracking-wider text-white/50';
+const sectionHeadingClasses = 'text-sm font-bold text-white/70';
 
 export default function EditSpeakerModal({ speaker, leadSpeakerName, profileOnly = false, onClose, onError }: Props) {
   const isCoSpeaker = Boolean(speaker.coSpeakerOf);

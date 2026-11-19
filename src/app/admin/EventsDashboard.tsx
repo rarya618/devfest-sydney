@@ -100,7 +100,7 @@ function EventCard({
               type="button"
               onClick={handleMakeCurrent}
               aria-label={`Make ${event.name} the current DevFest`}
-              className="text-xs font-bold px-3 py-2 rounded-lg border border-white/40 text-white/70 hover:border-white/60 hover:text-white transition-colors"
+              className="press inline-flex items-center h-8 text-sm font-bold px-3.5 rounded-full border border-white/35 text-off-white hover:border-white transition-colors"
             >
               Make current
             </button>
@@ -109,7 +109,7 @@ function EventCard({
             type="button"
             onClick={onEdit}
             aria-label={`Edit ${event.name}`}
-            className="text-xs font-bold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-opacity"
+            className="press inline-flex items-center h-8 text-sm font-bold px-3.5 rounded-full border border-white/35 text-off-white hover:border-white transition-colors"
           >
             Edit
           </button>
@@ -184,7 +184,7 @@ export default function EventsDashboard({ summaries, hasCurrentDevfest }: Props)
 
       <div className="px-4 md:px-5 pb-8 sm:pb-10">
         {!hasCurrentDevfest && summaries.length > 0 && (
-          <p className="mb-5 text-sm text-google-yellow bg-google-yellow/10 border border-google-yellow/25 rounded-lg px-4 py-3">
+          <p className="mb-5 text-sm text-google-yellow bg-google-yellow/10 border border-google-yellow/25 rounded-2xl px-4 py-3">
             No DevFest is set as current, so every form endpoint reads as closed and the ticket emails can&rsquo;t be sent.
             Use &ldquo;Make current&rdquo; on a DevFest.
           </p>
