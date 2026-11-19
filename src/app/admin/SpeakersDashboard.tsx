@@ -25,6 +25,7 @@ import type { CalendarInviteStatus, Speaker, SpeakerConfirmation, SpeakerSession
 import { useMobileBarHidden } from './MobileBarContext';
 import HistoryDisclosure, { stampedOn, type HistoryRow } from './HistoryDisclosure';
 import ConfirmAction from './ConfirmAction';
+import AdminSearch from './AdminSearch';
 
 // The speaker card's history rows. Same shape as the crew card's, so the two dashboards
 // read the same way; the dates themselves differ because a speaker is promoted from a
@@ -607,18 +608,10 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
   const [filter, setFilter] = useState<FilterTrack>('all');
   const [confirmationFilter, setConfirmationFilter] = useState<FilterConfirmation>('all');
   const [search, setSearch] = useState('');
-  const [searchOpen, setSearchOpen] = useState(false);
   const [trackMenuOpen, setTrackMenuOpen] = useState(false);
   const [confirmationMenuOpen, setConfirmationMenuOpen] = useState(false);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
   const trackMenuRef = useRef<HTMLDivElement>(null);
   const confirmationMenuRef = useRef<HTMLDivElement>(null);
-  const searchWidthOpen = searchOpen || Boolean(search);
-
-  useEffect(() => {
-    if (searchOpen) searchInputRef.current?.focus();
-  }, [searchOpen]);
 
   useEffect(() => {
     if (!trackMenuOpen) return;
@@ -659,30 +652,6 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [confirmationMenuOpen]);
-
-  useEffect(() => {
-    if (!searchOpen) return;
-
-    function handlePointerDown(event: MouseEvent) {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
-        setSearch('');
-        setSearchOpen(false);
-      }
-    }
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        setSearch('');
-        setSearchOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [searchOpen]);
 
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
 
@@ -869,70 +838,7 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
                 ))
             )}
 
-            <div
-              ref={searchContainerRef}
-              className={`relative shrink-0 h-10 rounded-full transition-all duration-300 ease-in-out ${
-                searchWidthOpen ? 'w-full sm:w-80 bg-white/[0.06]' : 'w-10 bg-white/[0.06] hover:bg-white/[0.1]'
-              }`}
-            >
-              <button
-                onClick={() => setSearchOpen(true)}
-                tabIndex={searchOpen || search ? -1 : undefined}
-                aria-label="Search speakers by name, email, or talk title"
-                title="Search"
-                className={`absolute left-0 top-0 inline-flex items-center justify-center w-10 h-10 rounded-full text-white/70 hover:text-white transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
-                }`}
-              >
-                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <circle cx="7" cy="7" r="5" />
-                  <path strokeLinecap="round" d="M11 11l3.5 3.5" />
-                </svg>
-              </button>
-
-              <input
-                ref={searchInputRef}
-                type="search"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                tabIndex={searchOpen || search ? undefined : -1}
-                placeholder="Search by name, email, or talk…"
-                aria-label="Search speakers by name, email, or talk title"
-                className={`w-full h-10 rounded-full bg-transparent pl-9 pr-9 py-0 text-sm text-white placeholder:text-white/50 focus:outline-none transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
-              />
-              <svg
-                className={`absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/55 pointer-events-none transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-100' : 'opacity-0'
-                }`}
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              >
-                <circle cx="7" cy="7" r="5" />
-                <path strokeLinecap="round" d="M11 11l3.5 3.5" />
-              </svg>
-              <button
-                onClick={() => {
-                  setSearch('');
-                  setSearchOpen(false);
-                }}
-                tabIndex={searchOpen || search ? undefined : -1}
-                aria-label="Close search"
-                className={`absolute right-2 top-1/2 -translate-y-1/2 text-white/55 hover:text-white/70 transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <path strokeLinecap="round" d="M4 4l8 8M12 4l-8 8" />
-                </svg>
-              </button>
-            </div>
-
-            {(searchOpen || search) && <div className="basis-full h-0 sm:hidden" aria-hidden="true" />}
+            <AdminSearch value={search} onChange={setSearch} label="Search speakers by name, email or talk title" placeholder="Search by name, email or talk…" />
 
             <div className="relative shrink-0" ref={confirmationMenuRef}>
               <button

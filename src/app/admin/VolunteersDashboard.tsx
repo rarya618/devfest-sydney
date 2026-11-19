@@ -24,6 +24,8 @@ import { useRouter } from 'next/navigation';
 import Select from '@/components/Select';
 import ConfirmAction from './ConfirmAction';
 import DecisionButtons from './DecisionButtons';
+import AdminSearch from './AdminSearch';
+import FilterChipRow from './FilterChipRow';
 
 interface ReviewerNotesPanelProps {
   volunteerId: string;
@@ -427,27 +429,9 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
   const [filter, setFilter] = useState<FilterStatus>('all');
   const [areaFilter, setAreaFilter] = useState<FilterArea>('all');
   const [search, setSearch] = useState('');
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchWidthOpen, setSearchWidthOpen] = useState(false);
   const [statusMenuOpen, setStatusMenuOpen] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
   const statusMenuRef = useRef<HTMLDivElement>(null);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (searchOpen || search) {
-      const timeout = setTimeout(() => setSearchWidthOpen(true), 20);
-      return () => clearTimeout(timeout);
-    }
-    setSearchWidthOpen(false);
-  }, [searchOpen, search]);
-
-  useEffect(() => {
-    if (searchWidthOpen) {
-      searchInputRef.current?.focus();
-    }
-  }, [searchWidthOpen]);
 
   useEffect(() => {
     if (!statusMenuOpen) return;
@@ -468,30 +452,6 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [statusMenuOpen]);
-
-  useEffect(() => {
-    if (!searchOpen) return;
-
-    function handlePointerDown(event: MouseEvent) {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
-        setSearch('');
-        setSearchOpen(false);
-      }
-    }
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        setSearch('');
-        setSearchOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [searchOpen]);
 
   const dismissAlert = useCallback(() => setAlertMessage(null), []);
 
@@ -561,70 +521,7 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
           )}
 
           <div className="flex flex-wrap items-center gap-2 min-w-0">
-            <div
-              ref={searchContainerRef}
-              className={`relative shrink-0 h-10 rounded-full transition-all duration-300 ease-in-out ${
-                searchWidthOpen ? 'w-full sm:w-80 bg-white/[0.06]' : 'w-10 bg-white/[0.06] hover:bg-white/[0.1]'
-              }`}
-            >
-              <button
-                onClick={() => setSearchOpen(true)}
-                tabIndex={searchOpen || search ? -1 : undefined}
-                aria-label="Search by name or email"
-                title="Search"
-                className={`absolute left-0 top-0 inline-flex items-center justify-center w-10 h-10 rounded-full text-white/70 hover:text-white transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
-                }`}
-              >
-                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <circle cx="7" cy="7" r="5" />
-                  <path strokeLinecap="round" d="M11 11l3.5 3.5" />
-                </svg>
-              </button>
-
-              <input
-                ref={searchInputRef}
-                type="search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                tabIndex={searchOpen || search ? undefined : -1}
-                placeholder="Search by name or email…"
-                aria-label="Search by name or email"
-                className={`w-full h-10 rounded-full bg-transparent pl-9 pr-9 py-0 text-sm text-white placeholder:text-white/50 focus:outline-none transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
-              />
-              <svg
-                className={`absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/55 pointer-events-none transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-100' : 'opacity-0'
-                }`}
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              >
-                <circle cx="7" cy="7" r="5" />
-                <path strokeLinecap="round" d="M11 11l3.5 3.5" />
-              </svg>
-              <button
-                onClick={() => {
-                  setSearch('');
-                  setSearchOpen(false);
-                }}
-                tabIndex={searchOpen || search ? undefined : -1}
-                aria-label="Close search"
-                className={`absolute right-2 top-1/2 -translate-y-1/2 text-white/55 hover:text-white/70 transition-opacity duration-200 ${
-                  searchWidthOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <path strokeLinecap="round" d="M4 4l8 8M12 4l-8 8" />
-                </svg>
-              </button>
-            </div>
-
-            {(searchOpen || search) && <div className="basis-full h-0 sm:hidden" aria-hidden="true" />}
+            <AdminSearch value={search} onChange={setSearch} label="Search volunteers by name or email" placeholder="Search by name or email…" />
 
             <div className="relative shrink-0" ref={statusMenuRef}>
               <button
@@ -674,11 +571,7 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
         {/* Areas of interest as a tab row. Status is a menu because a signup is in exactly
             one state; an area is a lens on the queue, and the row shows how thin each one
             is without opening anything. */}
-        <div
-          role="group"
-          aria-label="Filter volunteers by area of interest"
-          className="mt-3 -mx-4 md:-mx-5 px-4 md:px-5 flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
+        <FilterChipRow label="Filter volunteers by area of interest" className="mt-3 -mx-4 md:-mx-5">
           {areaTabs.map((tab) => (
             <button
               key={tab.value}
@@ -699,7 +592,7 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
               <span className="font-medium text-white/60">{tab.count}</span>
             </button>
           ))}
-        </div>
+        </FilterChipRow>
       </div>
 
       <div className="px-4 md:px-5 pb-8 sm:pb-10">

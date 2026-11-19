@@ -10,6 +10,7 @@ import type { VolunteerPoolEvent, VolunteerPoolMember } from '@/lib/volunteerInv
 import type { VolunteerStatus } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
 import Select from '@/components/Select';
+import FilterChipRow from './FilterChipRow';
 
 // The volunteer pool (stage 4d-2, PM.md): the volunteers who said they'd like to hear about
 // future events, kept like a mailing list. Nobody is in it by default: an admin adds them from
@@ -182,7 +183,7 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
         </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <div role="group" aria-label="Filter the pool" className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <FilterChipRow label="Filter the pool" className="-mx-4 md:mx-0 md:px-0">
             {filterTabs.map((tab) => (
               <button
                 key={tab.value}
@@ -197,7 +198,7 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
                 {tab.label}
               </button>
             ))}
-          </div>
+          </FilterChipRow>
           <input
             type="search"
             value={search}

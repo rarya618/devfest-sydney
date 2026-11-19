@@ -24,6 +24,7 @@ import type { MeetupFormat, MeetupProposal, MeetupProposalStatus, ReviewerNote }
 import { useMobileBarHidden } from './MobileBarContext';
 import ConfirmAction from './ConfirmAction';
 import DecisionButtons from './DecisionButtons';
+import FilterChipRow from './FilterChipRow';
 
 // Closes a popover on an outside click or Escape.
 function useDismissable(isOpen: boolean, containerRef: React.RefObject<HTMLDivElement | null>, onDismiss: () => void) {
@@ -651,7 +652,7 @@ export default function MeetupProposalsDashboard({ proposals, events, eventNames
           </div>
         </div>
 
-        <div role="group" aria-label="Filter proposals by format" className="mt-3 -mx-4 md:-mx-5 px-4 md:px-5 flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <FilterChipRow label="Filter proposals by format" className="mt-3 -mx-4 md:-mx-5">
           {formatTabs.map((tab) => (
             <button
               key={tab.value}
@@ -666,7 +667,7 @@ export default function MeetupProposalsDashboard({ proposals, events, eventNames
               <span className="font-medium text-white/60">{tab.count}</span>
             </button>
           ))}
-        </div>
+        </FilterChipRow>
       </div>
 
       <div className="px-4 md:px-5 pb-8 sm:pb-10">
