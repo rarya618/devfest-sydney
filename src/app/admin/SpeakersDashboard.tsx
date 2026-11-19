@@ -186,21 +186,11 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
   const [editing, setEditing] = useState(false);
   const [addingCoSpeaker, setAddingCoSpeaker] = useState(false);
   const isCoSpeaker = Boolean(speaker.coSpeakerOf);
-  const [confirmingRemove, setConfirmingRemove] = useState(false);
   const confirmation = CONFIRMATION_CHIP[speaker.confirmation];
   const missing = missingProfileParts(speaker);
 
-  useEffect(() => {
-    if (!confirmingRemove) return;
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setConfirmingRemove(false);
-    }
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [confirmingRemove]);
 
   function handleRemove() {
-    setConfirmingRemove(false);
     startTransition(async () => {
       const result = await removeSpeaker(speaker.talkId, speaker.id);
       if (result.error) onError(result.error);
@@ -495,49 +485,53 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
             </ConfirmAction>
           )}
 
-          <button
-            onClick={() => setConfirmingRemove((open) => !open)}
-            aria-label={`Remove ${speaker.name} from the lineup`}
-            aria-expanded={confirmingRemove}
-            title="Remove from lineup"
-            className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-white/60 hover:text-google-red-light hover:bg-google-red/[0.08]`}
-          >
-            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9h6.6l.7-9" />
-            </svg>
-          </button>
+          <ConfirmAction
 
-          {confirmingRemove && (
-            <div
-              role="group"
-              aria-label={`Confirm removing ${speaker.name}`}
-              className="absolute right-0 top-full mt-1.5 z-20 flex flex-col items-end gap-2 bg-surface-raised border border-white/10 rounded-2xl px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.45)] w-56"
-            >
-              <p className="text-xs text-white/70 leading-snug w-full">
-                {isCoSpeaker
-                  ? 'Remove this co-speaker from the lineup?'
-                  : coSpeakers.length > 0
-                    ? `Remove from the lineup with ${coSpeakers.map((coSpeaker) => coSpeaker.name.split(' ')[0]).join(' and ')}, and return the proposal to pending?`
-                    : 'Remove from the lineup and return the proposal to pending?'}
-              </p>
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => setConfirmingRemove(false)}
-                  aria-label="Keep this speaker"
-                  className="text-xs px-2.5 py-1 rounded-full border border-white/35 text-white/70 hover:border-white/60 hover:text-white transition-colors"
-                >
-                  Keep
-                </button>
-                <button
-                  onClick={handleRemove}
-                  aria-label={`Remove ${speaker.name} from the lineup`}
-                  className="text-xs px-2.5 py-1 rounded-full bg-google-red-deep text-white font-medium hover:opacity-90 transition-colors"
-                >
-                  Remove
-                </button>
-              </div>
-            </div>
-          )}
+            tone="danger"
+
+            message={`Remove ${speaker.name} from the lineup?`}
+
+            detail={isCoSpeaker
+
+              ? 'They come off this session. Nothing is emailed.'
+
+              : coSpeakers.length > 0
+
+                ? `The talk comes off the lineup with ${coSpeakers.map((coSpeaker) => coSpeaker.name.split(' ')[0]).join(' and ')}, and the proposal goes back to pending. Nothing is emailed.`
+
+                : 'The talk comes off the lineup and the proposal goes back to pending. Nothing is emailed.'}
+
+            confirmLabel="Remove"
+
+            onConfirm={handleRemove}
+
+          >
+
+            {(triggerProps) => (
+
+              <button
+
+                {...triggerProps}
+
+                aria-label={`Remove ${speaker.name} from the lineup`}
+
+                title="Remove from lineup"
+
+                className="inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-white/60 hover:text-google-red-light hover:bg-google-red/[0.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
+
+              >
+
+                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9h6.6l.7-9" />
+
+                </svg>
+
+              </button>
+
+            )}
+
+          </ConfirmAction>
         </div>
       </div>
 
@@ -602,7 +596,6 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
   const [alertMessage, setAlertMessage] = useState<string | null>(
     sessionTimes ? null : 'The schedule couldn\'t be loaded, so calendar invites are hidden for now. Refresh the page to try again.'
   );
-  const [confirmingBulk, setConfirmingBulk] = useState<BulkKind | null>(null);
   const [bulkProgress, setBulkProgress] = useState<{ kind: BulkKind; sent: number; total: number } | null>(null);
   const [isBulkPending, startBulkTransition] = useTransition();
   const [filter, setFilter] = useState<FilterTrack>('all');
@@ -697,7 +690,6 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
   function handleBulkSend(kind: BulkKind) {
     const targets = bulkTargets[kind];
     const { singular, plural } = BULK_COPY[kind];
-    setConfirmingBulk(null);
     if (targets.length === 0) return;
 
     startBulkTransition(async () => {
@@ -791,50 +783,42 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
               <p role="status" className="shrink-0 h-10 inline-flex items-center px-4 rounded-full bg-white/[0.06] text-sm font-bold text-white/70">
                 Sending {BULK_COPY[bulkProgress.kind].plural} {bulkProgress.sent} of {bulkProgress.total}
               </p>
-            ) : confirmingBulk ? (
-              <div role="group" aria-label={`Confirm sending ${BULK_COPY[confirmingBulk].plural}`} className="shrink-0 flex items-center gap-2 h-10 pl-4 pr-1.5 rounded-full bg-surface-raised border border-white/10">
-                <span className="text-sm text-white/70">
-                  Email {bulkTargets[confirmingBulk].length} {bulkTargets[confirmingBulk].length === 1 ? 'speaker' : 'speakers'}?
-                </span>
-                <button
-                  onClick={() => setConfirmingBulk(null)}
-                  aria-label={`Cancel sending ${BULK_COPY[confirmingBulk].plural}`}
-                  className="text-xs px-2.5 py-1 rounded-full border border-white/40 text-white/60 hover:border-white/60 hover:text-white transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => handleBulkSend(confirmingBulk)}
-                  aria-label={`Send ${BULK_COPY[confirmingBulk].plural} to ${bulkTargets[confirmingBulk].length} speakers`}
-                  className={`text-xs px-2.5 py-1 rounded-full font-bold hover:opacity-90 transition-opacity ${BULK_COPY[confirmingBulk].confirmClass}`}
-                >
-                  Send
-                </button>
-              </div>
             ) : (
               (['thanks', 'invites'] as const)
                 .filter((kind) => bulkTargets[kind].length > 0)
                 .map((kind) => (
-                  <button
+                  <ConfirmAction
                     key={kind}
-                    onClick={() => setConfirmingBulk(kind)}
-                    disabled={isBulkPending}
-                    aria-label={`Send ${BULK_COPY[kind].plural} to the ${bulkTargets[kind].length} confirmed speakers who need one`}
-                    title={BULK_COPY[kind].title}
-                    className={`shrink-0 inline-flex items-center gap-2 h-10 text-sm px-4 rounded-full font-bold transition-colors disabled:opacity-50 ${BULK_COPY[kind].buttonClass}`}
+                    tone="send"
+                    align="left"
+                    message={`Email ${bulkTargets[kind].length} ${bulkTargets[kind].length === 1 ? 'speaker' : 'speakers'} their ${bulkTargets[kind].length === 1 ? BULK_COPY[kind].singular : BULK_COPY[kind].plural}?`}
+                    detail={`${BULK_COPY[kind].title} They go one at a time, about a second apart.`}
+                    confirmLabel={`Send ${bulkTargets[kind].length}`}
+                    onConfirm={() => handleBulkSend(kind)}
+                    className="inline-flex shrink-0"
                   >
-                    {kind === 'invites' ? (
-                      <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                        <rect x="2" y="3" width="12" height="11" rx="1.5" />
-                        <path strokeLinecap="round" d="M2 6.5h12M5.5 1.75v2.5M10.5 1.75v2.5" />
-                      </svg>
-                    ) : (
-                      <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                        <path strokeLinejoin="round" d="M8 13.5S1.75 9.75 1.75 5.75A3 3 0 018 4a3 3 0 016.25 1.75C14.25 9.75 8 13.5 8 13.5z" />
-                      </svg>
+                    {(triggerProps) => (
+                      <button
+                        {...triggerProps}
+                        disabled={isBulkPending}
+                        aria-label={`Send ${BULK_COPY[kind].plural} to the ${bulkTargets[kind].length} confirmed speakers who need one`}
+                        title={BULK_COPY[kind].title}
+                        className={`shrink-0 inline-flex items-center gap-2 h-10 text-sm px-4 rounded-full font-bold transition-colors disabled:opacity-50 ${BULK_COPY[kind].buttonClass}`}
+                      >
+                        {kind === 'invites' ? (
+                          <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                            <rect x="2" y="3" width="12" height="11" rx="1.5" />
+                            <path strokeLinecap="round" d="M2 6.5h12M5.5 1.75v2.5M10.5 1.75v2.5" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                            <path strokeLinejoin="round" d="M8 13.5S1.75 9.75 1.75 5.75A3 3 0 018 4a3 3 0 016.25 1.75C14.25 9.75 8 13.5 8 13.5z" />
+                          </svg>
+                        )}
+                        Send {bulkTargets[kind].length} {bulkTargets[kind].length === 1 ? BULK_COPY[kind].singular : BULK_COPY[kind].plural}
+                      </button>
                     )}
-                    Send {bulkTargets[kind].length} {bulkTargets[kind].length === 1 ? BULK_COPY[kind].singular : BULK_COPY[kind].plural}
-                  </button>
+                  </ConfirmAction>
                 ))
             )}
 

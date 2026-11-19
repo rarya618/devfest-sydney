@@ -82,21 +82,11 @@ function CrewCard({ member, onError }: CrewCardProps) {
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [confirmingRemove, setConfirmingRemove] = useState(false);
   const confirmation = VOLUNTEER_CONFIRMATION_CHIPS[member.confirmation];
   const isOrganiser = member.isOrganiser;
 
-  useEffect(() => {
-    if (!confirmingRemove) return;
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setConfirmingRemove(false);
-    }
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [confirmingRemove]);
 
   function handleRemove() {
-    setConfirmingRemove(false);
     startTransition(async () => {
       const result = await removeFromCrew(member.id);
       if (result.error) onError(result.error);
@@ -359,42 +349,49 @@ function CrewCard({ member, onError }: CrewCardProps) {
             </button>
           )}
 
-          {confirmingRemove ? (
-            <div role="group" aria-label={`Confirm removing ${member.name}`} className="flex flex-col items-end gap-1.5 bg-surface-raised border border-white/10 rounded-xl px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.45)] w-52">
-              <p className="text-xs text-white/70 leading-snug text-left w-full">
-                {isOrganiser
-                  ? 'Remove this organiser? Their record is deleted, not returned to the signup queue.'
-                  : 'Remove from the crew and put the signup back to pending?'}
-              </p>
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => setConfirmingRemove(false)}
-                  aria-label={`Keep ${isOrganiser ? 'this organiser' : 'this crew member'}`}
-                  className="text-xs px-2.5 py-1 rounded-lg border border-white/40 text-white/50 hover:border-white/60 hover:text-white transition-colors"
-                >
-                  Keep
-                </button>
-                <button
-                  onClick={handleRemove}
-                  aria-label={`Remove ${member.name} from the crew`}
-                  className="text-xs px-2.5 py-1 rounded-full bg-google-red-deep text-white font-medium hover:opacity-90 transition-colors"
-                >
-                  Remove
-                </button>
-              </div>
-            </div>
-          ) : (
-            <button
-              onClick={() => setConfirmingRemove(true)}
-              aria-label={`Remove ${member.name} from the crew`}
-              title="Remove from crew"
-              className="inline-flex items-center justify-center w-9 h-9 rounded-full text-white/55 hover:text-google-red-light hover:bg-google-red/[0.08] transition-colors"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9h6.6l.7-9" />
-              </svg>
-            </button>
-          )}
+          <ConfirmAction
+
+            tone="danger"
+
+            message={isOrganiser ? `Remove ${member.name} as an organiser?` : `Remove ${member.name} from the crew?`}
+
+            detail={isOrganiser
+
+              ? 'Their organiser record is deleted, not returned to the signup queue.'
+
+              : 'Their signup goes back to pending. Nothing is emailed.'}
+
+            confirmLabel="Remove"
+
+            onConfirm={handleRemove}
+
+          >
+
+            {(triggerProps) => (
+
+              <button
+
+                {...triggerProps}
+
+                aria-label={`Remove ${member.name} from the crew`}
+
+                title="Remove from crew"
+
+                className="inline-flex items-center justify-center w-9 h-9 rounded-full text-white/60 hover:text-google-red-light hover:bg-google-red/[0.08] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
+
+              >
+
+                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9h6.6l.7-9" />
+
+                </svg>
+
+              </button>
+
+            )}
+
+          </ConfirmAction>
         </div>
       </div>
 
