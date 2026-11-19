@@ -10,7 +10,7 @@ export const VOLUNTEER_STATUS_DOT_STYLES: Record<VolunteerStatus, { text: string
 export const VOLUNTEER_STATUS_LABELS: Record<VolunteerStatus, string> = {
   pending: 'Pending',
   accepted: 'Accepted',
-  rejected: 'Rejected',
+  rejected: 'Not selected',
   archived: 'Archived',
 };
 
