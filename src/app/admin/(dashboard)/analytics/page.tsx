@@ -3,7 +3,7 @@ import { getVerifiedSession } from '@/lib/adminSession';
 import { loadGdgAnalytics, type EventAnalyticsRow, type GdgAnalytics, type WaitingItem } from '@/lib/gdgAnalytics';
 import StickyAdminHeader from '../../StickyAdminHeader';
 import SubmissionsOverTimeChart from '../../SubmissionsOverTimeChart';
-import { ChannelsCard, EmptyState, StatStrip, StatTile, StatusTiles } from '../../analyticsShared';
+import { ChannelsCard, Disclosure, EmptyState, StatStrip, StatTile, StatusTiles } from '../../analyticsShared';
 import { Chip, StatusLabel } from '../../Chips';
 import LoadFailureAlert from '../../LoadFailureAlert';
 
@@ -36,9 +36,9 @@ function SectionHeading({ id, children, takeaway }: { id: string; children: Reac
 
 function FigureDefinitions() {
   return (
-    <details className="text-sm text-white/60">
-      <summary className="inline-flex min-h-11 cursor-pointer select-none items-center font-bold text-white/70">What these figures mean</summary>
-      <ul className="mt-1 max-w-prose list-disc space-y-1.5 pl-5">
+    // A footnote to the whole page, so it sits closer than the 40px between sections.
+    <Disclosure summary="What these figures mean" className="-mt-6">
+      <ul className="mt-1 max-w-prose list-disc space-y-1.5 pl-5 text-sm text-white/60">
         <li>First-time means their first talk with GDG Sydney; returning means they spoke at an earlier event. In the bars, green is returning and grey is first-time.</li>
         <li>A meetup counts only the proposals accepted into it.</li>
         <li>People on file have a speaker profile. A talk counts once it is on an event&rsquo;s programme, upcoming events included.</li>
@@ -46,7 +46,7 @@ function FigureDefinitions() {
         <li>Repeat speakers have talks at more than one event; repeat volunteers signed up for more than one.</li>
         <li>Each organiser is counted once, whichever events they organised.</li>
       </ul>
-    </details>
+    </Disclosure>
   );
 }
 
@@ -113,9 +113,9 @@ function WaitingForDecision({ waiting }: { waiting: WaitingItem[] }) {
             <Link
               href={waitingHref(item)}
               aria-label={`Review ${item.count} ${noun}${item.eventName ? ` for ${item.eventName}` : ''}; ${describeAge(item.oldestDays)}`}
-              className="group flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-white/[0.04] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-google-blue"
+              className="group flex items-center gap-3 px-4 py-3.5 sm:gap-4 sm:px-5 transition-colors hover:bg-white/[0.04] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-google-blue"
             >
-              <span className="w-10 shrink-0 text-2xl font-bold tabular-nums text-off-white">{item.count}</span>
+              <span className="w-8 shrink-0 text-2xl font-bold tabular-nums text-off-white sm:w-10">{item.count}</span>
               <span className="min-w-0 flex-1">
                 <span className="block font-bold text-off-white">{noun.charAt(0).toUpperCase() + noun.slice(1)}</span>
                 <span className="block text-sm text-white/60">
@@ -125,9 +125,13 @@ function WaitingForDecision({ waiting }: { waiting: WaitingItem[] }) {
                   </span>
                 </span>
               </span>
-              <span className="shrink-0 rounded-full border border-white/35 px-4 py-1.5 text-sm font-bold text-off-white transition-colors group-hover:border-white">
+              <span className="hidden shrink-0 rounded-full border border-white/35 px-4 py-1.5 text-sm font-bold text-off-white transition-colors group-hover:border-white sm:inline-flex">
                 Review
               </span>
+              {/* On a phone the pill squeezed the row to four lines; the row's own open arrow says the same. */}
+              <svg className="h-4 w-4 shrink-0 text-white/60 group-hover:text-white sm:hidden" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 3.5L10.5 8 6 12.5" />
+              </svg>
             </Link>
           </li>
         );
@@ -233,9 +237,11 @@ function EventCards({ events }: { events: EventAnalyticsRow[] }) {
 }
 
 function EventRows({ events }: { events: EventAnalyticsRow[] }) {
-  const cell = 'px-4 py-3 align-top';
+  // 20px at the outer edges, the inset of every other panel on the page, so the event names
+  // line up with the waiting list and the figures above and below them.
+  const cell = 'px-3 py-3 align-top first:pl-5 last:pr-5';
   return (
-    <div className="bg-surface border border-white/10 rounded-2xl overflow-x-auto">
+    <div className="overflow-x-auto rounded-2xl bg-surface">
       <table className="w-full min-w-[640px] text-sm text-white/80">
         <caption className="sr-only">GDG Sydney events, newest first, with their talks, speakers, proposals and volunteers</caption>
         <thead>
@@ -280,13 +286,10 @@ function EventsList({ events }: { events: EventAnalyticsRow[] }) {
       <div className="sm:hidden"><EventCards events={recent} /></div>
       <div className="hidden sm:block"><EventRows events={recent} /></div>
       {earlier.length > 0 && (
-        <details className="mt-3">
-          <summary className="inline-flex min-h-11 cursor-pointer select-none items-center text-sm font-bold text-white/70">
-            Earlier events ({earlier.length})
-          </summary>
+        <Disclosure summary={`Earlier events (${earlier.length})`} className="mt-2">
           <div className="mt-2 sm:hidden"><EventCards events={earlier} /></div>
           <div className="mt-2 hidden sm:block"><EventRows events={earlier} /></div>
-        </details>
+        </Disclosure>
       )}
     </>
   );
@@ -318,8 +321,8 @@ function AnalyticsBody({ analytics }: { analytics: GdgAnalytics }) {
         <EventsList events={analytics.events} />
       </section>
 
-      <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
-      <section aria-labelledby="speakers-heading">
+      <div className="grid gap-10 lg:grid-cols-2">
+      <section aria-labelledby="speakers-heading" className="flex flex-col">
         <SectionHeading
           id="speakers-heading"
           takeaway={
@@ -328,7 +331,7 @@ function AnalyticsBody({ analytics }: { analytics: GdgAnalytics }) {
         >
           Speakers across events
         </SectionHeading>
-        <StatStrip className="">
+        <StatStrip className="flex-1">
           <StatTile label="People on file" count={speakers.people} />
           <StatTile label="Speakers with a talk" count={speakers.withTalks} />
           <StatTile label="Repeat speakers" count={speakers.repeat} />
@@ -336,7 +339,7 @@ function AnalyticsBody({ analytics }: { analytics: GdgAnalytics }) {
         </StatStrip>
       </section>
 
-      <section aria-labelledby="volunteers-heading">
+      <section aria-labelledby="volunteers-heading" className="flex flex-col">
         <SectionHeading
           id="volunteers-heading"
           takeaway={
@@ -347,9 +350,9 @@ function AnalyticsBody({ analytics }: { analytics: GdgAnalytics }) {
         >
           Volunteers across events
         </SectionHeading>
-        <StatStrip className="">
-          <StatTile label="Volunteer profiles" count={volunteers.profiles} />
-          <StatTile label="In the volunteer pool" count={volunteers.inPool} />
+        <StatStrip className="flex-1">
+          <StatTile label="Profiles" count={volunteers.profiles} />
+          <StatTile label="In the pool" count={volunteers.inPool} />
           <StatTile label="Signups" count={volunteers.signups} />
           <StatTile label="Repeat volunteers" count={volunteers.repeat} />
           <StatTile label="Organisers" count={volunteers.organisers} />
@@ -383,17 +386,14 @@ function AnalyticsBody({ analytics }: { analytics: GdgAnalytics }) {
         {meetupProposals.total === 0 ? (
           <EmptyState message="No meetup proposals yet." />
         ) : (
-          <details className="mt-1">
-            <summary className="inline-flex min-h-11 cursor-pointer select-none items-center text-sm font-bold text-white/70">
-              Proposals over time and how they arrived
-            </summary>
+          <Disclosure summary="Proposals over time and how they arrived" className="-mt-4">
             <div className="mt-2">
               <SubmissionsOverTimeChart entries={meetupProposals.submittedAt.map((submittedAt) => ({ submittedAt }))} noun="proposals" accent="green" />
-              <div className="grid items-start sm:grid-cols-2 gap-3">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <ChannelsCard title="How proposals arrived" channels={meetupProposals.bySource} total={meetupProposals.total} noun="proposals" barClass="bg-google-green" />
               </div>
             </div>
-          </details>
+          </Disclosure>
         )}
       </section>
 
