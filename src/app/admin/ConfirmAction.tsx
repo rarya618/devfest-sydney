@@ -27,8 +27,9 @@ interface ConfirmActionProps {
   detail?: string;
   /** The confirm button's words: "Send email", "Undo acceptance". */
   confirmLabel: string;
-  /** `send` for an email (Blue 700), `danger` for something that deletes (Red 600). */
-  tone: 'send' | 'danger';
+  /** `send` for an email (Blue 700), `accept` for a decision in someone's favour (Green 700),
+   *  `danger` for something that deletes or turns someone down (Red 600). */
+  tone: 'send' | 'accept' | 'danger';
   onConfirm: () => void;
   /** Which side of the trigger the panel lines up with. */
   align?: 'left' | 'right';
@@ -82,9 +83,11 @@ export default function ConfirmAction({
     };
   }, [isOpen]);
 
-  const confirmClasses = tone === 'danger'
-    ? 'bg-google-red-deep focus-visible:ring-google-red-light'
-    : 'bg-google-blue-deep focus-visible:ring-google-blue';
+  const confirmClasses = {
+    send: 'bg-google-blue-deep focus-visible:ring-google-blue',
+    accept: 'bg-google-green-deep focus-visible:ring-google-blue',
+    danger: 'bg-google-red-deep focus-visible:ring-google-red-light',
+  }[tone];
 
   return (
     <div className={`relative ${className}`}>
