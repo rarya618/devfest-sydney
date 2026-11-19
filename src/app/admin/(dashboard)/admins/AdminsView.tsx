@@ -7,6 +7,7 @@ import Alert from '@/components/Alert';
 import InviteAdminForm from '../../InviteAdminForm';
 import { useMobileBarHidden } from '../../MobileBarContext';
 import type { AdminUser } from '@/lib/types';
+import ConfirmAction from '../../ConfirmAction';
 
 interface Props {
   admins: AdminUser[];
@@ -66,14 +67,25 @@ export default function AdminsView({ admins, currentAdminEmail }: Props) {
                   </p>
                   <p className="text-xs text-white/50 truncate">{admin.email}</p>
                 </div>
-                <button
-                  onClick={() => handleRemove(admin.email)}
-                  disabled={isSelf || isPending}
-                  aria-label={`Remove admin access for ${admin.name}`}
-                  className="order-3 md:order-4 shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border border-google-red-light/60 text-google-red-light hover:bg-google-red/[0.06] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                <ConfirmAction
+                  tone="danger"
+                  message={`Remove admin access for ${admin.name}?`}
+                  detail="They're signed out of the admin and can't sign back in until someone adds them again."
+                  confirmLabel="Remove access"
+                  onConfirm={() => handleRemove(admin.email)}
+                  className="inline-flex order-3 md:order-4 shrink-0"
                 >
-                  {removing ? 'Removing…' : 'Remove'}
-                </button>
+                  {(triggerProps) => (
+                    <button
+                      {...triggerProps}
+                      disabled={isSelf || isPending}
+                      aria-label={`Remove admin access for ${admin.name}`}
+                      className="order-3 md:order-4 shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border border-google-red-light/60 text-google-red-light hover:bg-google-red/[0.06] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {removing ? 'Removing…' : 'Remove'}
+                    </button>
+                  )}
+                </ConfirmAction>
                 <div className="order-4 md:order-3 w-full md:w-auto pl-12 md:pl-0 text-left md:text-right md:shrink-0">
                   <p className="text-xs text-white/55 truncate">
                     Added {formatDate(admin.addedAt)}

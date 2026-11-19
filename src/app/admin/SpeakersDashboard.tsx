@@ -24,6 +24,7 @@ import { formatScheduleTime, SCHEDULE_ROOM_LABELS } from '@/lib/scheduleLabels';
 import type { CalendarInviteStatus, Speaker, SpeakerConfirmation, SpeakerSessionTime, Track } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
 import HistoryDisclosure, { stampedOn, type HistoryRow } from './HistoryDisclosure';
+import ConfirmAction from './ConfirmAction';
 
 // The speaker card's history rows. Same shape as the crew card's, so the two dashboards
 // read the same way; the dates themselves differ because a speaker is promoted from a
@@ -87,6 +88,14 @@ const INVITE_BUTTON_TITLE: Record<Exclude<CalendarInviteStatus, 'unscheduled'>, 
   changed: 'Send calendar update',
   removed: 'Send calendar cancellation',
   sent: 'Resend calendar invite',
+};
+
+// What each calendar send does, for its confirmation.
+const INVITE_CONFIRM_DETAIL: Record<Exclude<CalendarInviteStatus, 'unscheduled'>, string> = {
+  'not-sent': 'It adds their session to their calendar.',
+  changed: 'It moves the session in their calendar to its new time or room.',
+  removed: 'It takes the session out of their calendar.',
+  sent: 'They get the same invite again; their calendar keeps one entry.',
 };
 
 type FilterTrack = 'all' | Track;
@@ -383,62 +392,106 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
           )}
 
           {canEmail && (
-            <button
-              onClick={handleSendAcceptanceEmail}
-              disabled={isPending}
-              aria-label={`${alreadyEmailed ? 'Resend' : 'Send'} acceptance email to ${speaker.name} for: ${speaker.talkTitle}`}
-              title={alreadyEmailed ? 'Resend acceptance email' : 'Send acceptance email'}
-              className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${alreadyEmailed ? quietIcon : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'}`}
+            <ConfirmAction
+              tone="send"
+              message={`${alreadyEmailed ? 'Resend' : 'Send'} the acceptance email to ${speaker.name}?`}
+              detail={speaker.confirmation === 'confirmed'
+                ? 'They have confirmed their spot. They get the email again anyway.'
+                : alreadyEmailed
+                  ? `Last sent ${formatDate(speaker.acceptanceEmailSentAt!)}. They get it again, with a new date to confirm by.`
+                  : 'It tells them their talk is in and asks them to confirm their spot.'}
+              confirmLabel={alreadyEmailed ? 'Resend email' : 'Send email'}
+              onConfirm={handleSendAcceptanceEmail}
             >
-              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
-              </svg>
-            </button>
+              {(triggerProps) => (
+                <button
+                  {...triggerProps}
+                  disabled={isPending}
+                  aria-label={`${alreadyEmailed ? 'Resend' : 'Send'} acceptance email to ${speaker.name} for: ${speaker.talkTitle}`}
+                  title={alreadyEmailed ? 'Resend acceptance email' : 'Send acceptance email'}
+                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${alreadyEmailed ? quietIcon : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'}`}
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                    <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
+                  </svg>
+                </button>
+              )}
+            </ConfirmAction>
           )}
 
           {canSendTicket && (
-            <button
-              onClick={handleSendSpeakerTicket}
-              disabled={isPending}
-              aria-label={`${ticketSent ? 'Resend' : 'Send'} the complimentary speaker ticket to ${speaker.name}`}
-              title={ticketSent ? 'Resend speaker ticket' : 'Send speaker ticket'}
-              className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${ticketSent ? quietIcon : 'bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white'}`}
+            <ConfirmAction
+              tone="send"
+              message={`${ticketSent ? 'Resend' : 'Send'} the speaker ticket to ${speaker.name}?`}
+              detail={ticketSent ? 'They get the free ticket link again.' : 'It emails them the link to their free speaker ticket.'}
+              confirmLabel={ticketSent ? 'Resend ticket' : 'Send ticket'}
+              onConfirm={handleSendSpeakerTicket}
             >
-              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 6.25V4.5a1 1 0 011-1h11a1 1 0 011 1v1.75a1.75 1.75 0 000 3.5V11.5a1 1 0 01-1 1h-11a1 1 0 01-1-1V9.75a1.75 1.75 0 000-3.5z" />
-                <path strokeLinecap="round" strokeDasharray="1.5 1.5" d="M10 4v8" />
-              </svg>
-            </button>
+              {(triggerProps) => (
+                <button
+                  {...triggerProps}
+                  disabled={isPending}
+                  aria-label={`${ticketSent ? 'Resend' : 'Send'} the complimentary speaker ticket to ${speaker.name}`}
+                  title={ticketSent ? 'Resend speaker ticket' : 'Send speaker ticket'}
+                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${ticketSent ? quietIcon : 'bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white'}`}
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 6.25V4.5a1 1 0 011-1h11a1 1 0 011 1v1.75a1.75 1.75 0 000 3.5V11.5a1 1 0 01-1 1h-11a1 1 0 01-1-1V9.75a1.75 1.75 0 000-3.5z" />
+                    <path strokeLinecap="round" strokeDasharray="1.5 1.5" d="M10 4v8" />
+                  </svg>
+                </button>
+              )}
+            </ConfirmAction>
           )}
 
           {inviteAction && (
-            <button
-              onClick={handleSendCalendarInvite}
-              disabled={isPending}
-              aria-label={`${INVITE_BUTTON_TITLE[inviteAction]} to ${speaker.name}`}
-              title={INVITE_BUTTON_TITLE[inviteAction]}
-              className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${inviteNeedsSending ? 'bg-google-yellow/15 text-google-yellow hover:bg-google-yellow hover:text-black-02' : quietIcon}`}
+            <ConfirmAction
+              tone="send"
+              message={`${INVITE_BUTTON_TITLE[inviteAction]} to ${speaker.name}?`}
+              detail={INVITE_CONFIRM_DETAIL[inviteAction]}
+              confirmLabel={INVITE_BUTTON_TITLE[inviteAction].replace(/ calendar /, ' ').replace(/^./, (letter) => letter.toUpperCase())}
+              onConfirm={handleSendCalendarInvite}
             >
-              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                <rect x="2" y="3" width="12" height="11" rx="1.5" />
-                <path strokeLinecap="round" d="M2 6.5h12M5.5 1.75v2.5M10.5 1.75v2.5" />
-              </svg>
-            </button>
+              {(triggerProps) => (
+                <button
+                  {...triggerProps}
+                  disabled={isPending}
+                  aria-label={`${INVITE_BUTTON_TITLE[inviteAction]} to ${speaker.name}`}
+                  title={INVITE_BUTTON_TITLE[inviteAction]}
+                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${inviteNeedsSending ? 'bg-google-yellow/15 text-google-yellow hover:bg-google-yellow hover:text-black-02' : quietIcon}`}
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                    <rect x="2" y="3" width="12" height="11" rx="1.5" />
+                    <path strokeLinecap="round" d="M2 6.5h12M5.5 1.75v2.5M10.5 1.75v2.5" />
+                  </svg>
+                </button>
+              )}
+            </ConfirmAction>
           )}
 
           {canSendTicket && (
-            <button
-              onClick={handleSendThanks}
-              disabled={isPending}
-              aria-label={`${thanksSent ? 'Resend' : 'Send'} the thank-you email with photos, mug and Asana trial to ${speaker.name}`}
-              title={thanksSent ? 'Resend thank-you' : 'Send thank-you'}
-              className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${thanksSent ? quietIcon : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'}`}
+            <ConfirmAction
+              tone="send"
+              message={`${thanksSent ? 'Resend' : 'Send'} the thank-you email to ${speaker.name}?`}
+              detail={thanksSent ? 'They get the photos, mug and Asana trial offer again.' : 'It links the event photos and offers the mug and the Asana trial.'}
+              confirmLabel={thanksSent ? 'Resend email' : 'Send email'}
+              onConfirm={handleSendThanks}
             >
-              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                <path strokeLinejoin="round" d="M8 13.5S1.75 9.75 1.75 5.75A3 3 0 018 4a3 3 0 016.25 1.75C14.25 9.75 8 13.5 8 13.5z" />
-              </svg>
-            </button>
+              {(triggerProps) => (
+                <button
+                  {...triggerProps}
+                  disabled={isPending}
+                  aria-label={`${thanksSent ? 'Resend' : 'Send'} the thank-you email with photos, mug and Asana trial to ${speaker.name}`}
+                  title={thanksSent ? 'Resend thank-you' : 'Send thank-you'}
+                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${thanksSent ? quietIcon : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'}`}
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                    <path strokeLinejoin="round" d="M8 13.5S1.75 9.75 1.75 5.75A3 3 0 018 4a3 3 0 016.25 1.75C14.25 9.75 8 13.5 8 13.5z" />
+                  </svg>
+                </button>
+              )}
+            </ConfirmAction>
           )}
 
           <button

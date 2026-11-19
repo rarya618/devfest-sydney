@@ -22,6 +22,7 @@ import {
 } from '@/lib/meetupProposalLabels';
 import type { MeetupFormat, MeetupProposal, MeetupProposalStatus, ReviewerNote } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
+import ConfirmAction from './ConfirmAction';
 
 // Closes a popover on an outside click or Escape.
 function useDismissable(isOpen: boolean, containerRef: React.RefObject<HTMLDivElement | null>, onDismiss: () => void) {
@@ -349,24 +350,36 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
             </div>
           )}
           {isAccepted && (
-            <button
-              onClick={() => handleAction(sendMeetupAcceptanceEmail)}
-              disabled={isPending}
-              aria-label={`${proposal.acceptanceEmailSentAt ? 'Resend' : 'Send'} the acceptance email for ${proposal.talkTitle}`}
-              title={proposal.acceptanceEmailSentAt ? 'Resend acceptance email' : 'Send acceptance email'}
-              className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-60 ${
-                // Highlighted only while the speaker still needs telling: not once sent, nor for a
-                // talk agreed outside the form and confirmed without an email.
-                proposal.acceptanceEmailSentAt || proposal.confirmation === 'confirmed'
-                  ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
-                  : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
-              }`}
+            <ConfirmAction
+              tone="send"
+              message={`${proposal.acceptanceEmailSentAt ? 'Resend' : 'Send'} the acceptance email to ${proposal.name}?`}
+              detail={proposal.acceptanceEmailSentAt
+                ? `Last sent ${formatDate(proposal.acceptanceEmailSentAt)}. They get it again, with a new date to confirm by.`
+                : 'It tells them their talk is on the meetup\'s programme and asks them to confirm.'}
+              confirmLabel={proposal.acceptanceEmailSentAt ? 'Resend email' : 'Send email'}
+              onConfirm={() => handleAction(sendMeetupAcceptanceEmail)}
             >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
-              </svg>
-            </button>
+              {(triggerProps) => (
+                <button
+                  {...triggerProps}
+                  disabled={isPending}
+                  aria-label={`${proposal.acceptanceEmailSentAt ? 'Resend' : 'Send'} the acceptance email for ${proposal.talkTitle}`}
+                  title={proposal.acceptanceEmailSentAt ? 'Resend acceptance email' : 'Send acceptance email'}
+                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-60 ${
+                    // Highlighted only while the speaker still needs telling: not once sent, nor for a
+                    // talk agreed outside the form and confirmed without an email.
+                    proposal.acceptanceEmailSentAt || proposal.confirmation === 'confirmed'
+                      ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
+                      : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
+                  }`}
+                >
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                    <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
+                  </svg>
+                </button>
+              )}
+            </ConfirmAction>
           )}
           {proposal.status !== 'pending' && (
             <button
