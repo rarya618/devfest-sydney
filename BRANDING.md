@@ -92,7 +92,7 @@ The whole app (admin, speaker portal, sign-in, the email-link pages, the DevFest
 
 `text-google-green-light` was added 2026-11-19 for the same reason: core green clears AA as plain text on a card (4.8:1) but not on its own tint (3.9:1), which the admin's "Confirmed" chips used.
 
-`text-google-blue-light` exists because the core blue is fine as plain text on a dark card (5.3:1) but drops to 4.5:1 once it sits on its own `bg-google-blue/15` tint, which is how every admin chip is built. Green and yellow clear AA on the same tint, so they stay on the core colours; only blue needed the lighter variant.
+`text-google-blue-light` exists because the core blue is weak as small text on dark: 4.7:1 on the Black 02 page, 4.1:1 on a `#282828` card (measured 2026-11-19), and lower again on its own `bg-google-blue/15` tint, which is how the admin chips were built. Use Blue 300 for blue text. Yellow clears AA on its tint (7.6:1 on a card), so it stays on the core colour; green needs Green 300 on a tint (above).
 
 ### Interactive States (site-only)
 
