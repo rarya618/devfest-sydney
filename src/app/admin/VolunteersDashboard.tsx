@@ -392,15 +392,17 @@ interface Props {
   // Set on General events > Volunteers: the general events to pick between, and which one
   // is shown. Absent on the DevFest page, which follows the sidebar's DevFest picker.
   generalEvents?: { events: { id: string; name: string }[]; selectedId: string };
+  // Opens the list already filtered to what is waiting (`?status=pending`, from Community overview).
+  initialStatus?: 'pending';
 }
 
 type FilterStatus = 'all' | VolunteerStatus;
 type FilterArea = 'all' | VolunteerArea;
 
-export default function VolunteersDashboard({ volunteers, generalEvents }: Props) {
+export default function VolunteersDashboard({ volunteers, generalEvents, initialStatus }: Props) {
   const router = useRouter();
   const mobileBarHidden = useMobileBarHidden();
-  const [filter, setFilter] = useState<FilterStatus>('all');
+  const [filter, setFilter] = useState<FilterStatus>(initialStatus ?? 'all');
   const [areaFilter, setAreaFilter] = useState<FilterArea>('all');
   const [search, setSearch] = useState('');
   const [statusMenuOpen, setStatusMenuOpen] = useState(false);

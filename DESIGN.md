@@ -391,6 +391,21 @@ The organiser admin is a working tool: dense, scannable, one signal per fact.
 - **Decision:** a pending record's choice is "Accept" (Green 700) and "Not this time" (outline), both confirmed (`DecisionButtons.tsx`).
 - **No side stripes.** Admin cards are plain `#282828` at 16px radius; track, role and type are said once, in a chip.
 
+### Analytics (2026-11-19)
+Community overview (`/admin/analytics`) and Form results (`/admin/devfest/analytics`) share `analyticsShared.tsx`.
+- **Stat strip:** one `#282828` panel at 16px radius holding the figures, not a pill each: a 14px label at white 60% over a 24px Bold off-white number, a 12px white 60% subtext (visible, never a tooltip). A 6px status dot leads the label only where the figure is a record's status (Pending yellow, Accepted green, Not selected white 40%). No icons, no tints. Zero counts drop to white 60%. Columns follow the count and the panel's own width (a container query), so no figure sits alone on a row: four go 2 by 2 then 4 across from 36rem, five go 3 and 2 then 5 across from 42rem. Each figure is a three-row subgrid with balanced labels, so a label that wraps keeps the numbers level.
+- **Waiting for a decision:** the first thing on the overview. One row per queue with something pending on an event still to come: the count, the noun, the event, how long the oldest has waited (yellow text from a week), and a "Review" outline pill (on phones the row's open arrow instead, so it stays two lines). The whole row links to that queue filtered to pending (`?status=pending`). With nothing waiting it is a single green status label.
+- **Retention bar:** a 96px by 6px bar 6px under the caption of a speakers or volunteers count (the caption comes first, so captions line up across a row; it breaks only after its comma), returning in Google Green beside first-time in white 30%, always next to its words ("4 first-time, 2 returning"). The overview's definition line names the colours.
+- **Section text:** each section opens with one takeaway sentence at white 80%. The definitions of every term live once, in a collapsed "What these figures mean" note at the foot of the page, not under each heading.
+- **Spacing:** every panel (stat strip, waiting list, events table, chart, breakdown cards) is plain `#282828` with no outline and a 20px inset (16px on phones), the table's outer cells included, so content lines up down the page. Sections are 40px apart, a heading 16px above its panel; panels in one group are 12px apart, with 24px under a stat strip. Cards in a row stretch to one height, and the speakers and volunteers panels end level. "What these figures mean" is a footnote, 16px under the last section.
+- **Folds:** every fold ("Earlier events", the meetup detail, "What these figures mean", "View as table") is `Disclosure` in `analyticsShared.tsx`: a 12px chevron that turns as it opens, 44px tall, a blue focus ring.
+- **Tabs:** Form results' section tabs are the admin's filled filter chips (white 6%, 12% when current) in `FilterChipRow`, fading at the edge that has more.
+- **Chart axis:** a round step (1, 2 or 5 times a power of ten), at most four gaps, the axis topped at a step.
+- **Keeping it short:** the four newest events show and older ones fold under "Earlier events"; the meetup chart and breakdown fold under one toggle; speakers and volunteers sit side by side from 1024px; the stat strip fits three columns on a phone.
+- **A lone source** ("Where they heard of us" with one answer) is a sentence under the grid, not a bar at 100%.
+- **Phones:** the events table becomes stacked cards below 640px with the same facts. Chart axis labels are sized from the chart's on-screen scale to stay at 12px. Tabs and "View as table" are 44px tall.
+- **A failed load** raises the bottom-left Alert (`LoadFailureAlert.tsx`) over a quiet empty state.
+
 ### Alert
 - The app's only error surface, anchored bottom-left (16px inset, 24px from 640px, full width less the gutters on phones, max 24rem). `#303030` with a 40% red border, 12px radius, 12px by 16px, a small red-tinted circle icon, 14px text at white 80%, and a dismiss button. It rises 12px and fades in over 300ms and stays until dismissed.
 

@@ -487,11 +487,13 @@ interface Props {
   proposals: MeetupProposal[];
   events: MeetupEventOption[];
   eventNames: Record<string, string>;
+  // Opens the list already filtered to what is waiting (`?status=pending`, from Community overview).
+  initialStatus?: 'pending';
 }
 
-export default function MeetupProposalsDashboard({ proposals, events, eventNames }: Props) {
+export default function MeetupProposalsDashboard({ proposals, events, eventNames, initialStatus }: Props) {
   const mobileBarHidden = useMobileBarHidden();
-  const [statusFilter, setStatusFilter] = useState<FilterStatus>('all');
+  const [statusFilter, setStatusFilter] = useState<FilterStatus>(initialStatus ?? 'all');
   const [formatFilter, setFormatFilter] = useState<FilterFormat>('all');
   const [search, setSearch] = useState('');
   const [statusMenuOpen, setStatusMenuOpen] = useState(false);

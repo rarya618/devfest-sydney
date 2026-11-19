@@ -1,7 +1,7 @@
 import { TRACK_LABELS, TRACK_DOT_COLORS, FORMAT_LABELS, EXPERIENCE_LABELS } from '@/lib/submissionLabels';
 import type { Submission, SubmissionStatus, Track, TalkFormat, ExperienceLevel } from '@/lib/types';
 import SubmissionsOverTimeChart from '../../../SubmissionsOverTimeChart';
-import { BarRow, BreakdownCard, EmptyState, StatusTiles, countChannels, countUniqueEmails } from '../../../analyticsShared';
+import { BarRow, BreakdownCard, ChannelsCard, EmptyState, StatusTiles, countChannels, countUniqueEmails } from '../../../analyticsShared';
 
 interface Props {
   submissions: Submission[];
@@ -40,21 +40,21 @@ export default function SpeakerAnalytics({ submissions }: Props) {
     <>
       <StatusTiles
         total={total}
-        totalLabel="Submissions"
+        totalLabel="Proposals"
         uniqueCount={countUniqueEmails(submissions)}
-        uniqueLabel="Unique applicants"
+        uniqueLabel="People who proposed"
         pending={statusCounts.pending}
         accepted={statusCounts.accepted}
         rejected={statusCounts.rejected}
       />
 
       {total === 0 ? (
-        <EmptyState message="No submissions yet." />
+        <EmptyState message="No talk proposals for this DevFest yet." />
       ) : (
         <>
-          <SubmissionsOverTimeChart entries={submissions} noun="submissions" accent="blue" />
+          <SubmissionsOverTimeChart entries={submissions} noun="proposals" accent="blue" />
 
-          <div className="grid sm:grid-cols-2 gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <BreakdownCard title="By track">
               {TRACK_ORDER.filter((track) => trackCounts[track]).map((track) => (
                 <BarRow
@@ -86,11 +86,7 @@ export default function SpeakerAnalytics({ submissions }: Props) {
               <BarRow label="Requires travel support" count={requiresTravelSupportCount} total={total} />
             </BreakdownCard>
 
-            <BreakdownCard title="Traffic sources">
-              {channels.map(([channel, count]) => (
-                <BarRow key={channel} label={channel} count={count} total={total} />
-              ))}
-            </BreakdownCard>
+            <ChannelsCard title="Where they heard of us" channels={channels} total={total} noun="proposals" />
           </div>
         </>
       )}

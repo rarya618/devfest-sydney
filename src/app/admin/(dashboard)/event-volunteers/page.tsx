@@ -10,7 +10,7 @@ export const metadata = {
 export const dynamic = 'force-dynamic';
 
 interface Props {
-  searchParams: Promise<{ event?: string }>;
+  searchParams: Promise<{ event?: string; status?: string }>;
 }
 
 // General events > Volunteers: the same review queue as DevFest's, for one general event at a
@@ -18,7 +18,7 @@ interface Props {
 // volunteer pool's invites. The acceptance email and /volunteer/confirm read the event (stage
 // 4e), so they work here too; the roster and ticket marks live on DevFest > Crew only.
 export default async function EventVolunteersPage({ searchParams }: Props) {
-  const [, { event: requestedId }, events] = await Promise.all([getVerifiedSession(), searchParams, loadEvents()]);
+  const [, { event: requestedId, status }, events] = await Promise.all([getVerifiedSession(), searchParams, loadEvents()]);
 
   // Upcoming general events soonest first, then past ones most recent first.
   const now = Date.now();
@@ -45,6 +45,7 @@ export default async function EventVolunteersPage({ searchParams }: Props) {
     <VolunteersDashboard
       volunteers={volunteers}
       generalEvents={{ events: ordered.map((event) => ({ id: event.id, name: event.name })), selectedId: selected.id }}
+      initialStatus={status === 'pending' ? 'pending' : undefined}
     />
   );
 }

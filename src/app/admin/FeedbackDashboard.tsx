@@ -16,7 +16,7 @@ import {
   FEEDBACK_ROLE_LABELS,
 } from '@/lib/feedbackLabels';
 import type { FeedbackResponse } from '@/lib/types';
-import { BarRow, BreakdownCard, EmptyState, StatTile } from './analyticsShared';
+import { BarRow, BreakdownCard, EmptyState, StatStrip, StatTile } from './analyticsShared';
 import { deleteFeedbackResponse } from './feedbackActions';
 import StickyAdminHeader from './StickyAdminHeader';
 
@@ -219,18 +219,16 @@ export default function FeedbackDashboard({ responses }: Props) {
           <EmptyState message="No feedback yet. Share /feedback with attendees to start collecting it." />
         ) : (
           <>
-            <div className="flex flex-wrap gap-2.5 mb-6">
-              <StatTile label="Responses" count={total} icon="layers" />
-              <StatTile label="Overall, out of 5" count={average(responses.map((response) => response.overallRating))} icon="check" accent="green" />
+            <StatStrip>
+              <StatTile label="Responses" count={total} />
+              <StatTile label="Overall, out of 5" count={average(responses.map((response) => response.overallRating))} />
               <StatTile
                 label="Net Promoter Score"
                 count={netPromoterScore(recommendScores)}
                 subtext="Share of 9 and 10 minus share of 0 to 6"
-                icon="users"
-                accent="blue"
               />
-              <StatTile label="Left an email" count={responses.filter((response) => response.email).length} icon="clock" accent="yellow" />
-            </div>
+              <StatTile label="Left an email" count={responses.filter((response) => response.email).length} />
+            </StatStrip>
 
             <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4 mb-10">
               <BreakdownCard title="Overall rating">

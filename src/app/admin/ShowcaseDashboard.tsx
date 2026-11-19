@@ -482,14 +482,16 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
 
 interface Props {
   entries: ShowcaseSubmission[];
+  // Opens the list already filtered to what is waiting (`?status=pending`, from Community overview).
+  initialStatus?: 'pending';
 }
 
 type FilterStatus = 'all' | ShowcaseStatus;
 type FilterStage = 'all' | ShowcaseStage;
 
-export default function ShowcaseDashboard({ entries }: Props) {
+export default function ShowcaseDashboard({ entries, initialStatus }: Props) {
   const mobileBarHidden = useMobileBarHidden();
-  const [filter, setFilter] = useState<FilterStatus>('all');
+  const [filter, setFilter] = useState<FilterStatus>(initialStatus ?? 'all');
   const [stageFilter, setStageFilter] = useState<FilterStage>('all');
   const [search, setSearch] = useState('');
   const [statusMenuOpen, setStatusMenuOpen] = useState(false);

@@ -7,9 +7,13 @@ export const metadata = {
   title: 'Builder Showcase',
 };
 
-export default async function ShowcasePage() {
-  const eventId = await getAdminDevfestId();
-  const [, entries] = await Promise.all([getVerifiedSession(), fetchShowcaseSubmissions(eventId)]);
+interface Props {
+  searchParams: Promise<{ status?: string }>;
+}
 
-  return <ShowcaseDashboard entries={entries} />;
+export default async function ShowcasePage({ searchParams }: Props) {
+  const eventId = await getAdminDevfestId();
+  const [, entries, { status }] = await Promise.all([getVerifiedSession(), fetchShowcaseSubmissions(eventId), searchParams]);
+
+  return <ShowcaseDashboard entries={entries} initialStatus={status === 'pending' ? 'pending' : undefined} />;
 }
