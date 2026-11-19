@@ -72,6 +72,7 @@ The core fills reach only 3.1 to 3.9:1 against white, which fails WCAG AA for th
 | Red 600 | `#d93025` | `bg-google-red-deep` | Solid red button fills with white text |
 | Red 300 | `#f28b82` | `text-google-red-light` | Red text on dark surfaces (errors, destructive actions) |
 | Blue 300 | `#8ab4f8` | `text-google-blue-light` | Blue text on a blue tint (the admin status and track chips) |
+| Green 300 | `#81c995` | `text-google-green-light` | Green text on a green tint (admin chips). Core green measures 3.9:1 on its 15% tint over a `#282828` card; Green 300 is 6.1:1 |
 
 Minimum text opacity on the dark page is `text-white/50`. Anything lower is decorative only.
 
@@ -88,6 +89,8 @@ The whole app (admin, speaker portal, sign-in, the email-link pages, the DevFest
 `text-white/50` only just clears AA on `surface-raised`, so keep anything smaller than 14px at `white/60` or above there.
 
 `bg-google-blue-deep` was Blue 600 (`#1a73e8`) until the admin contrast pass measured it at 4.48:1 against white, just under AA, and moved it down a step to 5.41:1.
+
+`text-google-green-light` was added 2026-11-19 for the same reason: core green clears AA as plain text on a card (4.8:1) but not on its own tint (3.9:1), which the admin's "Confirmed" chips used.
 
 `text-google-blue-light` exists because the core blue is fine as plain text on a dark card (5.3:1) but drops to 4.5:1 once it sits on its own `bg-google-blue/15` tint, which is how every admin chip is built. Green and yellow clear AA on the same tint, so they stay on the core colours; only blue needed the lighter variant.
 
