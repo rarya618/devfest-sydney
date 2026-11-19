@@ -23,6 +23,7 @@ import {
 import type { MeetupFormat, MeetupProposal, MeetupProposalStatus, ReviewerNote } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
 import ConfirmAction from './ConfirmAction';
+import DecisionButtons from './DecisionButtons';
 
 // Closes a popover on an outside click or Escape.
 function useDismissable(isOpen: boolean, containerRef: React.RefObject<HTMLDivElement | null>, onDismiss: () => void) {
@@ -322,32 +323,27 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
             </svg>
           </button>
           {proposal.status === 'pending' && (
-            <div className="inline-flex flex-col rounded-full border border-white/15 overflow-hidden">
-              <button
-                onClick={() => handleAction(rejectMeetupProposal)}
-                disabled={isPending}
-                aria-label={`Reject meetup talk proposal: ${proposal.talkTitle}`}
-                title="Reject"
-                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-red-deep hover:text-white transition-colors disabled:opacity-60"
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <path strokeLinecap="round" d="M2.5 2.5l7 7m0-7l-7 7" />
-                </svg>
-              </button>
-              <span className="h-px bg-white/15" />
-              <button
-                onClick={() => (events.length > 0 ? setChoosingEvent((open) => !open) : onError('There\'s no upcoming general event to accept this into. Create one in Events first.'))}
-                disabled={isPending}
-                aria-expanded={choosingEvent}
-                aria-label={`Accept meetup talk proposal: ${proposal.talkTitle}, choosing which event`}
-                title="Accept"
-                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-green-deep hover:text-white transition-colors disabled:opacity-60"
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.375l2.625 2.625L9.75 3.75" />
-                </svg>
-              </button>
-            </div>
+            <DecisionButtons
+              subject={`${proposal.name}'s meetup proposal: ${proposal.talkTitle}`}
+              disabled={isPending}
+              acceptTrigger={(buttonClassName) => (
+                <button
+                  type="button"
+                  onClick={() => (events.length > 0 ? setChoosingEvent((open) => !open) : onError('There\'s no upcoming general event to accept this into. Create one in Events first.'))}
+                  disabled={isPending}
+                  aria-expanded={choosingEvent}
+                  aria-label={`Accept ${proposal.name}'s meetup proposal: ${proposal.talkTitle}, choosing which event`}
+                  className={buttonClassName}
+                >
+                  Accept
+                </button>
+              )}
+              reject={{
+                message: `Turn down ${proposal.name}'s talk?`,
+                detail: 'No email is sent, and you can move it back to pending.',
+                onConfirm: () => handleAction(rejectMeetupProposal),
+              }}
+            />
           )}
           {isAccepted && (
             <ConfirmAction

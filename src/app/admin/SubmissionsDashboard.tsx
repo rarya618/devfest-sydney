@@ -22,6 +22,7 @@ import { csvFilename, downloadCsv, formatCsvBoolean } from '@/lib/csv';
 import { useMobileBarHidden } from './MobileBarContext';
 import Select from '@/components/Select';
 import ConfirmAction from './ConfirmAction';
+import DecisionButtons from './DecisionButtons';
 
 // The speaker changed the proposal from the speaker portal after sending it.
 function EditedMark({ editedAt }: { editedAt: string }) {
@@ -758,31 +759,20 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
             </svg>
           </button>
           {submission.status === 'pending' && (
-            <div className="inline-flex flex-col rounded-full border border-white/15 overflow-hidden">
-              <button
-                onClick={() => handleAction(rejectSubmission)}
-                disabled={isPending || bulkActionsPending}
-                aria-label={`Reject proposal: ${submission.talkTitle}`}
-                title="Reject"
-                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-red-deep hover:text-white transition-colors disabled:opacity-60"
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <path strokeLinecap="round" d="M2.5 2.5l7 7m0-7l-7 7" />
-                </svg>
-              </button>
-              <span className="h-px bg-white/15" />
-              <button
-                onClick={() => handleAction(promoteSubmission)}
-                disabled={isPending || bulkActionsPending}
-                aria-label={`Accept and promote proposal: ${submission.talkTitle}`}
-                title="Accept"
-                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-green-deep hover:text-white transition-colors disabled:opacity-60"
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.375l2.625 2.625L9.75 3.75" />
-                </svg>
-              </button>
-            </div>
+            <DecisionButtons
+              subject={`${submission.name}'s proposal: ${submission.talkTitle}`}
+              disabled={isPending || bulkActionsPending}
+              accept={{
+                message: `Accept ${submission.name}'s talk?`,
+                detail: 'It joins the lineup, and their speaker profile is created or reused. No email is sent yet: send the acceptance email when you\'re ready.',
+                onConfirm: () => handleAction(promoteSubmission),
+              }}
+              reject={{
+                message: `Mark ${submission.name}'s talk as not selected?`,
+                detail: 'No email is sent. You can send the rejection email afterwards, or move it back to pending.',
+                onConfirm: () => handleAction(rejectSubmission),
+              }}
+            />
           )}
           {submission.status === 'rejected' && !rejectionBlocker && (
             <SendRejectionEmailButton
@@ -1011,31 +1001,22 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
         )}
 
         {submission.status === 'pending' && (
-          <div className="hidden md:inline-flex shrink-0 rounded-full border border-white/15 overflow-hidden">
-            <button
-              onClick={() => handleAction(rejectSubmission)}
-              disabled={isPending || bulkActionsPending}
-              aria-label={`Reject proposal: ${submission.talkTitle}`}
-              title="Reject"
-              className="inline-flex items-center justify-center px-3 h-8 text-white/70 hover:bg-google-red-deep hover:text-white transition-colors disabled:opacity-60"
-            >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                <path strokeLinecap="round" d="M2.5 2.5l7 7m0-7l-7 7" />
-              </svg>
-            </button>
-            <span className="w-px bg-white/15" />
-            <button
-              onClick={() => handleAction(promoteSubmission)}
-              disabled={isPending || bulkActionsPending}
-              aria-label={`Accept and promote proposal: ${submission.talkTitle}`}
-              title="Accept"
-              className="inline-flex items-center justify-center px-3 h-8 text-white/70 hover:bg-google-green-deep hover:text-white transition-colors disabled:opacity-60"
-            >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.375l2.625 2.625L9.75 3.75" />
-              </svg>
-            </button>
-          </div>
+          <DecisionButtons
+            layout="row"
+            className="hidden md:flex shrink-0"
+            subject={`${submission.name}'s proposal: ${submission.talkTitle}`}
+            disabled={isPending || bulkActionsPending}
+            accept={{
+              message: `Accept ${submission.name}'s talk?`,
+              detail: 'It joins the lineup, and their speaker profile is created or reused. No email is sent yet: send the acceptance email when you\'re ready.',
+              onConfirm: () => handleAction(promoteSubmission),
+            }}
+            reject={{
+              message: `Mark ${submission.name}'s talk as not selected?`,
+              detail: 'No email is sent. You can send the rejection email afterwards, or move it back to pending.',
+              onConfirm: () => handleAction(rejectSubmission),
+            }}
+          />
         )}
         {submission.status === 'rejected' && !rejectionBlocker && (
           <SendRejectionEmailButton

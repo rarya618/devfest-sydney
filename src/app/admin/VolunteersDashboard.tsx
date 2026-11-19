@@ -23,6 +23,7 @@ import { useMobileBarHidden } from './MobileBarContext';
 import { useRouter } from 'next/navigation';
 import Select from '@/components/Select';
 import ConfirmAction from './ConfirmAction';
+import DecisionButtons from './DecisionButtons';
 
 interface ReviewerNotesPanelProps {
   volunteerId: string;
@@ -288,31 +289,20 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
             </svg>
           </button>
           {volunteer.status === 'pending' && (
-            <div className="inline-flex flex-col rounded-full border border-white/15 overflow-hidden">
-              <button
-                onClick={() => handleAction(rejectVolunteer)}
-                disabled={isPending}
-                aria-label={`Reject volunteer signup: ${volunteer.name}`}
-                title="Reject"
-                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-red-deep hover:text-white transition-colors disabled:opacity-60"
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <path strokeLinecap="round" d="M2.5 2.5l7 7m0-7l-7 7" />
-                </svg>
-              </button>
-              <span className="h-px bg-white/15" />
-              <button
-                onClick={() => handleAction(acceptVolunteer)}
-                disabled={isPending}
-                aria-label={`Accept volunteer signup: ${volunteer.name}`}
-                title="Accept"
-                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-green-deep hover:text-white transition-colors disabled:opacity-60"
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.375l2.625 2.625L9.75 3.75" />
-                </svg>
-              </button>
-            </div>
+            <DecisionButtons
+              subject={`${volunteer.name}'s volunteer signup`}
+              disabled={isPending}
+              accept={{
+                message: `Accept ${volunteer.name} onto the crew?`,
+                detail: 'They move to the crew roster. No email is sent yet: send the acceptance email when you\'re ready.',
+                onConfirm: () => handleAction(acceptVolunteer),
+              }}
+              reject={{
+                message: `Turn down ${volunteer.name}'s signup?`,
+                detail: 'No email is sent, and you can move it back to pending.',
+                onConfirm: () => handleAction(rejectVolunteer),
+              }}
+            />
           )}
           {/* The same send this volunteer's card offers on /admin/devfest/crew, so an organiser
               working through the review queue doesn't have to change pages to tell someone. */}

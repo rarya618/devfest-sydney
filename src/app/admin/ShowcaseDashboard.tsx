@@ -22,6 +22,7 @@ import {
 import type { ReviewerNote, ShowcaseStage, ShowcaseStatus, ShowcaseSubmission } from '@/lib/types';
 import { useMobileBarHidden } from './MobileBarContext';
 import ConfirmAction from './ConfirmAction';
+import DecisionButtons from './DecisionButtons';
 
 interface ReviewerNotesPanelProps {
   entryId: string;
@@ -348,31 +349,20 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
             </svg>
           </button>
           {entry.status === 'pending' && (
-            <div className="inline-flex flex-col rounded-full border border-white/15 overflow-hidden">
-              <button
-                onClick={() => handleAction(rejectShowcaseEntry)}
-                disabled={isPending}
-                aria-label={`Reject Builder Showcase entry: ${entry.projectName}`}
-                title="Reject"
-                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-red-deep hover:text-white transition-colors disabled:opacity-60"
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                  <path strokeLinecap="round" d="M2.5 2.5l7 7m0-7l-7 7" />
-                </svg>
-              </button>
-              <span className="h-px bg-white/15" />
-              <button
-                onClick={() => handleAction(acceptShowcaseEntry)}
-                disabled={isPending}
-                aria-label={`Accept Builder Showcase entry: ${entry.projectName}`}
-                title="Accept"
-                className="inline-flex items-center justify-center w-8 py-3 text-white/70 hover:bg-google-green-deep hover:text-white transition-colors disabled:opacity-60"
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.375l2.625 2.625L9.75 3.75" />
-                </svg>
-              </button>
-            </div>
+            <DecisionButtons
+              subject={`the Builder Showcase entry ${entry.projectName}`}
+              disabled={isPending}
+              accept={{
+                message: `Accept ${entry.projectName} into the showcase?`,
+                detail: `No email is sent yet: send ${entry.name} the acceptance email when you're ready.`,
+                onConfirm: () => handleAction(acceptShowcaseEntry),
+              }}
+              reject={{
+                message: `Turn down ${entry.projectName}?`,
+                detail: 'No email is sent, and you can move it back to pending.',
+                onConfirm: () => handleAction(rejectShowcaseEntry),
+              }}
+            />
           )}
           {entry.status === 'accepted' && (
             <ConfirmAction
