@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import Link from 'next/link';
 import { getVerifiedSession } from '@/lib/adminSession';
 import { loadGdgAnalytics, type EventAnalyticsRow, type GdgAnalytics, type WaitingItem } from '@/lib/gdgAnalytics';
@@ -50,17 +51,33 @@ function FigureDefinitions() {
   );
 }
 
+// Kept whole, so a narrow column breaks after the comma ("6 first-time, / 0 returning") and
+// never between a number and its word.
+function Phrases({ parts }: { parts: string[] }) {
+  return (
+    <>
+      {parts.map((part, index) => (
+        <Fragment key={part}>
+          {index > 0 && ' '}
+          <span className="whitespace-nowrap">{part}</span>
+        </Fragment>
+      ))}
+    </>
+  );
+}
+
 function Muted({ children }: { children: React.ReactNode }) {
   return <span className="block text-xs text-white/60">{children}</span>;
 }
 
-// Returning (green) beside first-time (grey), as a share of the whole. The words beside it say
-// the same thing, so the colours are never the only signal.
+// Returning (green) beside first-time (grey), as a share of the whole. It sits under the words
+// that say the same thing, so the colours are never the only signal, and so every column's
+// caption starts right under its number and lines up across the row.
 function RetentionBar({ returning, firstTime }: { returning: number; firstTime: number }) {
   const total = returning + firstTime;
   if (total === 0) return null;
   return (
-    <span aria-hidden="true" className="mt-2 flex h-1.5 w-24 overflow-hidden rounded-full bg-white/10">
+    <span aria-hidden="true" className="mt-1.5 flex h-1.5 w-24 overflow-hidden rounded-full bg-white/10">
       <span className="h-full bg-google-green" style={{ width: `${(returning / total) * 100}%` }} />
       <span className="h-full bg-white/30" style={{ width: `${(firstTime / total) * 100}%` }} />
     </span>
@@ -148,8 +165,8 @@ function SpeakersFact({ event, compact = false }: { event: EventAnalyticsRow; co
       {event.speakers}
       {event.speakers > 0 && (
         <>
+          <Muted>{compact ? `${event.returningSpeakers} returning` : <Phrases parts={[`${event.firstTimeSpeakers} first-time,`, `${event.returningSpeakers} returning`]} />}</Muted>
           <RetentionBar returning={event.returningSpeakers} firstTime={event.firstTimeSpeakers} />
-          <Muted>{compact ? `${event.returningSpeakers} returning` : `${event.firstTimeSpeakers} first-time, ${event.returningSpeakers} returning`}</Muted>
         </>
       )}
     </>
@@ -179,10 +196,10 @@ function VolunteersFact({ event, compact = false }: { event: EventAnalyticsRow; 
       {event.volunteerSignups}
       {event.volunteerSignups > 0 && (
         <>
-          <RetentionBar returning={event.returningVolunteers} firstTime={event.volunteerSignups - event.returningVolunteers} />
           <Muted>
-            {compact ? `${event.returningVolunteers} returning` : `${event.acceptedVolunteers} accepted, ${event.returningVolunteers} returning`}
+            {compact ? `${event.returningVolunteers} returning` : <Phrases parts={[`${event.acceptedVolunteers} accepted,`, `${event.returningVolunteers} returning`]} />}
           </Muted>
+          <RetentionBar returning={event.returningVolunteers} firstTime={event.volunteerSignups - event.returningVolunteers} />
         </>
       )}
     </>
