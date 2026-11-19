@@ -20,6 +20,7 @@ import { useMobileBarHidden } from './MobileBarContext';
 import HistoryDisclosure, { stampedOn, type HistoryRow } from './HistoryDisclosure';
 import InvitePastVolunteersModal from './InvitePastVolunteersModal';
 import type { InvitablePastVolunteer } from '@/lib/volunteerInvite';
+import ConfirmAction from './ConfirmAction';
 
 // Neither 'unassigned' nor 'organisers' is a VolunteerArea. 'unassigned' is the absence
 // of one, and the filter reached for most while the roster is still being built;
@@ -304,22 +305,32 @@ function CrewCard({ member, onError }: CrewCardProps) {
           </button>
 
           {!isOrganiser && (
-          <button
-            onClick={handleSendAcceptanceEmail}
-            disabled={isPending}
-            aria-label={`${alreadyEmailed ? 'Resend' : 'Send'} the volunteer acceptance email to ${member.name}`}
-            title={alreadyEmailed ? 'Resend acceptance email' : 'Send acceptance email'}
-            className={`inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-              alreadyEmailed
-                ? 'text-white/55 hover:text-white hover:bg-white/[0.08]'
-                : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
-            }`}
+          <ConfirmAction
+            tone="send"
+            message={`${alreadyEmailed ? 'Resend' : 'Send'} the volunteer acceptance email to ${member.name}?`}
+            detail={alreadyEmailed ? 'They get it again, with a new date to confirm by.' : 'It tells them they\'re on the crew and asks them to confirm.'}
+            confirmLabel={alreadyEmailed ? 'Resend email' : 'Send email'}
+            onConfirm={handleSendAcceptanceEmail}
           >
-            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-              <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
-            </svg>
-          </button>
+            {(triggerProps) => (
+              <button
+                {...triggerProps}
+                disabled={isPending}
+                aria-label={`${alreadyEmailed ? 'Resend' : 'Send'} the volunteer acceptance email to ${member.name}`}
+                title={alreadyEmailed ? 'Resend acceptance email' : 'Send acceptance email'}
+                className={`inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                  alreadyEmailed
+                    ? 'text-white/55 hover:text-white hover:bg-white/[0.08]'
+                    : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
+                }`}
+              >
+                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                  <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
+                </svg>
+              </button>
+            )}
+          </ConfirmAction>
           )}
 
           {!isOrganiser && (

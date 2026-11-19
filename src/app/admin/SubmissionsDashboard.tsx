@@ -21,6 +21,7 @@ import { applicantKey, rejectionEmailBlocker, type RejectionEmailBlocker } from 
 import { csvFilename, downloadCsv, formatCsvBoolean } from '@/lib/csv';
 import { useMobileBarHidden } from './MobileBarContext';
 import Select from '@/components/Select';
+import ConfirmAction from './ConfirmAction';
 
 // The speaker changed the proposal from the speaker portal after sending it.
 function EditedMark({ editedAt }: { editedAt: string }) {
@@ -97,24 +98,39 @@ function SendAcceptanceEmailButton({
   disabled: boolean;
 }) {
   const alreadySent = Boolean(submission.acceptanceEmailSentAt);
+  const detail = submission.speakerConfirmedAt
+    ? `They confirmed on ${formatDate(submission.speakerConfirmedAt)}. They get the email again anyway.`
+    : alreadySent
+      ? `Last sent ${formatDate(submission.acceptanceEmailSentAt!)}. They get it again, with a new date to confirm by.`
+      : 'It tells them their talk is in and asks them to confirm their spot.';
 
   return (
-    <button
-      onClick={onSend}
-      disabled={disabled}
-      aria-label={`${alreadySent ? 'Resend' : 'Send'} acceptance email to ${submission.name} for: ${submission.talkTitle}`}
-      title={alreadySent ? 'Resend acceptance email' : 'Send acceptance email'}
-      className={`inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-        alreadySent
-          ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
-          : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
-      }`}
+    <ConfirmAction
+      tone="send"
+      message={`${alreadySent ? 'Resend' : 'Send'} the acceptance email to ${submission.name}?`}
+      detail={detail}
+      confirmLabel={alreadySent ? 'Resend email' : 'Send email'}
+      onConfirm={onSend}
     >
-      <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-        <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
-      </svg>
-    </button>
+      {(triggerProps) => (
+        <button
+          {...triggerProps}
+          disabled={disabled}
+          aria-label={`${alreadySent ? 'Resend' : 'Send'} acceptance email to ${submission.name} for: ${submission.talkTitle}`}
+          title={alreadySent ? 'Resend acceptance email' : 'Send acceptance email'}
+          className={`inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+            alreadySent
+              ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
+              : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
+          }`}
+        >
+          <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+            <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
+          </svg>
+        </button>
+      )}
+    </ConfirmAction>
   );
 }
 
@@ -133,26 +149,38 @@ function SendSpeakerTicketButton({
   const alreadySent = Boolean(submission.speakerTicketEmailSentAt);
 
   return (
-    <button
-      onClick={onSend}
-      disabled={disabled}
-      aria-label={`${alreadySent ? 'Resend' : 'Send'} the complimentary speaker ticket to ${submission.name}`}
-      title={
-        alreadySent
-          ? `Resend speaker ticket (sent ${formatDate(submission.speakerTicketEmailSentAt!)}${submission.speakerTicketEmailSentBy ? ` by ${submission.speakerTicketEmailSentBy}` : ''})`
-          : 'Send speaker ticket'
-      }
-      className={`inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-        alreadySent
-          ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
-          : 'bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white'
-      }`}
+    <ConfirmAction
+      tone="send"
+      message={`${alreadySent ? 'Resend' : 'Send'} the speaker ticket to ${submission.name}?`}
+      detail={alreadySent
+        ? `Last sent ${formatDate(submission.speakerTicketEmailSentAt!)}. They get the free ticket link again.`
+        : 'It emails them the link to their free speaker ticket.'}
+      confirmLabel={alreadySent ? 'Resend ticket' : 'Send ticket'}
+      onConfirm={onSend}
     >
-      <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 6.25V4.5a1 1 0 011-1h11a1 1 0 011 1v1.75a1.75 1.75 0 000 3.5V11.5a1 1 0 01-1 1h-11a1 1 0 01-1-1V9.75a1.75 1.75 0 000-3.5z" />
-        <path strokeLinecap="round" strokeDasharray="1.5 1.5" d="M10 4v8" />
-      </svg>
-    </button>
+      {(triggerProps) => (
+        <button
+          {...triggerProps}
+          disabled={disabled}
+          aria-label={`${alreadySent ? 'Resend' : 'Send'} the complimentary speaker ticket to ${submission.name}`}
+          title={
+            alreadySent
+              ? `Resend speaker ticket (sent ${formatDate(submission.speakerTicketEmailSentAt!)}${submission.speakerTicketEmailSentBy ? ` by ${submission.speakerTicketEmailSentBy}` : ''})`
+              : 'Send speaker ticket'
+          }
+          className={`inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+            alreadySent
+              ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
+              : 'bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white'
+          }`}
+        >
+          <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 6.25V4.5a1 1 0 011-1h11a1 1 0 011 1v1.75a1.75 1.75 0 000 3.5V11.5a1 1 0 01-1 1h-11a1 1 0 01-1-1V9.75a1.75 1.75 0 000-3.5z" />
+            <path strokeLinecap="round" strokeDasharray="1.5 1.5" d="M10 4v8" />
+          </svg>
+        </button>
+      )}
+    </ConfirmAction>
   );
 }
 
@@ -170,26 +198,82 @@ function SendRejectionEmailButton({
   const alreadySent = Boolean(submission.rejectionEmailSentAt);
 
   return (
-    <button
-      onClick={onSend}
-      disabled={disabled}
-      aria-label={`${alreadySent ? 'Resend' : 'Send'} rejection email to ${submission.name} for: ${submission.talkTitle}`}
-      title={
-        alreadySent
-          ? `Resend rejection email (sent ${formatDate(submission.rejectionEmailSentAt!)}${submission.rejectionEmailSentBy ? ` by ${submission.rejectionEmailSentBy}` : ''})`
-          : 'Send rejection email'
-      }
-      className={`inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-        alreadySent
-          ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
-          : 'bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white'
-      }`}
+    <ConfirmAction
+      tone="send"
+      message={`${alreadySent ? 'Resend' : 'Send'} the rejection email to ${submission.name}?`}
+      detail={alreadySent
+        ? `Last sent ${formatDate(submission.rejectionEmailSentAt!)}. They get it again.`
+        : 'It tells them this talk wasn\'t selected and invites them to propose to a meetup.'}
+      confirmLabel={alreadySent ? 'Resend email' : 'Send email'}
+      onConfirm={onSend}
     >
-      <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-        <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
-      </svg>
-    </button>
+      {(triggerProps) => (
+        <button
+          {...triggerProps}
+          disabled={disabled}
+          aria-label={`${alreadySent ? 'Resend' : 'Send'} rejection email to ${submission.name} for: ${submission.talkTitle}`}
+          title={
+            alreadySent
+              ? `Resend rejection email (sent ${formatDate(submission.rejectionEmailSentAt!)}${submission.rejectionEmailSentBy ? ` by ${submission.rejectionEmailSentBy}` : ''})`
+              : 'Send rejection email'
+          }
+          className={`inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+            alreadySent
+              ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
+              : 'bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white'
+          }`}
+        >
+          <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+            <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
+          </svg>
+        </button>
+      )}
+    </ConfirmAction>
+  );
+}
+
+// Undo acceptance deletes the talk (with its calendar invite UID and send marks) and, if they
+// give no other talk, the speaker, then moves the proposal back to pending. It always asks
+// first: on 2026-11-19 a stray click here removed a confirmed speaker's talk (put back from
+// point-in-time recovery with scripts/restore-undone-acceptance.mjs).
+function UndoAcceptanceButton({
+  submission,
+  onUndo,
+  disabled,
+  wrapperClassName,
+}: {
+  submission: Submission;
+  onUndo: () => void;
+  disabled: boolean;
+  wrapperClassName?: string;
+}) {
+  const consequence = 'This deletes the talk, its calendar invite history and ticket marks, and their speaker profile if they give no other talk. The proposal goes back to pending. No email is sent.';
+  return (
+    <ConfirmAction
+      tone="danger"
+      message={`Undo accepting ${submission.name}'s talk?`}
+      detail={submission.speakerConfirmedAt
+        ? `They confirmed their spot on ${formatDate(submission.speakerConfirmedAt)}. ${consequence}`
+        : consequence}
+      confirmLabel="Undo acceptance"
+      onConfirm={onUndo}
+      className={wrapperClassName}
+    >
+      {(triggerProps) => (
+        <button
+          {...triggerProps}
+          disabled={disabled}
+          aria-label={`Undo acceptance of proposal: ${submission.talkTitle}`}
+          title="Undo acceptance"
+          className="inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-full bg-white/[0.06] text-white/70 hover:bg-google-red/[0.12] hover:text-google-red-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 4L2.5 7.5 6 11M2.5 7.5h6.5a4 4 0 010 8H7" />
+          </svg>
+        </button>
+      )}
+    </ConfirmAction>
   );
 }
 
@@ -316,20 +400,31 @@ function ReviewerNotesPanel({ submissionId, notes, onError }: ReviewerNotesPanel
             <li key={index} className="text-xs bg-white/[0.04] border border-white/10 rounded-lg px-3 py-2">
               <div className="flex items-start justify-between gap-2">
                 <p className="text-white/70 leading-relaxed whitespace-pre-wrap flex-1">{note.text}</p>
-                <button
-                  onClick={() => handleDelete(index)}
-                  disabled={isDeleting}
-                  aria-label={`Delete reviewer note from ${note.authorName}`}
-                  className="shrink-0 text-white/55 hover:text-google-red-light transition-colors disabled:opacity-40"
+                <ConfirmAction
+                  tone="danger"
+                  message={`Delete this note from ${note.authorName}?`}
+                  detail="It's gone for good, and notes are this proposal's record of what was sent."
+                  confirmLabel="Delete note"
+                  onConfirm={() => handleDelete(index)}
+                  className="inline-flex shrink-0"
                 >
-                  {isDeleting && deletingIndex === index ? (
-                    <span className="text-[10px]">Deleting…</span>
-                  ) : (
-                    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3.5 4.5h9M6.5 4.5v-1a1 1 0 011-1h1a1 1 0 011 1v1m-5.5 0l.5 8a1 1 0 001 .95h5a1 1 0 001-.95l.5-8" />
-                    </svg>
+                  {(triggerProps) => (
+                    <button
+                      {...triggerProps}
+                      disabled={isDeleting}
+                      aria-label={`Delete reviewer note from ${note.authorName}`}
+                      className="shrink-0 text-white/55 hover:text-google-red-light transition-colors disabled:opacity-40"
+                    >
+                      {isDeleting && deletingIndex === index ? (
+                        <span className="text-[10px]">Deleting…</span>
+                      ) : (
+                        <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3.5 4.5h9M6.5 4.5v-1a1 1 0 011-1h1a1 1 0 011 1v1m-5.5 0l.5 8a1 1 0 001 .95h5a1 1 0 001-.95l.5-8" />
+                        </svg>
+                      )}
+                    </button>
                   )}
-                </button>
+                </ConfirmAction>
               </div>
               <p className="mt-1 text-xs text-white/55">
                 <span className="font-medium text-white/50">{note.authorName}</span> &middot; {formatDate(note.createdAt)}
@@ -711,17 +806,11 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
             />
           )}
           {submission.status === 'accepted' && (
-            <button
-              onClick={() => handleAction(undoPromotion)}
+            <UndoAcceptanceButton
+              submission={submission}
+              onUndo={() => handleAction(undoPromotion)}
               disabled={isPending || bulkActionsPending}
-              aria-label={`Undo acceptance of proposal: ${submission.talkTitle}`}
-              title="Undo"
-              className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-            >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 4L2.5 7.5 6 11M2.5 7.5h6.5a4 4 0 010 8H7" />
-              </svg>
-            </button>
+            />
           )}
           <div className="relative" ref={moreMenuRef}>
             <button
@@ -970,17 +1059,12 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
           />
         )}
         {submission.status === 'accepted' && (
-          <button
-            onClick={() => handleAction(undoPromotion)}
+          <UndoAcceptanceButton
+            submission={submission}
+            onUndo={() => handleAction(undoPromotion)}
             disabled={isPending || bulkActionsPending}
-            aria-label={`Undo acceptance of proposal: ${submission.talkTitle}`}
-            title="Undo"
-            className="hidden md:inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
-          >
-            <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 4L2.5 7.5 6 11M2.5 7.5h6.5a4 4 0 010 8H7" />
-            </svg>
-          </button>
+            wrapperClassName="hidden md:inline-flex shrink-0"
+          />
         )}
 
         <div className="relative shrink-0" ref={moreMenuRef}>

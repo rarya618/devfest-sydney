@@ -22,6 +22,7 @@ import type { ReviewerNote, VolunteerArea, VolunteerStatus, VolunteerSubmission 
 import { useMobileBarHidden } from './MobileBarContext';
 import { useRouter } from 'next/navigation';
 import Select from '@/components/Select';
+import ConfirmAction from './ConfirmAction';
 
 interface ReviewerNotesPanelProps {
   volunteerId: string;
@@ -316,22 +317,34 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
           {/* The same send this volunteer's card offers on /admin/devfest/crew, so an organiser
               working through the review queue doesn't have to change pages to tell someone. */}
           {volunteer.status === 'accepted' && (
-            <button
-              onClick={() => handleAction(sendVolunteerAcceptanceEmail)}
-              disabled={isPending}
-              aria-label={`${volunteer.acceptanceEmailSentAt ? 'Resend' : 'Send'} the volunteer acceptance email to ${volunteer.name}`}
-              title={volunteer.acceptanceEmailSentAt ? 'Resend acceptance email' : 'Send acceptance email'}
-              className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-60 ${
-                volunteer.acceptanceEmailSentAt
-                  ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
-                  : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
-              }`}
+            <ConfirmAction
+              tone="send"
+              message={`${volunteer.acceptanceEmailSentAt ? 'Resend' : 'Send'} the volunteer acceptance email to ${volunteer.name}?`}
+              detail={volunteer.acceptanceEmailSentAt
+                ? `Last sent ${formatDate(volunteer.acceptanceEmailSentAt)}. They get it again, with a new date to confirm by.`
+                : 'It tells them they\'re on the crew and asks them to confirm.'}
+              confirmLabel={volunteer.acceptanceEmailSentAt ? 'Resend email' : 'Send email'}
+              onConfirm={() => handleAction(sendVolunteerAcceptanceEmail)}
             >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-                <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
-              </svg>
-            </button>
+              {(triggerProps) => (
+                <button
+                  {...triggerProps}
+                  disabled={isPending}
+                  aria-label={`${volunteer.acceptanceEmailSentAt ? 'Resend' : 'Send'} the volunteer acceptance email to ${volunteer.name}`}
+                  title={volunteer.acceptanceEmailSentAt ? 'Resend acceptance email' : 'Send acceptance email'}
+                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-60 ${
+                    volunteer.acceptanceEmailSentAt
+                      ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
+                      : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
+                  }`}
+                >
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                    <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2 4.5l6 4 6-4" />
+                  </svg>
+                </button>
+              )}
+            </ConfirmAction>
           )}
           {(volunteer.status === 'rejected' || volunteer.status === 'archived' || volunteer.status === 'accepted') && (
             <button
