@@ -12,6 +12,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
+import { ADMIN_ACTION_START_EVENT } from '@/components/Alert';
 
 export interface ConfirmTriggerProps {
   ref: RefObject<HTMLButtonElement | null>;
@@ -124,6 +125,9 @@ export default function ConfirmAction({
               type="button"
               onClick={() => {
                 close({ returnFocus: true });
+                // Clears an error still on screen from an earlier attempt (src/components/Alert.tsx),
+                // so a retry that works doesn't leave "couldn't be sent" up and invite a duplicate.
+                window.dispatchEvent(new Event(ADMIN_ACTION_START_EVENT));
                 onConfirm();
               }}
               className={`press px-4 py-1.5 rounded-full text-sm font-bold text-white hover:opacity-85 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-raised ${confirmClasses}`}

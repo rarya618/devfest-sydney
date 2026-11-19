@@ -3,6 +3,10 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
+// Fired when an admin confirms a new action (ConfirmAction): any error from an earlier attempt
+// is dismissed at once, so it can't sit next to a retry that worked.
+export const ADMIN_ACTION_START_EVENT = 'admin-action-start';
+
 interface AlertProps {
   message: string;
   onDismiss: () => void;
@@ -27,6 +31,11 @@ export default function Alert({ message, onDismiss }: AlertProps) {
     const enterTimer = setTimeout(() => setVisible(true), 10);
     return () => clearTimeout(enterTimer);
   }, []);
+
+  useEffect(() => {
+    window.addEventListener(ADMIN_ACTION_START_EVENT, onDismiss);
+    return () => window.removeEventListener(ADMIN_ACTION_START_EVENT, onDismiss);
+  }, [onDismiss]);
 
   function handleDismiss() {
     setVisible(false);
