@@ -17,8 +17,8 @@ export interface AdminEventSummary {
   privateLinksSet: Record<EventPrivateLinkKey, boolean>;
 }
 
-const chipBase = 'inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold';
-const CHIP_OPEN = `${chipBase} bg-google-green/15 text-google-green border-google-green/25`;
+const chipBase = 'inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border font-bold';
+const CHIP_OPEN = `${chipBase} bg-google-green/15 text-google-green-light border-google-green/25`;
 const CHIP_NEUTRAL = `${chipBase} bg-white/[0.06] text-white/70 border-white/10`;
 const CHIP_CURRENT = `${chipBase} bg-google-blue/15 text-google-blue-light border-google-blue/25`;
 
@@ -76,7 +76,7 @@ function EventCard({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
-            <h3 className="font-bold text-white text-xl leading-snug tracking-tight">{event.name}</h3>
+            <h2 className="font-bold text-white text-xl leading-snug tracking-tight">{event.name}</h2>
             <span className={CHIP_NEUTRAL}>{EVENT_TYPE_LABELS[event.type]}</span>
             {summary.isCurrentDevfest && (
               <span
@@ -100,7 +100,7 @@ function EventCard({
               type="button"
               onClick={handleMakeCurrent}
               aria-label={`Make ${event.name} the current DevFest`}
-              className="text-xs font-semibold px-3 py-2 rounded-lg border border-white/40 text-white/70 hover:border-white/60 hover:text-white transition-colors"
+              className="text-xs font-bold px-3 py-2 rounded-lg border border-white/40 text-white/70 hover:border-white/60 hover:text-white transition-colors"
             >
               Make current
             </button>
@@ -109,7 +109,7 @@ function EventCard({
             type="button"
             onClick={onEdit}
             aria-label={`Edit ${event.name}`}
-            className="text-xs font-semibold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-opacity"
+            className="text-xs font-bold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-opacity"
           >
             Edit
           </button>

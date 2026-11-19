@@ -60,7 +60,7 @@ function ReviewerNotesPanel({ volunteerId, notes, onError }: ReviewerNotesPanelP
             <li key={index} className="text-xs bg-white/[0.04] border border-white/10 rounded-lg px-3 py-2">
               <p className="text-white/70 leading-relaxed whitespace-pre-wrap">{note.text}</p>
               <p className="mt-1 text-xs text-white/55">
-                <span className="font-medium text-white/50">{note.authorName}</span> &middot; {formatDate(note.createdAt)}
+                <span className="font-normal text-white/50">{note.authorName}</span> &middot; {formatDate(note.createdAt)}
               </p>
             </li>
           ))}
@@ -84,7 +84,7 @@ function ReviewerNotesPanel({ volunteerId, notes, onError }: ReviewerNotesPanelP
           type="submit"
           disabled={isPending || !draft.trim()}
           aria-label="Save reviewer note"
-          className="shrink-0 text-xs font-semibold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
+          className="shrink-0 text-xs font-bold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
         >
           {isPending ? 'Saving…' : 'Add'}
         </button>
@@ -154,13 +154,13 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
       <div className="flex items-stretch gap-4">
       <div className="flex-1 min-w-0 flex flex-col">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
-        <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{volunteer.name}</h3>
+        <h2 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{volunteer.name}</h2>
         {/* Only on accepted signups: "Not emailed" against a pending one would read as a
             task, when the thing to do first is decide. */}
         {volunteer.status === 'accepted' && (
           <span
             title={VOLUNTEER_CONFIRMATION_CHIPS[volunteer.confirmation].title}
-            className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${VOLUNTEER_CONFIRMATION_CHIPS[volunteer.confirmation].className}`}
+            className={`text-xs font-bold px-1.5 py-0.5 rounded ${VOLUNTEER_CONFIRMATION_CHIPS[volunteer.confirmation].className}`}
           >
             {VOLUNTEER_CONFIRMATION_CHIPS[volunteer.confirmation].label}
           </span>
@@ -188,19 +188,19 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
         {(volunteer.googleTechExperience || volunteer.isTorrensStudentOrStaff || volunteer.hasBeenGdgOnCampusExec) && (
           <div className="flex flex-wrap items-center gap-1.5 gap-y-2 mt-3">
             {volunteer.googleTechExperience && (
-              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25">
+              <span className="inline-flex items-center gap-1 text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25">
                 Possible facilitator
               </span>
             )}
             {volunteer.isTorrensStudentOrStaff && (
-              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25">
+              <span className="inline-flex items-center gap-1 text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25">
                 Torrens
               </span>
             )}
             {volunteer.hasBeenGdgOnCampusExec && (
               <span
                 title="Has been on the exec team of a GDG on Campus chapter"
-                className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-green/15 text-google-green border-google-green/25"
+                className="inline-flex items-center gap-1 text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-green/15 text-google-green-light border-google-green/25"
               >
                 GDG on Campus exec{volunteer.gdgOnCampusChapter ? ` · ${GDG_ON_CAMPUS_CHAPTER_LABELS[volunteer.gdgOnCampusChapter]}` : ''}
               </span>
@@ -211,7 +211,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
 
       <div className="flex flex-wrap items-center gap-1.5 gap-y-2 mb-4">
         {volunteer.areasOfInterest.map((area) => (
-          <span key={area} className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-medium">
+          <span key={area} className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-bold">
             {VOLUNTEER_AREA_LABELS[area]}
           </span>
         ))}
@@ -246,7 +246,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
           )}
           {hasTracking && (
             <p className="text-sm text-white/55">
-              <span className="font-medium text-white/70">Link tracking: </span>
+              <span className="font-bold text-white/70">Link tracking: </span>
               {[
                 volunteer.tracking.ref && `ref=${volunteer.tracking.ref}`,
                 volunteer.tracking.utmSource && `source=${volunteer.tracking.utmSource}`,
@@ -327,7 +327,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
                   className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-60 ${
                     volunteer.acceptanceEmailSentAt
                       ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
-                      : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
+                      : 'bg-google-green/15 text-google-green-light hover:bg-google-green-deep hover:text-white'
                   }`}
                 >
                   <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
@@ -367,7 +367,7 @@ function VolunteerRow({ volunteer, onError }: VolunteerRowProps) {
                 <circle cx="13" cy="8" r="1.25" />
               </svg>
               {volunteer.reviewerNotes.length > 0 && (
-                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-[10px] font-bold leading-none">
+                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-xs font-bold leading-none">
                   {volunteer.reviewerNotes.length}
                 </span>
               )}
@@ -516,7 +516,7 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
               onChange={(eventId) => router.push(`/admin/event-volunteers?event=${encodeURIComponent(eventId)}`)}
               options={generalEvents.events.map((event) => ({ value: event.id, label: event.name }))}
               aria-label="Choose which general event's volunteers to show"
-              className="h-10 rounded-full border border-white/35 bg-white/[0.06] px-4 text-sm font-semibold text-white focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
+              className="h-10 rounded-full border border-white/35 bg-white/[0.06] px-4 text-sm font-bold text-white focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
             />
           )}
 
@@ -534,7 +534,7 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
                 }`}
               >
                 {filterTabs.find((tab) => tab.value === filter)?.label}
-                <span className="font-medium text-white/60">{counts[filter]}</span>
+                <span className="font-normal text-white/60">{counts[filter]}</span>
                 <svg className={`w-3 h-3 text-white/55 transition-transform ${statusMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
                 </svg>
@@ -555,7 +555,7 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
                       }}
                       aria-checked={filter === tab.value}
                       className={`w-full flex items-center justify-between gap-3 text-left text-sm px-4 py-2.5 transition-colors ${
-                        filter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
+                        filter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-bold hover:bg-white/[0.08] hover:text-white'
                       }`}
                     >
                       {tab.label}
@@ -589,7 +589,7 @@ export default function VolunteersDashboard({ volunteers, generalEvents }: Props
               }`}
             >
               {tab.label}
-              <span className="font-medium text-white/60">{tab.count}</span>
+              <span className="font-normal text-white/60">{tab.count}</span>
             </button>
           ))}
         </FilterChipRow>

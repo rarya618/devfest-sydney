@@ -102,7 +102,7 @@ function ReviewerNotesPanel({ proposalId, notes, onError }: ReviewerNotesPanelPr
           type="submit"
           disabled={isPending || !draft.trim()}
           aria-label="Save reviewer note"
-          className="shrink-0 text-xs font-semibold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
+          className="shrink-0 text-xs font-bold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
         >
           {isPending ? 'Saving…' : 'Add'}
         </button>
@@ -141,7 +141,7 @@ const CONFIRMATION_CHIPS: Record<MeetupProposal['confirmation'], { label: string
   },
   confirmed: {
     label: 'Confirmed',
-    className: 'bg-google-green/15 text-google-green border-google-green/25',
+    className: 'bg-google-green/15 text-google-green-light border-google-green/25',
     title: 'The speaker has confirmed. They now appear in the event\'s public lineup.',
   },
   unknown: { label: 'Unknown', className: 'bg-white/[0.06] text-white/70 border-white/10', title: '' },
@@ -206,7 +206,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
     >
       <div className="flex items-stretch gap-4">
         <div className="flex-1 min-w-0 flex flex-col">
-          <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight mb-3">{proposal.talkTitle}</h3>
+          <h2 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight mb-3">{proposal.talkTitle}</h2>
 
           <div className="mb-3 min-w-0">
             <p className="flex items-center gap-1.5 text-sm text-white/55 truncate">
@@ -234,19 +234,19 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
           <div className="flex flex-wrap items-center gap-1.5 gap-y-2 mb-4">
             <span
               title={MEETUP_FORMAT_LABELS[proposal.format]}
-              className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25"
+              className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25"
             >
               {MEETUP_FORMAT_SHORT_LABELS[proposal.format]}
             </span>
             {isAccepted && (
-              <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-green/15 text-google-green border-google-green/25">
+              <span className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-green/15 text-google-green-light border-google-green/25">
                 {eventNames[proposal.eventId] ?? 'Event removed'}
               </span>
             )}
             {isAccepted && (
               <span
                 title={CONFIRMATION_CHIPS[proposal.confirmation].title}
-                className={`inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold ${CONFIRMATION_CHIPS[proposal.confirmation].className}`}
+                className={`inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border font-bold ${CONFIRMATION_CHIPS[proposal.confirmation].className}`}
               >
                 {CONFIRMATION_CHIPS[proposal.confirmation].label}
               </span>
@@ -254,7 +254,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
             {proposal.source === 'api' && (
               <span
                 title="Sent through the proposal API rather than the gdgsydney.com/speak form, usually by an AI agent on the speaker's behalf. Check it reads like them before accepting."
-                className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25"
+                className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25"
               >
                 Sent by an agent
               </span>
@@ -262,7 +262,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
             {!proposal.speakingExperience && (
               <span
                 title="They left speaking experience blank, which may mean this would be their first talk."
-                className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-medium"
+                className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-bold"
               >
                 No speaking experience given
               </span>
@@ -285,7 +285,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={`Open ${proposal.name}'s profile in a new tab`}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.06] text-white/70 hover:text-white hover:bg-white/[0.1] transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.06] text-white/70 hover:text-white hover:bg-white/[0.1] transition-colors"
                   >
                     Profile
                     <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
@@ -367,7 +367,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
                     // talk agreed outside the form and confirmed without an email.
                     proposal.acceptanceEmailSentAt || proposal.confirmation === 'confirmed'
                       ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
-                      : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
+                      : 'bg-google-green/15 text-google-green-light hover:bg-google-green-deep hover:text-white'
                   }`}
                 >
                   <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
@@ -407,7 +407,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
                 <circle cx="13" cy="8" r="1.25" />
               </svg>
               {proposal.reviewerNotes.length > 0 && (
-                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-[10px] font-bold leading-none">
+                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-xs font-bold leading-none">
                   {proposal.reviewerNotes.length}
                 </span>
               )}
@@ -460,7 +460,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
 
       {choosingEvent && (
         <div className="mt-3 pt-3 border-t border-white/10">
-          <p className="text-xs font-semibold text-white/65 mb-2">Accept into which event?</p>
+          <p className="text-xs font-bold text-white/65 mb-2">Accept into which event?</p>
           <div className="flex flex-wrap gap-2">
             {events.map((event) => (
               <button
@@ -469,7 +469,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
                 onClick={() => handleAccept(event.id)}
                 disabled={isPending}
                 aria-label={`Accept ${proposal.talkTitle} into ${event.name}`}
-                className="text-xs font-semibold px-3 py-1.5 rounded-full border border-white/40 text-white/85 hover:border-google-green hover:text-white transition-colors"
+                className="text-xs font-bold px-3 py-1.5 rounded-full border border-white/40 text-white/85 hover:border-google-green hover:text-white transition-colors"
               >
                 {event.name}
               </button>
@@ -505,7 +505,7 @@ function MeetupProposalRow({ proposal, events, eventNames, onError }: MeetupProp
             type="button"
             onClick={() => handleTakeBack(confirmingTakeBack)}
             aria-label="Take this talk off its event"
-            className="text-xs px-3 py-1.5 rounded-full bg-google-red-deep text-white font-semibold hover:opacity-90 transition-opacity"
+            className="text-xs px-3 py-1.5 rounded-full bg-google-red-deep text-white font-bold hover:opacity-90 transition-opacity"
           >
             Take it off
           </button>
@@ -618,7 +618,7 @@ export default function MeetupProposalsDashboard({ proposals, events, eventNames
                 }`}
               >
                 {STATUS_TABS.find((tab) => tab.value === statusFilter)?.label}
-                <span className="font-medium text-white/60">{counts[statusFilter]}</span>
+                <span className="font-normal text-white/60">{counts[statusFilter]}</span>
                 <svg className={`w-3 h-3 text-white/55 transition-transform ${statusMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
                 </svg>
@@ -639,7 +639,7 @@ export default function MeetupProposalsDashboard({ proposals, events, eventNames
                         setStatusMenuOpen(false);
                       }}
                       className={`w-full flex items-center justify-between gap-3 text-left text-sm px-4 py-2.5 transition-colors ${
-                        statusFilter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
+                        statusFilter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-bold hover:bg-white/[0.08] hover:text-white'
                       }`}
                     >
                       {tab.label}
@@ -664,7 +664,7 @@ export default function MeetupProposalsDashboard({ proposals, events, eventNames
               }`}
             >
               {tab.label}
-              <span className="font-medium text-white/60">{tab.count}</span>
+              <span className="font-normal text-white/60">{tab.count}</span>
             </button>
           ))}
         </FilterChipRow>

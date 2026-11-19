@@ -88,7 +88,7 @@ export default function InvitePastVolunteersModal({ eventId, eventName, people, 
             Each person gets an email asking them to crew {eventName}, with a link that shows the details we hold and
             asks only where they&rsquo;d like to help. Their answer lands in Volunteers as a pending signup.
           </p>
-          <label className="flex items-center gap-2 text-sm font-semibold text-white">
+          <label className="flex items-center gap-2 text-sm font-bold text-white">
             <input
               type="checkbox"
               className="h-4 w-4 accent-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue"
@@ -109,7 +109,7 @@ export default function InvitePastVolunteersModal({ eventId, eventName, people, 
                     aria-label={`Invite ${person.name}`}
                   />
                   <span className="min-w-0">
-                    <span className="block text-sm font-semibold text-white">{person.name}</span>
+                    <span className="block text-sm font-bold text-white">{person.name}</span>
                     <span className="block text-xs text-white/55 truncate">{person.email}</span>
                     <span className="block text-xs text-white/55">
                       Crewed {person.pastEventNames.join(', ')}
@@ -141,7 +141,7 @@ export default function InvitePastVolunteersModal({ eventId, eventName, people, 
             onClick={handleSend}
             disabled={isPending || selected.size === 0}
             aria-label={`Send ${selected.size} invite${selected.size === 1 ? '' : 's'} to crew ${eventName}`}
-            className="text-xs px-4 py-1.5 rounded-full bg-google-green-deep text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50"
+            className="text-xs px-4 py-1.5 rounded-full bg-google-green-deep text-white font-bold hover:opacity-90 transition-colors disabled:opacity-50"
           >
             {isPending ? 'Sending…' : `Send ${selected.size} invite${selected.size === 1 ? '' : 's'}`}
           </button>

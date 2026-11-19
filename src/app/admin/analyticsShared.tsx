@@ -63,7 +63,7 @@ export function StatTile({
         <StatIcon name={icon} className="w-4 h-4" />
       </span>
       <span className="flex flex-col leading-tight">
-        <span className="text-[11px] font-medium text-white/50">{label}</span>
+        <span className="text-xs font-normal text-white/50">{label}</span>
         <span className={`text-lg font-bold tracking-tight ${styles.countText}`}>{count}</span>
       </span>
     </div>
@@ -123,7 +123,7 @@ export function BarRow({
   return (
     <div title={`${label}: ${count} of ${total} (${pct}%)`}>
       <div className="flex items-center justify-between text-sm mb-1.5">
-        <span className="flex items-center gap-2 font-medium text-white/70">
+        <span className="flex items-center gap-2 font-normal text-white/70">
           {dotClass && <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotClass}`} aria-hidden="true" />}
           {label}
         </span>

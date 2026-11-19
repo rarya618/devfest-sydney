@@ -84,7 +84,7 @@ function ReviewerNotesPanel({ entryId, notes, onError }: ReviewerNotesPanelProps
           type="submit"
           disabled={isPending || !draft.trim()}
           aria-label="Save reviewer note"
-          className="shrink-0 text-xs font-semibold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
+          className="shrink-0 text-xs font-bold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
         >
           {isPending ? 'Saving…' : 'Add'}
         </button>
@@ -163,13 +163,13 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
       <div className="flex items-stretch gap-4">
       <div className="flex-1 min-w-0 flex flex-col">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-1.5">
-        <h3 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{entry.projectName}</h3>
+        <h2 className="min-w-0 font-bold text-white text-xl leading-snug tracking-tight">{entry.projectName}</h2>
         {/* Only on accepted entries: "Not emailed" against a pending one would read as a
             task, when the thing to do first is decide. */}
         {entry.status === 'accepted' && (
           <span
             title={SHOWCASE_CONFIRMATION_CHIPS[entry.confirmation].title}
-            className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${SHOWCASE_CONFIRMATION_CHIPS[entry.confirmation].className}`}
+            className={`text-xs font-bold px-1.5 py-0.5 rounded ${SHOWCASE_CONFIRMATION_CHIPS[entry.confirmation].className}`}
           >
             {SHOWCASE_CONFIRMATION_CHIPS[entry.confirmation].label}
           </span>
@@ -177,7 +177,7 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
         {canSendTicket && !entry.showcaseTicketEmailSentAt && (
           <span
             title="This entrant has confirmed but hasn't been emailed their complimentary ticket. Send it with the ticket button."
-            className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-yellow/15 text-google-yellow"
+            className="text-xs font-bold px-1.5 py-0.5 rounded bg-google-yellow/15 text-google-yellow"
           >
             No ticket sent
           </span>
@@ -205,21 +205,21 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
       </div>
 
       <div className="flex flex-wrap items-center gap-1.5 gap-y-2 mb-4">
-        <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25">
+        <span className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25">
           {SHOWCASE_STAGE_LABELS[entry.stage]}
         </span>
         {entry.isFirstTimePresenter && (
-          <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25">
+          <span className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25">
             First-time presenter
           </span>
         )}
         {entry.coPresenters.length > 0 && (
-          <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-medium">
+          <span className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.06] text-white/70 font-bold">
             {entry.coPresenters.length === 1 ? 'Presenting as a pair' : `Presenting as a team of ${entry.coPresenters.length + 1}`}
           </span>
         )}
         {entry.demoRequirements && (
-          <span className="inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-red/15 text-google-red-light border-google-red/25">
+          <span className="inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-red/15 text-google-red-light border-google-red/25">
             Has demo requirements
           </span>
         )}
@@ -286,7 +286,7 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
           )}
           {hasTracking && (
             <p className="text-sm text-white/55">
-              <span className="font-medium text-white/70">Link tracking: </span>
+              <span className="font-bold text-white/70">Link tracking: </span>
               {[
                 entry.tracking.ref && `ref=${entry.tracking.ref}`,
                 entry.tracking.utmSource && `source=${entry.tracking.utmSource}`,
@@ -309,7 +309,7 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`Open ${link.label.toLowerCase()} link for ${entry.projectName} in a new tab`}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.06] text-white/70 hover:text-white hover:bg-white/[0.1] transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.06] text-white/70 hover:text-white hover:bg-white/[0.1] transition-colors"
             >
               {link.label}
               <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
@@ -385,7 +385,7 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
                   className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-60 ${
                     entry.acceptanceEmailSentAt
                       ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
-                      : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
+                      : 'bg-google-green/15 text-google-green-light hover:bg-google-green-deep hover:text-white'
                   }`}
                 >
                   <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
@@ -453,7 +453,7 @@ function ShowcaseRow({ entry, onError }: ShowcaseRowProps) {
                 <circle cx="13" cy="8" r="1.25" />
               </svg>
               {entry.reviewerNotes.length > 0 && (
-                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-[10px] font-bold leading-none">
+                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-xs font-bold leading-none">
                   {entry.reviewerNotes.length}
                 </span>
               )}
@@ -630,7 +630,7 @@ export default function ShowcaseDashboard({ entries }: Props) {
                 }`}
               >
                 {filterTabs.find((tab) => tab.value === filter)?.label}
-                <span className="font-medium text-white/60">{counts[filter]}</span>
+                <span className="font-normal text-white/60">{counts[filter]}</span>
                 <svg className={`w-3 h-3 text-white/55 transition-transform ${statusMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
                 </svg>
@@ -651,7 +651,7 @@ export default function ShowcaseDashboard({ entries }: Props) {
                       }}
                       aria-checked={filter === tab.value}
                       className={`w-full flex items-center justify-between gap-3 text-left text-sm px-4 py-2.5 transition-colors ${
-                        filter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
+                        filter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-bold hover:bg-white/[0.08] hover:text-white'
                       }`}
                     >
                       {tab.label}
@@ -685,7 +685,7 @@ export default function ShowcaseDashboard({ entries }: Props) {
               }`}
             >
               {tab.label}
-              <span className="font-medium text-white/60">{tab.count}</span>
+              <span className="font-normal text-white/60">{tab.count}</span>
             </button>
           ))}
         </FilterChipRow>

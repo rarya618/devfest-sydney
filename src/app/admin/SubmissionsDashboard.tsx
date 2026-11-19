@@ -64,7 +64,7 @@ function LinkChip({ label, value, icon, accent }: LinkChipProps) {
       <span className={`flex items-center justify-center w-5 h-5 rounded-full shrink-0 ${colors.iconBg} ${colors.iconText}`}>
         {icon}
       </span>
-      <span className="text-sm font-medium text-white/70 group-hover:text-white transition-colors">
+      <span className="text-sm font-normal text-white/70 group-hover:text-white transition-colors">
         {label}
         {!href && <span className="ml-1.5 font-normal text-white/55">{value.trim()}</span>}
       </span>
@@ -137,7 +137,7 @@ function SendAcceptanceEmailButton({
           className={`inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
             alreadySent
               ? 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
-              : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'
+              : 'bg-google-green/15 text-google-green-light hover:bg-google-green-deep hover:text-white'
           }`}
         >
           <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
@@ -312,7 +312,7 @@ function RejectionEmailState({ submission, blocker }: { submission: Submission; 
     return (
       <span
         title={`Rejection email sent ${formatDate(submission.rejectionEmailSentAt)}${submission.rejectionEmailSentBy ? ` by ${submission.rejectionEmailSentBy}` : ''}`}
-        className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
+        className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
       >
         Emailed
       </span>
@@ -323,7 +323,7 @@ function RejectionEmailState({ submission, blocker }: { submission: Submission; 
     return (
       <span
         title="This person has another proposal accepted, so they don't get a rejection email. Mention this talk to them yourself if you want to."
-        className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-green/15 text-google-green"
+        className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-google-green/15 text-google-green-light"
       >
         Speaking
       </span>
@@ -334,7 +334,7 @@ function RejectionEmailState({ submission, blocker }: { submission: Submission; 
     return (
       <span
         title="This person has another proposal waiting for review. Decide it first so they only get one email."
-        className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
+        className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
       >
         Pending decision
       </span>
@@ -344,7 +344,7 @@ function RejectionEmailState({ submission, blocker }: { submission: Submission; 
   return (
     <span
       title="This speaker hasn't been told yet. Send the rejection email from the action rail."
-      className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-yellow/15 text-google-yellow"
+      className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-google-yellow/15 text-google-yellow"
     >
       Not emailed
     </span>
@@ -358,7 +358,7 @@ function AcceptanceState({ submission }: { submission: Submission }) {
     return (
       <span
         title={`Speaker confirmed ${formatDate(submission.speakerConfirmedAt)}`}
-        className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-green/15 text-google-green"
+        className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-google-green/15 text-google-green-light"
       >
         Confirmed
       </span>
@@ -369,7 +369,7 @@ function AcceptanceState({ submission }: { submission: Submission }) {
     return (
       <span
         title={`Acceptance email sent ${formatDate(submission.acceptanceEmailSentAt)}${submission.acceptanceEmailSentBy ? ` by ${submission.acceptanceEmailSentBy}` : ''}`}
-        className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
+        className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/60"
       >
         Awaiting confirmation
       </span>
@@ -379,7 +379,7 @@ function AcceptanceState({ submission }: { submission: Submission }) {
   return (
     <span
       title="This speaker hasn't been told yet. Send the acceptance email from the actions menu."
-      className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-google-yellow/15 text-google-yellow"
+      className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded bg-google-yellow/15 text-google-yellow"
     >
       Not emailed
     </span>
@@ -446,7 +446,7 @@ function ReviewerNotesPanel({ submissionId, notes, onError }: ReviewerNotesPanel
                       className="shrink-0 text-white/55 hover:text-google-red-light transition-colors disabled:opacity-40"
                     >
                       {isDeleting && deletingIndex === index ? (
-                        <span className="text-[10px]">Deleting…</span>
+                        <span className="text-xs">Deleting…</span>
                       ) : (
                         <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M3.5 4.5h9M6.5 4.5v-1a1 1 0 011-1h1a1 1 0 011 1v1m-5.5 0l.5 8a1 1 0 001 .95h5a1 1 0 001-.95l.5-8" />
@@ -457,7 +457,7 @@ function ReviewerNotesPanel({ submissionId, notes, onError }: ReviewerNotesPanel
                 </ConfirmAction>
               </div>
               <p className="mt-1 text-xs text-white/55">
-                <span className="font-medium text-white/50">{note.authorName}</span> &middot; {formatDate(note.createdAt)}
+                <span className="font-normal text-white/50">{note.authorName}</span> &middot; {formatDate(note.createdAt)}
               </p>
             </li>
           ))}
@@ -481,7 +481,7 @@ function ReviewerNotesPanel({ submissionId, notes, onError }: ReviewerNotesPanel
           type="submit"
           disabled={isPending || !draft.trim()}
           aria-label="Save reviewer note"
-          className="shrink-0 text-xs font-semibold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
+          className="shrink-0 text-xs font-bold px-3 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-40"
         >
           {isPending ? 'Saving…' : 'Add'}
         </button>
@@ -591,22 +591,22 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
           submission.optOutOfRecording) && (
           <div className="flex flex-wrap items-center gap-1.5 gap-y-2 mt-3">
             {submission.isFirstTimeSpeaker && (
-              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-green/15 text-google-green border-google-green/25">
+              <span className="inline-flex items-center gap-1 text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-green/15 text-google-green-light border-google-green/25">
                 First-time speaker
               </span>
             )}
             {submission.wantsMentoring && (
-              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-green/15 text-google-green border-google-green/25">
+              <span className="inline-flex items-center gap-1 text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-green/15 text-google-green-light border-google-green/25">
                 Wants mentoring
               </span>
             )}
             {submission.isGoogleDeveloperExpert && (
-              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25">
+              <span className="inline-flex items-center gap-1 text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-blue/15 text-google-blue-light border-google-blue/25">
                 GDE
               </span>
             )}
             {submission.requiresTravelSupport && (
-              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25">
+              <span className="inline-flex items-center gap-1 text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-yellow/15 text-google-yellow border-google-yellow/25">
                 <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 15.5V9.75a1.5 1.5 0 011.5-1.5h13.5a1.5 1.5 0 011.5 1.5v5.75M3.75 15.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5M3.75 15.5v.75A1.5 1.5 0 005.25 17.75h13.5a1.5 1.5 0 001.5-1.5v-.75M9 8.25V6.5A1.5 1.5 0 0110.5 5h3A1.5 1.5 0 0115 6.5v1.75" />
                 </svg>
@@ -614,7 +614,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
               </span>
             )}
             {submission.optOutOfRecording && (
-              <span className="inline-flex items-center gap-1 text-[11px] leading-none px-2.5 py-1 rounded-full border font-bold bg-google-red/15 text-google-red-light border-google-red/25">
+              <span className="inline-flex items-center gap-1 text-xs leading-none px-2.5 py-1 rounded-full border font-bold bg-google-red/15 text-google-red-light border-google-red/25">
                 Don&apos;t record
               </span>
             )}
@@ -628,7 +628,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
         <div className="overflow-hidden">
       <div className="flex flex-wrap items-center gap-2 mb-5 pl-8">
         <span className={`inline-block w-[5px] h-[5px] rounded-full ${TRACK_DOT_COLORS[submission.track]}`} />
-        <span className={`text-xs font-medium ${TRACK_COLORS[submission.track]}`}>
+        <span className={`text-xs font-normal ${TRACK_COLORS[submission.track]}`}>
           {TRACK_LABELS[submission.track]}
         </span>
         <span className="text-white/50 text-xs">/</span>
@@ -666,14 +666,14 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
 
           {submission.howDidYouHear && (
             <p className="text-sm text-white/55">
-              <span className="font-medium text-white/70">Found us via: </span>
+              <span className="font-normal text-white/70">Found us via: </span>
               {submission.howDidYouHear}
             </p>
           )}
 
           {(submission.tracking.utmSource || submission.tracking.utmMedium || submission.tracking.utmCampaign || submission.tracking.ref) && (
             <p className="text-sm text-white/55">
-              <span className="font-medium text-white/70">Link tracking: </span>
+              <span className="font-normal text-white/70">Link tracking: </span>
               {[
                 submission.tracking.ref && `ref=${submission.tracking.ref}`,
                 submission.tracking.utmSource && `source=${submission.tracking.utmSource}`,
@@ -687,7 +687,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
 
           {submission.coSpeakerEmails && (
             <p className="text-sm text-white/55">
-              <span className="font-medium text-white/70">Co-speaker(s): </span>
+              <span className="font-normal text-white/70">Co-speaker(s): </span>
               {submission.coSpeakerEmails}
             </p>
           )}
@@ -853,7 +853,7 @@ function SubmissionRow({ submission, onError, selected, onToggleSelect, bulkActi
                 <circle cx="13" cy="8" r="1.25" />
               </svg>
               {submission.reviewerNotes.length > 0 && (
-                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-[10px] font-bold leading-none">
+                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-google-blue-deep text-white text-xs font-bold leading-none">
                   {submission.reviewerNotes.length}
                 </span>
               )}
@@ -1516,7 +1516,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                           disabled={isBulkPending}
                           aria-label={`Email ${unsentRejectionTargets.length} selected rejected ${unsentRejectionTargets.length === 1 ? 'person' : 'people'} who haven't been told yet`}
                           title="One email per person. Skips anyone already emailed, speaking, or with a proposal still pending."
-                          className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white transition-colors disabled:opacity-60"
+                          className="shrink-0 h-10 text-sm font-bold px-4 rounded-full bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white transition-colors disabled:opacity-60"
                         >
                           Email {unsentRejectionTargets.length} {unsentRejectionTargets.length === 1 ? 'person' : 'people'}
                         </button>
@@ -1564,7 +1564,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 }`}
               >
                 {filterTabs.find((tab) => tab.value === filter)?.label}
-                <span className="font-medium text-white/60">{counts[filter]}</span>
+                <span className="font-normal text-white/60">{counts[filter]}</span>
                 <svg className={`w-3 h-3 text-white/55 transition-transform ${statusMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
                 </svg>
@@ -1585,7 +1585,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                       }}
                       aria-checked={filter === tab.value}
                       className={`w-full flex items-center justify-between gap-3 text-left text-sm px-4 py-2.5 transition-colors ${
-                        filter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
+                        filter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-bold hover:bg-white/[0.08] hover:text-white'
                       }`}
                     >
                       {tab.label}
@@ -1602,7 +1602,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 aria-haspopup="menu"
                 aria-expanded={trackStatsOpen}
                 aria-label="View submission counts by track"
-                className={`inline-flex items-center gap-2 h-10 text-sm px-4 rounded-full transition-colors font-medium ${
+                className={`inline-flex items-center gap-2 h-10 text-sm px-4 rounded-full transition-colors font-bold ${
                   trackStatsOpen
                     ? 'bg-white/[0.12] text-white'
                     : 'bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white'
@@ -1622,11 +1622,11 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 >
                   {(Object.keys(TRACK_LABELS) as Track[]).map((track) => (
                     <div key={track} className="flex items-center justify-between gap-3 px-4 py-2 text-sm">
-                      <span className="inline-flex items-center gap-2 text-white/70 font-medium">
+                      <span className="inline-flex items-center gap-2 text-white/70 font-bold">
                         <span className={`w-[5px] h-[5px] rounded-full ${TRACK_DOT_COLORS[track]}`} />
                         {TRACK_LABELS[track]}
                       </span>
-                      <span className="text-white font-semibold">{trackCounts[track]}</span>
+                      <span className="text-white font-bold">{trackCounts[track]}</span>
                     </div>
                   ))}
                 </div>
@@ -1656,7 +1656,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                   className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-56 bg-surface-raised border border-white/10 rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden px-4 py-5 space-y-4 z-30"
                 >
                   <div>
-                    <label htmlFor="track-filter-select" className="block text-sm font-semibold text-white/55 capitalize mb-1">
+                    <label htmlFor="track-filter-select" className="block text-sm font-bold text-white/55 capitalize mb-1">
                       Track
                     </label>
                     <Select<TrackFilter>
@@ -1668,12 +1668,12 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                         ...(Object.entries(TRACK_LABELS) as [Track, string][]).map(([value, label]) => ({ value, label })),
                       ]}
                       aria-label="Filter by track"
-                      className="w-full rounded-lg border border-white/35 bg-white/[0.06] px-2.5 py-1.5 text-sm font-medium text-white/70 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
+                      className="w-full rounded-lg border border-white/35 bg-white/[0.06] px-2.5 py-1.5 text-sm font-bold text-white/70 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="sort-select" className="block text-sm font-semibold text-white/55 capitalize mb-1">
+                    <label htmlFor="sort-select" className="block text-sm font-bold text-white/55 capitalize mb-1">
                       Sort
                     </label>
                     <Select<SortOption>
@@ -1682,7 +1682,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                       onChange={setSort}
                       options={(Object.entries(SORT_LABELS) as [SortOption, string][]).map(([value, label]) => ({ value, label }))}
                       aria-label="Sort submissions"
-                      className="w-full rounded-lg border border-white/35 bg-white/[0.06] px-2.5 py-1.5 text-sm font-medium text-white/70 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
+                      className="w-full rounded-lg border border-white/35 bg-white/[0.06] px-2.5 py-1.5 text-sm font-bold text-white/70 focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
                     />
                   </div>
                 </div>
@@ -1803,7 +1803,9 @@ export default function SubmissionsDashboard({ submissions }: Props) {
       </div>
 
       <div className="px-4 md:px-5">
-        {/* Submissions list */}
+        {/* Submissions list. Grouped by submitter, each group has a visible h2 (the person);
+            otherwise this hidden one sits between the page's h1 and the rows' h3s. */}
+        {sort !== 'submitter' && <h2 className="sr-only">Proposals</h2>}
         {sorted.length === 0 ? (
           <div className="text-center py-16 text-white/55 text-sm">
             No submissions match these filters.
@@ -1816,7 +1818,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                   <h2 className="text-base font-bold text-white">{group.name}</h2>
                   <span className="text-sm text-white/55">{group.email}</span>
                   {group.submissions.length > 1 && (
-                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-google-blue/15 text-google-blue-light border border-google-blue/25">
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-google-blue/15 text-google-blue-light border border-google-blue/25">
                       {group.submissions.length} submissions
                     </span>
                   )}

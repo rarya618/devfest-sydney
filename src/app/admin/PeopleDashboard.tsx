@@ -59,7 +59,7 @@ function PersonCard({ person, onEdit, onPreview }: { person: PersonWithTalks; on
           </span>
         )}
         <div className="min-w-0 flex-1">
-          <h3 className="font-bold text-white text-lg leading-snug">{person.name}</h3>
+          <h2 className="font-bold text-white text-lg leading-snug">{person.name}</h2>
           <p className="text-sm text-white/55 truncate">{person.email}</p>
           {person.tagline && <p className="mt-1 text-sm text-white/65">{person.tagline}</p>}
         </div>
@@ -69,7 +69,7 @@ function PersonCard({ person, onEdit, onPreview }: { person: PersonWithTalks; on
             type="button"
             onClick={onPreview}
             aria-label={`Preview ${person.name}'s public speaker card`}
-            className="text-xs font-semibold px-3 py-2 rounded-lg border border-white/40 text-white/70 hover:border-white/60 hover:text-white transition-colors"
+            className="text-xs font-bold px-3 py-2 rounded-lg border border-white/40 text-white/70 hover:border-white/60 hover:text-white transition-colors"
           >
             Preview
           </button>
@@ -77,7 +77,7 @@ function PersonCard({ person, onEdit, onPreview }: { person: PersonWithTalks; on
             type="button"
             onClick={onEdit}
             aria-label={`Edit ${person.name}'s profile`}
-            className="text-xs font-semibold px-3 py-2 rounded-lg border border-white/40 text-white/70 hover:border-white/60 hover:text-white transition-colors"
+            className="text-xs font-bold px-3 py-2 rounded-lg border border-white/40 text-white/70 hover:border-white/60 hover:text-white transition-colors"
           >
             Edit profile
           </button>

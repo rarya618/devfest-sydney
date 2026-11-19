@@ -192,7 +192,7 @@ interface NavLinksProps {
 
 function navLinkClasses(active: boolean, rounded: boolean, nested = false): string {
   return `block text-sm transition-colors ${nested ? 'pl-8 pr-4' : 'px-4'} ${rounded ? 'py-2 rounded-full' : 'py-2.5'} ${
-    active ? 'bg-white/10 text-off-white font-bold' : 'text-white/65 font-medium hover:text-off-white hover:bg-white/[0.06]'
+    active ? 'bg-white/10 text-off-white font-bold' : 'text-white/65 font-bold hover:text-off-white hover:bg-white/[0.06]'
   }`;
 }
 
@@ -219,7 +219,7 @@ function NavDropdown({ item, pathname, onNavigate, rounded }: NavDropdownProps) 
         className={`w-full flex items-center justify-between text-left text-sm px-4 transition-colors ${rounded ? 'py-2 rounded-full' : 'py-2.5'} ${
           containsActivePage && !isOpen
             ? 'bg-white/10 text-off-white font-bold'
-            : `${containsActivePage ? 'text-off-white font-bold' : 'text-white/65 font-medium'} hover:text-off-white hover:bg-white/[0.06]`
+            : `${containsActivePage ? 'text-off-white font-bold' : 'text-white/65 font-normal'} hover:text-off-white hover:bg-white/[0.06]`
         }`}
       >
         {item.label}
@@ -337,7 +337,7 @@ function AccountRow({ adminName, adminEmail, signingOut, onSignOut }: AccountRow
         {getInitials(adminName)}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-white truncate" title={adminName}>{adminName}</p>
+        <p className="text-sm font-bold text-white truncate" title={adminName}>{adminName}</p>
         <p className="text-xs text-white/50 truncate" title={adminEmail}>{adminEmail}</p>
       </div>
       <button

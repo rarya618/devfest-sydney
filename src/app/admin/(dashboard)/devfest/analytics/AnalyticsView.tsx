@@ -50,7 +50,7 @@ export default function AnalyticsView({ activeTab, submissions, volunteers, show
                 className={`inline-flex items-center gap-2 shrink-0 text-sm px-3.5 py-1.5 rounded-full border transition-colors ${
                   active
                     ? 'bg-white/[0.1] border-white/15 text-white font-bold'
-                    : 'border-white/10 text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
+                    : 'border-white/10 text-white/70 font-bold hover:bg-white/[0.08] hover:text-white'
                 }`}
               >
                 {TAB_LABELS[tab]}

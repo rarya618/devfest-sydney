@@ -75,7 +75,7 @@ export default function InviteAdminForm({ onDone, onError }: Props) {
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 text-sm font-semibold px-4 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="flex-1 text-sm font-bold px-4 py-2 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {submitting ? 'Adding…' : 'Add admin'}
             </button>

@@ -152,7 +152,7 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
           <div className="flex flex-wrap items-center gap-2 min-w-0">
             {events.length > 0 && (
               <>
-                <label htmlFor="pool-event" className="text-sm font-semibold text-white/70">Invite to</label>
+                <label htmlFor="pool-event" className="text-sm font-bold text-white/70">Invite to</label>
                 <Select
                   id="pool-event"
                   value={eventId}
@@ -166,7 +166,7 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
                   }))}
                   disabled={isPending}
                   aria-label="Choose the event to invite volunteers to"
-                  className="h-10 rounded-full border border-white/35 bg-white/[0.06] px-4 text-sm font-semibold text-white focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
+                  className="h-10 rounded-full border border-white/35 bg-white/[0.06] px-4 text-sm font-bold text-white focus:outline-none focus:border-google-blue focus:ring-2 focus:ring-google-blue/40"
                 />
               </>
             )}
@@ -229,7 +229,7 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
         ) : (
           <div className="bg-surface rounded-2xl border border-white/10 overflow-hidden">
             {filter !== 'others' && chosenEvent && selectableVisible.length > 0 && (
-              <label className="flex items-center gap-3 px-4 py-3 border-b border-white/10 text-sm font-semibold text-white">
+              <label className="flex items-center gap-3 px-4 py-3 border-b border-white/10 text-sm font-bold text-white">
                 <input
                   type="checkbox"
                   className="h-4 w-4 accent-google-blue focus:outline-none focus:ring-2 focus:ring-google-blue"
@@ -256,7 +256,7 @@ export default function VolunteerPoolDashboard({ members, events }: Props) {
                       />
                     )}
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-white">
+                      <p className="text-sm font-bold text-white">
                         {member.name}
                       </p>
                       <p className="text-xs text-white/55 truncate">{member.email}</p>

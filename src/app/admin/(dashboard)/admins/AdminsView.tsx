@@ -40,7 +40,7 @@ export default function AdminsView({ admins, currentAdminEmail }: Props) {
           <button
             onClick={() => setInviting(true)}
             aria-label="Invite a new admin"
-            className="shrink-0 h-10 text-sm font-semibold px-4 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-opacity"
+            className="shrink-0 h-10 text-sm font-bold px-4 rounded-full bg-google-blue-deep text-white hover:opacity-90 transition-opacity"
           >
             Invite admin
           </button>
@@ -61,9 +61,9 @@ export default function AdminsView({ admins, currentAdminEmail }: Props) {
                   {getInitials(admin.name)}
                 </span>
                 <div className="order-2 min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-white truncate">
+                  <p className="text-sm font-bold text-white truncate">
                     {admin.name}
-                    {isSelf && <span className="ml-2 text-xs font-medium text-white/55">(you)</span>}
+                    {isSelf && <span className="ml-2 text-xs font-bold text-white/55">(you)</span>}
                   </p>
                   <p className="text-xs text-white/50 truncate">{admin.email}</p>
                 </div>
@@ -80,7 +80,7 @@ export default function AdminsView({ admins, currentAdminEmail }: Props) {
                       {...triggerProps}
                       disabled={isSelf || isPending}
                       aria-label={`Remove admin access for ${admin.name}`}
-                      className="order-3 md:order-4 shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border border-google-red-light/60 text-google-red-light hover:bg-google-red/[0.06] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="order-3 md:order-4 shrink-0 text-xs font-bold px-3 py-1.5 rounded-lg border border-google-red-light/60 text-google-red-light hover:bg-google-red/[0.06] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {removing ? 'Removing…' : 'Remove'}
                     </button>

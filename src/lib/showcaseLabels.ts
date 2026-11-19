@@ -23,7 +23,7 @@ export const SHOWCASE_STAGE_LABELS: Record<ShowcaseStage, string> = {
 export const SHOWCASE_CONFIRMATION_CHIPS: Record<ShowcaseConfirmation, { label: string; className: string; title: string }> = {
   confirmed: {
     label: 'Confirmed',
-    className: 'bg-google-green/15 text-google-green',
+    className: 'bg-google-green/15 text-google-green-light',
     title: 'The entrant has confirmed they will present.',
   },
   awaiting: {

@@ -107,7 +107,7 @@ type FilterConfirmation = 'all' | SpeakerConfirmation;
 const CONFIRMATION_CHIP: Record<SpeakerConfirmation, { label: string; className: string; title: string }> = {
   confirmed: {
     label: 'Confirmed',
-    className: 'bg-google-green/15 text-google-green',
+    className: 'bg-google-green/15 text-google-green-light',
     title: 'The speaker has confirmed their participation.',
   },
   awaiting: {
@@ -161,7 +161,7 @@ function ProfileLink({ href, label }: ProfileLinkProps) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`Open ${label} profile in a new tab`}
-      className="inline-flex items-center gap-1 text-xs font-medium text-google-blue hover:underline"
+      className="inline-flex items-center gap-1 text-xs font-bold text-google-blue hover:underline"
     >
       {label}
       <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
@@ -256,8 +256,8 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
   }
 
   const quietIcon = 'text-white/60 hover:text-white hover:bg-white/[0.08]';
-  const neutralChip = 'inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full bg-white/[0.06] text-white/70 font-medium';
-  const warningChip = 'inline-flex items-center text-[11px] leading-none px-2.5 py-1 rounded-full font-bold bg-google-yellow/15 text-google-yellow';
+  const neutralChip = 'inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full bg-white/[0.06] text-white/70 font-bold';
+  const warningChip = 'inline-flex items-center text-xs leading-none px-2.5 py-1 rounded-full font-bold bg-google-yellow/15 text-google-yellow';
 
   // Compact by default (redesigned 2026-11-14: the card had seven stacked action buttons and six
   // lines before the talk title). Collapsed: who, what, and one row of chips with every gap
@@ -276,8 +276,8 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
 
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-            <h3 className="font-bold text-white text-base leading-snug">{speaker.name}</h3>
-            <span title={confirmation.title} className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${confirmation.className}`}>
+            <h2 className="font-bold text-white text-base leading-snug">{speaker.name}</h2>
+            <span title={confirmation.title} className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${confirmation.className}`}>
               {confirmation.label}
             </span>
             {isCoSpeaker && (
@@ -406,7 +406,7 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
                   disabled={isPending}
                   aria-label={`${alreadyEmailed ? 'Resend' : 'Send'} acceptance email to ${speaker.name} for: ${speaker.talkTitle}`}
                   title={alreadyEmailed ? 'Resend acceptance email' : 'Send acceptance email'}
-                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${alreadyEmailed ? quietIcon : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'}`}
+                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${alreadyEmailed ? quietIcon : 'bg-google-green/15 text-google-green-light hover:bg-google-green-deep hover:text-white'}`}
                 >
                   <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                     <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
@@ -481,7 +481,7 @@ function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, o
                   disabled={isPending}
                   aria-label={`${thanksSent ? 'Resend' : 'Send'} the thank-you email with photos, mug and Asana trial to ${speaker.name}`}
                   title={thanksSent ? 'Resend thank-you' : 'Send thank-you'}
-                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${thanksSent ? quietIcon : 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white'}`}
+                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${thanksSent ? quietIcon : 'bg-google-green/15 text-google-green-light hover:bg-google-green-deep hover:text-white'}`}
                 >
                   <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                     <path strokeLinejoin="round" d="M8 13.5S1.75 9.75 1.75 5.75A3 3 0 018 4a3 3 0 016.25 1.75C14.25 9.75 8 13.5 8 13.5z" />
@@ -666,10 +666,10 @@ function LineupRow(props: LineupCardProps) {
     >
       <SpeakerAvatar speaker={speaker} />
       <div className="min-w-0">
-        <h3 className="font-bold text-off-white text-[0.9375rem] leading-snug truncate">
+        <h2 className="font-bold text-off-white text-[0.9375rem] leading-snug truncate">
           {speaker.name}
           {isCoSpeaker && leadSpeaker && <span className="font-normal text-white/60"> with {leadSpeaker.name}</span>}
-        </h3>
+        </h2>
         <p className="mt-0.5 text-sm text-white/60 truncate">{speaker.talkTitle}</p>
         {missing.length > 0 && (
           <p className="mt-1.5"><Chip tone="attention" title="Missing from the public profile">Missing {missing.join(', ').toLowerCase()}</Chip></p>
@@ -721,7 +721,7 @@ const BULK_COPY: Record<BulkKind, { singular: string; plural: string; buttonClas
   thanks: {
     singular: 'thank-you',
     plural: 'thank-yous',
-    buttonClass: 'bg-google-green/15 text-google-green hover:bg-google-green-deep hover:text-white',
+    buttonClass: 'bg-google-green/15 text-google-green-light hover:bg-google-green-deep hover:text-white',
     confirmClass: 'bg-google-green-deep text-white',
     title: 'Sends the thank-you with the photos and the mug and Asana link to every confirmed speaker and co-speaker who hasn\'t had it.',
   },
@@ -971,7 +971,7 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
                 }`}
               >
                 {confirmationTabs.find((tab) => tab.value === confirmationFilter)?.label}
-                <span className="font-medium text-white/60">{confirmationCounts[confirmationFilter]}</span>
+                <span className="font-normal text-white/60">{confirmationCounts[confirmationFilter]}</span>
                 <svg className={`w-3 h-3 text-white/55 transition-transform ${confirmationMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
                 </svg>
@@ -992,7 +992,7 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
                       }}
                       aria-checked={confirmationFilter === tab.value}
                       className={`w-full flex items-center justify-between gap-3 text-left text-sm px-4 py-2.5 transition-colors ${
-                        confirmationFilter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
+                        confirmationFilter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-bold hover:bg-white/[0.08] hover:text-white'
                       }`}
                     >
                       {tab.label}
@@ -1014,7 +1014,7 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
                 }`}
               >
                 {filterTabs.find((tab) => tab.value === filter)?.label}
-                <span className="font-medium text-white/60">{counts[filter]}</span>
+                <span className="font-normal text-white/60">{counts[filter]}</span>
                 <svg className={`w-3 h-3 text-white/55 transition-transform ${trackMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 4.5l3.5 3.5 3.5-3.5" />
                 </svg>
@@ -1035,7 +1035,7 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
                       }}
                       aria-checked={filter === tab.value}
                       className={`w-full flex items-center justify-between gap-3 text-left text-sm px-4 py-2.5 transition-colors ${
-                        filter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-medium hover:bg-white/[0.08] hover:text-white'
+                        filter === tab.value ? 'bg-white/[0.08] text-white font-bold' : 'text-white/70 font-bold hover:bg-white/[0.08] hover:text-white'
                       }`}
                     >
                       {tab.label}
