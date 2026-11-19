@@ -191,7 +191,7 @@ export default function SubmissionsOverTimeChart({ entries, noun, accent }: Prop
 
         {hovered && (
           <div
-            className="absolute top-2 pointer-events-none bg-[#3c4043] text-white rounded-lg px-3 py-2 text-xs shadow-lg whitespace-nowrap"
+            className="absolute top-2 pointer-events-none bg-surface-raised border border-white/10 text-white rounded-lg px-3 py-2 text-xs shadow-[0_12px_32px_rgba(0,0,0,0.45)] whitespace-nowrap"
             style={{
               left: `${(tooltipX / CHART_WIDTH) * 100}%`,
               transform: tooltipOnRight ? 'translateX(8px)' : 'translateX(calc(-100% - 8px))',

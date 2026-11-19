@@ -3,7 +3,9 @@ import { getVerifiedSession } from '@/lib/adminSession';
 import { loadGdgAnalytics, type EventAnalyticsRow, type GdgAnalytics } from '@/lib/gdgAnalytics';
 import StickyAdminHeader from '../../StickyAdminHeader';
 import SubmissionsOverTimeChart from '../../SubmissionsOverTimeChart';
-import { BarRow, BreakdownCard, EmptyState, StatTile, StatusTiles } from '../../analyticsShared';
+import { BarRow, BreakdownCard, EmptyState, StatStrip, StatTile, StatusTiles } from '../../analyticsShared';
+import { Chip, StatusLabel } from '../../Chips';
+import LoadFailureAlert from '../../LoadFailureAlert';
 
 // GDG Sydney across every event (added 2026-11-14). One DevFest's forms in detail are on
 // /admin/devfest/analytics. The numbers come from src/lib/gdgAnalytics.ts.
@@ -28,7 +30,7 @@ function SectionHeading({ id, children, description }: { id: string; children: R
 }
 
 function Muted({ children }: { children: React.ReactNode }) {
-  return <span className="block text-xs text-white/55">{children}</span>;
+  return <span className="block text-xs text-white/60">{children}</span>;
 }
 
 function EventsTable({ events }: { events: EventAnalyticsRow[] }) {
@@ -39,7 +41,7 @@ function EventsTable({ events }: { events: EventAnalyticsRow[] }) {
       <table className="w-full min-w-[720px] text-sm text-white/80">
         <caption className="sr-only">Every GDG Sydney event, newest first, with its talks, speakers, proposals and volunteers</caption>
         <thead>
-          <tr className="text-left text-xs font-bold text-white/55 border-b border-white/10">
+          <tr className="text-left text-xs font-bold text-white/60 border-b border-white/10">
             <th scope="col" className={cell}>Event</th>
             <th scope="col" className={cell}>Talks</th>
             <th scope="col" className={cell}>Speakers</th>
@@ -53,12 +55,10 @@ function EventsTable({ events }: { events: EventAnalyticsRow[] }) {
             <tr key={event.eventId} className="border-b border-white/[0.06] last:border-b-0">
               <th scope="row" className={`${cell} text-left font-normal`}>
                 <span className="block font-bold text-white">{event.name}</span>
-                <span className="mt-1 flex flex-wrap items-center gap-2 text-xs text-white/55">
+                <span className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-white/60">
                   <span className="font-mono">{formatEventDate(event.startAt)}</span>
-                  <span className={`px-2 py-0.5 rounded-full font-bold ${event.type === 'devfest' ? 'bg-google-blue/15 text-google-blue-light' : 'bg-google-green/15 text-google-green-light'}`}>
-                    {event.type === 'devfest' ? 'DevFest' : 'Meetup'}
-                  </span>
-                  {event.isUpcoming && <span className="px-2 py-0.5 rounded-full font-bold bg-google-yellow/15 text-google-yellow">Upcoming</span>}
+                  <Chip>{event.type === 'devfest' ? 'DevFest' : 'Meetup'}</Chip>
+                  {event.isUpcoming && <StatusLabel tone="good">Upcoming</StatusLabel>}
                 </span>
               </th>
               <td className={cell}>{event.talks}</td>
@@ -117,18 +117,16 @@ function AnalyticsBody({ analytics }: { analytics: GdgAnalytics }) {
         >
           Speakers across events
         </SectionHeading>
-        <div className="flex flex-wrap gap-2.5">
-          <StatTile label="People on file" count={speakers.people} icon="users" accent="neutral" />
-          <StatTile label="Speakers with a talk" count={speakers.withTalks} icon="check" accent="blue" />
+        <StatStrip className="">
+          <StatTile label="People on file" count={speakers.people} />
+          <StatTile label="Speakers with a talk" count={speakers.withTalks} />
           <StatTile
             label="Spoke at more than one event"
             count={speakers.repeat}
             subtext={speakers.withTalks > 0 ? `${Math.round((speakers.repeat / speakers.withTalks) * 100)}% of speakers with a talk` : undefined}
-            icon="users"
-            accent="green"
           />
-          <StatTile label="Talks across events" count={speakers.talks} icon="layers" accent="neutral" />
-        </div>
+          <StatTile label="Talks across events" count={speakers.talks} />
+        </StatStrip>
       </section>
 
       <section aria-labelledby="meetup-proposals-heading">
@@ -165,18 +163,13 @@ function AnalyticsBody({ analytics }: { analytics: GdgAnalytics }) {
         >
           Volunteers across events
         </SectionHeading>
-        <div className="flex flex-wrap gap-2.5">
-          <StatTile label="Volunteer profiles" count={volunteers.profiles} icon="users" accent="neutral" />
-          <StatTile label="In the volunteer pool" count={volunteers.inPool} icon="check" accent="green" />
-          <StatTile label="Signups" count={volunteers.signups} icon="layers" accent="neutral" />
-          <StatTile
-            label="Volunteered at more than one event"
-            count={volunteers.repeat}
-            icon="users"
-            accent="blue"
-          />
-          <StatTile label="Organisers" count={volunteers.organisers} icon="users" accent="yellow" />
-        </div>
+        <StatStrip className="">
+          <StatTile label="Volunteer profiles" count={volunteers.profiles} />
+          <StatTile label="In the volunteer pool" count={volunteers.inPool} />
+          <StatTile label="Signups" count={volunteers.signups} />
+          <StatTile label="Volunteered at more than one event" count={volunteers.repeat} />
+          <StatTile label="Organisers" count={volunteers.organisers} />
+        </StatStrip>
       </section>
     </div>
   );
@@ -195,7 +188,7 @@ export default async function GdgAnalyticsPage() {
     <>
       <StickyAdminHeader className="z-20 w-full px-4 md:px-5 pt-4 pb-3 md:pt-8 md:pb-4 bg-black-02/95 backdrop-blur-sm">
         <h1 className="text-xl font-bold text-off-white tracking-[-0.01em]">Community overview</h1>
-        <p className="mt-0.5 text-sm text-white/55">
+        <p className="mt-0.5 text-sm text-white/60">
           Every GDG Sydney event side by side. For one DevFest&rsquo;s forms, see{' '}
           <Link href="/admin/devfest/analytics" className="text-google-blue-light underline underline-offset-2 hover:no-underline">
             Form results
@@ -207,9 +200,10 @@ export default async function GdgAnalyticsPage() {
         {analytics ? (
           <AnalyticsBody analytics={analytics} />
         ) : (
-          <p role="alert" className="rounded-2xl border border-google-red/30 bg-google-red/10 px-6 py-5 text-white/80">
-            The analytics didn&rsquo;t load. Refresh the page to try again.
-          </p>
+          <>
+            <EmptyState message="The numbers aren't showing right now." />
+            <LoadFailureAlert message="The numbers didn't load. Refresh the page to try again." />
+          </>
         )}
       </div>
     </>

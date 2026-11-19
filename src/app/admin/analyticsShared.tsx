@@ -12,60 +12,44 @@ export const ACCENT_CHART_CLASSES: Record<AnalyticsAccent, { fill: string; strok
   yellow: { fill: 'fill-google-yellow', stroke: 'stroke-google-yellow', bar: 'bg-google-yellow' },
 };
 
-type StatAccent = 'neutral' | 'blue' | 'yellow' | 'green' | 'muted';
-
-const STAT_ACCENT_STYLES: Record<StatAccent, { border: string; bg: string; iconBg: string; iconText: string; countText: string }> = {
-  neutral: { border: 'border-white/15', bg: 'bg-surface', iconBg: 'bg-white/10', iconText: 'text-white/70', countText: 'text-white' },
-  blue: { border: 'border-google-blue/25', bg: 'bg-google-blue/[0.08]', iconBg: 'bg-google-blue/15', iconText: 'text-google-blue-light', countText: 'text-google-blue' },
-  yellow: { border: 'border-google-yellow/25', bg: 'bg-google-yellow/[0.08]', iconBg: 'bg-google-yellow/15', iconText: 'text-google-yellow', countText: 'text-google-yellow' },
-  green: { border: 'border-google-green/25', bg: 'bg-google-green/[0.08]', iconBg: 'bg-google-green/15', iconText: 'text-google-green', countText: 'text-google-green' },
-  muted: { border: 'border-white/10', bg: 'bg-surface', iconBg: 'bg-white/10', iconText: 'text-white/55', countText: 'text-white/50' },
-};
-
-const STAT_ICON_PATHS = {
-  layers: 'M12 3 2 8l10 5 10-5-10-5ZM2 12l10 5 10-5M2 16l10 5 10-5',
-  users: 'M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M11 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
-  clock: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM12 6v6l4 2',
-  check: 'M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4 12 14.01l-3-3',
-  x: 'M18 6 6 18M6 6l12 12',
-} as const;
-
-type StatIconName = keyof typeof STAT_ICON_PATHS;
-
-function StatIcon({ name, className }: { name: StatIconName; className?: string }) {
+// A row of figures in one panel: a large number under its label, with a status dot only where
+// the figure is a record's status (DESIGN.md, Admin tables: one signal per fact, no tinted
+// chips). Replaces the icon-and-tint pills, which repeated the cards below them.
+export function StatStrip({ children, className = 'mb-6' }: { children: ReactNode; className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d={STAT_ICON_PATHS[name]} />
-    </svg>
+    <dl className={`grid grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] gap-x-8 gap-y-5 rounded-2xl bg-surface px-5 py-5 ${className}`}>
+      {children}
+    </dl>
   );
 }
+
+type StatStatus = 'waiting' | 'good' | 'done';
+
+const STAT_STATUS_DOTS: Record<StatStatus, string> = {
+  waiting: 'bg-google-yellow',
+  good: 'bg-google-green',
+  done: 'bg-white/40',
+};
 
 export function StatTile({
   label,
   count,
   subtext,
-  accent = 'neutral',
-  icon,
+  status,
 }: {
   label: string;
   count: number;
   subtext?: string;
-  accent?: StatAccent;
-  icon: StatIconName;
+  status?: StatStatus;
 }) {
-  const styles = STAT_ACCENT_STYLES[count === 0 ? 'muted' : accent];
   return (
-    <div
-      title={subtext}
-      className={`group inline-flex items-center gap-3 rounded-full border ${styles.border} ${styles.bg} pl-2 pr-6 py-2`}
-    >
-      <span className={`flex items-center justify-center w-8 h-8 rounded-full shrink-0 ${styles.iconBg} ${styles.iconText}`}>
-        <StatIcon name={icon} className="w-4 h-4" />
-      </span>
-      <span className="flex flex-col leading-tight">
-        <span className="text-xs font-normal text-white/50">{label}</span>
-        <span className={`text-lg font-bold tracking-tight ${styles.countText}`}>{count}</span>
-      </span>
+    <div>
+      <dt className="flex items-center gap-1.5 text-sm text-white/60">
+        {status && <span aria-hidden="true" className={`h-1.5 w-1.5 shrink-0 rounded-full ${STAT_STATUS_DOTS[status]}`} />}
+        {label}
+      </dt>
+      <dd className={`mt-1 text-2xl font-bold tabular-nums tracking-tight ${count === 0 ? 'text-white/60' : 'text-off-white'}`}>{count}</dd>
+      {subtext && <p className="mt-0.5 text-xs text-white/60">{subtext}</p>}
     </div>
   );
 }
@@ -88,21 +72,15 @@ export function StatusTiles({
   accepted: number;
   rejected: number;
 }) {
-  const percentOfTotal = (count: number) => (total > 0 ? `${Math.round((count / total) * 100)}% of total` : undefined);
+  const percentOfTotal = (count: number) => (total > 0 ? `${Math.round((count / total) * 100)}% of ${totalLabel.toLowerCase()}` : undefined);
   return (
-    <div className="flex flex-wrap gap-2.5 mb-6">
-      <StatTile label={totalLabel} count={total} icon="layers" accent="neutral" />
-      <StatTile
-        label={uniqueLabel}
-        count={uniqueCount}
-        subtext={total > 0 ? `${Math.round((uniqueCount / total) * 100)}% of ${totalLabel.toLowerCase()}` : undefined}
-        icon="users"
-        accent="blue"
-      />
-      <StatTile label="Pending" count={pending} subtext={percentOfTotal(pending)} icon="clock" accent="yellow" />
-      <StatTile label="Accepted" count={accepted} subtext={percentOfTotal(accepted)} icon="check" accent="green" />
-      <StatTile label="Not selected" count={rejected} subtext={percentOfTotal(rejected)} icon="x" accent="muted" />
-    </div>
+    <StatStrip>
+      <StatTile label={totalLabel} count={total} />
+      <StatTile label={uniqueLabel} count={uniqueCount} />
+      <StatTile label="Pending" count={pending} subtext={percentOfTotal(pending)} status="waiting" />
+      <StatTile label="Accepted" count={accepted} subtext={percentOfTotal(accepted)} status="good" />
+      <StatTile label="Not selected" count={rejected} subtext={percentOfTotal(rejected)} status="done" />
+    </StatStrip>
   );
 }
 
