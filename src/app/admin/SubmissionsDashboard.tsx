@@ -1337,20 +1337,32 @@ export default function SubmissionsDashboard({ submissions }: Props) {
   }
 
   const selectedCount = visibleSelectedIds.length;
+  // Accept and Not this time only change pending proposals, so they count and offer only those.
+  const selectedPendingCount = sorted.filter((s) => selectedIds.has(s.id) && s.status === 'pending').length;
+  const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
+  const noPendingSelected = selectedPendingCount === 0 ? 'None of the selected proposals are pending.' : undefined;
 
   return (
     <>
       <div className={`sticky ${mobileBarHidden ? 'top-0' : 'top-[4.25rem]'} md:top-0 transition-[top] duration-300 ease-in-out z-20 w-full px-4 md:px-5 pt-2 md:pt-[1.125rem] pb-3 bg-black-02/95 backdrop-blur-sm`}>
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-          <div className="min-w-0 min-h-[3.25rem] flex items-center">
+          <div className="min-w-0 h-[3.25rem] flex items-center md:flex-1 md:basis-0">
             {selectedCount > 0 ? (
-              <div key="bulk-actions" className="flex items-center gap-2 flex-wrap animate-fade-in-fast">
-                <span className="shrink-0 text-sm text-white/55 mr-2">{selectedCount} selected</span>
+              <div key="bulk-actions" className="flex items-center gap-2 flex-nowrap overflow-x-auto [scrollbar-width:none] max-w-full animate-fade-in-fast">
+                <span className="shrink-0 text-sm text-white/60">{selectedCount} selected</span>
+                <button
+                  onClick={clearSelection}
+                  disabled={isBulkPending}
+                  aria-label="Clear the selection"
+                  className="shrink-0 h-10 text-sm px-3 -ml-1 rounded-full text-white/60 underline underline-offset-4 decoration-white/30 hover:text-white hover:decoration-white transition-colors"
+                >
+                  Clear
+                </button>
                 <ConfirmAction
                   tone="danger"
                   align="left"
-                  message={`Mark ${selectedCount} selected ${selectedCount === 1 ? 'proposal' : 'proposals'} as not selected?`}
-                  detail="Only pending ones change. No email is sent: send rejection emails afterwards."
+                  message={`Mark ${plural(selectedPendingCount, 'pending proposal', 'pending proposals')} as not selected?`}
+                  detail={`${selectedCount > selectedPendingCount ? `The other ${plural(selectedCount - selectedPendingCount, 'selected proposal is', 'selected proposals are')} already decided and stay as they are. ` : ''}No email is sent: send rejection emails afterwards.`}
                   confirmLabel="Not this time"
                   onConfirm={handleBulkReject}
                   className="inline-flex shrink-0"
@@ -1358,8 +1370,9 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                   {(triggerProps) => (
                     <button
                       {...triggerProps}
-                      disabled={isBulkPending}
-                      aria-label={`Not this time: ${selectedCount} selected submissions`}
+                      disabled={isBulkPending || selectedPendingCount === 0}
+                      aria-label={`Not this time: ${plural(selectedPendingCount, 'pending proposal', 'pending proposals')}`}
+                      title={noPendingSelected}
                       className="press shrink-0 h-10 text-sm font-bold px-4 rounded-full border border-white/35 text-off-white hover:border-white transition-colors disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
                     >
                       Not this time
@@ -1369,8 +1382,8 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 <ConfirmAction
                   tone="accept"
                   align="left"
-                  message={`Accept ${selectedCount} selected ${selectedCount === 1 ? 'proposal' : 'proposals'}?`}
-                  detail="Only pending ones change. Each talk joins the lineup with its speaker profile. No email is sent yet."
+                  message={`Accept ${plural(selectedPendingCount, 'pending proposal', 'pending proposals')}?`}
+                  detail={`${selectedCount > selectedPendingCount ? `The other ${plural(selectedCount - selectedPendingCount, 'selected proposal is', 'selected proposals are')} already decided and stay as they are. ` : ''}Each talk joins the lineup with its speaker profile. No email is sent yet.`}
                   confirmLabel="Accept"
                   onConfirm={handleBulkAccept}
                   className="inline-flex shrink-0"
@@ -1378,8 +1391,9 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                   {(triggerProps) => (
                     <button
                       {...triggerProps}
-                      disabled={isBulkPending}
-                      aria-label={`Accept ${selectedCount} selected submissions`}
+                      disabled={isBulkPending || selectedPendingCount === 0}
+                      aria-label={`Accept ${plural(selectedPendingCount, 'pending proposal', 'pending proposals')}`}
+                      title={noPendingSelected}
                       className="press shrink-0 h-10 text-sm font-bold px-4 rounded-full bg-google-green-deep text-white hover:opacity-85 transition-opacity disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue focus-visible:ring-offset-2 focus-visible:ring-offset-black-02"
                     >
                       Accept
@@ -1405,7 +1419,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                         <button
                           {...triggerProps}
                           disabled={isBulkPending}
-                          aria-label={`Email ${unsentRejectionTargets.length} selected rejected ${unsentRejectionTargets.length === 1 ? 'person' : 'people'} who haven't been told yet`}
+                          aria-label={`Email ${plural(unsentRejectionTargets.length, 'person', 'people')} whose talk wasn't selected and who haven't been told yet`}
                           title="One email per person. Skips anyone already emailed, speaking, or with a proposal still pending."
                           className="shrink-0 h-10 text-sm font-bold px-4 rounded-full bg-google-blue/15 text-google-blue-light hover:bg-google-blue-deep hover:text-white transition-colors disabled:opacity-60"
                         >
@@ -1418,17 +1432,10 @@ export default function SubmissionsDashboard({ submissions }: Props) {
                 <button
                   onClick={handleBulkArchive}
                   disabled={isBulkPending}
-                  aria-label={`Archive ${selectedCount} selected submissions`}
+                  aria-label={`Archive ${plural(selectedCount, 'selected proposal', 'selected proposals')}`}
                   className="shrink-0 h-10 text-sm px-4 rounded-full bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white transition-colors"
                 >
                   Archive
-                </button>
-                <button
-                  onClick={clearSelection}
-                  disabled={isBulkPending}
-                  className="shrink-0 h-10 text-sm px-4 rounded-full text-white/55 hover:text-white/70 transition-colors"
-                >
-                  Clear
                 </button>
               </div>
             ) : (
@@ -1441,7 +1448,7 @@ export default function SubmissionsDashboard({ submissions }: Props) {
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 min-w-0 md:shrink-0 md:flex-nowrap">
             <AdminSearch value={search} onChange={setSearch} label="Search name, email, talk title or abstract" placeholder="Search name, email, talk title or abstract…" />
 
             <div className="relative shrink-0" ref={statusMenuRef}>
