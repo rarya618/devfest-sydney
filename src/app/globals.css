@@ -343,6 +343,22 @@ body {
   }
 }
 
+/* The side panel (src/app/admin/SidePanel.tsx) slides in from the right edge. */
+.sheet-panel[open] {
+  animation: sheet-in 0.42s var(--ease-settle) backwards;
+}
+
+.sheet-panel[open]::backdrop {
+  animation: modal-backdrop-in 0.3s var(--ease-settle) backwards;
+}
+
+@keyframes sheet-in {
+  from {
+    opacity: 0.4;
+    transform: translateX(48px);
+  }
+}
+
 /* The confirmation panel (src/app/admin/ConfirmAction.tsx) drops 4px into place. */
 .confirm-panel {
   animation: confirm-panel-in 0.2s var(--ease-settle) backwards;

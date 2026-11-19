@@ -19,8 +19,9 @@ interface AdminModalProps {
   isBusy?: boolean;
   /** Tailwind max-width for the panel, e.g. `max-w-xl`. */
   widthClass?: string;
-  /** `bare` drops the panel's fill and edge, for content that brings its own (the speaker card preview). */
-  variant?: 'panel' | 'bare';
+  /** `bare` drops the panel's fill and edge, for content that brings its own (the speaker card
+   *  preview). `sheet` is the side panel (SidePanel.tsx): full height against the right edge. */
+  variant?: 'panel' | 'bare' | 'sheet';
   /** A click on the backdrop closes it too. Off for forms, where it would lose what was typed. */
   closeOnBackdrop?: boolean;
   children: ReactNode;
@@ -53,8 +54,13 @@ export default function AdminModal({ label, onClose, isBusy = false, widthClass 
       onClick={(event) => {
         if (closeOnBackdrop && !isBusy && event.target === event.currentTarget) onClose();
       }}
-      className={`modal-panel w-[calc(100%-2rem)] ${widthClass} max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain m-auto p-0 text-off-white backdrop:bg-black/70
-        ${variant === 'panel' ? 'bg-surface-raised rounded-3xl border border-white/10 shadow-[0_24px_64px_rgba(0,0,0,0.55)]' : 'bg-transparent'}`}
+      className={
+        variant === 'sheet'
+          ? `sheet-panel fixed inset-y-0 right-0 left-auto m-0 h-dvh max-h-none w-full ${widthClass} overflow-y-auto overscroll-contain p-0 text-off-white
+             bg-black-02 border-l border-white/10 sm:rounded-l-3xl shadow-[0_0_64px_rgba(0,0,0,0.6)] backdrop:bg-black/50`
+          : `modal-panel w-[calc(100%-2rem)] ${widthClass} max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain m-auto p-0 text-off-white backdrop:bg-black/70
+             ${variant === 'panel' ? 'bg-surface-raised rounded-3xl border border-white/10 shadow-[0_24px_64px_rgba(0,0,0,0.55)]' : 'bg-transparent'}`
+      }
     >
       {children}
     </dialog>
