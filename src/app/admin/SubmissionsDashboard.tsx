@@ -1027,7 +1027,7 @@ function SubmissionListRow({ submission, onError, selected, onToggleSelect, bulk
         <span className="font-mono text-xs text-white/60">{formatDate(submission.submittedAt)}</span>
       </span>
 
-      <span className="col-span-full md:col-span-1 flex justify-start md:justify-end pl-8 md:pl-0 empty:hidden">{nextStep}</span>
+      <span className="col-span-full md:col-span-1 flex justify-start md:justify-end pl-8 md:pl-0 max-md:empty:hidden">{nextStep}</span>
 
       <button
         type="button"

@@ -26,6 +26,8 @@ import { useMobileBarHidden } from './MobileBarContext';
 import HistoryDisclosure, { stampedOn, type HistoryRow } from './HistoryDisclosure';
 import ConfirmAction from './ConfirmAction';
 import AdminSearch from './AdminSearch';
+import SidePanel from './SidePanel';
+import { Chip, StatusLabel, type StatusTone } from './Chips';
 
 // The speaker card's history rows. Same shape as the crew card's, so the two dashboards
 // read the same way; the dates themselves differ because a speaker is promoted from a
@@ -169,7 +171,7 @@ function ProfileLink({ href, label }: ProfileLinkProps) {
   );
 }
 
-interface SpeakerCardProps {
+interface LineupCardProps {
   speaker: Speaker;
   // On a co-speaker, the speaker whose session they present. Undefined otherwise.
   leadSpeaker?: Speaker;
@@ -178,11 +180,15 @@ interface SpeakerCardProps {
   session: SpeakerSessionTime | null;
   inviteStatus: CalendarInviteStatus | null;
   onError: (message: string) => void;
+  // Shown inside the table's side panel: opens expanded.
+  inPanel?: boolean;
 }
 
-function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, onError }: SpeakerCardProps) {
+// One (talk, speaker) pair in full: named LineupCard so it can't be mistaken for the shared
+// SpeakerCard (the portal's badge face) imported elsewhere.
+function LineupCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, onError, inPanel = false }: LineupCardProps) {
   const [isPending, startTransition] = useTransition();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(inPanel);
   const [editing, setEditing] = useState(false);
   const [addingCoSpeaker, setAddingCoSpeaker] = useState(false);
   const isCoSpeaker = Boolean(speaker.coSpeakerOf);
@@ -561,6 +567,136 @@ function SpeakerCard({ speaker, leadSpeaker, coSpeakers, session, inviteStatus, 
   );
 }
 
+// Where a speaker stands, in the portal's state colours.
+const CONFIRMATION_STATUS: Record<SpeakerConfirmation, { tone: StatusTone; label: string }> = {
+  confirmed: { tone: 'good', label: 'Confirmed' },
+  awaiting: { tone: 'waiting', label: 'Awaiting confirmation' },
+  'not-emailed': { tone: 'waiting', label: 'Not emailed' },
+  unknown: { tone: 'done', label: 'Unknown' },
+};
+
+const NEXT_STEP_PILL =
+  'press inline-flex items-center justify-center h-8 px-3.5 rounded-full border border-white/35 text-sm font-bold text-off-white whitespace-nowrap hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue';
+
+// A row of the lineup table: the person and their talk, the track, where they stand, what's
+// missing from their profile, and the one email to send next. The full card (bio, links,
+// session, every send, co-speakers, edit, remove, history) opens in the side panel.
+function LineupRow(props: LineupCardProps) {
+  const { speaker, leadSpeaker, inviteStatus, onError } = props;
+  const [isPending, startTransition] = useTransition();
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const isCoSpeaker = Boolean(speaker.coSpeakerOf);
+  const status = CONFIRMATION_STATUS[speaker.confirmation];
+  const missing = missingProfileParts(speaker);
+  const canEmail = !isCoSpeaker && speaker.confirmation !== 'unknown';
+  const canSendTicket = speaker.confirmation === 'confirmed';
+  const inviteAction = canSendTicket && inviteStatus && inviteStatus !== 'unscheduled' ? inviteStatus : null;
+
+  function run(send: () => Promise<{ error?: string }>) {
+    startTransition(async () => {
+      const result = await send();
+      if (result.error) onError(result.error);
+    });
+  }
+
+  function handleRowClick(event: React.MouseEvent<HTMLLIElement>) {
+    const target = event.target as HTMLElement;
+    if (target.closest('button, a, input, textarea, select, [role="menu"], [role="dialog"], [role="alertdialog"]')) return;
+    if (window.getSelection()?.toString()) return;
+    setIsPanelOpen(true);
+  }
+
+  let nextStep: React.ReactNode = null;
+  if (canEmail && speaker.confirmation === 'not-emailed') {
+    nextStep = (
+      <ConfirmAction
+        tone="send"
+        message={`Send the acceptance email to ${speaker.name}?`}
+        detail="It tells them their talk is in and asks them to confirm their spot."
+        confirmLabel="Send email"
+        onConfirm={() => run(() => sendAcceptanceEmail(speaker.submissionId))}
+      >
+        {(triggerProps) => (
+          <button {...triggerProps} type="button" disabled={isPending} aria-label={`Send acceptance email to ${speaker.name}`} className={NEXT_STEP_PILL}>
+            Send acceptance email
+          </button>
+        )}
+      </ConfirmAction>
+    );
+  } else if (canSendTicket && !speaker.speakerTicketEmailSentAt && !isCoSpeaker) {
+    nextStep = (
+      <ConfirmAction
+        tone="send"
+        message={`Send the speaker ticket to ${speaker.name}?`}
+        detail="It emails them the link to their free speaker ticket."
+        confirmLabel="Send ticket"
+        onConfirm={() => run(() => sendSpeakerTicketEmail(speaker.submissionId))}
+      >
+        {(triggerProps) => (
+          <button {...triggerProps} type="button" disabled={isPending} aria-label={`Send the speaker ticket to ${speaker.name}`} className={NEXT_STEP_PILL}>
+            Send ticket
+          </button>
+        )}
+      </ConfirmAction>
+    );
+  } else if (inviteAction && INVITE_NEEDS_SENDING.includes(inviteAction)) {
+    nextStep = (
+      <ConfirmAction
+        tone="send"
+        message={`${INVITE_BUTTON_TITLE[inviteAction]} to ${speaker.name}?`}
+        detail={INVITE_CONFIRM_DETAIL[inviteAction]}
+        confirmLabel={INVITE_BUTTON_TITLE[inviteAction].replace(/ calendar /, ' ').replace(/^./, (letter) => letter.toUpperCase())}
+        onConfirm={() => run(() => sendCalendarInvite(speaker.talkId, speaker.id))}
+      >
+        {(triggerProps) => (
+          <button {...triggerProps} type="button" disabled={isPending} aria-label={`${INVITE_BUTTON_TITLE[inviteAction]} to ${speaker.name}`} className={NEXT_STEP_PILL}>
+            {INVITE_BUTTON_TITLE[inviteAction].replace(/^Send calendar /, 'Send ')}
+          </button>
+        )}
+      </ConfirmAction>
+    );
+  }
+
+  return (
+    <li
+      onClick={handleRowClick}
+      className={`grid grid-cols-[auto_minmax(0,1fr)_auto] md:grid-cols-[auto_minmax(0,1fr)_8.5rem_11.5rem_12rem_auto] items-center gap-x-4 gap-y-2 px-4 py-3 cursor-pointer transition-colors hover:bg-white/[0.04] ${
+        isPending ? 'opacity-50 pointer-events-none' : ''
+      }`}
+    >
+      <SpeakerAvatar speaker={speaker} />
+      <div className="min-w-0">
+        <h3 className="font-bold text-off-white text-[0.9375rem] leading-snug truncate">
+          {speaker.name}
+          {isCoSpeaker && leadSpeaker && <span className="font-normal text-white/60"> with {leadSpeaker.name}</span>}
+        </h3>
+        <p className="mt-0.5 text-sm text-white/60 truncate">{speaker.talkTitle}</p>
+        {missing.length > 0 && (
+          <p className="mt-1.5"><Chip tone="attention" title="Missing from the public profile">Missing {missing.join(', ').toLowerCase()}</Chip></p>
+        )}
+      </div>
+      <span className="hidden md:block"><Chip dotClass={TRACK_DOT_COLORS[speaker.track]}>{TRACK_LABELS[speaker.track]}</Chip></span>
+      <span className="hidden md:block"><StatusLabel tone={status.tone} title={CONFIRMATION_CHIP[speaker.confirmation].title}>{status.label}</StatusLabel></span>
+      <span className="col-span-full md:col-span-1 flex justify-start md:justify-end pl-14 md:pl-0 max-md:empty:hidden">{nextStep}</span>
+      <button
+        type="button"
+        onClick={() => setIsPanelOpen(true)}
+        aria-label={`Open ${speaker.name}: ${speaker.talkTitle}`}
+        className="press row-start-1 col-start-3 md:row-auto md:col-auto inline-flex items-center justify-center w-8 h-8 rounded-full text-white/60 hover:text-white hover:bg-white/[0.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-google-blue"
+      >
+        <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 3.5L10.5 8 6 12.5" />
+        </svg>
+      </button>
+      {isPanelOpen && (
+        <SidePanel title={speaker.name} subtitle={speaker.talkTitle} onClose={() => setIsPanelOpen(false)}>
+          <LineupCard {...props} inPanel />
+        </SidePanel>
+      )}
+    </li>
+  );
+}
+
 interface Props {
   speakers: Speaker[];
   // Speaker id to their slot. Null when the schedule couldn't be read.
@@ -923,18 +1059,28 @@ export default function SpeakersDashboard({ speakers, sessionTimes }: Props) {
             <p className="text-sm text-white/50">No speakers match this filter.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-3 items-start">
-            {filtered.map((speaker) => (
-              <SpeakerCard
-                key={speaker.rowId}
-                speaker={speaker}
-                leadSpeaker={speaker.coSpeakerOf ? leadByTalk.get(speaker.talkId) : undefined}
-                coSpeakers={speaker.coSpeakerOf ? [] : coSpeakersByTalk.get(speaker.talkId) ?? []}
-                session={sessionTimes?.[speaker.talkId] ?? null}
-                inviteStatus={inviteStatuses.get(speaker.rowId) ?? null}
-                onError={setAlertMessage}
-              />
-            ))}
+          <div className="rounded-2xl bg-surface overflow-hidden">
+            <div aria-hidden="true" className="hidden md:grid grid-cols-[auto_minmax(0,1fr)_8.5rem_11.5rem_12rem_auto] gap-x-4 px-4 py-2.5 border-b border-white/10 text-xs font-bold text-white/60">
+              <span className="w-10 sm:w-11" />
+              <span>Speaker and talk</span>
+              <span>Track</span>
+              <span>Status</span>
+              <span className="text-right">Next step</span>
+              <span className="w-8" />
+            </div>
+            <ul className="divide-y divide-white/[0.07]">
+              {filtered.map((speaker) => (
+                <LineupRow
+                  key={speaker.rowId}
+                  speaker={speaker}
+                  leadSpeaker={speaker.coSpeakerOf ? leadByTalk.get(speaker.talkId) : undefined}
+                  coSpeakers={speaker.coSpeakerOf ? [] : coSpeakersByTalk.get(speaker.talkId) ?? []}
+                  session={sessionTimes?.[speaker.talkId] ?? null}
+                  inviteStatus={inviteStatuses.get(speaker.rowId) ?? null}
+                  onError={setAlertMessage}
+                />
+              ))}
+            </ul>
           </div>
         )}
       </div>
