@@ -106,7 +106,7 @@ export default function ConfirmAction({
           aria-describedby={detail ? detailId : undefined}
           // Keeps clicks inside the panel from reaching a clickable card behind it.
           onClick={(event) => event.stopPropagation()}
-          className={`absolute top-full mt-2 z-30 w-72 max-w-[calc(100vw-2rem)] ${align === 'right' ? 'right-0' : 'left-0'}
+          className={`confirm-panel absolute top-full mt-2 z-30 w-72 max-w-[calc(100vw-2rem)] ${align === 'right' ? 'right-0' : 'left-0'}
             bg-surface-raised border border-white/10 rounded-2xl p-4 shadow-[0_12px_32px_rgba(0,0,0,0.45)] text-left`}
         >
           <p id={messageId} className="text-sm font-bold text-off-white leading-snug">{message}</p>
